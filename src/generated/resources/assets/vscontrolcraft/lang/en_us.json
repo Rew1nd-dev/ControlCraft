@@ -1,0 +1,10 @@
+{
+  "block.vscontrolcraft.chunk_loader": "Chunk Loader",
+  "block.vscontrolcraft.propeller": "Propeller",
+  "block.vscontrolcraft.propeller_controller": "Propeller Controller",
+  "block.vscontrolcraft.receiver": "Receiver",
+  "block.vscontrolcraft.spinalyzer": "Spinalyzer",
+  "block.vscontrolcraft.transmitter": "Transmitter",
+  "block.vscontrolcraft.wingcontroller": "Wingcontroller",
+  "item.vscontrolcraft.linker": "Example Item"
+}

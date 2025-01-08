@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "refmap": "mixins.vscontrolcraft.refmap.json",
+  "mixins": [
+    "MixinCCCommonHooks",
+    "MixinPhysicsTick"
+  ],
+  "package": "com.verr1.vscontrolcraft.mixin",
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,27 @@
+// 1.20.1	2025-01-07T08:25:16.7086881	Registrate Provider for vscontrolcraft [Recipes, Advancements, Loot Tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud)]
+fe4d8d4be2dbcfa63ffd817a4501a8b5e334a3c1 assets/vscontrolcraft/blockstates/chunk_loader.json
+06ac4a5e2ac2a0a2340977909b780db04d73d29a assets/vscontrolcraft/blockstates/propeller.json
+2c70a7166bd6f2bfdf586ccc92267b43fcf2db5a assets/vscontrolcraft/blockstates/propeller_controller.json
+df7fca3766118cfc0e2182576213305e7e749d39 assets/vscontrolcraft/blockstates/receiver.json
+3a96b48f1ce93ef4f8ac6577c28e74e03c9bd38f assets/vscontrolcraft/blockstates/spinalyzer.json
+7f6e4e9d5a3ce7151a929eb7a1f8d47edf506d07 assets/vscontrolcraft/blockstates/transmitter.json
+e9eff5a38157986a502f5298b5e76db134c6fc9f assets/vscontrolcraft/blockstates/wingcontroller.json
+123f0d7d9c650be60c39e927b053c0146c5944c7 assets/vscontrolcraft/lang/en_ud.json
+b658630a5f3293b1d0999820b16ed3a40fa5de9b assets/vscontrolcraft/lang/en_us.json
+bbdebe955e19afc5b650b42fbb0195225f8a0882 assets/vscontrolcraft/models/item/chunk_loader.json
+6c53b1a6ed28929b7a0a090edf6101e610f842fc assets/vscontrolcraft/models/item/linker.json
+e509136c28cbbfcf9bc028f3f2432d449e548e7f assets/vscontrolcraft/models/item/propeller.json
+9b08bce5a394e53e22931c02d9062565c9c4c71c assets/vscontrolcraft/models/item/propeller_controller.json
+c51b95b0dcf738e6fc36adeac93b7f935eaa3809 assets/vscontrolcraft/models/item/receiver.json
+5297596fa483239b32830a21d2c6298c18842e1f assets/vscontrolcraft/models/item/spinalyzer.json
+fa5847169992c31801e97df3dc24287b5b60b24a assets/vscontrolcraft/models/item/transmitter.json
+59c2ebaddc33691487a7c205c564d00c9100cabb assets/vscontrolcraft/models/item/wingcontroller.json
+92c879a4dbfa8d24715ece2d7684105608efa4e6 data/minecraft/tags/blocks/mineable/axe.json
+92c879a4dbfa8d24715ece2d7684105608efa4e6 data/minecraft/tags/blocks/mineable/pickaxe.json
+8cd2c961cf3646cc7601b8c4c3fe4f29c1b14891 data/vscontrolcraft/loot_tables/blocks/chunk_loader.json
+bda001a25e5c2090b9a0c78c7be897eadf0fb292 data/vscontrolcraft/loot_tables/blocks/propeller.json
+a1fe678626068d52e93ecc2086b1293d8e7000df data/vscontrolcraft/loot_tables/blocks/propeller_controller.json
+93a0ddd8b70db3ba3f3b6af59ee8b110f4fb5545 data/vscontrolcraft/loot_tables/blocks/receiver.json
+261bf63835f55cabcb37033f9538d0ca10eb120b data/vscontrolcraft/loot_tables/blocks/spinalyzer.json
+a6d1e2222fe0256958d32ff49fe9dd9cbf8377d7 data/vscontrolcraft/loot_tables/blocks/transmitter.json
+2d687c2e5b21c95a9ded611f7bddaa1764266b4e data/vscontrolcraft/loot_tables/blocks/wingcontroller.json
