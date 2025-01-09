@@ -19,8 +19,7 @@ import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.VecHelper;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.vscontrolcraft.ControlCraft;
-import com.verr1.vscontrolcraft.base.IPacketHandle;
-import com.verr1.vscontrolcraft.base.SyncAnimationPacket;
+import com.verr1.vscontrolcraft.base.PacketHandler;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.WingControllerPeripheral;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
@@ -34,6 +33,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -75,6 +75,7 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
 
     public WingControllerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        lazyTickRate = 3;
         clientAnimatedAngle = LerpedFloat.angular();
     }
 
@@ -132,6 +133,14 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
         if(!level.isClientSide){
             syncClient();
         }
+    }
+
+    @Override
+    public void remove() {
+        if(!level.isClientSide){
+            disassemble();
+        }
+        super.remove();
     }
 
     @Override
@@ -233,15 +242,17 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
 
     public void syncClient(){
         if(!level.isClientSide){
-            var p = new SyncAnimationPacket<>(this, new WingControllerAnimationDataHandler(angle), WingControllerBlockEntity.class);
+            var p = new WingControllerSyncAnimationPacket(getBlockPos(), angle);
             AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
         }
     }
 
-    public static class WingControllerAnimationDataHandler implements IPacketHandle<WingControllerBlockEntity>{
+    public static class WingControllerAnimationDataHandler extends PacketHandler {
         private float animatedAngle;
 
-        public WingControllerAnimationDataHandler(){animatedAngle = 0;}
+        public WingControllerAnimationDataHandler(FriendlyByteBuf buffer){
+            animatedAngle = 0;
+        }
 
         public WingControllerAnimationDataHandler(float angle){animatedAngle = angle;}
 
@@ -256,8 +267,11 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
         }
 
         @Override
-        public void handle(WingControllerBlockEntity be) {
-            be.setAngle(animatedAngle);
+        public void handle(BlockEntity be) {
+            if(be instanceof WingControllerBlockEntity){
+                ((WingControllerBlockEntity) be).setAngle(animatedAngle);
+            }
+
         }
     }
 

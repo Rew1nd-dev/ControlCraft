@@ -1,16 +1,15 @@
 package com.verr1.vscontrolcraft.blocks.propeller;
 
-import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
-import com.verr1.vscontrolcraft.base.IPacketHandle;
+import com.verr1.vscontrolcraft.base.PacketHandler;
 import com.verr1.vscontrolcraft.base.ISyncable;
-import com.verr1.vscontrolcraft.base.SyncAnimationPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
@@ -19,17 +18,24 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 
-public class PropellerBlockEntity extends SmartBlockEntity implements ISyncable{
+/*
+* TODO:
+*  1. add some propeller classes that extends this class
+*  2. make propeller stat changeable (GUI)
+* */
+
+public class SimplePropellerBlockEntity extends SmartBlockEntity implements ISyncable{
     public double ThrustRatio = 1000;
-    public double TorqueRatio = 1000;
+    public double TorqueRatio = 0;
     public double rotationalSpeed = 5;
 
     public LerpedFloat angle;
     public float targetAngle = 0;
 
-    public PropellerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public SimplePropellerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         angle = LerpedFloat.angular();
+        lazyTickRate = 3;
     }
 
     public double getThrustRatio() {
@@ -78,12 +84,12 @@ public class PropellerBlockEntity extends SmartBlockEntity implements ISyncable{
     @Override
     public void syncClient() {
         if(!level.isClientSide){
-            var p = new SyncAnimationPacket<>(this, new PropellerAnimationDataHandler(rotationalSpeed), PropellerBlockEntity.class);
+            var p = new PropellerSyncAnimationPacket(getBlockPos(), rotationalSpeed);
             AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
         }
     }
 
-    public static class PropellerAnimationDataHandler implements IPacketHandle<PropellerBlockEntity>{
+    public static class PropellerAnimationDataHandler extends PacketHandler {
         private double rotationalSpeed;
 
         public PropellerAnimationDataHandler(){
@@ -105,8 +111,8 @@ public class PropellerBlockEntity extends SmartBlockEntity implements ISyncable{
         }
 
         @Override
-        public void handle(PropellerBlockEntity be) {
-            be.setVisualRotationalSpeed(rotationalSpeed);
+        public void handle(BlockEntity be) {
+            ((SimplePropellerBlockEntity) be).setVisualRotationalSpeed(rotationalSpeed);
         }
     }
 }

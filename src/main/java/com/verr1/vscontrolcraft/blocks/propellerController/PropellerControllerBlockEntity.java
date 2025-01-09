@@ -5,7 +5,7 @@ import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.PropellerController
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.LogicalPropeller;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.PropellerForceInducer;
-import com.verr1.vscontrolcraft.blocks.propeller.PropellerBlockEntity;
+import com.verr1.vscontrolcraft.blocks.propeller.SimplePropellerBlockEntity;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
@@ -62,11 +62,8 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
         if(level.isClientSide) return;
 
         //rotationSpeed = 256;
-        attachedPropellerTorqueRatio = 0;
-        attachedPropellerThrustRatio = 10000;
 
         syncAttachedPropeller();
-
         syncAttachedInducer();
     }
 
@@ -75,12 +72,12 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
     }
 
     public void syncAttachedPropeller(){
-        Vec3i direction = this.getBlockState().getValue(BlockStateProperties.FACING).getNormal();
+        Vec3i direction = this.getBlockState().getValue(BlockStateProperties.FACING).getOpposite().getNormal();
         BlockPos propellerPos = this.getBlockPos().offset(new BlockPos(direction.getX(), direction.getY(), direction.getZ()));
         var attachedBlockEntity = level.getBlockEntity(propellerPos);
-        hasAttachedPropeller = attachedBlockEntity instanceof PropellerBlockEntity;
+        hasAttachedPropeller = attachedBlockEntity instanceof SimplePropellerBlockEntity;
         if(!hasAttachedPropeller)return;
-        PropellerBlockEntity propeller = (PropellerBlockEntity) attachedBlockEntity;
+        SimplePropellerBlockEntity propeller = (SimplePropellerBlockEntity) attachedBlockEntity;
         propeller.setVisualRotationalSpeed(rotationSpeed);
         attachedPropellerTorqueRatio = propeller.getTorqueRatio();
         attachedPropellerThrustRatio = propeller.getThrustRatio();

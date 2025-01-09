@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 
-public class PropellerBlock extends DirectionalBlock implements IBE<PropellerBlockEntity> {
+public class PropellerBlock extends DirectionalBlock implements IBE<SimplePropellerBlockEntity> {
     public static final String ID = "propeller";
 
     public PropellerBlock(Properties p_49795_) {
@@ -36,12 +36,12 @@ public class PropellerBlock extends DirectionalBlock implements IBE<PropellerBlo
     }
 
     @Override
-    public Class<PropellerBlockEntity> getBlockEntityClass() {
-        return PropellerBlockEntity.class;
+    public Class<SimplePropellerBlockEntity> getBlockEntityClass() {
+        return SimplePropellerBlockEntity.class;
     }
 
     @Override
-    public BlockEntityType<? extends PropellerBlockEntity> getBlockEntityType() {
+    public BlockEntityType<? extends SimplePropellerBlockEntity> getBlockEntityType() {
         return AllBlockEntities.PROPELLER_BLOCKENTITY.get();
     }
 }

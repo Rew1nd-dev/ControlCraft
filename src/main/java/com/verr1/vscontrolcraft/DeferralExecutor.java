@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft;
 
+import com.verr1.vscontrolcraft.base.DefaultDeferralRunnable;
 import com.verr1.vscontrolcraft.utils.DeferralRunnable;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -20,4 +21,10 @@ public class DeferralExecutor {
     public static void executeLater(DeferralRunnable r){
         deferralTasks.add(r);
     }
+
+    public static void executeLater(Runnable r, int ticks){
+        deferralTasks.add(new DefaultDeferralRunnable(r, ticks));
+    }
+
+
 }

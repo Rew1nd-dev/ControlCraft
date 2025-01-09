@@ -2,12 +2,11 @@ package com.verr1.vscontrolcraft.registry;
 
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.vscontrolcraft.ControlCraft;
-import com.verr1.vscontrolcraft.base.SyncAnimationPacket;
-import com.verr1.vscontrolcraft.blocks.propeller.PropellerBlockEntity;
+import com.verr1.vscontrolcraft.blocks.propeller.PropellerSyncAnimationPacket;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverOpenScreenPacket;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverRegisterPacket;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerLinkPacket;
-import com.verr1.vscontrolcraft.blocks.wingController.WingControllerBlockEntity;
+import com.verr1.vscontrolcraft.blocks.wingController.WingControllerSyncAnimationPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -30,9 +29,8 @@ public enum AllPackets {
 
     //Server To Client
     RECEIVER_SCREEN_OPEN(ReceiverOpenScreenPacket.class, ReceiverOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
-    SYNC_PROPELLER_ANIMATION(SyncAnimationPacket.getPacketClass(),  SyncAnimationPacket.createDecoder(PropellerBlockEntity.class, new PropellerBlockEntity.PropellerAnimationDataHandler()), NetworkDirection.PLAY_TO_CLIENT),
-    SYNC_WING_CONTROLLER_ANIMATION(SyncAnimationPacket.getPacketClass(),  SyncAnimationPacket.createDecoder(WingControllerBlockEntity.class, new WingControllerBlockEntity.WingControllerAnimationDataHandler()), NetworkDirection.PLAY_TO_CLIENT);
-
+    SYNC_PROPELLER_ANIMATION(PropellerSyncAnimationPacket.class, PropellerSyncAnimationPacket::new, NetworkDirection.PLAY_TO_CLIENT),
+    SYNC_WING_CONTROLLER_ANIMATION(WingControllerSyncAnimationPacket.class, WingControllerSyncAnimationPacket::new, NetworkDirection.PLAY_TO_CLIENT);
 
     public static final String NETWORK_VERSION = "1.2";
 

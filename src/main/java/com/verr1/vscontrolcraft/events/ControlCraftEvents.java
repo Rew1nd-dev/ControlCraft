@@ -1,12 +1,9 @@
 package com.verr1.vscontrolcraft.events;
 
-import com.simibubi.create.Create;
-import com.simibubi.create.foundation.utility.ServerSpeedProvider;
-import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.Debug;
 import com.verr1.vscontrolcraft.DeferralExecutor;
 import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkManager;
-import com.verr1.vscontrolcraft.compat.cctweaked.alternates.DelegateOnServerTickStart;
+import com.verr1.vscontrolcraft.compat.cctweaked.alternates.ComputerCraftDelegation;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -24,11 +21,16 @@ public class ControlCraftEvents {
 
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event) {
-        DelegateOnServerTickStart.setServer(event.getServer());
+
     }
 
-    public static void onPhysicsTick(){
+    public static void onPhysicsTickStart(){
         // ControlCraft.LOGGER.info("Physics tick");
-        DelegateOnServerTickStart.onServerPhysicsTickStart();
+        // DelegateOnServerTickStart.DelegateRun();
+        ComputerCraftDelegation.FreeDelegateThread();
+    }
+
+    public static void onPhysicsTickEnd(){
+        ComputerCraftDelegation.LockDelegateThread();
     }
 }

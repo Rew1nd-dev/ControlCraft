@@ -23,7 +23,11 @@ import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import java.util.List;
 
 public class SpinalyzerBlockEntity extends SmartBlockEntity {
-
+    /* TODO:
+    *   1. Rewrite getRelativeAngle(), using rotation matrix and reference axis
+    *   2. Add checkIfPair Api to peripheral
+    *
+    */
 
     private BlockPos pairPos;
 

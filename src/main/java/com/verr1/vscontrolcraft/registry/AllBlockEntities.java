@@ -13,7 +13,7 @@ import com.verr1.vscontrolcraft.blocks.recevier.ReceiverBlockEntity;
 import com.verr1.vscontrolcraft.blocks.transmitter.TransmitterBlock;
 import com.verr1.vscontrolcraft.blocks.transmitter.TransmitterBlockEntity;
 import com.verr1.vscontrolcraft.blocks.propeller.PropellerBlock;
-import com.verr1.vscontrolcraft.blocks.propeller.PropellerBlockEntity;
+import com.verr1.vscontrolcraft.blocks.propeller.SimplePropellerBlockEntity;
 import com.verr1.vscontrolcraft.blocks.propellerController.PropellerControllerBlock;
 import com.verr1.vscontrolcraft.blocks.propellerController.PropellerControllerBlockEntity;
 import com.verr1.vscontrolcraft.blocks.propellerController.PropellerControllerInstance;
@@ -35,8 +35,8 @@ public class AllBlockEntities {
             .renderer(() -> PropellerControllerRenderer::new)
             .register();
 
-    public static final BlockEntityEntry<PropellerBlockEntity> PROPELLER_BLOCKENTITY = REGISTRATE
-            .blockEntity(PropellerBlock.ID, PropellerBlockEntity::new)
+    public static final BlockEntityEntry<SimplePropellerBlockEntity> PROPELLER_BLOCKENTITY = REGISTRATE
+            .blockEntity(PropellerBlock.ID, SimplePropellerBlockEntity::new)
             .validBlock(AllBlocks.PROPELLER_BLOCK)
             .renderer(() -> PropellerRenderer::new)
             .register();
