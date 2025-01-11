@@ -1,7 +1,5 @@
 package com.verr1.vscontrolcraft.base;
 
-import com.verr1.vscontrolcraft.utils.DeferralRunnable;
-
 public class DefaultDeferralRunnable implements DeferralRunnable {
     int ticks = 0;
     Runnable task;

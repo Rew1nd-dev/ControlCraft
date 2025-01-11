@@ -20,13 +20,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.client.model.generators.ConfiguredModel;
-import net.minecraftforge.client.model.generators.ModelFile;
-import org.joml.Matrix3f;
-import org.valkyrienskies.core.impl.shadow.F;
 
 public class SpinalyzerBlock extends DirectionalBlock implements IBE<SpinalyzerBlockEntity>, IWrenchable {
     public static final String ID = "spinalyzer";

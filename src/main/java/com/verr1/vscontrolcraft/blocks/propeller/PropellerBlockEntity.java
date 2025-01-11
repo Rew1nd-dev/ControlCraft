@@ -8,6 +8,7 @@ import com.verr1.vscontrolcraft.base.ISyncable;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -24,15 +25,16 @@ import java.util.List;
 *  2. make propeller stat changeable (GUI)
 * */
 
-public class SimplePropellerBlockEntity extends SmartBlockEntity implements ISyncable{
+public class PropellerBlockEntity extends SmartBlockEntity implements ISyncable{
     public double ThrustRatio = 1000;
-    public double TorqueRatio = 0;
+    public double TorqueRatio = 1000;
+    public boolean ReverseTorque = false;
     public double rotationalSpeed = 5;
 
     public LerpedFloat angle;
     public float targetAngle = 0;
 
-    public SimplePropellerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public PropellerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         angle = LerpedFloat.angular();
         lazyTickRate = 3;
@@ -46,6 +48,10 @@ public class SimplePropellerBlockEntity extends SmartBlockEntity implements ISyn
         return TorqueRatio;
     }
 
+    public boolean getReverseTorque(){
+        return ReverseTorque;
+    }
+
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
 
@@ -55,6 +61,11 @@ public class SimplePropellerBlockEntity extends SmartBlockEntity implements ISyn
         rotationalSpeed = speed;
     }
 
+    public void setProperty(double torqueRatio, double thrustRatio, boolean reverseTorque){
+        this.TorqueRatio = torqueRatio;
+        this.ThrustRatio = thrustRatio;
+        this.ReverseTorque = reverseTorque;
+    }
 
 
     @Override
@@ -79,7 +90,21 @@ public class SimplePropellerBlockEntity extends SmartBlockEntity implements ISyn
     }
 
 
+    @Override
+    public void writeSafe(CompoundTag tag) {
+        super.writeSafe(tag);
+        tag.putDouble("ThrustRatio", ThrustRatio);
+        tag.putDouble("TorqueRatio", TorqueRatio);
+        tag.putBoolean("ReverseTorque", ReverseTorque);
+    }
 
+    @Override
+    protected void read(CompoundTag tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        ThrustRatio = tag.getDouble("ThrustRatio");
+        TorqueRatio = tag.getDouble("TorqueRatio");
+        ReverseTorque = tag.getBoolean("ReverseTorque");
+    }
 
     @Override
     public void syncClient() {
@@ -112,7 +137,7 @@ public class SimplePropellerBlockEntity extends SmartBlockEntity implements ISyn
 
         @Override
         public void handle(BlockEntity be) {
-            ((SimplePropellerBlockEntity) be).setVisualRotationalSpeed(rotationalSpeed);
+            ((PropellerBlockEntity) be).setVisualRotationalSpeed(rotationalSpeed);
         }
     }
 }

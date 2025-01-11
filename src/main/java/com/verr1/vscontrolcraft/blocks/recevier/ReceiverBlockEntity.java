@@ -15,6 +15,7 @@ import dan200.computercraft.shared.computer.core.ServerContext;
 import dan200.computercraft.shared.platform.InvalidateCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -108,6 +109,21 @@ public class ReceiverBlockEntity extends SmartBlockEntity {
         super.destroy();
         if(level.isClientSide)return;
         NetworkManager.UnregisterWirelessPeripheral(networkKey);
+    }
+
+    @Override
+    protected void write(CompoundTag tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
+        tag.putLong("protocol", networkKey.Protocol());
+        tag.putString("name", networkKey.Name());
+    }
+
+    @Override
+    protected void read(CompoundTag tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        long protocol = tag.getLong("protocol");
+        String name = tag.getString("name");
+        resetNetworkRegistry(new PeripheralKey(name, protocol));
     }
 
     @Override

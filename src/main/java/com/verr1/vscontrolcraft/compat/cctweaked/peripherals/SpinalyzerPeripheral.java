@@ -1,15 +1,19 @@
 package com.verr1.vscontrolcraft.compat.cctweaked.peripherals;
 
 import com.google.common.collect.Sets;
+import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlockEntity;
+import com.verr1.vscontrolcraft.utils.CCUtils;
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3d;
 import org.joml.Quaterniondc;
+import org.joml.Vector3d;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class SpinalyzerPeripheral implements IPeripheral {
@@ -51,6 +55,7 @@ public class SpinalyzerPeripheral implements IPeripheral {
     @LuaFunction
     public List<Double> getQuaternion(){
         Quaterniondc q = spinalyzerBlockEntity.getQuaternion();
+        computers.forEach(e->{e.queueEvent("t", 1);});
         return List.of(q.x(), q.y(), q.z(), q.w());
     }
 
@@ -66,7 +71,7 @@ public class SpinalyzerPeripheral implements IPeripheral {
 
     @LuaFunction
     public List<List<Double>> getRelativeTransform(){
-        Matrix3d m = spinalyzerBlockEntity.getTransformFromPair();
+        Matrix3d m = spinalyzerBlockEntity.getRelativeSourceTransform();
         return List.of(
             List.of(m.m00, m.m01, m.m02),
             List.of(m.m10, m.m11, m.m12),
@@ -75,8 +80,17 @@ public class SpinalyzerPeripheral implements IPeripheral {
     }
 
     @LuaFunction
-    public double getRelativeAngle(){
-        return spinalyzerBlockEntity.getRotationAngle();
+    public double getRelativeAngle(int axis){
+        return spinalyzerBlockEntity.getRotationAngle(axis);
     }
+
+    @LuaFunction
+    public Map<String, Object> getPhysicsInfo(){
+        return spinalyzerBlockEntity.readPhysicsShipInfo().getCCPhysics();
+    }
+
+
+
+
 
 }

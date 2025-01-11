@@ -14,8 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PropellerForceInducer implements ShipForcesInducer {
 
     private final int lazyTickRate = 30;
-    private int lazyTick = lazyTickRate;
-    private ConcurrentHashMap<BlockPos, LogicalPropeller> controllerProperties = new ConcurrentHashMap<>();
+    private int lazyTickCount = lazyTickRate;
+    private final ConcurrentHashMap<BlockPos, LogicalPropeller> controllerProperties = new ConcurrentHashMap<>();
 
     public PropellerForceInducer() {
         super();
@@ -79,8 +79,8 @@ public class PropellerForceInducer implements ShipForcesInducer {
     }
 
     public void lazyTick(){
-        if(lazyTick-- > 0)return;
-        lazyTick = lazyTickRate;
+        if(lazyTickCount-- > 0)return;
+        lazyTickCount = lazyTickRate;
         removeInvalidControllers();
     }
 

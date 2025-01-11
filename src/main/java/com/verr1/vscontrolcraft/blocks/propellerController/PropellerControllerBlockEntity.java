@@ -5,7 +5,7 @@ import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.PropellerController
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.LogicalPropeller;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.PropellerForceInducer;
-import com.verr1.vscontrolcraft.blocks.propeller.SimplePropellerBlockEntity;
+import com.verr1.vscontrolcraft.blocks.propeller.PropellerBlockEntity;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
@@ -60,9 +60,6 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
     public void tick(){
         super.tick();
         if(level.isClientSide) return;
-
-        //rotationSpeed = 256;
-
         syncAttachedPropeller();
         syncAttachedInducer();
     }
@@ -75,12 +72,13 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
         Vec3i direction = this.getBlockState().getValue(BlockStateProperties.FACING).getOpposite().getNormal();
         BlockPos propellerPos = this.getBlockPos().offset(new BlockPos(direction.getX(), direction.getY(), direction.getZ()));
         var attachedBlockEntity = level.getBlockEntity(propellerPos);
-        hasAttachedPropeller = attachedBlockEntity instanceof SimplePropellerBlockEntity;
+        hasAttachedPropeller = attachedBlockEntity instanceof PropellerBlockEntity;
         if(!hasAttachedPropeller)return;
-        SimplePropellerBlockEntity propeller = (SimplePropellerBlockEntity) attachedBlockEntity;
+        PropellerBlockEntity propeller = (PropellerBlockEntity) attachedBlockEntity;
         propeller.setVisualRotationalSpeed(rotationSpeed);
         attachedPropellerTorqueRatio = propeller.getTorqueRatio();
         attachedPropellerThrustRatio = propeller.getThrustRatio();
+        attachPropellerReverseTorque = propeller.getReverseTorque();
     }
 
     public boolean canDrive(){
@@ -88,15 +86,11 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
     }
 
     public Vector3d getDirection(){
-        return Util.Vec3itoVector3d(getBlockState().getValue(BlockStateProperties.FACING).getNormal());
+        return Util.Vec3itoVector3d(getBlockState().getValue(BlockStateProperties.FACING).getOpposite().getNormal());
     }
 
     public double getTargetSpeed(){
         return rotationSpeed;
-    }
-
-    public void setReverseTorque(boolean reverseTorque){
-        this.attachPropellerReverseTorque = reverseTorque;
     }
 
     public void syncAttachedInducer(){
@@ -104,7 +98,6 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
         ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos((ServerLevel) level, getBlockPos());
         if(ship == null)return;
         var inducer = PropellerForceInducer.getOrCreate(ship);
-        if(inducer == null)return;
         inducer.updateLogicalPropeller(
                 getBlockPos(),
                 new LogicalPropeller(

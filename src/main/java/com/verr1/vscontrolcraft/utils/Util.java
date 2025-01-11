@@ -10,9 +10,12 @@ import org.joml.Matrix3d;
 import org.joml.Matrix3f;
 import org.joml.Vector3d;
 
+import java.util.function.Predicate;
+
 import static com.verr1.vscontrolcraft.registry.AllBlockStates.ROTATION;
 
 public class Util {
+    ;
 
     public static Vector3d Vec3toVector3d(Vec3 vec3){
         return new Vector3d(vec3.x, vec3.y, vec3.z);
@@ -114,5 +117,39 @@ public class Util {
         yRotation = Math.floorMod(yRotation, 360);
 
         return Pair.of(xRotation, yRotation);
+    }
+
+    public static boolean tryParseLongFilter(String s) {
+        try{
+            Long.parseLong(s);
+            return true;
+        }catch (NumberFormatException e){
+            return false;
+        }
+    }
+
+    public static long tryParseLong(String s) {
+        try{
+            return Long.parseLong(s);
+        }catch (NumberFormatException e){
+            return 0;
+        }
+    }
+
+    public static boolean tryParseDoubleFilter(String s) {
+        try{
+            Double.parseDouble(s);
+            return true;
+        }catch (NumberFormatException e){
+            return false;
+        }
+    }
+
+    public static double tryParseDouble(String s) {
+        try{
+            return Double.parseDouble(s);
+        }catch (NumberFormatException e){
+            return 0;
+        }
     }
 }

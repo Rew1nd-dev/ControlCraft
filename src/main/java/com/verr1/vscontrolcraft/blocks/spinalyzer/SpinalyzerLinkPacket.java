@@ -38,7 +38,7 @@ public class SpinalyzerLinkPacket extends SimplePacketBase {
                 BlockEntity receiver = level.getExistingBlockEntity(receiverPos);
                 BlockEntity transmitter = level.getExistingBlockEntity(transmitterPos);
                 if(receiver instanceof SpinalyzerBlockEntity && transmitter instanceof SpinalyzerBlockEntity){
-                    ((SpinalyzerBlockEntity) receiver).pairWith((SpinalyzerBlockEntity) transmitter);
+                    ((SpinalyzerBlockEntity) receiver).setSource((SpinalyzerBlockEntity) transmitter);
                 }
 
             }

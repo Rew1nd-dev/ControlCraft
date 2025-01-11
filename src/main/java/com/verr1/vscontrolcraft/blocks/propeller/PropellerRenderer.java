@@ -13,12 +13,12 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
-public class PropellerRenderer extends SafeBlockEntityRenderer<SimplePropellerBlockEntity> {
+public class PropellerRenderer extends SafeBlockEntityRenderer<PropellerBlockEntity> {
     public PropellerRenderer(BlockEntityRendererProvider.Context context) {
     }
 
     @Override
-    protected void renderSafe(SimplePropellerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource bufferSource, int light, int overlay) {
+    protected void renderSafe(PropellerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource bufferSource, int light, int overlay) {
         float angle = be.angle.getValue(partialTicks);
         BlockState state = be.getBlockState();
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());

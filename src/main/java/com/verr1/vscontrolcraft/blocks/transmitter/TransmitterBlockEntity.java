@@ -80,6 +80,14 @@ public class TransmitterBlockEntity extends SmartBlockEntity {
         // ControlCraft.LOGGER.info("Transmitter Tick");
     }
 
+    @Override
+    public void invalidate(){
+        super.invalidate();
+        if(peripheralCap != null){
+            peripheralCap.invalidate();
+            peripheralCap = null;
+        }
+    }
 
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {

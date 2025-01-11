@@ -3,6 +3,10 @@ package com.verr1.vscontrolcraft.blocks.spinalyzer;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SpinalyzerPeripheral;
+import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.LogicalPropeller;
+import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.PropellerForceInducer;
+import com.verr1.vscontrolcraft.compat.valkyrienskies.spnialyzer.LogicalSensor;
+import com.verr1.vscontrolcraft.compat.valkyrienskies.spnialyzer.SpinalyzerSensor;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
@@ -29,11 +33,14 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
     *
     */
 
-    private BlockPos pairPos;
+    private BlockPos source;
 
 
     private SpinalyzerPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
+
+    private ShipPhysics physicsThreadShipInfo;
+    private final Object lock = new Object();
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -65,9 +72,9 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
         return getQuaternion_Ship_wc2sc(ship);
     }
 
-    public Matrix3d getTransformFromPair(){
-        if(pairPos != null && level.getExistingBlockEntity(pairPos) instanceof SpinalyzerBlockEntity){
-            var pairBe = (SpinalyzerBlockEntity) level.getExistingBlockEntity(pairPos);
+    public Matrix3d getRelativeSourceTransform(){
+        if(source != null && level.getExistingBlockEntity(source) instanceof SpinalyzerBlockEntity){
+            var pairBe = (SpinalyzerBlockEntity) level.getExistingBlockEntity(source);
             Matrix3d selfTransform = getRotationMatrix_wc2sc();
             Matrix3d pairTransform = pairBe.getRotationMatrix_wc2sc();
             return new Matrix3d(pairTransform.transpose()).mul(selfTransform);
@@ -75,21 +82,37 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
         return getRotationMatrix_wc2sc();
     }
 
-
-    public void pairWith(SpinalyzerBlockEntity pair){
-        this.pairPos = pair.getBlockPos();
+    public void writePhysicsShipInfo(ShipPhysics sp){
+        synchronized (lock){
+            physicsThreadShipInfo = sp;
+        }
     }
 
-    public double getRotationAngle(){
-        Quaterniondc q_pair = new Quaterniond();;
-        if(pairPos != null && level.getExistingBlockEntity(pairPos) instanceof SpinalyzerBlockEntity){
-            var pairBe = (SpinalyzerBlockEntity) level.getExistingBlockEntity(pairPos);
-            q_pair = pairBe.getQuaternion();
+    public ShipPhysics readPhysicsShipInfo(){
+        synchronized (lock){
+            return physicsThreadShipInfo;
+        }
+    }
+
+
+    public void setSource(SpinalyzerBlockEntity pair){
+        this.source = pair.getBlockPos();
+    }
+
+    public double getRotationAngle(int axis){
+        Matrix3d m = getRelativeSourceTransform();
+        if(axis == 0){ // rotating around x-axis
+            return Math.atan2(m.m21(), m.m22()); // z.y / z.z
+        }
+        if (axis == 1){ // rotating around y-axis
+            return Math.atan2(m.m20(), m.m22()); // z.x / z.z
+        }
+        if (axis == 2){ // rotating around z-axis
+            return Math.atan2(m.m10(), m.m11()); // y.x / y.y
         }
 
-        Quaterniondc q_self = getQuaternion();
 
-        return q_pair.conjugate(new Quaterniond()).mul(q_self).angle();
+        return 0;
     }
 
     private Quaterniondc getQuaternion_World_wc2sc(){
@@ -111,6 +134,35 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
 
     public Matrix3d getRotationMatrixOfPlacement_sc2pc(){
         return new Matrix3d();
+    }
+
+    public void syncAttachedSensor(){
+        if(level.isClientSide) return;
+        ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos((ServerLevel) level, getBlockPos());
+        if(ship == null)return;
+        var sensor = SpinalyzerSensor.getOrCreate(ship);
+        sensor.updateSensor(new LogicalSensor((ServerLevel) getLevel(), getBlockPos()));
+    }
+
+    public void exitAttachedSensor(){
+        if(level.isClientSide) return;
+        ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos((ServerLevel) level, getBlockPos());
+        if(ship == null)return;
+        var sensor = SpinalyzerSensor.getOrCreate(ship);
+        sensor.removeSensor(new LogicalSensor((ServerLevel) getLevel(), getBlockPos()));
+    }
+
+    @Override
+    public void destroy(){
+        exitAttachedSensor();
+        super.destroy();
+    }
+
+
+    @Override
+    public void lazyTick() {
+        super.lazyTick();
+        syncAttachedSensor();
     }
 
     @Override

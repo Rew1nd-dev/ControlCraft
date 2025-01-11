@@ -152,6 +152,15 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
 
     }
 
+    @Override
+    public void invalidate(){
+        super.invalidate();
+        if(peripheralCap != null){
+            peripheralCap.invalidate();
+            peripheralCap = null;
+        }
+    }
+
     protected void applyRotation() {
         float wingAngle = level.isClientSide ? clientAnimatedAngle.getValue() : angle;
         if (physicalWing == null)

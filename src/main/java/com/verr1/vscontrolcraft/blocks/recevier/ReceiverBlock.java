@@ -4,7 +4,7 @@ import com.simibubi.create.foundation.block.IBE;
 import com.verr1.vscontrolcraft.DeferralExecutor;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
-import com.verr1.vscontrolcraft.utils.DeferralRunnable;
+import com.verr1.vscontrolcraft.base.DeferralRunnable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;

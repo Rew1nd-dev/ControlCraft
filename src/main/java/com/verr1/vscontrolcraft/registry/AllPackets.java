@@ -2,6 +2,8 @@ package com.verr1.vscontrolcraft.registry;
 
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.vscontrolcraft.ControlCraft;
+import com.verr1.vscontrolcraft.blocks.propeller.PropellerOpenScreenPacket;
+import com.verr1.vscontrolcraft.blocks.propeller.PropellerSettingsPacket;
 import com.verr1.vscontrolcraft.blocks.propeller.PropellerSyncAnimationPacket;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverOpenScreenPacket;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverRegisterPacket;
@@ -25,10 +27,12 @@ import java.util.function.Supplier;
 public enum AllPackets {
     // Client To Server
     NETWORK_ID_SETTING(ReceiverRegisterPacket.class, ReceiverRegisterPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    PROPELLER_SETTINGS(PropellerSettingsPacket.class, PropellerSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
     SPINALYZER_TARGET_SELECTION(SpinalyzerLinkPacket.class, SpinalyzerLinkPacket::new, NetworkDirection.PLAY_TO_SERVER),
 
     //Server To Client
     RECEIVER_SCREEN_OPEN(ReceiverOpenScreenPacket.class, ReceiverOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
+    PROPELLER_SCREEN_OPEN(PropellerOpenScreenPacket.class, PropellerOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     SYNC_PROPELLER_ANIMATION(PropellerSyncAnimationPacket.class, PropellerSyncAnimationPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     SYNC_WING_CONTROLLER_ANIMATION(WingControllerSyncAnimationPacket.class, WingControllerSyncAnimationPacket::new, NetworkDirection.PLAY_TO_CLIENT);
 

@@ -33,7 +33,7 @@ public class PropellerSyncAnimationPacket extends SimplePacketBase {
     public boolean handle(NetworkEvent.Context context) {
         context.enqueueWork(() -> {
             BlockEntity blockEntity = Minecraft.getInstance().player.level().getExistingBlockEntity(pos);
-            if(blockEntity instanceof SimplePropellerBlockEntity propellerBlockEntity){
+            if(blockEntity instanceof PropellerBlockEntity propellerBlockEntity){
                 propellerBlockEntity.setVisualRotationalSpeed(rotationalSpeed);
             }
         });

@@ -2,43 +2,41 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [32, 32],
 	"textures": {
-		"particle": "vscontrolcraft:block/propeller"
+		"0": "vscontrolcraft:block/propeller_base",
+		"particle": "vscontrolcraft:block/propeller_base"
 	},
 	"elements": [
 		{
-			"from": [7, 0, 7],
-			"to": [9, 2, 9],
-			"rotation": {"angle": 0, "axis": "y", "origin": [7, 0, 7]},
-			"color": 4,
+			"from": [1, 0, 1],
+			"to": [15, 4, 15],
+			"rotation": {"angle": 0, "axis": "y", "origin": [1, 0, 1]},
 			"faces": {
-				"north": {"uv": [0, 0, 1, 1], "texture": "#missing"},
-				"east": {"uv": [0, 0, 1, 1], "texture": "#missing"},
-				"south": {"uv": [0, 0, 1, 1], "texture": "#missing"},
-				"west": {"uv": [0, 0, 1, 1], "texture": "#missing"},
-				"up": {"uv": [0, 0, 1, 1], "texture": "#missing"},
-				"down": {"uv": [0, 0, 1, 1], "texture": "#missing"}
+				"north": {"uv": [7, 0, 14, 2], "texture": "#0"},
+				"east": {"uv": [7, 2, 14, 4], "texture": "#0"},
+				"south": {"uv": [7, 4, 14, 6], "texture": "#0"},
+				"west": {"uv": [7, 6, 14, 8], "texture": "#0"},
+				"up": {"uv": [7, 7, 0, 0], "texture": "#0"},
+				"down": {"uv": [7, 7, 0, 14], "texture": "#0"}
 			}
 		}
 	],
 	"display": {
 		"thirdperson_righthand": {
 			"rotation": [75, 45, 0],
-			"translation": [0, 2.5, 2.5],
+			"translation": [0, 2.5, 0],
 			"scale": [0.375, 0.375, 0.375]
 		},
 		"thirdperson_lefthand": {
 			"rotation": [75, 45, 0],
-			"translation": [0, 2.5, 2.5],
+			"translation": [0, 2.5, 0],
 			"scale": [0.375, 0.375, 0.375]
 		},
 		"firstperson_righthand": {
 			"rotation": [0, 45, 0],
-			"translation": [0, 4.75, 0],
 			"scale": [0.4, 0.4, 0.4]
 		},
 		"firstperson_lefthand": {
 			"rotation": [0, 225, 0],
-			"translation": [0, 4.75, 0],
 			"scale": [0.4, 0.4, 0.4]
 		},
 		"ground": {
@@ -47,7 +45,6 @@
 		},
 		"gui": {
 			"rotation": [30, 225, 0],
-			"translation": [0, 3, 0],
 			"scale": [0.625, 0.625, 0.625]
 		},
 		"fixed": {
@@ -56,16 +53,10 @@
 	},
 	"groups": [
 		{
-			"name": "frame",
+			"name": "base",
 			"origin": [8, 8, 8],
 			"color": 0,
 			"children": [0]
-		},
-		{
-			"name": "fan",
-			"origin": [8, 0, 8],
-			"color": 0,
-			"children": []
 		}
 	]
 }
