@@ -1,8 +1,15 @@
 package com.verr1.vscontrolcraft.registry;
 
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
+import com.verr1.vscontrolcraft.blocks.camera.CameraBlock;
+import com.verr1.vscontrolcraft.blocks.camera.CameraBlockEntity;
+import com.verr1.vscontrolcraft.blocks.camera.CameraRenderer;
 import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkLoaderBlock;
 import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkLoaderBlockEntity;
+import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlock;
+import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlockEntity;
+import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlock;
+import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlock;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerRenderer;
@@ -58,10 +65,25 @@ public class AllBlockEntities {
 
     public static final BlockEntityEntry<SpinalyzerBlockEntity> SPINALYZER_BLOCKENTITY = REGISTRATE
             .blockEntity(SpinalyzerBlock.ID, SpinalyzerBlockEntity::new)
-            .validBlock(AllBlocks.SPINALYZER_BLOCK_BLOCK)
+            .validBlock(AllBlocks.SPINALYZER_BLOCK)
             .renderer(() -> SpinalyzerRenderer::new)
             .register();
 
+    public static final BlockEntityEntry<CameraBlockEntity> CAMERA_BLOCKENTITY = REGISTRATE
+            .blockEntity(CameraBlock.ID, CameraBlockEntity::new)
+            .validBlock(AllBlocks.CAMERA_BLOCK)
+            .renderer(()-> CameraRenderer::new)
+            .register();
+
+    public static final BlockEntityEntry<ServoMotorBlockEntity> SERVO_MOTOR_BLOCKENTITY = REGISTRATE
+            .blockEntity(ServoMotorBlock.ID, ServoMotorBlockEntity::new)
+            .validBlock(AllBlocks.SERVO_MOTOR_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<MagnetBlockEntity> MAGNET_BLOCKENTITY = REGISTRATE
+            .blockEntity(MagnetBlock.ID, MagnetBlockEntity::new)
+            .validBlock(AllBlocks.MAGNET_BLOCK)
+            .register();
 
     public static void register(){
 

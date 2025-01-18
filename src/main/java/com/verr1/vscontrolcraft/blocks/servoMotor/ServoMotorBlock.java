@@ -1,0 +1,72 @@
+package com.verr1.vscontrolcraft.blocks.servoMotor;
+
+import com.simibubi.create.AllItems;
+import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
+import com.simibubi.create.foundation.block.IBE;
+import com.verr1.vscontrolcraft.registry.AllBlockEntities;
+import com.verr1.vscontrolcraft.registry.AllPackets;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+
+public class ServoMotorBlock extends DirectionalKineticBlock implements IBE<ServoMotorBlockEntity> {
+    public static String ID = "servo";
+
+    public ServoMotorBlock(Properties properties) {
+        super(properties);
+    }
+
+    @Override
+    public Direction.Axis getRotationAxis(BlockState state) {
+        return null;
+    }
+
+    protected void displayScreen(ServoMotorBlockEntity entity, Player player){
+
+        double a = entity.getControllerInfoHolder().getTargetAngle();
+        ServoMotorBlockEntity.pid pidParams = entity.getControllerInfoHolder().getPIDParams();
+
+        AllPackets.sendToPlayer(
+                new ServoMotorOpenScreenPacket(pidParams, a, entity.getBlockPos()),
+                ((ServerPlayer)player)
+        );
+
+    }
+
+    @Override
+    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
+                                 BlockHitResult hit){
+        if(worldIn.isClientSide)return InteractionResult.SUCCESS;
+        if(AllItems.WRENCH.isIn(player.getItemInHand(InteractionHand.MAIN_HAND))) {
+            withBlockEntityDo(worldIn, pos, ServoMotorBlockEntity::setAssembleNextTick);
+        }else if(!com.verr1.vscontrolcraft.registry.AllItems.LINKER.isIn(player.getItemInHand(InteractionHand.MAIN_HAND))){
+            withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
+        }
+        return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        Direction facing = context.getClickedFace();
+        return defaultBlockState().setValue(FACING, context.getClickedFace());
+    }
+
+
+    @Override
+    public Class<ServoMotorBlockEntity> getBlockEntityClass() {
+        return ServoMotorBlockEntity.class;
+    }
+
+    @Override
+    public BlockEntityType<? extends ServoMotorBlockEntity> getBlockEntityType() {
+        return AllBlockEntities.SERVO_MOTOR_BLOCKENTITY.get();
+    }
+}

@@ -1,7 +1,4 @@
-package com.verr1.vscontrolcraft;
-
-import com.verr1.vscontrolcraft.base.DefaultDeferralRunnable;
-import com.verr1.vscontrolcraft.base.DeferralRunnable;
+package com.verr1.vscontrolcraft.base.DeferralExecutor;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 

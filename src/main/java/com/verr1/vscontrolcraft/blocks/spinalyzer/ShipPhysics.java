@@ -1,10 +1,8 @@
 package com.verr1.vscontrolcraft.blocks.spinalyzer;
 
 import com.verr1.vscontrolcraft.utils.CCUtils;
-import org.joml.Matrix3dc;
-import org.joml.Quaterniondc;
-import org.joml.Vector3d;
-import org.joml.Vector3dc;
+import kotlin.reflect.jvm.internal.impl.util.ModuleVisibilityHelper;
+import org.joml.*;
 
 import java.util.Map;
 
@@ -13,8 +11,11 @@ public record ShipPhysics(Vector3dc velocity,
                           Vector3dc position,
                           Quaterniondc quaternion,
                           Matrix3dc inertiaTensor,
+                          Matrix3dc rotationMatrix,
                           double mass
 ){
+    public static ShipPhysics EMPTY = new ShipPhysics(new Vector3d(), new Vector3d(), new Vector3d(), new Quaterniond(), new Matrix3d(), new Matrix3d(), 0);
+
     public Map<String, Object> getCCPhysics(){
         return Map.of(
                 "velocity", CCUtils.dumpVec3(velocity()),

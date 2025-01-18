@@ -35,6 +35,7 @@ public class ReceiverRegisterPacket extends BlockEntityConfigurationPacket<Recei
     @Override
     protected void applySettings(ReceiverBlockEntity blockEntity) {
         blockEntity.resetNetworkRegistry(new PeripheralKey(name, protocol));
+
     }
 
 }

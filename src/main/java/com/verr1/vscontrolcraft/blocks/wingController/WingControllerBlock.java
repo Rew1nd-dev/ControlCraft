@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class WingControllerBlock extends BearingBlock implements IBE<WingControllerBlockEntity> {
-    public static final String ID = "wingcontroller";
+    public static final String ID = "wing_controller";
 
     public WingControllerBlock(Properties properties) {
         super(properties);

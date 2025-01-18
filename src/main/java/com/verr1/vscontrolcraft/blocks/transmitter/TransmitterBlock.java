@@ -1,15 +1,20 @@
 package com.verr1.vscontrolcraft.blocks.transmitter;
 
+import com.simibubi.create.AllShapes;
 import com.simibubi.create.foundation.block.IBE;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class TransmitterBlock extends DirectionalBlock implements IBE<TransmitterBlockEntity> {
     public static final String ID = "transmitter";
@@ -30,6 +35,11 @@ public class TransmitterBlock extends DirectionalBlock implements IBE<Transmitte
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return defaultBlockState().setValue(FACING, context.getClickedFace());
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState p_60555_, BlockGetter p_60556_, BlockPos p_60557_, CollisionContext p_60558_) {
+        return AllShapes.LARGE_GEAR.get(p_60555_.getValue(FACING).getAxis());
     }
 
     @Override

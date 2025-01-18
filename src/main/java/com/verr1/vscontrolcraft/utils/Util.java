@@ -6,11 +6,9 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix3d;
-import org.joml.Matrix3f;
-import org.joml.Vector3d;
+import org.joml.*;
 
-import java.util.function.Predicate;
+import java.lang.Math;
 
 import static com.verr1.vscontrolcraft.registry.AllBlockStates.ROTATION;
 
@@ -143,6 +141,16 @@ public class Util {
         }catch (NumberFormatException e){
             return false;
         }
+    }
+
+    public static boolean tryParseClampedDoubleFilter(String s, double threshold){
+        try{
+            double d = Double.parseDouble(s);
+            if(Math.abs(d) < threshold)return true;
+        }catch (NumberFormatException e){
+            return false;
+        }
+        return false;
     }
 
     public static double tryParseDouble(String s) {

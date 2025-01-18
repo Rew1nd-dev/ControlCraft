@@ -1,4 +1,4 @@
-package com.verr1.vscontrolcraft.base;
+package com.verr1.vscontrolcraft.base.DeferralExecutor;
 
 public class DefaultDeferralRunnable implements DeferralRunnable {
     int ticks = 0;

@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3d;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
+import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
@@ -110,8 +111,6 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
         if (axis == 2){ // rotating around z-axis
             return Math.atan2(m.m10(), m.m11()); // y.x / y.y
         }
-
-
         return 0;
     }
 

@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.blocks.propeller;
 
+import com.simibubi.create.AllShapes;
 import com.simibubi.create.foundation.block.IBE;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
@@ -9,6 +10,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
@@ -16,6 +18,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PropellerBlock extends DirectionalBlock implements IBE<PropellerBlockEntity> {
     public static final String ID = "propeller";
@@ -33,6 +38,11 @@ public class PropellerBlock extends DirectionalBlock implements IBE<PropellerBlo
     public void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
         super.createBlockStateDefinition(builder);
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState p_60555_, BlockGetter p_60556_, BlockPos p_60557_, CollisionContext p_60558_) {
+        return AllShapes.LARGE_GEAR.get(p_60555_.getValue(FACING).getAxis());
     }
 
     protected void displayScreen(PropellerBlockEntity entity, Player player){

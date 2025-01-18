@@ -62,7 +62,4 @@ public class SpinalyzerBlock extends DirectionalBlock implements IBE<SpinalyzerB
     }
 
 
-    public static class SpinalyzerGenerator{
-
-    }
 }

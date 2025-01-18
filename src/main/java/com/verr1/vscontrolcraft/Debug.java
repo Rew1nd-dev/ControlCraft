@@ -10,6 +10,7 @@ public class Debug {
     public static void tick(TickEvent.ServerTickEvent event){
         ServerLevel overworldLevel = event.getServer().getLevel(ServerLevel.OVERWORLD);
         var shipWorldCore = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld(overworldLevel);
+
         if(shipWorldCore == null) return;
         var tasks = shipWorldCore.getChunkWatchTasks();
 

@@ -4,7 +4,10 @@ import com.simibubi.create.foundation.data.BlockStateGen;
 import com.simibubi.create.foundation.data.SharedProperties;
 import com.simibubi.create.foundation.data.TagGen;
 import com.tterrag.registrate.util.entry.BlockEntry;
+import com.verr1.vscontrolcraft.blocks.camera.CameraBlock;
 import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkLoaderBlock;
+import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlock;
+import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlock;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlock;
 import com.verr1.vscontrolcraft.blocks.wingController.WingControllerBlock;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverBlock;
@@ -92,8 +95,41 @@ public class AllBlocks {
             .transform(customItemModel())
             .register();
 
-    public static final BlockEntry<SpinalyzerBlock> SPINALYZER_BLOCK_BLOCK = REGISTRATE
+    public static final BlockEntry<SpinalyzerBlock> SPINALYZER_BLOCK = REGISTRATE
             .block(SpinalyzerBlock.ID, SpinalyzerBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<CameraBlock> CAMERA_BLOCK = REGISTRATE
+            .block(CameraBlock.ID, CameraBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<ServoMotorBlock> SERVO_MOTOR_BLOCK = REGISTRATE
+            .block(ServoMotorBlock.ID, ServoMotorBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<MagnetBlock> MAGNET_BLOCK = REGISTRATE
+            .block(MagnetBlock.ID, MagnetBlock::new)
             .initialProperties(SharedProperties::stone)
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(

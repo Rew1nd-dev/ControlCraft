@@ -36,6 +36,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity {
         if(level.isClientSide)return MethodResult.of(null, "You Are Calling This On The Client Side, Nothing Returned");
         if(attachedPeripheral == null) return MethodResult.of(null, "Receiver Called, But No Peripheral Attached");
         if(!methods.containsKey(methodName))return MethodResult.of(null, "Receiver Called, But Method Not Found");
+        if(access == null)return MethodResult.of(null, "Receiver Called, But No Access Provided");
         return methods.get(methodName).apply(attachedPeripheral, context, access, args);
 
     }
@@ -86,6 +87,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity {
         if(level.isClientSide)return;
         if(Objects.equals(newKey.Name(), ""))return;
         networkKey = NetworkManager.registerAndGetKey(newKey, getBlockPos());
+        sendData();
     }
 
     @Override
@@ -114,16 +116,22 @@ public class ReceiverBlockEntity extends SmartBlockEntity {
     @Override
     protected void write(CompoundTag tag, boolean clientPacket) {
         super.write(tag, clientPacket);
-        tag.putLong("protocol", networkKey.Protocol());
-        tag.putString("name", networkKey.Name());
+        if(!clientPacket){
+            tag.putLong("protocol", networkKey.Protocol());
+            tag.putString("name", networkKey.Name());
+        }
+
     }
+
 
     @Override
     protected void read(CompoundTag tag, boolean clientPacket) {
         super.read(tag, clientPacket);
-        long protocol = tag.getLong("protocol");
-        String name = tag.getString("name");
-        resetNetworkRegistry(new PeripheralKey(name, protocol));
+        if(!clientPacket){
+            long protocol = tag.getLong("protocol");
+            String name = tag.getString("name");
+            resetNetworkRegistry(new PeripheralKey(name, protocol));
+        }
     }
 
     @Override

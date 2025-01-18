@@ -20,6 +20,29 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 
+
+/*
+* TODO:
+*    Visualization:
+*    1. add tool tips for blocks, need data syncing.
+*    2. render servo top part as a moving segment, rotate as angle changes
+*    3. remake wing controller model, make a moving part connected with wing block
+*    4.
+*    Functionality:
+*    1. extract ServoConstrainAssembleSchedule run() function, make it inside an class specific for ship aligning task
+*    2. VS constrain serialize utilities
+*    Features:
+*    1. suicide block, or self-disassemble block
+*    2. magnet block, implement using constrain or ShipForceInducer
+*    3. Linker tool, configurable, multi-functional tool for Control Craft
+*    4. Variants of bearings with different rotational behaviors
+*    5. Directional Jet rudders, and rudder controller consuming liquid(optional), just like propeller controller
+*    6. Piston with Sphere Hinge connection
+*    Configuration:
+*    1. make more fields configurable
+*/
+
+
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(ControlCraft.MODID)
 public class ControlCraft

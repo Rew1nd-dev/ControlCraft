@@ -37,9 +37,9 @@ public class TransmitterPeripheral implements IPeripheral {
 
     @Override
     public boolean equals(@Nullable IPeripheral iPeripheral) {
-        if (iPeripheral instanceof PropellerControllerPeripheral)return false;
         if (iPeripheral == null)return false;
-        return transmitterBlockEntity == iPeripheral.getTarget();
+        if (!(iPeripheral instanceof TransmitterPeripheral transmitterPeripheral))return false;
+        return transmitterBlockEntity.getBlockPos() == ((TransmitterBlockEntity) transmitterPeripheral.getTarget()).getBlockPos();
     }
 
 

@@ -96,6 +96,7 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
     public void syncAttachedInducer(){
         if(level.isClientSide) return;
         ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos((ServerLevel) level, getBlockPos());
+
         if(ship == null)return;
         var inducer = PropellerForceInducer.getOrCreate(ship);
         inducer.updateLogicalPropeller(

@@ -18,7 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
 public class PropellerScreen extends AbstractSimiScreen {
-    private final Component confirmLabel = Lang.translateDirect("action.trySettingNetworkID");
+    private final Component confirmLabel = Lang.translateDirect("action.trySettingPropeller");
 
     private AllGuiTextures background;
     private EditBox thrustRatioField;

@@ -1,16 +1,18 @@
 package com.verr1.vscontrolcraft.blocks.recevier;
 
+import com.simibubi.create.AllShapes;
 import com.simibubi.create.foundation.block.IBE;
-import com.verr1.vscontrolcraft.DeferralExecutor;
+import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
-import com.verr1.vscontrolcraft.base.DeferralRunnable;
+import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralRunnable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
@@ -19,6 +21,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 
 public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlockEntity> {
@@ -45,6 +49,10 @@ public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlock
         return defaultBlockState().setValue(FACING, context.getClickedFace());
     }
 
+    @Override
+    public VoxelShape getShape(BlockState p_60555_, BlockGetter p_60556_, BlockPos p_60557_, CollisionContext p_60558_) {
+        return AllShapes.LARGE_GEAR.get(p_60555_.getValue(FACING).getAxis());
+    }
 
     @Override
     public void onPlace(BlockState state, Level world, BlockPos pos, BlockState oldState, boolean isMoving) {

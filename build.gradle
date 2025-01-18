@@ -89,6 +89,18 @@ minecraft {
         }
 
         client {
+
+            workingDirectory project.file('run')
+            //jvmArg "-XX:+AllowEnhancedClassRedefinition"
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', "${mod_id}"
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             property 'forge.enabledGameTestNamespaces', mod_id
         }
@@ -176,6 +188,10 @@ dependencies {
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
+    implementation "org.lwjgl:lwjgl:3.3.6"
+    implementation "org.lwjgl:lwjgl-glfw:3.3.6"
+    implementation "org.lwjgl:lwjgl-opengl:3.3.6"
+
     // create dependencies
     implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }
     implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
@@ -205,6 +221,11 @@ dependencies {
     implementation fg.deobf("libs:peripheralium-forge:1.20.1-0.6.15")
     implementation fg.deobf("libs:peripheralworks-forge-1.20.1:1.4.3")
     implementation fg.deobf("maven.modrinth:create-clockwork:EvNWNIMY")
+
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
+    implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.4.1")) {
+        jarJar.ranged(it, "[0.4.1,)")
+    }
 
 
     implementation fg.deobf("maven.modrinth:sodium:mc1.20.1-0.5.11")

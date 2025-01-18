@@ -7,7 +7,8 @@ import com.verr1.vscontrolcraft.ControlCraft;
 public class AllPartialModels {
     public static final PartialModel
         NORMAL_PROPELLER = block("simple_propeller"),
-            SPINALYZR_AXES = block("spinalyzer_axes")    ;
+        SPINALYZR_AXES = block("spinalyzer_axes") ,
+        CAMERA_LENS = block("camera_lens");
 
 
     private static PartialModel block(String path) {

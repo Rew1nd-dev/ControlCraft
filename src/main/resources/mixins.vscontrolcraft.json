@@ -3,7 +3,10 @@
   "refmap": "mixins.vscontrolcraft.refmap.json",
   "mixins": [
     "MixinCCCommonHooks",
-    "MixinPhysicsTick"
+    "MixinPhysicsTick",
+    "MixinCamera",
+    "MixinGameRenderer",
+    "MixinVSGameUtilsKt"
   ],
   "package": "com.verr1.vscontrolcraft.mixin",
   "injectors": {

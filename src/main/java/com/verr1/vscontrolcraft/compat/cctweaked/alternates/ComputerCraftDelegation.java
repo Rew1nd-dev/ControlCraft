@@ -29,7 +29,7 @@ public class ComputerCraftDelegation {
                 }
 
                 try{
-                    ControlCraft.LOGGER.info("log from another thread!");
+                    // ControlCraft.LOGGER.info("log from another thread!");
                     ServerContext.get(server).tick();
                     TickScheduler.tick();
                     MonitorWatcher.onTick();

@@ -65,6 +65,7 @@ public class PropellerBlockEntity extends SmartBlockEntity implements ISyncable{
         this.TorqueRatio = torqueRatio;
         this.ThrustRatio = thrustRatio;
         this.ReverseTorque = reverseTorque;
+        sendData();
     }
 
 
@@ -91,19 +92,23 @@ public class PropellerBlockEntity extends SmartBlockEntity implements ISyncable{
 
 
     @Override
-    public void writeSafe(CompoundTag tag) {
-        super.writeSafe(tag);
-        tag.putDouble("ThrustRatio", ThrustRatio);
-        tag.putDouble("TorqueRatio", TorqueRatio);
-        tag.putBoolean("ReverseTorque", ReverseTorque);
+    protected void write(CompoundTag tag, boolean clientPacket) {
+        if(!clientPacket){
+            tag.putDouble("ThrustRatio", ThrustRatio);
+            tag.putDouble("TorqueRatio", TorqueRatio);
+            tag.putBoolean("ReverseTorque", ReverseTorque);
+        }
+        super.write(tag, clientPacket);
     }
 
     @Override
     protected void read(CompoundTag tag, boolean clientPacket) {
+        if(!clientPacket){
+            ThrustRatio = tag.getDouble("ThrustRatio");
+            TorqueRatio = tag.getDouble("TorqueRatio");
+            ReverseTorque = tag.getBoolean("ReverseTorque");
+        }
         super.read(tag, clientPacket);
-        ThrustRatio = tag.getDouble("ThrustRatio");
-        TorqueRatio = tag.getDouble("TorqueRatio");
-        ReverseTorque = tag.getBoolean("ReverseTorque");
     }
 
     @Override

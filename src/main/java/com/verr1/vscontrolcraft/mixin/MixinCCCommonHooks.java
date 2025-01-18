@@ -2,7 +2,7 @@ package com.verr1.vscontrolcraft.mixin;
 
 
 import com.verr1.vscontrolcraft.Config;
-import com.verr1.vscontrolcraft.DeferralExecutor;
+import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
 import com.verr1.vscontrolcraft.compat.cctweaked.alternates.ComputerCraftDelegation;
 import dan200.computercraft.shared.CommonHooks;
 import net.minecraft.server.MinecraftServer;
