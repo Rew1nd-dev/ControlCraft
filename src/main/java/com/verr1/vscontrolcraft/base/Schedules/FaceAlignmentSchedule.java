@@ -20,6 +20,8 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
 
     private Runnable onExpiredTask = () -> {};
 
+    private Quaterniond extraRotation = new Quaterniond();
+
     @Override
     public void onExpire() {
         if(!alignmentDone())return;
@@ -27,8 +29,8 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
     }
 
     public boolean alignmentDone(){
-        Vector3d xp = VSMathUtils.getAbsolutePosition(xPos, level, xDir);
-        Vector3d yp = VSMathUtils.getAbsolutePosition(yPos, level, yDir);
+        Vector3d xp = VSMathUtils.getFaceCenterPos(level, xPos, xDir);
+        Vector3d yp = VSMathUtils.getFaceCenterPos(level, yPos, yDir);
         return xp.sub(yp).lengthSquared() < 0.5;
     }
 
@@ -75,8 +77,7 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
             BlockPos yPos,
             Direction yDir,
             ServerLevel level,
-            int timeBeforeExpired,
-            Runnable onExpiredTask
+            int timeBeforeExpired
     ){
 
         this.xPos = xPos;
@@ -87,11 +88,19 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
         this.yDir = yDir;
         this.level = level;
 
-        this.onExpiredTask = onExpiredTask;
-
         q_tar = getYTargetQuaternion();
         p_tar = getYTargetPosition();
         init(new LevelPos(yPos, level), q_tar, p_tar, timeBeforeExpired);
+    }
+
+    public FaceAlignmentSchedule withExpiredTask(Runnable task){
+        onExpiredTask = task;
+        return this;
+    }
+
+    public FaceAlignmentSchedule withExtraQuaternion(Quaterniond extra){
+        extraRotation = extra;
+        return this;
     }
 
 }

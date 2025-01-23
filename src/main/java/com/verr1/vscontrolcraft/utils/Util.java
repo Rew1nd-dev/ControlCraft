@@ -13,7 +13,10 @@ import java.lang.Math;
 import static com.verr1.vscontrolcraft.registry.AllBlockStates.ROTATION;
 
 public class Util {
-    ;
+
+    public static Vec3 vec3add(Vec3 a, Vec3 b){
+        return new Vec3(a.x + b.x, a.y + b.y, a.z + b.z);
+    }
 
     public static Vector3d Vec3toVector3d(Vec3 vec3){
         return new Vector3d(vec3.x, vec3.y, vec3.z);

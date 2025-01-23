@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.PacketDistributor;
 import org.joml.*;
+import org.valkyrienskies.core.apigame.constraints.VSSlideConstraint;
 
 public class JointMotorBlockEntity extends AbstractServoMotor {
     private boolean assembleNextTick = false;
@@ -24,6 +25,7 @@ public class JointMotorBlockEntity extends AbstractServoMotor {
     }
 
     public Direction getServoDirection(){
+
         Direction facing = getBlockState().getValue(JointMotorBlock.FACING);
         Boolean align = getBlockState().getValue(JointMotorBlock.AXIS_ALONG_FIRST_COORDINATE);
         if(facing.getAxis() != Direction.Axis.X){

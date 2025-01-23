@@ -1,4 +1,4 @@
-package com.verr1.vscontrolcraft.blocks.sphereHinge;
+package com.verr1.vscontrolcraft.blocks.sphericalHinge;
 
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;

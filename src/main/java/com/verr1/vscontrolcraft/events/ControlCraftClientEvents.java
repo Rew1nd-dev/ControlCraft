@@ -4,7 +4,6 @@ import com.verr1.vscontrolcraft.base.ICameraAccessor;
 import com.verr1.vscontrolcraft.base.Wand.ClientWand;
 import com.verr1.vscontrolcraft.blocks.camera.CameraBlockEntity;
 import com.verr1.vscontrolcraft.blocks.camera.LinkedCameraManager;
-import com.verr1.vscontrolcraft.base.Servo.ServoMotorAssembleHandler;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerTargetHandler;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ViewportEvent;
@@ -17,8 +16,6 @@ public class ControlCraftClientEvents {
 
     @SubscribeEvent
     public static void onTick(TickEvent.ClientTickEvent event){
-        SpinalyzerTargetHandler.tick();
-        ServoMotorAssembleHandler.tick();
         LinkedCameraManager.tick();
         ClientWand.tick();
     }

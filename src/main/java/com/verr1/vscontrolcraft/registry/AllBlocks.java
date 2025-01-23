@@ -9,9 +9,10 @@ import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkLoaderBlock;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlock;
 import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlock;
+import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointDataGenerator;
 import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlock;
-import com.verr1.vscontrolcraft.blocks.sphereHinge.SphericalHingeBlock;
-import com.verr1.vscontrolcraft.blocks.sphereHinge.SphericalHingeDataGenerator;
+import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeBlock;
+import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeDataGenerator;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlock;
 import com.verr1.vscontrolcraft.blocks.wingController.WingControllerBlock;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverBlock;
@@ -170,7 +171,7 @@ public class AllBlocks {
             .initialProperties(SharedProperties::stone)
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
-                    BlockStateGen.directionalAxisBlockProvider()
+                    RevoluteJointDataGenerator.generate()
             )
             .item()
             .transform(customItemModel())

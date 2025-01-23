@@ -2,14 +2,18 @@
   "required": true,
   "refmap": "mixins.vscontrolcraft.refmap.json",
   "mixins": [
-    "MixinCCCommonHooks",
-    "MixinPhysicsTick",
     "MixinCamera",
+    "MixinCCCommonHooks",
     "MixinGameRenderer",
+    "MixinPhysicsTick",
     "MixinVSGameUtilsKt"
   ],
   "package": "com.verr1.vscontrolcraft.mixin",
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "client": [
+    "MixinMinecraft",
+    "MixinMouseHandler"
+  ]
 }

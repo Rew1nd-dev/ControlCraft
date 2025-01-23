@@ -12,7 +12,8 @@ import com.verr1.vscontrolcraft.blocks.propeller.PropellerSettingsPacket;
 import com.verr1.vscontrolcraft.blocks.propeller.PropellerSyncAnimationPacket;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverOpenScreenPacket;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverRegisterPacket;
-import com.verr1.vscontrolcraft.base.Servo.ServoMotorConstrainAssemblePacket;
+import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointConstrainAssemblePacket;
+import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorConstrainAssemblePacket;
 import com.verr1.vscontrolcraft.base.Servo.ServoMotorOpenScreenPacket;
 import com.verr1.vscontrolcraft.base.Servo.ServoMotorSettingsPacket;
 import com.verr1.vscontrolcraft.base.Servo.ServoMotorSyncAnimationPacket;
@@ -41,6 +42,7 @@ public enum AllPackets {
     MAGNET_SETTINGS(MagnetSettingsPacket.class, MagnetSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
     SPINALYZER_TARGET_SELECTION(SpinalyzerLinkPacket.class, SpinalyzerLinkPacket::new, NetworkDirection.PLAY_TO_SERVER),
     SERVOMOTOR_CONSTRAIN_ASSEMBLE(ServoMotorConstrainAssemblePacket.class, ServoMotorConstrainAssemblePacket::new, NetworkDirection.PLAY_TO_SERVER),
+    JOINTMOTOR_CONSTRAIN_ASSEMBLE(RevoluteJointConstrainAssemblePacket.class, RevoluteJointConstrainAssemblePacket::new, NetworkDirection.PLAY_TO_SERVER),
     HINGE_BRUTE_CONNECTION(HingeBruteConnectPacket.class, HingeBruteConnectPacket::new, NetworkDirection.PLAY_TO_SERVER),
     HINGE_ADJUSTMENT(HingeAdjustLevelPacket.class, HingeAdjustLevelPacket::new, NetworkDirection.PLAY_TO_SERVER),
 

@@ -7,27 +7,27 @@ import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 
-public abstract class WandAbstractDualSelectionMode implements IWandMode {
-
+public abstract class WandAbstractQuadSelectionMode implements IWandMode {
     protected WandSelection x = WandSelection.NULL;
     protected WandSelection y = WandSelection.NULL;
+    protected WandSelection z = WandSelection.NULL;
+    protected WandSelection w = WandSelection.NULL;
 
-    private enum State{
+    protected enum State{
         TO_SELECT_X,
         TO_SELECT_Y,
+        TO_SELECT_Z,
+        TO_SELECT_W,
         TO_CONFIRM
     }
 
-    private State state = State.TO_SELECT_X;
-    private State next_state = State.TO_SELECT_X;
+    protected State state = State.TO_SELECT_X;
+    protected State next_state = State.TO_SELECT_X;
 
 
-    protected WandAbstractDualSelectionMode(){
+    protected WandAbstractQuadSelectionMode(){
 
     }
-
-    @Override
-    public abstract String getID();
 
     @Override
     public void onSelection(WandSelection selection) {
@@ -38,9 +38,14 @@ public abstract class WandAbstractDualSelectionMode implements IWandMode {
                 break;
             case TO_SELECT_Y:
                 y = selection;
-                next_state = State.TO_CONFIRM;
+                next_state = State.TO_SELECT_Z;
                 break;
-            case TO_CONFIRM:
+            case TO_SELECT_Z:
+                z = selection;
+                next_state = State.TO_SELECT_W;
+                break;
+            case TO_SELECT_W:
+                w = selection;
                 next_state = State.TO_CONFIRM;
                 break;
         }
@@ -48,18 +53,9 @@ public abstract class WandAbstractDualSelectionMode implements IWandMode {
     }
 
     @Override
-    public void onClear() {
-        clear();
-        next_state = State.TO_SELECT_X;
-        state = next_state;
-    }
-
-    @Override
     public void onConfirm() {
         switch (state){
-            case TO_SELECT_X, TO_SELECT_Y:
-                // clear();
-                // next_state = State.TO_SELECT_X;
+            case TO_SELECT_X, TO_SELECT_Y, TO_SELECT_Z, TO_SELECT_W:
                 break;
             case TO_CONFIRM:
                 confirm();
@@ -70,11 +66,11 @@ public abstract class WandAbstractDualSelectionMode implements IWandMode {
         state = next_state;
     }
 
-
-
     private void clear(){
         x = WandSelection.NULL;
         y = WandSelection.NULL;
+        z = WandSelection.NULL;
+        w = WandSelection.NULL;
     }
 
     @Override
@@ -82,18 +78,24 @@ public abstract class WandAbstractDualSelectionMode implements IWandMode {
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
 
-        if(x != WandSelection.NULL) WandRenderer.drawOutline(x.pos(), 0xaaca32, "source");
-        if(y != WandSelection.NULL) WandRenderer.drawOutline(y.pos(), 0xffcb74, "target");
+        if(x != WandSelection.NULL) WandRenderer.drawOutline(x.pos(), x.face(), 0xaaca32, "x");
+        if(y != WandSelection.NULL) WandRenderer.drawOutline(y.pos(), y.face(), 0xffcb74, "y");
+        if(z != WandSelection.NULL) WandRenderer.drawOutline(z.pos(), z.face(), 0xaabbcc, "z");
+        if(w != WandSelection.NULL) WandRenderer.drawOutline(w.pos(), w.face(), 0xff66cc, "w");
+
     }
 
     private void confirm(){
-        if(x == WandSelection.NULL || y == WandSelection.NULL){
+        if(x == WandSelection.NULL || y == WandSelection.NULL || z == WandSelection.NULL || w == WandSelection.NULL){
             ControlCraft.LOGGER.info("Invalid state");
             return;
         }
 
-        sendPacket(x, y);
+        sendPacket(x, y, z, w);
     }
 
-    protected abstract void sendPacket(WandSelection x, WandSelection y);
+    protected abstract void sendPacket(WandSelection x, WandSelection y, WandSelection z, WandSelection w);
+
+    @Override
+    public abstract String getID();
 }

@@ -1,4 +1,4 @@
-package com.verr1.vscontrolcraft.base.Servo;
+package com.verr1.vscontrolcraft.blocks.servoMotor;
 
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.vscontrolcraft.base.IntervalExecutor.IntervalExecutor;
@@ -48,14 +48,13 @@ public class ServoMotorConstrainAssemblePacket extends SimplePacketBase {
                     assemPos,
                     assemDir,
                     (ServerLevel) context.getSender().level(),
-                    10,
-                    () -> {
-                        BlockEntity be = context.getSender().level().getExistingBlockEntity(servoPos);
-                        if(be instanceof AbstractServoMotor servo){
-                            servo.bruteDirectionalConnectWith(assemPos, assemDir);
-                        }
-                    }
-            );
+                    10
+            ).withExpiredTask(() -> {
+                BlockEntity be = context.getSender().level().getExistingBlockEntity(servoPos);
+                if(be instanceof ServoMotorBlockEntity servo){
+                    servo.bruteDirectionalConnectWith(assemPos, assemDir);
+                }
+            });
             IntervalExecutor.executeOnSchedule(task);
         });
         return true;

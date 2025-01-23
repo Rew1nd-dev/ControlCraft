@@ -55,7 +55,7 @@ public class ServoMotorBlock extends DirectionalKineticBlock implements IBE<Serv
         if(worldIn.isClientSide)return InteractionResult.SUCCESS;
         if(AllItems.WRENCH.isIn(player.getItemInHand(InteractionHand.MAIN_HAND))) {
             withBlockEntityDo(worldIn, pos, ServoMotorBlockEntity::setAssembleNextTick);
-        }else if(!com.verr1.vscontrolcraft.registry.AllItems.ALL_IN_WAND.isIn(player.getItemInHand(InteractionHand.MAIN_HAND))){
+        }else if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
             withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
         }
         return InteractionResult.SUCCESS;

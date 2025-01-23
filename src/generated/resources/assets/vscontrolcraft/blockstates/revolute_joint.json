@@ -1,51 +1,195 @@
 {
   "variants": {
-    "axis_along_first=false,facing=down": {
-      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+    "axis_along_first=false,facing=down,hinge_level=base": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_base_horizontal",
       "x": 270,
       "y": 90
     },
-    "axis_along_first=false,facing=east": {
-      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+    "axis_along_first=false,facing=down,hinge_level=full": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_full_horizontal",
+      "x": 270,
+      "y": 90
+    },
+    "axis_along_first=false,facing=down,hinge_level=half": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_half_horizontal",
+      "x": 270,
+      "y": 90
+    },
+    "axis_along_first=false,facing=down,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_three_quarter_horizontal",
+      "x": 270,
+      "y": 90
+    },
+    "axis_along_first=false,facing=east,hinge_level=base": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_base_horizontal",
       "y": 270
     },
-    "axis_along_first=false,facing=north": {
-      "model": "vscontrolcraft:block/revolute_joint/vertical",
+    "axis_along_first=false,facing=east,hinge_level=full": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_full_horizontal",
+      "y": 270
+    },
+    "axis_along_first=false,facing=east,hinge_level=half": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_half_horizontal",
+      "y": 270
+    },
+    "axis_along_first=false,facing=east,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_three_quarter_horizontal",
+      "y": 270
+    },
+    "axis_along_first=false,facing=north,hinge_level=base": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_base_vertical",
       "y": 180
     },
-    "axis_along_first=false,facing=south": {
-      "model": "vscontrolcraft:block/revolute_joint/vertical"
+    "axis_along_first=false,facing=north,hinge_level=full": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_full_vertical",
+      "y": 180
     },
-    "axis_along_first=false,facing=up": {
-      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+    "axis_along_first=false,facing=north,hinge_level=half": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_half_vertical",
+      "y": 180
+    },
+    "axis_along_first=false,facing=north,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_three_quarter_vertical",
+      "y": 180
+    },
+    "axis_along_first=false,facing=south,hinge_level=base": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_base_vertical"
+    },
+    "axis_along_first=false,facing=south,hinge_level=full": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_full_vertical"
+    },
+    "axis_along_first=false,facing=south,hinge_level=half": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_half_vertical"
+    },
+    "axis_along_first=false,facing=south,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_three_quarter_vertical"
+    },
+    "axis_along_first=false,facing=up,hinge_level=base": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_base_horizontal",
       "x": 90,
       "y": 90
     },
-    "axis_along_first=false,facing=west": {
-      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+    "axis_along_first=false,facing=up,hinge_level=full": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_full_horizontal",
+      "x": 90,
       "y": 90
     },
-    "axis_along_first=true,facing=down": {
-      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+    "axis_along_first=false,facing=up,hinge_level=half": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_half_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=false,facing=up,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_three_quarter_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=false,facing=west,hinge_level=base": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_base_horizontal",
+      "y": 90
+    },
+    "axis_along_first=false,facing=west,hinge_level=full": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_full_horizontal",
+      "y": 90
+    },
+    "axis_along_first=false,facing=west,hinge_level=half": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_half_horizontal",
+      "y": 90
+    },
+    "axis_along_first=false,facing=west,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_three_quarter_horizontal",
+      "y": 90
+    },
+    "axis_along_first=true,facing=down,hinge_level=base": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_base_horizontal",
       "x": 270
     },
-    "axis_along_first=true,facing=east": {
-      "model": "vscontrolcraft:block/revolute_joint/vertical",
+    "axis_along_first=true,facing=down,hinge_level=full": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_full_horizontal",
+      "x": 270
+    },
+    "axis_along_first=true,facing=down,hinge_level=half": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_half_horizontal",
+      "x": 270
+    },
+    "axis_along_first=true,facing=down,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_three_quarter_horizontal",
+      "x": 270
+    },
+    "axis_along_first=true,facing=east,hinge_level=base": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_base_vertical",
       "y": 270
     },
-    "axis_along_first=true,facing=north": {
-      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+    "axis_along_first=true,facing=east,hinge_level=full": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_full_vertical",
+      "y": 270
+    },
+    "axis_along_first=true,facing=east,hinge_level=half": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_half_vertical",
+      "y": 270
+    },
+    "axis_along_first=true,facing=east,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_three_quarter_vertical",
+      "y": 270
+    },
+    "axis_along_first=true,facing=north,hinge_level=base": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_base_horizontal",
       "y": 180
     },
-    "axis_along_first=true,facing=south": {
-      "model": "vscontrolcraft:block/revolute_joint/horizontal"
+    "axis_along_first=true,facing=north,hinge_level=full": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_full_horizontal",
+      "y": 180
     },
-    "axis_along_first=true,facing=up": {
-      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+    "axis_along_first=true,facing=north,hinge_level=half": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_half_horizontal",
+      "y": 180
+    },
+    "axis_along_first=true,facing=north,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_three_quarter_horizontal",
+      "y": 180
+    },
+    "axis_along_first=true,facing=south,hinge_level=base": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_base_horizontal"
+    },
+    "axis_along_first=true,facing=south,hinge_level=full": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_full_horizontal"
+    },
+    "axis_along_first=true,facing=south,hinge_level=half": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_half_horizontal"
+    },
+    "axis_along_first=true,facing=south,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_three_quarter_horizontal"
+    },
+    "axis_along_first=true,facing=up,hinge_level=base": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_base_horizontal",
       "x": 90
     },
-    "axis_along_first=true,facing=west": {
-      "model": "vscontrolcraft:block/revolute_joint/vertical",
+    "axis_along_first=true,facing=up,hinge_level=full": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_full_horizontal",
+      "x": 90
+    },
+    "axis_along_first=true,facing=up,hinge_level=half": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_half_horizontal",
+      "x": 90
+    },
+    "axis_along_first=true,facing=up,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_three_quarter_horizontal",
+      "x": 90
+    },
+    "axis_along_first=true,facing=west,hinge_level=base": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_base_vertical",
+      "y": 90
+    },
+    "axis_along_first=true,facing=west,hinge_level=full": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_full_vertical",
+      "y": 90
+    },
+    "axis_along_first=true,facing=west,hinge_level=half": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_half_vertical",
+      "y": 90
+    },
+    "axis_along_first=true,facing=west,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/revolute_joint/rvl_three_quarter_vertical",
       "y": 90
     }
   }

@@ -20,15 +20,28 @@ import java.lang.Math;
 //                      such that XC2YC * v_x(represented in XC coordinate) = v_y(represented in YC coordinate)
 
 public class VSMathUtils {
+
+
     public static Quaterniondc getQuaternionOfPlacement(Direction facing){
         return switch (facing){
             case DOWN -> new Quaterniond(new AxisAngle4d(Math.PI, new Vector3d(1.0, 0.0, 0.0)));
-            case NORTH -> (new Quaterniond(new AxisAngle4d(Math.PI, new Vector3d(0.0, 1.0, 0.0)))).mul((new Quaterniond(new AxisAngle4d(Math.PI / 2, (Vector3dc)(new Vector3d(1.0, 0.0, 0.0)))))).normalize();
-            case EAST -> new Quaterniond(new AxisAngle4d(Math.PI / 2, (Vector3dc) new Vector3d(0.0, 1.0, 0.0))).mul(new Quaterniond(new AxisAngle4d(Math.PI / 2, (Vector3dc)(new Vector3d(1.0, 0.0, 0.0))))).normalize();
-            case SOUTH -> (new Quaterniond(new AxisAngle4d(Math.PI / 2, (Vector3dc)(new Vector3d(1.0, 0.0, 0.0))))).normalize();
-            case WEST ->(new Quaterniond(new AxisAngle4d(Math.PI * 3 / 2, (Vector3dc)(new Vector3d(0.0, 1.0, 0.0))))).mul((Quaterniondc)(new Quaterniond(new AxisAngle4d(Math.PI / 2, (Vector3dc)(new Vector3d(1.0, 0.0, 0.0)))))).normalize();
+            case NORTH -> (new Quaterniond(new AxisAngle4d(Math.PI, new Vector3d(0.0, 1.0, 0.0)))).mul((new Quaterniond(new AxisAngle4d(Math.PI / 2, (new Vector3d(1.0, 0.0, 0.0)))))).normalize();
+            case EAST -> new Quaterniond(new AxisAngle4d(Math.PI / 2,  new Vector3d(0.0, 1.0, 0.0))).mul(new Quaterniond(new AxisAngle4d(Math.PI / 2, (new Vector3d(1.0, 0.0, 0.0))))).normalize();
+            case SOUTH -> (new Quaterniond(new AxisAngle4d(Math.PI / 2, (new Vector3d(1.0, 0.0, 0.0))))).normalize();
+            case WEST ->(new Quaterniond(new AxisAngle4d(Math.PI * 3 / 2, (new Vector3d(0.0, 1.0, 0.0))))).mul((Quaterniondc)(new Quaterniond(new AxisAngle4d(Math.PI / 2, (new Vector3d(1.0, 0.0, 0.0)))))).normalize();
             default -> new Quaterniond();
         };
+    }
+
+    // the rotation to make positive-x axis and positive-y axis align with xDir and yDir respectively
+    public static Quaterniondc getQuaternionOfPlacement(Direction xDir, Direction yDir){
+        Vector3d xDirJOML = Util.Vec3itoVector3d(xDir.getNormal());
+        Vector3d yDirJOML = Util.Vec3itoVector3d(yDir.getNormal());
+        Vector3d zDirJOML = new Vector3d(xDirJOML).cross(yDirJOML);
+
+        Matrix3d m = new Matrix3d().setRow(0, xDirJOML).setRow(1, yDirJOML).setRow(2, zDirJOML); // wc2sc since it is transposed
+        return m2q(m);
+
     }
 
     public static Vector3d getFaceCenterPos(ServerLevel level, BlockPos pos, Direction dir){
@@ -67,6 +80,7 @@ public class VSMathUtils {
         ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos(level, pos);
         return ship;
     }
+
 
     public static Vector3d getAbsolutePosition(BlockPos pos, ServerLevel level, Direction facing){
         ServerShip ship = getServerShip(pos, level);
@@ -134,15 +148,6 @@ public class VSMathUtils {
         return 0;
     }
 
-    /*
-    *
-        if(sign_0 == 1){
-            int temp = s_axis_x1;
-            s_axis_x1 = s_axis_x2;
-            s_axis_x2 = temp;
-        }// yc2xc
-    *
-    * */
     public static double get_xc2yc(Matrix3dc xc2yc, Direction xDir, Direction yDir){
         //xc2yc = xc2yc.transpose(new Matrix3d());
         int[] shuffle_1 = {2, 0, 1}; // z->y->x
@@ -169,6 +174,41 @@ public class VSMathUtils {
 
     public static Matrix3d q2m(Quaterniondc q){
         return q.get(new Matrix3d());
+    }
+
+    public static Quaterniond m2q(Matrix3dc m) {
+        double trace = m.m00() + m.m11() + m.m22();
+        double qw, qx, qy, qz;
+
+        if (trace > 0) {
+            double s = Math.sqrt(trace + 1.0) * 2; // s=4*qw
+            qw = 0.25 * s;
+            qx = (m.m21() - m.m12()) / s;
+            qy = (m.m02() - m.m20()) / s;
+            qz = (m.m10() - m.m01()) / s;
+        } else if ((m.m00() > m.m11()) && (m.m00() > m.m22())) {
+            double s = Math.sqrt(1.0 + m.m00() - m.m11() - m.m22()) * 2; // s=4*qx
+            qw = (m.m21() - m.m12()) / s;
+            qx = 0.25 * s;
+            qy = (m.m01() + m.m10()) / s;
+            qz = (m.m02() + m.m20()) / s;
+        } else if (m.m11() > m.m22()) {
+            double s = Math.sqrt(1.0 + m.m11() - m.m00() - m.m22()) * 2; // s=4*qy
+            qw = (m.m02() - m.m20()) / s;
+            qx = (m.m01() + m.m10()) / s;
+            qy = 0.25 * s;
+            qz = (m.m12() + m.m21()) / s;
+        } else {
+            double s = Math.sqrt(1.0 + m.m22() - m.m00() - m.m11()) * 2; // s=4*qz
+            qw = (m.m10() - m.m01()) / s;
+            qx = (m.m02() + m.m20()) / s;
+            qy = (m.m12() + m.m21()) / s;
+            qz = 0.25 * s;
+        }
+
+        Quaterniond quaternion = new Quaterniond(qx, qy, qz, qw);
+        quaternion.normalize();
+        return quaternion;
     }
 
     public static double get_xc2yc(@Nullable Ship ship_x, @Nullable Ship ship_y, Direction direction){
@@ -231,5 +271,16 @@ public class VSMathUtils {
 
     public static Quaterniond rotationToAlign(Direction staticFace, Direction dynamicFace){
         return new Quaterniond(getQuaternionOfPlacement(staticFace.getOpposite())).mul(new Quaterniond(getQuaternionOfPlacement(dynamicFace)).conjugate()).normalize();
+    }
+
+    public static boolean isVertical(Direction a, Direction b){
+        return a != b.getOpposite() && a != b;
+    }
+
+    public static Quaterniond rotationToAlign(Direction align_x, Direction forward_x, Direction align_y, Direction forward_y){
+        if(!(isVertical(align_x, forward_x) && isVertical(align_y, forward_y)))return new Quaterniond();
+        Quaterniond q_x = rotationToAlign(align_x.getOpposite(), forward_x);
+        Quaterniond q_y = rotationToAlign(align_y, forward_y);
+        return new Quaterniond(q_x).mul(q_y.conjugate()).normalize();
     }
 }

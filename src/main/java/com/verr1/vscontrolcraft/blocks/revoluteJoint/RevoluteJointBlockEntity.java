@@ -1,19 +1,23 @@
 package com.verr1.vscontrolcraft.blocks.revoluteJoint;
 
+import com.verr1.vscontrolcraft.ControlCraft;
+import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
 import com.verr1.vscontrolcraft.base.Hinge.HingeAdjustLevel;
 import com.verr1.vscontrolcraft.base.Hinge.HingeSyncLevelPacket;
 import com.verr1.vscontrolcraft.base.Hinge.IAdjustableHinge;
 import com.verr1.vscontrolcraft.base.Hinge.ICanBruteConnect;
 import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
-import com.verr1.vscontrolcraft.blocks.sphereHinge.SphericalHingeBlock;
-import com.verr1.vscontrolcraft.blocks.sphereHinge.SphericalHingeBlockEntity;
+import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeBlock;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
+import com.verr1.vscontrolcraft.utils.VSConstrainSerializeUtils;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.PacketDistributor;
@@ -28,7 +32,6 @@ import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implements ICanBruteConnect, IAdjustableHinge {
 
-    private HingeAdjustLevel hingeLevel = HingeAdjustLevel.FULL;
 
     private VSAttachmentConstraint attach;
     private Object attach_ID;
@@ -54,21 +57,29 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
         return Util.Vec3itoVector3d(getJointDirection().getNormal());
     }
 
+    public HingeAdjustLevel getHingeLevel(){
+        return getBlockState().getValue(SphericalHingeBlock.LEVEL);
+    }
+
     @Override
     public void adjust() {
-        hingeLevel = hingeLevel.next();
+        setAdjustment(getHingeLevel().next());
+        syncToClient();
     }
 
     @Override
     public HingeAdjustLevel getAdjustment() {
-        return hingeLevel;
+        return getHingeLevel();
     }
 
     @Override
-    public void setAdjustment(HingeAdjustLevel level) {
-        hingeLevel = level;
+    public void setAdjustment(HingeAdjustLevel hingeLevel) {
+        updateBlockState(level, getBlockPos(), getBlockState().setValue(SphericalHingeBlock.LEVEL, hingeLevel));
     }
 
+    public static void updateBlockState(Level world, BlockPos pos, BlockState newState){
+        world.setBlock(pos, newState, 3);
+    }
 
     void syncToClient(){
         AllPackets
@@ -79,7 +90,7 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
     private Vector3d getHingeConnectorPosJOML() {
         return Util.Vec3toVector3d(getBlockPos().getCenter())
                 .fma(-0.5, getDirectionJOML())
-                .fma(hingeLevel.correspondLength(), getDirectionJOML());
+                .fma(getHingeLevel().correspondLength(), getDirectionJOML());
     }
 
 
@@ -144,5 +155,48 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
             attach_ID = null;
             hinge_ID = null;
         }
+    }
+
+
+    public void writeSavedConstrains(CompoundTag tag){
+        tag.putBoolean("assembled", getCompanionServerShip() != null);
+        if(attach == null || hinge == null)return;
+        tag.putString("assemDir", getCompanionShipDirection().getSerializedName());
+        tag.putLong("asm", getCompanionShipID());
+        tag.putLong("own", getServerShipID());
+        VSConstrainSerializeUtils.writeVSAttachmentConstrain(tag, "attach_", attach);
+        VSConstrainSerializeUtils.writeVSHingeOrientationConstrain(tag, "hinge_", hinge);
+
+    }
+
+
+    public void readSavedConstrains(CompoundTag tag){
+        boolean assembled = tag.getBoolean("assembled");
+        if(!assembled)return;
+        String assemDirString = tag.getString("assemDir");
+        setCompanionShipDirection(Direction.byName(assemDirString));;
+        setCompanionShipID(tag.getLong("asm"));
+        attach = VSConstrainSerializeUtils.readVSAttachmentConstrain(tag, "attach_");
+        hinge = VSConstrainSerializeUtils.readVSHingeOrientationConstrain(tag, "hinge_");
+    }
+
+    @Override
+    protected void write(CompoundTag tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
+        if(clientPacket)return;
+        writeSavedConstrains(tag);
+    }
+
+    @Override
+    protected void read(CompoundTag tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        if(clientPacket)return;
+        try {
+            readSavedConstrains(tag);
+            DeferralExecutor.executeLater(this::recreateConstrains, 1);
+        }catch (Exception e){
+            ControlCraft.LOGGER.info("Failed to read saved constrains");
+        }
+
     }
 }

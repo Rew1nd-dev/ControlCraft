@@ -1,4 +1,4 @@
-package com.verr1.vscontrolcraft.blocks.sphereHinge;
+package com.verr1.vscontrolcraft.blocks.sphericalHinge;
 
 import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
@@ -11,7 +11,6 @@ import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSConstrainSerializeUtils;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;

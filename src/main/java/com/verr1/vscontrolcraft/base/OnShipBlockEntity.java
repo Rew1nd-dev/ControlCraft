@@ -2,7 +2,6 @@ package com.verr1.vscontrolcraft.base;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import com.verr1.vscontrolcraft.blocks.sphereHinge.SphericalHingeBlock;
 import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
