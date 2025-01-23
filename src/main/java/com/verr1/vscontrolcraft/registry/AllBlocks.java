@@ -6,8 +6,12 @@ import com.simibubi.create.foundation.data.TagGen;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import com.verr1.vscontrolcraft.blocks.camera.CameraBlock;
 import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkLoaderBlock;
+import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlock;
+import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlock;
 import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlock;
+import com.verr1.vscontrolcraft.blocks.sphereHinge.SphericalHingeBlock;
+import com.verr1.vscontrolcraft.blocks.sphereHinge.SphericalHingeDataGenerator;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlock;
 import com.verr1.vscontrolcraft.blocks.wingController.WingControllerBlock;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverBlock;
@@ -134,6 +138,39 @@ public class AllBlocks {
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
+            )
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<JointMotorBlock> JOINT_MOTOR_BLOCK = REGISTRATE
+            .block(JointMotorBlock.ID, JointMotorBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .blockstate(
+                    BlockStateGen.directionalAxisBlockProvider()
+            )
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<SphericalHingeBlock> SPHERE_HINGE_BLOCK = REGISTRATE
+            .block(SphericalHingeBlock.ID, SphericalHingeBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .blockstate(
+                    SphericalHingeDataGenerator.generate()
+            )
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<RevoluteJointBlock> REVOLUTE_JOINT_BLOCK = REGISTRATE
+            .block(RevoluteJointBlock.ID, RevoluteJointBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .blockstate(
+                    BlockStateGen.directionalAxisBlockProvider()
             )
             .item()
             .transform(customItemModel())

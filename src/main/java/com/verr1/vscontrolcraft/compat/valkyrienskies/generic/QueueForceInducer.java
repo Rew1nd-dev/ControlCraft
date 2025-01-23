@@ -22,7 +22,7 @@ public class QueueForceInducer implements ShipForcesInducer {
 
 
     public static QueueForceInducer getOrCreate(@NotNull ServerShip ship){
-        QueueForceInducer obj =ship.getAttachment(QueueForceInducer.class);
+        QueueForceInducer obj = ship.getAttachment(QueueForceInducer.class);
         if(obj == null){
             obj = new QueueForceInducer();
             ship.saveAttachment(QueueForceInducer.class, obj);

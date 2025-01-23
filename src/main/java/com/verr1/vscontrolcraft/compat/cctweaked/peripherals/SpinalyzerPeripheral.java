@@ -86,7 +86,7 @@ public class SpinalyzerPeripheral implements IPeripheral {
 
     @LuaFunction
     public Map<String, Object> getPhysicsInfo(){
-        return spinalyzerBlockEntity.readPhysicsShipInfo().getCCPhysics();
+        return spinalyzerBlockEntity.physics.read().getCCPhysics();
     }
 
 

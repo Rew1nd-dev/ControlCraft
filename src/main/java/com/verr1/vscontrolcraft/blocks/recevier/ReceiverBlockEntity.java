@@ -94,6 +94,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity {
     public void tick(){
         super.tick();
         if(level.isClientSide)return;
+        NetworkManager.activate(getBlockPos());
     }
 
     @Override

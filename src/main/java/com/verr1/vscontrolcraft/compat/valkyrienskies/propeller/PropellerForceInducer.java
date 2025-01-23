@@ -41,14 +41,14 @@ public class PropellerForceInducer implements ShipForcesInducer {
 
     public Vector3d calcForceVector(LogicalPropeller property){
         return new Vector3d(property.direction())
-                       .mul(property.speed() * property.THRUST_RATIO())
+                       .mul(property.speedCallBack().get() * property.THRUST_RATIO())
                        .mul(property.canDrive() ? 1 : 0);
 
     }
 
     public Vector3d calcTorqueVector(LogicalPropeller property){
         return new Vector3d(property.direction())
-                        .mul(property.speed() * property.TORQUE_RATIO())
+                        .mul(property.speedCallBack().get() * property.TORQUE_RATIO())
                         .mul(property.reverseTorque() ? 1 : -1)
                         .mul(property.canDrive() ? 1 : 0);
 

@@ -10,15 +10,21 @@ import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllBlockStates;
 import com.verr1.vscontrolcraft.utils.Util;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+
+import static com.verr1.vscontrolcraft.registry.AllShapes.HALF_BOX_BASE;
 
 
 public class SpinalyzerBlock extends DirectionalBlock implements IBE<SpinalyzerBlockEntity>, IWrenchable {
@@ -41,6 +47,11 @@ public class SpinalyzerBlock extends DirectionalBlock implements IBE<SpinalyzerB
     public void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
         super.createBlockStateDefinition(builder);
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+        return HALF_BOX_BASE.get(state.getValue(FACING));
     }
 
     @Override

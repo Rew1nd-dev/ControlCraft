@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.compat.valkyrienskies.servo;
 
+import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
 import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlockEntity;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.generic.PhysShipWrapper;
 import com.verr1.vscontrolcraft.utils.Util;
@@ -16,11 +17,13 @@ import org.valkyrienskies.core.api.ships.ShipForcesInducer;
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
 
 import java.util.concurrent.ConcurrentHashMap;
-
+//TODO: remove invalid servo
 public class ServoMotorForceInducer implements ShipForcesInducer {
-    private final int lazyTickRate = 30;
+    private final int lazyTickRate = 10;
     private int lazyTickCount = lazyTickRate;
+    private int TICKS_BEFORE_EXPIRED = 3;
     private ConcurrentHashMap<BlockPos, LogicalServoMotor> servoProperties = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<BlockPos, Integer> servoLife = new ConcurrentHashMap<>();
 
     public static ServoMotorForceInducer getOrCreate(@NotNull ServerShip ship){
         ServoMotorForceInducer obj = ship.getAttachment(ServoMotorForceInducer.class);
@@ -33,9 +36,9 @@ public class ServoMotorForceInducer implements ShipForcesInducer {
 
     public void servoControl(BlockPos servoPos, PhysShipWrapper servoShip, PhysShipWrapper assemShip, LogicalServoMotor property){
         BlockEntity be = property.level().getExistingBlockEntity(servoPos);
-        if(!(be instanceof ServoMotorBlockEntity servo))return;
+        if(!(be instanceof AbstractServoMotor servo))return;
         double angle = VSMathUtils.get_xc2yc(servoShip, assemShip, property.servoDir(), property.assemDir());
-        servo.debug_angle_accessor = angle;
+        // servo.debug_angle_accessor = angle;
 
         double scale = servo.getControllerInfoHolder().calculateControlTorqueScale();
         Vector3dc direction = Util.Vec3itoVector3d(property.servoDir().getNormal());
@@ -50,13 +53,24 @@ public class ServoMotorForceInducer implements ShipForcesInducer {
 
     public void writePhysics(BlockPos servoPos, PhysShipWrapper servoShip, PhysShipWrapper assemShip, LogicalServoMotor property){
         BlockEntity be = property.level().getExistingBlockEntity(servoPos);
-        if(!(be instanceof ServoMotorBlockEntity servo))return;
-        servo.writeOwnPhysicsShipInfo(VSMathUtils.getShipPhysics(servoShip.getImpl()));
-        servo.writeAsmPhysicsShipInfo(VSMathUtils.getShipPhysics(assemShip.getImpl()));
+        if(!(be instanceof AbstractServoMotor servo))return;
+        servo.ownPhysics.write(VSMathUtils.getShipPhysics(servoShip.getImpl()));
+        servo.asmPhysics.write(VSMathUtils.getShipPhysics(assemShip.getImpl()));
     }
 
     public void updateLogicalServoMotor(BlockPos pos, LogicalServoMotor property){
         servoProperties.put(pos, property);
+        servoLife.put(pos, TICKS_BEFORE_EXPIRED);
+    }
+
+    public void tickActivated(){
+        servoLife.entrySet().forEach(e -> e.setValue(e.getValue() - 1));
+        servoProperties.entrySet().removeIf(e -> servoLife.get(e.getKey()) != null && servoLife.get(e.getKey()) < 0);
+        servoLife.entrySet().removeIf(e -> e.getValue() < 0);
+    }
+
+    public void lazyTick(){
+        tickActivated();
     }
 
     @Override
@@ -64,6 +78,7 @@ public class ServoMotorForceInducer implements ShipForcesInducer {
         lazyTickCount--;
         if(lazyTickCount <= 0){
             lazyTickCount = lazyTickRate;
+            lazyTick();
         }
     }
 

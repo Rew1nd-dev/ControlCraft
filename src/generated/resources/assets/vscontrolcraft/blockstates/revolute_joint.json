@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "axis_along_first=false,facing=down": {
+      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+      "x": 270,
+      "y": 90
+    },
+    "axis_along_first=false,facing=east": {
+      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+      "y": 270
+    },
+    "axis_along_first=false,facing=north": {
+      "model": "vscontrolcraft:block/revolute_joint/vertical",
+      "y": 180
+    },
+    "axis_along_first=false,facing=south": {
+      "model": "vscontrolcraft:block/revolute_joint/vertical"
+    },
+    "axis_along_first=false,facing=up": {
+      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=false,facing=west": {
+      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+      "y": 90
+    },
+    "axis_along_first=true,facing=down": {
+      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+      "x": 270
+    },
+    "axis_along_first=true,facing=east": {
+      "model": "vscontrolcraft:block/revolute_joint/vertical",
+      "y": 270
+    },
+    "axis_along_first=true,facing=north": {
+      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+      "y": 180
+    },
+    "axis_along_first=true,facing=south": {
+      "model": "vscontrolcraft:block/revolute_joint/horizontal"
+    },
+    "axis_along_first=true,facing=up": {
+      "model": "vscontrolcraft:block/revolute_joint/horizontal",
+      "x": 90
+    },
+    "axis_along_first=true,facing=west": {
+      "model": "vscontrolcraft:block/revolute_joint/vertical",
+      "y": 90
+    }
+  }
+}

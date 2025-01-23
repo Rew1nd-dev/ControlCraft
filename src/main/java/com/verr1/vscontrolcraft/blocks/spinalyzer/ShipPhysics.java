@@ -12,9 +12,10 @@ public record ShipPhysics(Vector3dc velocity,
                           Quaterniondc quaternion,
                           Matrix3dc inertiaTensor,
                           Matrix3dc rotationMatrix,
+                          Matrix4dc s2wTransform,
                           double mass
 ){
-    public static ShipPhysics EMPTY = new ShipPhysics(new Vector3d(), new Vector3d(), new Vector3d(), new Quaterniond(), new Matrix3d(), new Matrix3d(), 0);
+    public static ShipPhysics EMPTY = new ShipPhysics(new Vector3d(), new Vector3d(), new Vector3d(), new Quaterniond(), new Matrix3d(), new Matrix3d(), new Matrix4d(),0);
 
     public Map<String, Object> getCCPhysics(){
         return Map.of(

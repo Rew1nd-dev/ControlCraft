@@ -1,24 +1,16 @@
 package com.verr1.vscontrolcraft.events;
 
 import com.verr1.vscontrolcraft.base.ICameraAccessor;
+import com.verr1.vscontrolcraft.base.Wand.ClientWand;
 import com.verr1.vscontrolcraft.blocks.camera.CameraBlockEntity;
 import com.verr1.vscontrolcraft.blocks.camera.LinkedCameraManager;
-import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorAssembleHandler;
+import com.verr1.vscontrolcraft.base.Servo.ServoMotorAssembleHandler;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerTargetHandler;
-import net.minecraft.client.Camera;
-import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.joml.Quaterniond;
-import org.joml.Quaterniondc;
-import org.joml.Vector3d;
-import org.joml.Vector3dc;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class ControlCraftClientEvents {
@@ -28,6 +20,7 @@ public class ControlCraftClientEvents {
         SpinalyzerTargetHandler.tick();
         ServoMotorAssembleHandler.tick();
         LinkedCameraManager.tick();
+        ClientWand.tick();
     }
 
     @SubscribeEvent

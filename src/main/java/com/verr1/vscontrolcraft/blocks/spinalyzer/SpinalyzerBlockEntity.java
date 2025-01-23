@@ -2,9 +2,8 @@ package com.verr1.vscontrolcraft.blocks.spinalyzer;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SpinalyzerPeripheral;
-import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.LogicalPropeller;
-import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.PropellerForceInducer;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.spnialyzer.LogicalSensor;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.spnialyzer.SpinalyzerSensor;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -21,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3d;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
-import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
@@ -40,8 +38,7 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
     private SpinalyzerPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
 
-    private ShipPhysics physicsThreadShipInfo;
-    private final Object lock = new Object();
+    public SynchronizedField<ShipPhysics> physics = new SynchronizedField<>(ShipPhysics.EMPTY);
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -74,8 +71,7 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
     }
 
     public Matrix3d getRelativeSourceTransform(){
-        if(source != null && level.getExistingBlockEntity(source) instanceof SpinalyzerBlockEntity){
-            var pairBe = (SpinalyzerBlockEntity) level.getExistingBlockEntity(source);
+        if(source != null && level.getExistingBlockEntity(source) instanceof SpinalyzerBlockEntity pairBe){
             Matrix3d selfTransform = getRotationMatrix_wc2sc();
             Matrix3d pairTransform = pairBe.getRotationMatrix_wc2sc();
             return new Matrix3d(pairTransform.transpose()).mul(selfTransform);
@@ -83,17 +79,6 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
         return getRotationMatrix_wc2sc();
     }
 
-    public void writePhysicsShipInfo(ShipPhysics sp){
-        synchronized (lock){
-            physicsThreadShipInfo = sp;
-        }
-    }
-
-    public ShipPhysics readPhysicsShipInfo(){
-        synchronized (lock){
-            return physicsThreadShipInfo;
-        }
-    }
 
 
     public void setSource(SpinalyzerBlockEntity pair){

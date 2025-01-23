@@ -1,11 +1,16 @@
 package com.verr1.vscontrolcraft.utils;
 
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import org.joml.*;
+import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.core.impl.game.ships.PhysInertia;
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld;
+import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.physics_api.PoseVel;
 
 import javax.annotation.Nullable;
@@ -26,6 +31,62 @@ public class VSMathUtils {
         };
     }
 
+    public static Vector3d getFaceCenterPos(ServerLevel level, BlockPos pos, Direction dir){
+        ServerShip xShip = VSGameUtilsKt.getShipObjectManagingPos(level, pos);
+        Vector3d xFace_sc = getFaceCenterPosNoTransform(pos, dir);
+        if(xShip == null)return xFace_sc;
+        Vector3d xFace_wc = xShip.getTransform().getShipToWorld().transformPosition(xFace_sc, new Vector3d());
+        return xFace_wc;
+    }
+
+    public static Vector3d getFaceCenterPosNoTransform(BlockPos pos, Direction dir){
+        Vector3d xCenterJOML = Util.Vec3toVector3d(pos.getCenter());
+        Vector3d xDirJOML = Util.Vec3itoVector3d(dir.getNormal());
+        Vector3d xFace_sc = xCenterJOML.fma(0.5, xDirJOML);
+        return xFace_sc;
+    }
+
+    public static String getDimensionID(ServerLevel level){
+        return VSGameUtilsKt.getDimensionId(level);
+    }
+
+    public static long getServerShipID(BlockPos pos, ServerLevel level){
+        ServerShip ship = getServerShip(pos, level);
+        if(ship != null)return ship.getId();
+        String dimensionID = getDimensionID(level);
+        ShipObjectServerWorld sosw = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
+        return sosw.getDimensionToGroundBodyIdImmutable().get(dimensionID);
+    }
+
+    public static boolean isOnServerShip(BlockPos pos, ServerLevel level){
+        return getServerShip(pos, level) != null;
+    }
+
+    public static ServerShip getServerShip(BlockPos pos, ServerLevel level){
+        if(level.isClientSide)return null;
+        ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos(level, pos);
+        return ship;
+    }
+
+    public static Vector3d getAbsolutePosition(BlockPos pos, ServerLevel level, Direction facing){
+        ServerShip ship = getServerShip(pos, level);
+        Vector3d faceCenter = getFaceCenterPos(level, pos, facing);
+        if(ship == null)return faceCenter;
+        var faceCenter_wc = ship.getTransform().getShipToWorld().transformPosition(faceCenter, new Vector3d());
+        return faceCenter_wc;
+    }
+
+    // force: xq is applied
+    public static Vector3d ColumnFunction(double xq, double yq, Vector3d x2y){
+        double r3 = Math.pow(x2y.length(), 3);
+        return new Vector3d(x2y).mul(-1e0 * xq * yq / r3);
+    }
+
+    // force: xi is applied
+    public static Vector3d BiotSavartFunction(Vector3d xi, Vector3d yi, Vector3d x2y){
+        double r3 = Math.pow(x2y.length(), 3);
+        return new Vector3d(yi).cross(new Vector3d(xi).cross(x2y)).mul(-1e0 / r3);
+    }
 
     public static double clamp(double x, double threshold){
         if(x > threshold)return threshold;
@@ -103,9 +164,6 @@ public class VSMathUtils {
 
 
     public static double get_xc2yc(Matrix3dc wc2sc_x, Matrix3dc wc2sc_y, Direction xDir, Direction yDir){
-        //Matrix3d align_y2x = rotationToAlign(xDir, yDir).get(new Matrix3d());
-        //Matrix3d wc2sc_yy = new Matrix3d(align_y2x.transpose()).mul(wc2sc_y);
-        //Matrix3d m = get_xc2yc(wc2sc_x, wc2sc_yy); // y * x_t
         return get_xc2yc(get_xc2yc(wc2sc_x, wc2sc_y), xDir, yDir);
     }
 
@@ -145,9 +203,15 @@ public class VSMathUtils {
                 new Vector3d(poseVel.getPos()),
                 new Quaterniond(poseVel.getRot()),
                 new Matrix3d(inertia.getMomentOfInertiaTensor()),
-                new Matrix3d(poseVel.getRot().get(new Matrix3d())),
+                new Matrix3d(ship.getTransform().getShipToWorld()),
+                new Matrix4d(ship.getTransform().getShipToWorld()),
                 inertia.getShipMass()
         );
+    }
+
+    public static Vector3d safeNormalize(Vector3d v){
+        if(v.lengthSquared() > 1e-6)return new Vector3d(v).normalize();
+        return v;
     }
 
     public static Vector3dc clamp(Vector3dc v, double threshold){
@@ -158,7 +222,7 @@ public class VSMathUtils {
         return vc;
     }
 
-    public static Vector3dc clamp(Vector3d v, double threshold){
+    public static Vector3d clamp(Vector3d v, double threshold){
         v.x = clamp(v.x, threshold);
         v.y = clamp(v.y, threshold);
         v.z = clamp(v.z, threshold);

@@ -31,13 +31,14 @@ import org.slf4j.Logger;
 *    Functionality:
 *    1. extract ServoConstrainAssembleSchedule run() function, make it inside an class specific for ship aligning task
 *    2. VS constrain serialize utilities
+*    3. Make Force Inducer removing invalids by life time
 *    Features:
 *    1. suicide block, or self-disassemble block
-*    2. magnet block, implement using constrain or ShipForceInducer
+*    2.√ magnet block, implement using constrain or ShipForceInducer
 *    3. Linker tool, configurable, multi-functional tool for Control Craft
-*    4. Variants of bearings with different rotational behaviors
+*    4.√ Variants of bearings with different rotational behaviors
 *    5. Directional Jet rudders, and rudder controller consuming liquid(optional), just like propeller controller
-*    6. Piston with Sphere Hinge connection
+*    6. Piston with Sphere sphere_hinge connection
 *    Configuration:
 *    1. make more fields configurable
 */

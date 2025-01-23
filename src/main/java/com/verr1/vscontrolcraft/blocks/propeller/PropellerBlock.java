@@ -22,6 +22,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import static com.verr1.vscontrolcraft.registry.AllShapes.HALF_BOX_BASE;
+
 public class PropellerBlock extends DirectionalBlock implements IBE<PropellerBlockEntity> {
     public static final String ID = "propeller";
 
@@ -41,8 +43,8 @@ public class PropellerBlock extends DirectionalBlock implements IBE<PropellerBlo
     }
 
     @Override
-    public VoxelShape getShape(BlockState p_60555_, BlockGetter p_60556_, BlockPos p_60557_, CollisionContext p_60558_) {
-        return AllShapes.LARGE_GEAR.get(p_60555_.getValue(FACING).getAxis());
+    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+        return HALF_BOX_BASE.get(state.getValue(FACING));
     }
 
     protected void displayScreen(PropellerBlockEntity entity, Player player){

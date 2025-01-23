@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.blocks.propellerController;
 
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
+import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.PropellerControllerPeripheral;
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.LogicalPropeller;
@@ -25,7 +26,9 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class PropellerControllerBlockEntity extends KineticBlockEntity {
     public boolean hasAttachedPropeller = false;
-    public double rotationSpeed = 0;
+
+    public SynchronizedField<Double> rotationalSpeed = new SynchronizedField<>(0.0);
+
     public boolean attachPropellerReverseTorque = false;
     public double attachedPropellerThrustRatio = 0;
     public double attachedPropellerTorqueRatio = 0;
@@ -69,13 +72,13 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
     }
 
     public void syncAttachedPropeller(){
-        Vec3i direction = this.getBlockState().getValue(BlockStateProperties.FACING).getOpposite().getNormal();
+        Vec3i direction = this.getBlockState().getValue(BlockStateProperties.FACING).getNormal();
         BlockPos propellerPos = this.getBlockPos().offset(new BlockPos(direction.getX(), direction.getY(), direction.getZ()));
         var attachedBlockEntity = level.getBlockEntity(propellerPos);
         hasAttachedPropeller = attachedBlockEntity instanceof PropellerBlockEntity;
         if(!hasAttachedPropeller)return;
         PropellerBlockEntity propeller = (PropellerBlockEntity) attachedBlockEntity;
-        propeller.setVisualRotationalSpeed(rotationSpeed);
+        propeller.setVisualRotationalSpeed(rotationalSpeed.read());
         attachedPropellerTorqueRatio = propeller.getTorqueRatio();
         attachedPropellerThrustRatio = propeller.getThrustRatio();
         attachPropellerReverseTorque = propeller.getReverseTorque();
@@ -90,7 +93,7 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
     }
 
     public double getTargetSpeed(){
-        return rotationSpeed;
+        return rotationalSpeed.read();
     }
 
     public void syncAttachedInducer(){
@@ -105,11 +108,11 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
                         canDrive(),
                         attachPropellerReverseTorque,
                         getDirection(),
-                        rotationSpeed,
+                        this::getTargetSpeed, // Physics Thread is running at higher frequency, send callback function to keep up with the latest
                         attachedPropellerThrustRatio,
                         attachedPropellerTorqueRatio,
                         (ServerLevel) this.level   //The level is always server sided, because tick() will return at client side
-                        )
+                )
         );
     }
 
@@ -130,7 +133,7 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
     }
 
     public void setTargetSpeed(double speed){
-        rotationSpeed = speed;
+        rotationalSpeed.write(speed);
     }
 
 }

@@ -256,33 +256,7 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
         }
     }
 
-    public static class WingControllerAnimationDataHandler extends PacketHandler {
-        private float animatedAngle;
 
-        public WingControllerAnimationDataHandler(FriendlyByteBuf buffer){
-            animatedAngle = 0;
-        }
-
-        public WingControllerAnimationDataHandler(float angle){animatedAngle = angle;}
-
-        @Override
-        public void readBuffer(FriendlyByteBuf buffer) {
-            animatedAngle = buffer.readFloat();
-        }
-
-        @Override
-        public void writeBuffer(FriendlyByteBuf buffer) {
-            buffer.writeFloat(animatedAngle);
-        }
-
-        @Override
-        public void handle(BlockEntity be) {
-            if(be instanceof WingControllerBlockEntity){
-                ((WingControllerBlockEntity) be).setAngle(animatedAngle);
-            }
-
-        }
-    }
 
     public static class WingControllerScrollValueBehavior extends ScrollValueBehaviour{
 

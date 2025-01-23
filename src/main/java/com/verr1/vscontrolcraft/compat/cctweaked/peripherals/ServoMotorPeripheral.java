@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.compat.cctweaked.peripherals;
 
 import com.google.common.collect.Sets;
+import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
 import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
@@ -15,10 +16,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class ServoMotorPeripheral implements IPeripheral {
-    private final ServoMotorBlockEntity servoMotorBlockEntity;
+    private final AbstractServoMotor servoMotorBlockEntity;
     private final Set<IComputerAccess> computers = Sets.newConcurrentHashSet();
 
-    public ServoMotorPeripheral(ServoMotorBlockEntity servoMotorBlockEntity) {
+    public ServoMotorPeripheral(AbstractServoMotor servoMotorBlockEntity) {
         this.servoMotorBlockEntity = servoMotorBlockEntity;
     }
 
@@ -46,12 +47,12 @@ public class ServoMotorPeripheral implements IPeripheral {
     public boolean equals(@Nullable IPeripheral iPeripheral) {
         if (iPeripheral == null)return false;
         if (!(iPeripheral instanceof ServoMotorPeripheral servoMotorPeripheral))return false;
-        return servoMotorBlockEntity.getBlockPos() == ((ServoMotorBlockEntity) servoMotorPeripheral.getTarget()).getBlockPos();
+        return servoMotorBlockEntity.getBlockPos() == ((AbstractServoMotor) servoMotorPeripheral.getTarget()).getBlockPos();
     }
 
     @LuaFunction
     public void setPID(double p, double i, double d){
-        servoMotorBlockEntity.getControllerInfoHolder().setParameter(p, i, d);
+        servoMotorBlockEntity.getControllerInfoHolder().setParameter(p, d, i);
     }
 
     @LuaFunction
@@ -61,8 +62,8 @@ public class ServoMotorPeripheral implements IPeripheral {
 
     @LuaFunction
     public Map<String, Map<String, Object>> getPhysics(){
-        Map<String, Object> own = servoMotorBlockEntity.readOwnPhysicsShipInfo().getCCPhysics();
-        Map<String, Object> asm = servoMotorBlockEntity.readAsmPhysicsShipInfo().getCCPhysics();
+        Map<String, Object> own = servoMotorBlockEntity.ownPhysics.read().getCCPhysics();
+        Map<String, Object> asm = servoMotorBlockEntity.asmPhysics.read().getCCPhysics();
         return Map.of(
                 "servo", own,
                 "assem", asm
@@ -74,10 +75,11 @@ public class ServoMotorPeripheral implements IPeripheral {
         return servoMotorBlockEntity.getServoAngle();
     }
 
+
     @LuaFunction
     public Matrix3d getRelative(){
-        Matrix3dc own = servoMotorBlockEntity.readOwnPhysicsShipInfo().rotationMatrix();
-        Matrix3dc asm = servoMotorBlockEntity.readAsmPhysicsShipInfo().rotationMatrix();
+        Matrix3dc own = servoMotorBlockEntity.ownPhysics.read().rotationMatrix();
+        Matrix3dc asm = servoMotorBlockEntity.asmPhysics.read().rotationMatrix();
         return VSMathUtils.get_xc2yc(own, asm);
     }
 

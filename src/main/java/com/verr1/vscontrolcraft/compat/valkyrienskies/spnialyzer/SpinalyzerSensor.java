@@ -27,7 +27,7 @@ public class SpinalyzerSensor implements ShipForcesInducer {
             BlockPos pos = e.getKey().pos();
             ServerLevel level = e.getKey().level();
             if(level.getExistingBlockEntity(pos) instanceof SpinalyzerBlockEntity spinal){
-                spinal.writePhysicsShipInfo(tickPhysics);
+                spinal.physics.write(tickPhysics);
             }
         });
     }

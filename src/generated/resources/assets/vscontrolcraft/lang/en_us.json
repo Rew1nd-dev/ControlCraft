@@ -1,12 +1,16 @@
 {
   "block.vscontrolcraft.camera": "Camera",
   "block.vscontrolcraft.chunk_loader": "Chunk Loader",
+  "block.vscontrolcraft.joint": "Joint",
+  "block.vscontrolcraft.magnet": "Magnet",
   "block.vscontrolcraft.propeller": "Propeller",
   "block.vscontrolcraft.propeller_controller": "Propeller Controller",
   "block.vscontrolcraft.receiver": "Receiver",
+  "block.vscontrolcraft.revolute_joint": "Revolute Joint",
   "block.vscontrolcraft.servo": "Servo",
+  "block.vscontrolcraft.sphere_hinge": "Sphere Hinge",
   "block.vscontrolcraft.spinalyzer": "Spinalyzer",
   "block.vscontrolcraft.transmitter": "Transmitter",
-  "block.vscontrolcraft.wingcontroller": "Wingcontroller",
-  "item.vscontrolcraft.linker": "Example Item"
+  "block.vscontrolcraft.wing_controller": "Wing Controller",
+  "item.vscontrolcraft.awe_in_wand": "Awe-In-Wand"
 }

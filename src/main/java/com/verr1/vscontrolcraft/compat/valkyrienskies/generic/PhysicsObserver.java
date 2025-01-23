@@ -6,6 +6,7 @@ import com.verr1.vscontrolcraft.utils.VSMathUtils;
 import org.jetbrains.annotations.NotNull;
 import org.valkyrienskies.core.api.ships.PhysShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.core.api.ships.ShipForcesInducer;
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
 
@@ -19,6 +20,10 @@ public class PhysicsObserver implements ShipForcesInducer {
             ship.saveAttachment(PhysicsObserver.class, obj);
         }
         return obj;
+    }
+
+    public ShipPhysics getObservation(){
+        return observation;
     }
 
     @Override

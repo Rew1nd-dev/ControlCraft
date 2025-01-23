@@ -9,12 +9,17 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+
+import static com.verr1.vscontrolcraft.registry.AllShapes.HALF_BOX_BASE;
 
 public class WingControllerBlock extends BearingBlock implements IBE<WingControllerBlockEntity> {
     public static final String ID = "wing_controller";
@@ -31,6 +36,11 @@ public class WingControllerBlock extends BearingBlock implements IBE<WingControl
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_49915_) {
         super.createBlockStateDefinition(p_49915_);
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+        return HALF_BOX_BASE.get(state.getValue(FACING));
     }
 
     @Override

@@ -40,8 +40,8 @@ public class PropellerControllerPeripheral implements IPeripheral {
 
     @Override
     public boolean equals(@Nullable IPeripheral iPeripheral) {
-        if (iPeripheral instanceof PropellerControllerPeripheral)return false;
         if (iPeripheral == null)return false;
+        if (!(iPeripheral instanceof PropellerControllerPeripheral))return false;
         return controllerBlockEntity == iPeripheral.getTarget();
     }
 

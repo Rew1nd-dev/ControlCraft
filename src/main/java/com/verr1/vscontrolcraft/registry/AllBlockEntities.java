@@ -6,10 +6,17 @@ import com.verr1.vscontrolcraft.blocks.camera.CameraBlockEntity;
 import com.verr1.vscontrolcraft.blocks.camera.CameraRenderer;
 import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkLoaderBlock;
 import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkLoaderBlockEntity;
+import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
+import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlock;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlockEntity;
+import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlock;
+import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlockEntity;
 import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlock;
 import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlockEntity;
+import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorRenderer;
+import com.verr1.vscontrolcraft.blocks.sphereHinge.SphericalHingeBlock;
+import com.verr1.vscontrolcraft.blocks.sphereHinge.SphericalHingeBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlock;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerRenderer;
@@ -26,6 +33,7 @@ import com.verr1.vscontrolcraft.blocks.propellerController.PropellerControllerBl
 import com.verr1.vscontrolcraft.blocks.propellerController.PropellerControllerInstance;
 import com.verr1.vscontrolcraft.blocks.propellerController.PropellerControllerRenderer;
 import com.verr1.vscontrolcraft.blocks.propeller.PropellerRenderer;
+import com.verr1.vscontrolcraft.blocks.wingController.WingControllerRenderer;
 
 import static com.verr1.vscontrolcraft.ControlCraft.REGISTRATE;
 
@@ -61,6 +69,7 @@ public class AllBlockEntities {
     public static final BlockEntityEntry<WingControllerBlockEntity> WING_CONTROLLER_BLOCKENTITY = REGISTRATE
             .blockEntity(WingControllerBlock.ID, WingControllerBlockEntity::new)
             .validBlock(AllBlocks.WING_CONTROLLER_BLOCK)
+            .renderer(() -> WingControllerRenderer::new)
             .register();
 
     public static final BlockEntityEntry<SpinalyzerBlockEntity> SPINALYZER_BLOCKENTITY = REGISTRATE
@@ -78,11 +87,27 @@ public class AllBlockEntities {
     public static final BlockEntityEntry<ServoMotorBlockEntity> SERVO_MOTOR_BLOCKENTITY = REGISTRATE
             .blockEntity(ServoMotorBlock.ID, ServoMotorBlockEntity::new)
             .validBlock(AllBlocks.SERVO_MOTOR_BLOCK)
+            .renderer(()-> ServoMotorRenderer::new)
             .register();
 
     public static final BlockEntityEntry<MagnetBlockEntity> MAGNET_BLOCKENTITY = REGISTRATE
             .blockEntity(MagnetBlock.ID, MagnetBlockEntity::new)
             .validBlock(AllBlocks.MAGNET_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<JointMotorBlockEntity> JOINT_MOTOR_BLOCKENTITY = REGISTRATE
+            .blockEntity(JointMotorBlock.ID, JointMotorBlockEntity::new)
+            .validBlock(AllBlocks.JOINT_MOTOR_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<SphericalHingeBlockEntity> SPHERE_HINGE_BLOCKENTITY = REGISTRATE
+            .blockEntity(SphericalHingeBlock.ID, SphericalHingeBlockEntity::new)
+            .validBlock(AllBlocks.SPHERE_HINGE_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<RevoluteJointBlockEntity> REVOLUTE_JOINT_BLOCKENTITY = REGISTRATE
+            .blockEntity(RevoluteJointBlock.ID, RevoluteJointBlockEntity::new)
+            .validBlock(AllBlocks.REVOLUTE_JOINT_BLOCK)
             .register();
 
     public static void register(){

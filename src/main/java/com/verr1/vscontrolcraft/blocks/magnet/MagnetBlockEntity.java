@@ -2,15 +2,131 @@ package com.verr1.vscontrolcraft.blocks.magnet;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
+import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
+import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.MagnetPeripheral;
+import com.verr1.vscontrolcraft.compat.valkyrienskies.magnet.LogicalMagnet;
+import com.verr1.vscontrolcraft.compat.valkyrienskies.magnet.MagnetForceInducer;
+import com.verr1.vscontrolcraft.utils.Util;
+import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
+import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import java.util.List;
 
 public class MagnetBlockEntity extends SmartBlockEntity {
+
+    private final SynchronizedField<ShipPhysics> physics = new SynchronizedField<>(ShipPhysics.EMPTY);
+
+
+    private double strength = 300;
+
+    private MagnetPeripheral peripheral;
+    private LazyOptional<IPeripheral> peripheralCap;
+
+    private boolean canBeRedstonePowered = false;
+
+    @Override
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+        if(cap == Capabilities.CAPABILITY_PERIPHERAL){
+            if(this.peripheral == null){
+                this.peripheral = new MagnetPeripheral(this);
+            }
+            if(peripheralCap == null || !peripheralCap.isPresent())
+                peripheralCap =  LazyOptional.of(() -> this.peripheral);
+            return peripheralCap.cast();
+        }
+        return super.getCapability(cap, side);
+    }
+
+    public void writePhysicsShipInfo(ShipPhysics sp){
+        physics.write(sp);
+    }
+
+    public ShipPhysics readPhysicsShipInfo(){
+        return physics.read();
+    }
+
     public MagnetBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+    }
+
+    public Vector3d getFaceCenter(){
+        Vector3d dir = Util.Vec3itoVector3d(getBlockState().getValue(MagnetBlock.FACING).getNormal()) ;
+        Vector3d f_sc = Util.Vec3toVector3d(getBlockPos().getCenter()).fma(0.0, dir);
+        return f_sc;
+    }
+
+
+    public Vector3dc getPosition_wc(){
+        if(level.isClientSide)return new Vector3d();
+        Vector3d p_sc = getFaceCenter();
+        ServerShip ship = VSGameUtilsKt.getShipManagingPos((ServerLevel) level, getBlockPos());
+        if(ship == null)return p_sc;
+
+        return readPhysicsShipInfo().s2wTransform().transformPosition(p_sc);
+    }
+
+    public boolean isOnServerShip(){
+        if(level.isClientSide)return false;
+        return VSGameUtilsKt.getShipManagingPos((ServerLevel) level, getBlockPos()) != null;
+    }
+
+    public Vector3d getDirection(){
+        Vector3d dir = Util.Vec3itoVector3d(getBlockState().getValue(MagnetBlock.FACING).getNormal());
+        if(!isOnServerShip())return dir;
+        return readPhysicsShipInfo().s2wTransform().transformDirection(dir);
+    }
+
+    public Vector3d getRelativePosition(){
+        if(getServerShipOn() == null)return new Vector3d();
+        Vector3d p_sc = getFaceCenter();
+        if(isOnServerShip()) return p_sc.sub(getServerShipOn().getInertiaData().getCenterOfMassInShip());
+        return new Vector3d();
+    }
+
+    public @Nullable ServerShip getServerShipOn(){
+        if(level.isClientSide)return null;
+        return VSGameUtilsKt.getShipObjectManagingPos((ServerLevel) level, getBlockPos());
+    }
+
+    public double getStrength(){
+        return strength;
+    }
+
+    public void setStrength(double strength){
+        this.strength = strength;
+    }
+
+    public void syncMagnetManager(){
+        MagnetManager.activate(new LogicalMagnet(getBlockPos(), (ServerLevel)level));
+    }
+
+    public void syncMagnetInducer(){
+        ServerShip ship = getServerShipOn();
+        if(ship == null)return;
+        MagnetForceInducer inducer = MagnetForceInducer.getOrCreate(ship);
+        inducer.activated(new LogicalMagnet(getBlockPos(), (ServerLevel)level));
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if(level.isClientSide)return;
+        syncMagnetManager();
+        syncMagnetInducer();
     }
 
     @Override
