@@ -2,9 +2,7 @@ package com.verr1.vscontrolcraft.registry;
 
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.vscontrolcraft.ControlCraft;
-import com.verr1.vscontrolcraft.base.Hinge.HingeAdjustLevelPacket;
-import com.verr1.vscontrolcraft.base.Hinge.HingeBruteConnectPacket;
-import com.verr1.vscontrolcraft.base.Hinge.HingeSyncLevelPacket;
+import com.verr1.vscontrolcraft.base.Hinge.packets.*;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetOpenScreenPacket;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetSettingsPacket;
 import com.verr1.vscontrolcraft.blocks.propeller.PropellerOpenScreenPacket;
@@ -12,11 +10,12 @@ import com.verr1.vscontrolcraft.blocks.propeller.PropellerSettingsPacket;
 import com.verr1.vscontrolcraft.blocks.propeller.PropellerSyncAnimationPacket;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverOpenScreenPacket;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverRegisterPacket;
-import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointConstrainAssemblePacket;
-import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorConstrainAssemblePacket;
-import com.verr1.vscontrolcraft.base.Servo.ServoMotorOpenScreenPacket;
-import com.verr1.vscontrolcraft.base.Servo.ServoMotorSettingsPacket;
+import com.verr1.vscontrolcraft.blocks.revoluteJoint.DirectionalAssemblePacket;
+import com.verr1.vscontrolcraft.blocks.servoMotor.SimpleAssemblePacket;
+import com.verr1.vscontrolcraft.base.Servo.PIDControllerOpenScreenPacket;
+import com.verr1.vscontrolcraft.base.Servo.PIDControllerSettingsPacket;
 import com.verr1.vscontrolcraft.base.Servo.ServoMotorSyncAnimationPacket;
+import com.verr1.vscontrolcraft.blocks.slider.SliderSyncAnimationPacket;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerLinkPacket;
 import com.verr1.vscontrolcraft.blocks.wingController.WingControllerSyncAnimationPacket;
 import net.minecraft.core.BlockPos;
@@ -38,23 +37,26 @@ public enum AllPackets {
     // Client To Server
     NETWORK_ID_SETTING(ReceiverRegisterPacket.class, ReceiverRegisterPacket::new, NetworkDirection.PLAY_TO_SERVER),
     PROPELLER_SETTINGS(PropellerSettingsPacket.class, PropellerSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
-    SERVOMOTOR_SETTINGS(ServoMotorSettingsPacket.class, ServoMotorSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    SERVOMOTOR_SETTINGS(PIDControllerSettingsPacket.class, PIDControllerSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
     MAGNET_SETTINGS(MagnetSettingsPacket.class, MagnetSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
     SPINALYZER_TARGET_SELECTION(SpinalyzerLinkPacket.class, SpinalyzerLinkPacket::new, NetworkDirection.PLAY_TO_SERVER),
-    SERVOMOTOR_CONSTRAIN_ASSEMBLE(ServoMotorConstrainAssemblePacket.class, ServoMotorConstrainAssemblePacket::new, NetworkDirection.PLAY_TO_SERVER),
-    JOINTMOTOR_CONSTRAIN_ASSEMBLE(RevoluteJointConstrainAssemblePacket.class, RevoluteJointConstrainAssemblePacket::new, NetworkDirection.PLAY_TO_SERVER),
+    SERVOMOTOR_CONSTRAIN_ASSEMBLE(SimpleAssemblePacket.class, SimpleAssemblePacket::new, NetworkDirection.PLAY_TO_SERVER),
+    JOINTMOTOR_CONSTRAIN_ASSEMBLE(DirectionalAssemblePacket.class, DirectionalAssemblePacket::new, NetworkDirection.PLAY_TO_SERVER),
     HINGE_BRUTE_CONNECTION(HingeBruteConnectPacket.class, HingeBruteConnectPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    HINGE_FLIP(HingeFlipPacket.class, HingeFlipPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    DESTROY_CONSTRAIN(DestroyConstrainPacket.class, DestroyConstrainPacket::new, NetworkDirection.PLAY_TO_SERVER),
     HINGE_ADJUSTMENT(HingeAdjustLevelPacket.class, HingeAdjustLevelPacket::new, NetworkDirection.PLAY_TO_SERVER),
 
     //Server To Client
     RECEIVER_SCREEN_OPEN(ReceiverOpenScreenPacket.class, ReceiverOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     PROPELLER_SCREEN_OPEN(PropellerOpenScreenPacket.class, PropellerOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
-    SERVOMOTOR_SCREEN_OPEN(ServoMotorOpenScreenPacket.class, ServoMotorOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
+    SERVOMOTOR_SCREEN_OPEN(PIDControllerOpenScreenPacket.class, PIDControllerOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     MAGNET_SCREEN_OPEN(MagnetOpenScreenPacket.class, MagnetOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     SYNC_SERVOMOTOR_ANIMATION(ServoMotorSyncAnimationPacket.class, ServoMotorSyncAnimationPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     SYNC_PROPELLER_ANIMATION(PropellerSyncAnimationPacket.class, PropellerSyncAnimationPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     SYNC_WING_CONTROLLER_ANIMATION(WingControllerSyncAnimationPacket.class, WingControllerSyncAnimationPacket::new, NetworkDirection.PLAY_TO_CLIENT),
-    SYNC_HINGE_LEVEL(HingeSyncLevelPacket .class, HingeSyncLevelPacket::new, NetworkDirection.PLAY_TO_CLIENT);
+    SYNC_SLIDER_CONTROLLER_ANIMATION(SliderSyncAnimationPacket.class, SliderSyncAnimationPacket::new, NetworkDirection.PLAY_TO_CLIENT),
+    SYNC_HINGE_LEVEL(HingeSyncClientPacket.class, HingeSyncClientPacket::new, NetworkDirection.PLAY_TO_CLIENT);
 
     public static final String NETWORK_VERSION = "1.2";
 

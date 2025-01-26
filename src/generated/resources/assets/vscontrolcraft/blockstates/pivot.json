@@ -1,0 +1,108 @@
+{
+  "variants": {
+    "facing=down,hinge_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 180
+    },
+    "facing=down,hinge_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 180
+    },
+    "facing=down,hinge_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 180
+    },
+    "facing=down,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 180
+    },
+    "facing=east,hinge_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,hinge_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,hinge_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,hinge_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 90
+    },
+    "facing=north,hinge_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 90
+    },
+    "facing=north,hinge_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 90
+    },
+    "facing=north,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 90
+    },
+    "facing=south,hinge_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,hinge_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,hinge_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,hinge_level=base": {
+      "model": "vscontrolcraft:block/pivot/base"
+    },
+    "facing=up,hinge_level=full": {
+      "model": "vscontrolcraft:block/pivot/full"
+    },
+    "facing=up,hinge_level=half": {
+      "model": "vscontrolcraft:block/pivot/half"
+    },
+    "facing=up,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter"
+    },
+    "facing=west,hinge_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,hinge_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,hinge_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,hinge_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

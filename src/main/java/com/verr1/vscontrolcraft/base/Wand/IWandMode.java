@@ -15,4 +15,7 @@ public interface IWandMode {
     default void onDeselect(){}
 
     default void onTick(){}
+
+    default String tickCallBackInfo(){return "";}
+
 }

@@ -18,7 +18,7 @@ public class ServoMotorRenderer extends SafeBlockEntityRenderer<ServoMotorBlockE
 
     @Override
     protected void renderSafe(ServoMotorBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource bufferSource, int light, int overlay) {
-        float angle = be.getAnimatedAngle(partialTicks);
+        float angle = -be.getAnimatedAngle(partialTicks);
         BlockState state = be.getBlockState();
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
         SuperByteBuffer buffer = CachedBufferer.partialFacing(AllPartialModels.SERVO_TOP, state);

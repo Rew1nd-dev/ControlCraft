@@ -1,106 +1,106 @@
 {
   "variants": {
     "facing=down,hinge_level=base": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_base",
+      "model": "vscontrolcraft:block/sphere_hinge/base",
       "x": 180
     },
     "facing=down,hinge_level=full": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_full",
+      "model": "vscontrolcraft:block/sphere_hinge/full",
       "x": 180
     },
     "facing=down,hinge_level=half": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_half",
+      "model": "vscontrolcraft:block/sphere_hinge/half",
       "x": 180
     },
     "facing=down,hinge_level=three_quarter": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_three_quarter",
+      "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
       "x": 180
     },
     "facing=east,hinge_level=base": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_base",
+      "model": "vscontrolcraft:block/sphere_hinge/base",
       "x": 90,
       "y": 90
     },
     "facing=east,hinge_level=full": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_full",
+      "model": "vscontrolcraft:block/sphere_hinge/full",
       "x": 90,
       "y": 90
     },
     "facing=east,hinge_level=half": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_half",
+      "model": "vscontrolcraft:block/sphere_hinge/half",
       "x": 90,
       "y": 90
     },
     "facing=east,hinge_level=three_quarter": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_three_quarter",
+      "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
       "x": 90,
       "y": 90
     },
     "facing=north,hinge_level=base": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_base",
+      "model": "vscontrolcraft:block/sphere_hinge/base",
       "x": 90
     },
     "facing=north,hinge_level=full": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_full",
+      "model": "vscontrolcraft:block/sphere_hinge/full",
       "x": 90
     },
     "facing=north,hinge_level=half": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_half",
+      "model": "vscontrolcraft:block/sphere_hinge/half",
       "x": 90
     },
     "facing=north,hinge_level=three_quarter": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_three_quarter",
+      "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
       "x": 90
     },
     "facing=south,hinge_level=base": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_base",
+      "model": "vscontrolcraft:block/sphere_hinge/base",
       "x": 90,
       "y": 180
     },
     "facing=south,hinge_level=full": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_full",
+      "model": "vscontrolcraft:block/sphere_hinge/full",
       "x": 90,
       "y": 180
     },
     "facing=south,hinge_level=half": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_half",
+      "model": "vscontrolcraft:block/sphere_hinge/half",
       "x": 90,
       "y": 180
     },
     "facing=south,hinge_level=three_quarter": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_three_quarter",
+      "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
       "x": 90,
       "y": 180
     },
     "facing=up,hinge_level=base": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_base"
+      "model": "vscontrolcraft:block/sphere_hinge/base"
     },
     "facing=up,hinge_level=full": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_full"
+      "model": "vscontrolcraft:block/sphere_hinge/full"
     },
     "facing=up,hinge_level=half": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_half"
+      "model": "vscontrolcraft:block/sphere_hinge/half"
     },
     "facing=up,hinge_level=three_quarter": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_three_quarter"
+      "model": "vscontrolcraft:block/sphere_hinge/three_quarter"
     },
     "facing=west,hinge_level=base": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_base",
+      "model": "vscontrolcraft:block/sphere_hinge/base",
       "x": 90,
       "y": 270
     },
     "facing=west,hinge_level=full": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_full",
+      "model": "vscontrolcraft:block/sphere_hinge/full",
       "x": 90,
       "y": 270
     },
     "facing=west,hinge_level=half": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_half",
+      "model": "vscontrolcraft:block/sphere_hinge/half",
       "x": 90,
       "y": 270
     },
     "facing=west,hinge_level=three_quarter": {
-      "model": "vscontrolcraft:block/sphere_hinge/sph_three_quarter",
+      "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
       "x": 90,
       "y": 270
     }

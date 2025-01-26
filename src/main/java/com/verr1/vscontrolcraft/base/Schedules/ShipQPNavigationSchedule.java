@@ -44,6 +44,13 @@ public class ShipQPNavigationSchedule implements IntervalRunnable {
 
     protected double MAX_INTEGRAL = 10;
 
+    public ShipQPNavigationSchedule(LevelPos levelPos, Quaterniond quaterniond, Vector3d vector3d, int timeBeforeExpired) {
+        this.shipPos = levelPos;
+        this.cyclesRemained = (int)(timeBeforeExpired / ts);
+        this.q_tar = quaterniond;
+        this.p_tar = vector3d;
+    }
+
     @Override
     public int getCyclesRemained() {
         return cyclesRemained;
@@ -102,20 +109,6 @@ public class ShipQPNavigationSchedule implements IntervalRunnable {
     }
 
     public ShipQPNavigationSchedule(){}
-
-
-    public ShipQPNavigationSchedule init(
-            LevelPos blockShipPos,
-            Quaterniondc targetQuaternion,
-            Vector3dc targetPosition,
-            int timeBeforeExpired
-    ){
-        this.shipPos = blockShipPos;
-        this.cyclesRemained = (int)(timeBeforeExpired / ts);
-        this.q_tar = targetQuaternion;
-        this.p_tar = targetPosition;
-        return this;
-    }
 
     @Override
     public void run() {

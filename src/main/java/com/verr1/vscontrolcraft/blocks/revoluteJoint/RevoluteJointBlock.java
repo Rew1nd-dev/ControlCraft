@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -29,6 +30,7 @@ public class RevoluteJointBlock extends DirectionalAxisKineticBlock implements I
 
 
     public static final EnumProperty<HingeAdjustLevel> LEVEL = EnumProperty.create("hinge_level", HingeAdjustLevel.class);
+    public static final BooleanProperty Flipped = BooleanProperty.create("joint_direction_flipped");
 
     public RevoluteJointBlock(Properties properties) {
         super(properties);
@@ -43,6 +45,7 @@ public class RevoluteJointBlock extends DirectionalAxisKineticBlock implements I
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(LEVEL);
+        builder.add(Flipped);
     }
 
     @Override

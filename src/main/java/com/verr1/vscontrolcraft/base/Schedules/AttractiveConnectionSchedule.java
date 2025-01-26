@@ -64,7 +64,7 @@ public class AttractiveConnectionSchedule extends ShipQPNavigationSchedule{
             int timeBeforeExpired,
             Runnable onExpiredTask
     ){
-
+        super(new LevelPos(yPos, level), new Quaterniond(), new Vector3d(), timeBeforeExpired);
         this.xPos = xPos;
         this.yPos = yPos;
 
@@ -75,7 +75,7 @@ public class AttractiveConnectionSchedule extends ShipQPNavigationSchedule{
 
         this.onExpiredTask = onExpiredTask;
 
-        init(new LevelPos(yPos, level), new Quaterniond(), new Vector3d(), timeBeforeExpired);
+
         //make qpSchedule only apply resistance force to make attraction progress smooth and stable
         setPID(0, 0, 14, 0);
     }

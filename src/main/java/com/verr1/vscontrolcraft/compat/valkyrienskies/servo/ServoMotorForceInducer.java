@@ -1,7 +1,6 @@
 package com.verr1.vscontrolcraft.compat.valkyrienskies.servo;
 
 import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
-import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlockEntity;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.generic.PhysShipWrapper;
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
@@ -22,8 +21,8 @@ public class ServoMotorForceInducer implements ShipForcesInducer {
     private final int lazyTickRate = 10;
     private int lazyTickCount = lazyTickRate;
     private int TICKS_BEFORE_EXPIRED = 3;
-    private ConcurrentHashMap<BlockPos, LogicalServoMotor> servoProperties = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<BlockPos, Integer> servoLife = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<BlockPos, LogicalServoMotor> servoProperties = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<BlockPos, Integer> servoLife = new ConcurrentHashMap<>();
 
     public static ServoMotorForceInducer getOrCreate(@NotNull ServerShip ship){
         ServoMotorForceInducer obj = ship.getAttachment(ServoMotorForceInducer.class);
@@ -40,10 +39,12 @@ public class ServoMotorForceInducer implements ShipForcesInducer {
         double angle = VSMathUtils.get_xc2yc(servoShip, assemShip, property.servoDir(), property.assemDir());
         // servo.debug_angle_accessor = angle;
 
-        double scale = servo.getControllerInfoHolder().calculateControlTorqueScale();
+        double accel_scale = servo.getControllerInfoHolder().calculateControlValueScaleAngular();
+        double control_torque = property.torqueCallBack().get();
+        double internal_torque = assemShip.getImpl().getInertia().getMomentOfInertiaTensor().m00() * accel_scale;
         Vector3dc direction = Util.Vec3itoVector3d(property.servoDir().getNormal());
 
-        Vector3dc controlTorque_sc = direction.mul(assemShip.getImpl().getInertia().getMomentOfInertiaTensor().m00() * -1 * scale, new Vector3d()); //
+        Vector3dc controlTorque_sc = direction.mul((-control_torque + internal_torque) * -1  , new Vector3d()); //
         Vector3dc controlTorque_wc = VSMathUtils.get_sc2wc(servoShip).transform(controlTorque_sc, new Vector3d());
         servo.getControllerInfoHolder().overrideError(angle);
 

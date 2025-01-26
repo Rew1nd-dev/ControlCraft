@@ -8,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import org.joml.*;
 import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.core.impl.shadow.F;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
@@ -18,9 +19,16 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
     private final Direction xDir;
     private final Direction yDir;
 
+    private boolean hasForcedQuaternionProvider = false;
+    private boolean hasOverriddenAlignExtra = false;
+
     private Runnable onExpiredTask = () -> {};
 
     private Quaterniond extraRotation = new Quaterniond();
+
+    private Quaterniond forcedQuaternion = new Quaterniond();
+
+    private Quaterniond overriddenAlignExtra = new Quaterniond();
 
     @Override
     public void onExpire() {
@@ -50,9 +58,12 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
     }
 
     public Quaterniondc getYTargetQuaternion(){
+        if(hasForcedQuaternionProvider)return forcedQuaternion;
+
         Quaterniondc xBase = getXBaseQuaternion();
         Quaterniondc alignExtra = VSMathUtils.rotationToAlign(xDir, yDir);
-        return xBase.mul(alignExtra, new Quaterniond());
+        if(hasOverriddenAlignExtra)alignExtra = new Quaterniond();
+        return xBase.mul(alignExtra, new Quaterniond()).mul(extraRotation, new Quaterniond()); //
     }
 
     public Vector3dc getYTargetPosition(){
@@ -71,15 +82,22 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
     }
 
 
-    public FaceAlignmentSchedule(
+    private FaceAlignmentSchedule(
             BlockPos xPos,
             Direction xDir,
             BlockPos yPos,
             Direction yDir,
             ServerLevel level,
-            int timeBeforeExpired
+            int timeBeforeExpired,
+            Quaterniond extraRotation,
+            boolean hasForcedQuaternionProvider,
+            boolean hasOverriddenAlignExtra,
+            Quaterniond forcedQuaternion,
+            Runnable onExpiredTask
     ){
 
+
+        super(new LevelPos(yPos, level), new Quaterniond(), new Vector3d(), timeBeforeExpired);
         this.xPos = xPos;
         this.yPos = yPos;
 
@@ -88,19 +106,92 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
         this.yDir = yDir;
         this.level = level;
 
+        this.onExpiredTask = onExpiredTask;
+
+        this.extraRotation = extraRotation;
+        this.hasForcedQuaternionProvider = hasForcedQuaternionProvider;
+        this.hasOverriddenAlignExtra = hasOverriddenAlignExtra;
+        this.forcedQuaternion = forcedQuaternion;
+    }
+
+    public FaceAlignmentSchedule setTarget(){
         q_tar = getYTargetQuaternion();
         p_tar = getYTargetPosition();
-        init(new LevelPos(yPos, level), q_tar, p_tar, timeBeforeExpired);
-    }
-
-    public FaceAlignmentSchedule withExpiredTask(Runnable task){
-        onExpiredTask = task;
         return this;
     }
 
-    public FaceAlignmentSchedule withExtraQuaternion(Quaterniond extra){
-        extraRotation = extra;
-        return this;
+    public static class builder{
+        private BlockPos xPos;
+        private BlockPos yPos;
+        private ServerLevel level;
+        private Direction xDir;
+        private Direction yDir;
+
+        private int timeBeforeExpired = 10;
+
+        private boolean hasForcedQuaternionProvider = false;
+        private boolean hasOverriddenAlignExtra = false;
+
+        private Runnable onExpiredTask = () -> {};
+
+        private Quaterniond extraRotation = new Quaterniond();
+
+        private Quaterniond forcedQuaternion = new Quaterniond();
+
+        public builder basic(
+                 BlockPos xPos,
+                 Direction xDir,
+                 BlockPos yPos,
+                 Direction yDir,
+                 ServerLevel level,
+                 int timeBeforeExpired
+        ){
+            this.xPos = xPos;
+            this.xDir = xDir;
+            this.yDir = yDir;
+            this.yPos = yPos;
+            this.level = level;
+            this.timeBeforeExpired = timeBeforeExpired;
+            return this;
+        }
+
+        public builder withExpiredTask(Runnable task){
+            onExpiredTask = task;
+            return this;
+        }
+
+        public builder withExtraQuaternion(Quaterniond extra){
+            extraRotation = extra;
+            return this;
+        }
+
+        public builder withForcedQuaternion(Quaterniond forced){
+            hasForcedQuaternionProvider = true;
+            forcedQuaternion = forced;
+            return this;
+        }
+
+        public builder withOverriddenAlignExtra(Quaterniond extra){
+            extraRotation = extra;
+            hasOverriddenAlignExtra = true;
+            return this;
+        }
+
+        public FaceAlignmentSchedule build(){
+            return new FaceAlignmentSchedule(
+                    xPos,
+                    xDir,
+                    yPos,
+                    yDir,
+                    level,
+                    timeBeforeExpired,
+                    extraRotation,
+                    hasForcedQuaternionProvider,
+                    hasOverriddenAlignExtra,
+                    forcedQuaternion,
+                    onExpiredTask
+            ).setTarget();
+        }
     }
 
 }

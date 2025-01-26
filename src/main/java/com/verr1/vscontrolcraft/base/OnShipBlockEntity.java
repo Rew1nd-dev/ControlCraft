@@ -6,6 +6,7 @@ import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -30,13 +31,18 @@ public class OnShipBlockEntity extends SmartBlockEntity {
 
     }
 
-    protected Vector3d getDirectionJOML() {
+    public static void updateBlockState(Level world, BlockPos pos, BlockState newState){
+        world.setBlock(pos, newState, 3);
+    }
+
+    public Vector3d getDirectionJOML() {
         return Util.Vec3itoVector3d(getDirection().getNormal());
     }
 
     public Direction getDirection(){
         return getBlockState().getValue(BlockStateProperties.FACING);
     }
+
 
     public boolean isOnServerShip(){
         return getServerShipOn() != null;

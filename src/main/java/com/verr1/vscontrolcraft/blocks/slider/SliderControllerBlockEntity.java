@@ -1,0 +1,409 @@
+package com.verr1.vscontrolcraft.blocks.slider;
+
+import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.content.equipment.goggles.IHaveHoveringInformation;
+import com.simibubi.create.foundation.utility.Lang;
+import com.simibubi.create.foundation.utility.animation.LerpedFloat;
+import com.verr1.vscontrolcraft.ControlCraft;
+import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
+import com.verr1.vscontrolcraft.base.Hinge.interfaces.IConstrainHolder;
+import com.verr1.vscontrolcraft.base.Servo.ICanBruteDirectionalConnect;
+import com.verr1.vscontrolcraft.base.Servo.IPIDController;
+import com.verr1.vscontrolcraft.base.Servo.PIDControllerInfoHolder;
+import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
+import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
+import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.ServoMotorPeripheral;
+import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SliderControllerPeripheral;
+import com.verr1.vscontrolcraft.compat.valkyrienskies.slider.LogicalSlider;
+import com.verr1.vscontrolcraft.compat.valkyrienskies.slider.SliderForceInducer;
+import com.verr1.vscontrolcraft.registry.AllPackets;
+import com.verr1.vscontrolcraft.utils.Util;
+import com.verr1.vscontrolcraft.utils.VSMathUtils;
+import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.shared.Capabilities;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
+import org.joml.*;
+import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint;
+import org.valkyrienskies.core.apigame.constraints.VSFixedOrientationConstraint;
+import org.valkyrienskies.core.apigame.constraints.VSHingeOrientationConstraint;
+import org.valkyrienskies.core.apigame.constraints.VSSlideConstraint;
+import org.valkyrienskies.core.impl.game.ships.ShipDataCommon;
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld;
+import org.valkyrienskies.core.impl.game.ships.ShipTransformImpl;
+import org.valkyrienskies.core.util.datastructures.DenseBlockPosSet;
+import org.valkyrienskies.mod.common.VSGameUtilsKt;
+import org.valkyrienskies.mod.common.assembly.ShipAssemblyKt;
+
+import javax.annotation.Nullable;
+import java.lang.Math;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
+import static net.minecraft.ChatFormatting.GRAY;
+
+public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implements
+        IPIDController, ICanBruteDirectionalConnect, IConstrainHolder, IHaveHoveringInformation
+{
+
+    private VSSlideConstraint slide;
+    private Object slide_id;
+    private VSFixedOrientationConstraint hinge;
+    private Object hinge_id;
+
+    private final double MAX_SLIDE_DISTANCE = 32;
+
+    public SynchronizedField<ShipPhysics> ownPhysics = new SynchronizedField<>(ShipPhysics.EMPTY);
+    public SynchronizedField<ShipPhysics> cmpPhysics = new SynchronizedField<>(ShipPhysics.EMPTY);
+    public SynchronizedField<Double> controlForce = new SynchronizedField<>(0.0);
+
+    private final LerpedFloat animatedDistance = LerpedFloat.linear();
+    public float animatedTargetDistance = 0;
+
+    private SliderControllerPeripheral peripheral;
+    protected LazyOptional<IPeripheral> peripheralCap;
+
+    @Override
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+        if(cap == Capabilities.CAPABILITY_PERIPHERAL){
+            if(this.peripheral == null){
+                this.peripheral = new SliderControllerPeripheral(this);
+            }
+            if(peripheralCap == null || !peripheralCap.isPresent())
+                peripheralCap =  LazyOptional.of(() -> this.peripheral);
+            return peripheralCap.cast();
+        }
+        return super.getCapability(cap, side);
+    }
+
+    private final PIDControllerInfoHolder controllerInfoHolder = new PIDControllerInfoHolder().setParameter(0.5, 14, 0);
+
+    public SliderControllerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
+
+    public Direction getVertical(){
+        if(getDirection().getAxis() != Direction.Axis.Y)return Direction.UP;
+        return Direction.SOUTH;
+    }
+
+    public Quaterniondc getQuaternionOfPlacement(){
+        return VSMathUtils.getQuaternionOfPlacement(getDirection());
+    }
+
+    public BlockPos getAssembleBlockPos(){
+        return getBlockPos().relative(getDirection());
+    }
+
+    public Vector3d getAssembleBlockPosJOML(){
+        return Util.Vec3toVector3d(getAssembleBlockPos().getCenter());
+    }
+
+    @Override
+    public void bruteDirectionalConnectWith(BlockPos assemPos, Direction forward, Direction align){
+        if(!VSMathUtils.isVertical(align, forward))return;
+
+        Direction selfAlign = getAlign();
+        Direction selfForward = getForward();
+
+        ServerShip assembledShip = VSGameUtilsKt.getShipObjectManagingPos((ServerLevel) level, assemPos);
+
+        if(assembledShip == null)return;
+        long ownerShipID = getServerShipID();
+        long assemShipID = assembledShip.getId();
+
+        Quaterniondc hingeQuaternion_Own = VSMathUtils.getQuaternionOfPlacement(selfAlign, selfForward).conjugate();
+        Quaterniondc hingeQuaternion_Asm = VSMathUtils.getQuaternionOfPlacement(align.getOpposite(), forward).conjugate();
+
+
+        VSFixedOrientationConstraint hingeConstraint = new VSFixedOrientationConstraint(
+                assemShipID,
+                ownerShipID,
+                1.0E-10,
+                hingeQuaternion_Asm, //new Quaterniond(),//
+                hingeQuaternion_Own, //new Quaterniond(),//
+                1.0E10
+        );
+
+        Vector3dc asmPos_Own = getAssembleBlockPosJOML();
+        Vector3dc asmPos_Asm = Util.Vec3toVector3d(assemPos.getCenter());
+
+        VSSlideConstraint slideConstraint = new VSSlideConstraint(
+                getServerShipID(),
+                assemShipID,
+                1.0E-10,
+                asmPos_Own,
+                asmPos_Asm,
+                1.0E10,
+                getDirectionJOML(),
+                MAX_SLIDE_DISTANCE
+        );
+
+        recreateConstrains(hingeConstraint, slideConstraint);
+        setCompanionShipID(assemShipID);
+        setCompanionShipDirection(align);
+        notifyUpdate();
+
+    }
+
+    @Override
+    public Direction getAlign() {
+        return getDirection();
+    }
+
+    @Override
+    public Direction getForward() {
+        return getVertical().getOpposite();
+    }
+
+    public double getOutputForce(){
+        return controlForce.read();
+    }
+
+    public void setOutputForce(double force){
+        controlForce.write(force);
+    }
+
+    public void assemble(){
+        // Only Assemble 1 Block When Being Right-Clicked with wrench. You Should Build Your Ship Up On This Assembled Block, Or Else Use Linker Tool Instead
+        if(level.isClientSide)return;
+        ServerLevel serverLevel = (ServerLevel) level;
+        DenseBlockPosSet collectedBlocks = new DenseBlockPosSet();
+        BlockPos assembledShipCenter = getAssembleBlockPos();
+        if(serverLevel.getBlockState(assembledShipCenter).isAir())return;
+        collectedBlocks.add(assembledShipCenter.getX(), assembledShipCenter.getY(), assembledShipCenter.getZ());
+        ServerShip assembledShip = ShipAssemblyKt.createNewShipWithBlocks(assembledShipCenter, collectedBlocks, serverLevel);
+        long assembledShipID = assembledShip.getId();
+
+        Quaterniondc ownerShipQuaternion = getSelfShipQuaternion();
+
+
+        Vector3d assembledShipPosCenterShipAtOwner = getAssembleBlockPosJOML();
+        Vector3d assembledShipPosCenterWorld = new Vector3d(assembledShipPosCenterShipAtOwner);
+        if(isOnServerShip()){
+            assembledShipPosCenterWorld = Objects.requireNonNull(getServerShipOn()).getShipToWorld().transformPosition(assembledShipPosCenterWorld);
+        }
+
+        long ownerShipID = getServerShipID();
+
+        ((ShipDataCommon)assembledShip)
+                .setTransform(
+                        new ShipTransformImpl(
+                                assembledShipPosCenterWorld,
+                                assembledShip
+                                        .getInertiaData()
+                                        .getCenterOfMassInShip(),
+                                ownerShipQuaternion,
+                                new Vector3d(1, 1, 1)
+                        )
+                );
+
+
+
+        VSFixedOrientationConstraint fixedOrientationConstraint = new VSFixedOrientationConstraint(
+                assembledShipID,
+                ownerShipID,
+                1.0E-10,
+                new Quaterniond(),
+                new Quaterniond(),
+                1.0E10
+        );
+
+        Vector3dc asmPos_Own = getAssembleBlockPosJOML();
+        Vector3dc asmPos_Asm = assembledShip.getInertiaData().getCenterOfMassInShip().add(new Vector3d(0.5, 0.5, 0.5), new Vector3d());
+
+        VSSlideConstraint slideConstraint = new VSSlideConstraint(
+                getServerShipID(),
+                assembledShipID,
+                1.0E-10,
+                asmPos_Own,
+                asmPos_Asm,
+                1.0E10,
+                getDirectionJOML(),
+                MAX_SLIDE_DISTANCE
+        );
+
+
+        recreateConstrains(fixedOrientationConstraint, slideConstraint);
+        setCompanionShipID(assembledShipID);
+        setCompanionShipDirection(Direction.DOWN);
+        notifyUpdate();
+
+    }
+
+    public Vector3dc getOwn_loc(){
+        if(slide == null)return new Vector3d();
+        return slide.getLocalPos0();
+    }
+
+    public Vector3dc getCmp_loc(){
+        if(slide == null)return new Vector3d();
+        return slide.getLocalPos1();
+    }
+
+    @Override
+    public PIDControllerInfoHolder getControllerInfoHolder(){
+        return controllerInfoHolder;
+    }
+
+    public double getSlideDistance(){
+        if(!hasCompanionShip())return 0;
+        if(slide == null)return 0;
+        Vector3dc own_local_pos = getOwn_loc();
+        Vector3dc cmp_local_pos = getCmp_loc();
+
+        ShipPhysics own_sp = ownPhysics.read();
+        ShipPhysics cmp_sp = cmpPhysics.read();
+
+        Matrix4dc own_s2w = own_sp.s2wTransform();
+        Matrix4dc own_w2s = own_sp.w2sTransform();
+        Matrix4dc cmp_s2w = cmp_sp.s2wTransform();
+
+        Vector3dc own_wc = own_s2w.transformPosition(own_local_pos, new Vector3d());
+        Vector3dc cmp_wc = cmp_s2w.transformPosition(cmp_local_pos, new Vector3d());
+        Vector3dc sub_sc = own_w2s
+                .transformDirection(
+                        cmp_wc.sub(own_wc, new Vector3d()), new Vector3d()
+                );
+
+        Direction dir = getDirection();
+        double sign = dir.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1 : -1;
+        double distance = switch (dir.getAxis()){
+            case X -> sign * sub_sc.x();
+            case Y -> sign * sub_sc.y();
+            case Z -> sign * sub_sc.z();
+        };
+
+        return distance;
+    }
+
+    public void recreateConstrains(
+            VSFixedOrientationConstraint hinge_0,
+            VSSlideConstraint slide)
+    {
+        this.hinge = hinge_0;
+        this.slide = slide;
+        recreateConstrains();
+    }
+
+
+    public void recreateConstrains(){
+        if(hinge == null|| slide == null)return;
+        if(level.isClientSide)return;
+        var shipWorldCore = (ShipObjectServerWorld) VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
+        hinge_id =  shipWorldCore.createNewConstraint(hinge);
+        slide_id =  shipWorldCore.createNewConstraint(slide);
+
+        if(hinge_id == null || slide_id == null){
+            hinge_id = null;
+            slide_id = null;
+            hinge = null;
+            slide = null;
+        }
+
+
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        if(level.isClientSide)return;
+        destroyConstrain();
+    }
+
+    public void destroyConstrain(){
+        try{
+            var shipWorldCore = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld(level);
+            shipWorldCore.removeConstraint((int) hinge_id);
+            shipWorldCore.removeConstraint((int)slide_id);
+            clearCompanionShipInfo();
+            hinge = null;
+            hinge_id = null;
+            slide = null;
+            slide_id = null;
+        }catch (Exception e){
+            ControlCraft.LOGGER.info(Arrays.toString(e.getStackTrace()));
+        }
+    }
+
+    public void syncCompanionAttachInducer(){
+        if(level.isClientSide)return;
+        ServerShip ship = getCompanionServerShip();
+        if(ship == null)return;
+        var inducer = SliderForceInducer.getOrCreate(ship);
+        inducer.updateLogicalSlider(
+                getBlockPos(),
+                new LogicalSlider(
+                        getServerShipID(),
+                        getCompanionShipID(),
+                        (ServerLevel) level,
+                        getDirection(),
+                        getOwn_loc(),
+                        getCmp_loc(),
+                        this::getOutputForce
+                )
+        );
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        syncClient();
+        syncCompanionAttachInducer();
+        if(!level.isClientSide)return;
+        tickAnimation();
+    }
+
+    public void tickAnimation(){
+        animatedDistance.chase(animatedTargetDistance, 0.5, LerpedFloat.Chaser.EXP);
+        animatedDistance.tickChaser();
+    }
+
+    float getAnimatedTargetDistance(float partialTicks){
+        return animatedDistance.getValue(partialTicks);
+    }
+
+    public void syncClient(){
+        if(!level.isClientSide){
+            var p = new SliderSyncAnimationPacket(getBlockPos(), (float) getSlideDistance());
+            AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
+        }
+    }
+
+    public void setAnimatedDistance(float d){
+        animatedTargetDistance = (float) VSMathUtils.clamp(d, MAX_SLIDE_DISTANCE);
+
+    }
+
+    @Override
+    public boolean addToTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        //Component.translatable()
+
+        Lang.translate("tooltip.stressImpact")
+                .style(GRAY)
+                .forGoggles(tooltip);
+
+        float stressTotal = getAnimatedTargetDistance(1);
+
+        Lang.number(stressTotal)
+                .translate("generic.unit.angle")
+                .style(ChatFormatting.AQUA)
+                .space()
+                .add(Lang.translate("gui.goggles.at_current_angle")
+                        .style(ChatFormatting.DARK_GRAY))
+                .forGoggles(tooltip, 1);
+        return true;
+    }
+
+}

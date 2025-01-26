@@ -9,6 +9,7 @@ import com.verr1.vscontrolcraft.blocks.transmitter.NetworkManager;
 import com.verr1.vscontrolcraft.compat.cctweaked.alternates.ComputerCraftDelegation;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -31,8 +32,6 @@ public class ControlCraftEvents {
     }
 
     public static void onPhysicsTickStart(){
-        // ControlCraft.LOGGER.info("Physics tick");
-        // DelegateOnServerTickStart.DelegateRun();
         ComputerCraftDelegation.FreeDelegateThread();
     }
 

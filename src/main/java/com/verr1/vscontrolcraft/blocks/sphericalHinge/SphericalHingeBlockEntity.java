@@ -2,10 +2,11 @@ package com.verr1.vscontrolcraft.blocks.sphericalHinge;
 
 import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
-import com.verr1.vscontrolcraft.base.Hinge.HingeAdjustLevel;
-import com.verr1.vscontrolcraft.base.Hinge.HingeSyncLevelPacket;
-import com.verr1.vscontrolcraft.base.Hinge.IAdjustableHinge;
-import com.verr1.vscontrolcraft.base.Hinge.ICanBruteConnect;
+import com.verr1.vscontrolcraft.base.Hinge.*;
+import com.verr1.vscontrolcraft.base.Hinge.interfaces.IAdjustableHinge;
+import com.verr1.vscontrolcraft.base.Hinge.interfaces.ICanBruteConnect;
+import com.verr1.vscontrolcraft.base.Hinge.interfaces.IConstrainHolder;
+import com.verr1.vscontrolcraft.base.Hinge.packets.HingeSyncClientPacket;
 import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
@@ -26,12 +27,12 @@ import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import java.util.Arrays;
 
-public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implements ICanBruteConnect, IAdjustableHinge{
+public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implements
+        ICanBruteConnect, IAdjustableHinge, IConstrainHolder
+{
 
     protected Object attachment_ID;
     protected VSAttachmentConstraint attachment = null;
-
-
 
 
     public SphericalHingeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -64,22 +65,11 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
         notifyUpdate();
     }
 
-    public void destroyConstrains(){
-        if(attachment == null)return;
-        var shipWorldCore = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld(level);
-        try{
-            shipWorldCore.removeConstraint((int) attachment_ID);
-            attachment = null;
-            attachment_ID = null;
-        }catch (Exception e){
-            ControlCraft.LOGGER.info(Arrays.toString(e.getStackTrace()));
-        }
-    }
 
     public void destroy() {
         super.destroy();
         if(level.isClientSide)return;
-        destroyConstrains();
+        destroyConstrain();
 
     }
 
@@ -170,9 +160,7 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
         updateBlockState(level, getBlockPos(), getBlockState().setValue(SphericalHingeBlock.LEVEL, hingeLevel));
     }
 
-    public static void updateBlockState(Level world, BlockPos pos, BlockState newState){
-        world.setBlock(pos, newState, 3);
-    }
+
 
 
 
@@ -180,68 +168,24 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
         if(level.isClientSide)return;
         AllPackets
                 .getChannel()
-                .send(PacketDistributor.ALL.noArg(),new HingeSyncLevelPacket(getBlockPos(), getAdjustment()));
+                .send(PacketDistributor.ALL.noArg(),new HingeSyncClientPacket(getBlockPos(), getAdjustment(), false));
     }
 
-}
-    /*
-
-    public BlockPos getAssembleBlockPos(){
-        return getBlockPos().relative(getBlockState().getValue(SphereHingeBlock.FACING));
-    }
-     @Deprecated
-    public void assemble(){
+    @Override
+    public void destroyConstrain() {
         if(level.isClientSide)return;
-        ServerLevel serverLevel = (ServerLevel) level;
-        DenseBlockPosSet collectedBlocks = new DenseBlockPosSet();
-        BlockPos assembledShipCenter = getAssembleBlockPos();
-        if(serverLevel.getBlockState(assembledShipCenter).isAir())return;
-        BlockEntity tryAssembleBlock = serverLevel.getExistingBlockEntity(assembledShipCenter);
-        if(!(tryAssembleBlock instanceof SphereHingeBlockEntity otherHinge))return;
-        if(otherHinge.getBlockState().getValue(SphereHingeBlock.FACING) != getDirection().getOpposite())return;
-
-        collectedBlocks.add(assembledShipCenter.getX(), assembledShipCenter.getY(), assembledShipCenter.getZ());
-        ServerShip assembledShip = ShipAssemblyKt.createNewShipWithBlocks(assembledShipCenter, collectedBlocks, serverLevel);
-        long assembledShipID = assembledShip.getId();
-
-        Quaterniondc ownerShipQuaternion = getSelfShipQuaternion();
-        Vector3d direction = getDirectionJOML();
-
-
-        Vector3d assembledShipPosCenterWorld = getHingeConnectorPosJOML();
-        if(isOnServerShip()){
-            assembledShipPosCenterWorld = Objects.requireNonNull(getServerShipOn()).getShipToWorld().transformPosition(assembledShipPosCenterWorld);
+        try{
+            var shipWorldCore = (ShipObjectServerWorld) VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
+            if(attachment_ID != null)shipWorldCore.removeConstraint((int)attachment_ID);
+            attachment_ID = null;
+        }catch (Exception e){
+            ControlCraft.LOGGER.error(Arrays.toString(e.getStackTrace()));
         }
 
-        long ownerShipID = getServerShipID();
-
-        ((ShipDataCommon)assembledShip)
-                .setTransform(
-                        new ShipTransformImpl(
-                                assembledShipPosCenterWorld,
-                                assembledShip
-                                        .getInertiaData()
-                                        .getCenterOfMassInShip(),
-                                ownerShipQuaternion,
-                                new Vector3d(1, 1, 1)
-                        )
-                );
-
-        Vector3dc asmPos_Own = Util.Vec3toVector3d(getBlockPos().getCenter());
-        Vector3dc asmPos_Asm = assembledShip.getInertiaData().getCenterOfMassInShip().add(new Vector3d(0.5, 0.5, 0.5), new Vector3d());
-
-        VSAttachmentConstraint attachment = new VSAttachmentConstraint(
-                ownerShipID,
-                assembledShipID,
-                1.0E-10,
-                new Vector3d(asmPos_Own).fma(0.5, direction),
-                new Vector3d(asmPos_Asm).fma(-0.5, direction),
-                1.0E10,
-                0.0
-        );
-
-        recreateConstrains(attachment);
-        setCompanionShipID(assembledShipID);
-        notifyUpdate();
     }
-    */
+
+
+
+
+}
+

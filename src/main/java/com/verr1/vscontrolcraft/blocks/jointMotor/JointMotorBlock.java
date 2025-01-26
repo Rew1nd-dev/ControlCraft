@@ -5,7 +5,7 @@ import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
 import com.verr1.vscontrolcraft.base.Servo.PID;
-import com.verr1.vscontrolcraft.base.Servo.ServoMotorOpenScreenPacket;
+import com.verr1.vscontrolcraft.base.Servo.PIDControllerOpenScreenPacket;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -40,11 +40,11 @@ public class JointMotorBlock extends DirectionalAxisKineticBlock implements IBE<
 
     protected void displayScreen(AbstractServoMotor entity, Player player){
 
-        double a = entity.getControllerInfoHolder().getTargetAngle();
+        double a = entity.getControllerInfoHolder().getTarget();
         PID pidParams = entity.getControllerInfoHolder().getPIDParams();
 
         AllPackets.sendToPlayer(
-                new ServoMotorOpenScreenPacket(pidParams, a, entity.getBlockPos()),
+                new PIDControllerOpenScreenPacket(pidParams, a, entity.getBlockPos()),
                 ((ServerPlayer)player)
         );
 

@@ -10,11 +10,16 @@ import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlock;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlockEntity;
+import com.verr1.vscontrolcraft.blocks.pivotJoint.PivotJointBlock;
+import com.verr1.vscontrolcraft.blocks.pivotJoint.PivotJointBlockEntity;
 import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlock;
 import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlockEntity;
 import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlock;
 import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorRenderer;
+import com.verr1.vscontrolcraft.blocks.slider.SliderControllerBlock;
+import com.verr1.vscontrolcraft.blocks.slider.SliderControllerBlockEntity;
+import com.verr1.vscontrolcraft.blocks.slider.SliderRenderer;
 import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeBlock;
 import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlock;
@@ -108,6 +113,17 @@ public class AllBlockEntities {
     public static final BlockEntityEntry<RevoluteJointBlockEntity> REVOLUTE_JOINT_BLOCKENTITY = REGISTRATE
             .blockEntity(RevoluteJointBlock.ID, RevoluteJointBlockEntity::new)
             .validBlock(AllBlocks.REVOLUTE_JOINT_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<PivotJointBlockEntity> PIVOT_JOINT_BLOCKENTITY = REGISTRATE
+            .blockEntity(PivotJointBlock.ID, PivotJointBlockEntity::new)
+            .validBlock(AllBlocks.PIVOT_JOINT_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<SliderControllerBlockEntity> SLIDER_CONTROLLER_BLOCKENTITY = REGISTRATE
+            .blockEntity(SliderControllerBlock.ID, SliderControllerBlockEntity::new)
+            .validBlock(AllBlocks.SLIDER_CONTROLLER_BLOCK)
+            .renderer(() -> SliderRenderer::new)
             .register();
 
     public static void register(){

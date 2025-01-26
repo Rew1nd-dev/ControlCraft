@@ -1,9 +1,12 @@
 package com.verr1.vscontrolcraft.base.Servo;
 
 
+import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.content.equipment.goggles.IHaveHoveringInformation;
 import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
+import com.verr1.vscontrolcraft.base.Hinge.interfaces.IConstrainHolder;
 import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.ServoMotorPeripheral;
@@ -21,7 +24,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +43,9 @@ import java.lang.Math;
 import java.util.Arrays;
 import java.util.Objects;
 
-public abstract class AbstractServoMotor extends ShipConnectorBlockEntity {
+public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implements
+        IHaveHoveringInformation, IConstrainHolder, IPIDController, ICanBruteDirectionalConnect
+{
     protected ServoMotorPeripheral peripheral;
     protected LazyOptional<IPeripheral> peripheralCap;
 
@@ -49,7 +53,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity {
 
     public SynchronizedField<ShipPhysics> ownPhysics = new SynchronizedField<>(ShipPhysics.EMPTY);
     public SynchronizedField<ShipPhysics> asmPhysics = new SynchronizedField<>(ShipPhysics.EMPTY);
-
+    public SynchronizedField<Double> controlTorque = new SynchronizedField<>(0.0);
 
     protected VSHingeOrientationConstraint savedHinge = null;
     protected VSAttachmentConstraint savedAttach_1 = null;
@@ -58,9 +62,10 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity {
     protected Object Attach_ID_1;
     protected Object Attach_ID_2;
 
-    private final ControllerInfoHolder servoController = new ControllerInfoHolder();
+    private final PIDControllerInfoHolder servoController = new PIDControllerInfoHolder();
 
-    public ControllerInfoHolder getControllerInfoHolder(){
+    @Override
+    public PIDControllerInfoHolder getControllerInfoHolder(){
         return servoController;
     }
 
@@ -77,10 +82,23 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity {
         return super.getCapability(cap, side);
     }
 
+    @Override
+    public Direction getAlign() {
+        return getDirection();
+    }
+
+    @Override
+    public Direction getForward() {
+        return getServoDirection().getOpposite();
+    }
+
     public AbstractServoMotor(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
+    /*
+    * @returns:  indicates the positive rotational direction vector in ship-coordinate
+    * */
     public abstract Direction getServoDirection();
 
     public abstract Vector3d getServoDirectionJOML();
@@ -95,40 +113,37 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity {
 
 
     public double getServoAngle(){
+        if(!hasCompanionShip())return 0;
         Matrix3dc own = ownPhysics.read().rotationMatrix().transpose(new Matrix3d()); //wc2sc
         Matrix3dc asm = asmPhysics.read().rotationMatrix().transpose(new Matrix3d());
         if(getCompanionShipDirection() == null)return 0;
-        return -VSMathUtils.get_xc2yc(own, asm, getServoDirection(), getCompanionShipDirection());
+        return VSMathUtils.get_xc2yc(own, asm, getServoDirection(), getCompanionShipDirection());
     }
 
 
-    public void applyTorque(double torque){
-        ServerShip asm = getCompanionServerShip();
-        ServerShip own = getServerShipOn();
-        if(asm == null)return;
-        if(own == null)return;
-        QueueForceInducer qfi_asm = QueueForceInducer.getOrCreate(asm);
-        QueueForceInducer qfi_own = QueueForceInducer.getOrCreate(own);
-        Vector3d torque_sc = Util.Vec3itoVector3d(getServoDirection().getNormal()).mul(torque);
-        Vector3d torque_wc = VSMathUtils.get_sc2wc(own).transform(torque_sc, new Vector3d());
-        qfi_asm.applyInvariantTorque(torque_wc);
-        qfi_own.applyInvariantTorque(torque_wc.mul(-1));
+    public void setOutputTorque(double torque){
+        controlTorque.write(torque);
+    }
+
+    public double getOutputTorque(){
+        return controlTorque.read();
     }
 
     public void destroy() {
         super.destroy();
         if(level.isClientSide)return;
-        destroyConstrains();
+        destroyConstrain();
 
     }
 
-    public void destroyConstrains(){
+    public void destroyConstrain(){
         if(savedHinge == null || savedAttach_1 == null || savedAttach_2 == null)return;
         var shipWorldCore = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld(level);
         try{
             shipWorldCore.removeConstraint((int)Hinge_ID_1);
             shipWorldCore.removeConstraint((int)Attach_ID_1);
             shipWorldCore.removeConstraint((int)Attach_ID_2);
+            clearCompanionShipInfo();
             savedHinge = null;
             savedAttach_1 = null;
             savedAttach_2 = null;
@@ -221,7 +236,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity {
 
     }
 
-    public void syncAssemAttachInducer(){
+    public void syncCompanionAttachInducer(){
         if(level.isClientSide)return;
         ServerShip ship = getCompanionServerShip();
         if(ship == null)return;
@@ -233,7 +248,8 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity {
                         getCompanionShipID(),
                         (ServerLevel) level,
                         getServoDirection(),
-                        getCompanionShipDirection()
+                        getCompanionShipDirection(),
+                        this::getOutputTorque
                 )
         );
     }
@@ -293,8 +309,15 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity {
         recreateConstrains(hingeConstraint, attachment_1, attachment_2);
         setCompanionShipID(assemShipID);
         setCompanionShipDirection(assemDir);
+        setStartingAngleOfCompanionShip();
         notifyUpdate();
+    }
 
+    @Override
+    public void bruteDirectionalConnectWith(BlockPos assemPos, Direction align, Direction forward){
+        // motor assembly does not require to reference forward direction, since it will rotate along align-axis,
+        // it will be fine as long as the ship is placed correct before being assembled
+        bruteDirectionalConnectWith(assemPos, align);
     }
 
     public void assemble(){
@@ -381,4 +404,12 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity {
 
     }
 
+
+    public void setStartingAngleOfCompanionShip(){
+        ServerShip asm = getCompanionServerShip();
+        ServerShip own = getServerShipOn();
+        if(asm == null)return;
+        double startAngle = VSMathUtils.get_xc2yc(own, asm, getServoDirection(), getCompanionShipDirection());
+        getControllerInfoHolder().setTarget(startAngle);
+    }
 }

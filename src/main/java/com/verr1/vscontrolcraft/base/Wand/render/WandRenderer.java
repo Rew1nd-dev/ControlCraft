@@ -1,14 +1,19 @@
 package com.verr1.vscontrolcraft.base.Wand.render;
 
 import com.simibubi.create.CreateClient;
+import com.verr1.vscontrolcraft.base.Wand.ClientWand;
 import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -79,6 +84,21 @@ public class WandRenderer {
         CreateClient.OUTLINER.showLine(slot + "selection_l4", faceVec3.f4, faceVec3.f1)
                 .colored(color)
                 .lineWidth(1 / 16f);
+    }
+
+    public static void textPlayerWhenHoldingWand(String text){
+        if(!ClientWand.isClientWandInHand())return;
+        if(!text.isEmpty())Minecraft.getInstance().gui.setOverlayMessage(Component.literal(text), true);
+    }
+
+    public static BlockEntity lookingAt(){
+        if(Minecraft.getInstance().player == null)return null;
+        HitResult hitResult = Minecraft.getInstance().player.pick(5, Minecraft.getInstance().getPartialTick(), false);
+
+        if(hitResult.getType() == HitResult.Type.BLOCK){
+            return Minecraft.getInstance().level.getExistingBlockEntity(((BlockHitResult) hitResult).getBlockPos());
+        }
+        return null;
     }
 
 }

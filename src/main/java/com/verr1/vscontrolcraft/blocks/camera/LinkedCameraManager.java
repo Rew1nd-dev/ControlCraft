@@ -12,6 +12,7 @@ public class LinkedCameraManager {
 
     public static CameraBlockEntity getLinkedCamera(){
         if(LinkCameraPos == null)return null;
+        if(Minecraft.getInstance().level == null)return null;
         return Minecraft
                 .getInstance()
                 .level

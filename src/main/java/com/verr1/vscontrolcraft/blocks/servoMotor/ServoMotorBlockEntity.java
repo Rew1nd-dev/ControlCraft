@@ -1,33 +1,25 @@
 package com.verr1.vscontrolcraft.blocks.servoMotor;
 
-import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
 import com.verr1.vscontrolcraft.base.Servo.ServoMotorSyncAnimationPacket;
-import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.ServoMotorPeripheral;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
-import dan200.computercraft.api.peripheral.IPeripheral;
-import dan200.computercraft.shared.Capabilities;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.network.PacketDistributor;
-import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static net.minecraft.ChatFormatting.GRAY;
 
-public class ServoMotorBlockEntity extends AbstractServoMotor implements IHaveGoggleInformation {
+public class ServoMotorBlockEntity extends AbstractServoMotor{
 
     private boolean assembleNextTick = false;
 
@@ -41,18 +33,18 @@ public class ServoMotorBlockEntity extends AbstractServoMotor implements IHaveGo
     }
 
     @Override
-    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+    public boolean addToTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         Lang.translate("tooltip.stressImpact")
                 .style(GRAY)
                 .forGoggles(tooltip);
 
-        float stressTotal = 0;
+        float stressTotal = getAnimatedAngle(1);
 
         Lang.number(stressTotal)
-                .translate("generic.unit.stress")
+                .translate("generic.unit.angle")
                 .style(ChatFormatting.AQUA)
                 .space()
-                .add(Lang.translate("gui.goggles.at_current_speed")
+                .add(Lang.translate("gui.goggles.at_current_angle")
                         .style(ChatFormatting.DARK_GRAY))
                 .forGoggles(tooltip, 1);
         return true;
@@ -90,7 +82,7 @@ public class ServoMotorBlockEntity extends AbstractServoMotor implements IHaveGo
             assembleNextTick = false;
         }
 
-        syncAssemAttachInducer();
+        syncCompanionAttachInducer();
         if(level.isClientSide){
             tickAnimation();
         }

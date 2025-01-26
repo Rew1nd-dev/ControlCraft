@@ -33,14 +33,25 @@ public class VSMathUtils {
         };
     }
 
-    // the rotation to make positive-x axis and positive-y axis align with xDir and yDir respectively
-    public static Quaterniondc getQuaternionOfPlacement(Direction xDir, Direction yDir){
-        Vector3d xDirJOML = Util.Vec3itoVector3d(xDir.getNormal());
-        Vector3d yDirJOML = Util.Vec3itoVector3d(yDir.getNormal());
+    // the rotation to make positive-x axis and positive-y axis align with aDir and bDir respectively
+    public static Quaterniond getQuaternionOfPlacement(Direction aDir, Direction bDir){
+        Vector3d xDirJOML = Util.Vec3itoVector3d(aDir.getNormal());
+        Vector3d yDirJOML = Util.Vec3itoVector3d(bDir.getNormal());
+        Vector3d zDirJOML = new Vector3d(xDirJOML).cross(yDirJOML);
+        //sc2wc
+        Matrix3d m = new Matrix3d().setRow(0, xDirJOML).setRow(1, yDirJOML).setRow(2, zDirJOML); // wc2sc since it is transposed
+        return m2q(m.transpose());
+
+    }
+
+    public static Matrix3d getRotationMatrixOfPlacement(Direction aDir, Direction bDir){
+        Vector3d xDirJOML = Util.Vec3itoVector3d(aDir.getNormal());
+        Vector3d yDirJOML = Util.Vec3itoVector3d(bDir.getNormal());
         Vector3d zDirJOML = new Vector3d(xDirJOML).cross(yDirJOML);
 
-        Matrix3d m = new Matrix3d().setRow(0, xDirJOML).setRow(1, yDirJOML).setRow(2, zDirJOML); // wc2sc since it is transposed
-        return m2q(m);
+        //sc2wc
+        return new Matrix3d().setRow(0, xDirJOML).setRow(1, yDirJOML).setRow(2, zDirJOML); // wc2sc since it is transposed
+
 
     }
 
@@ -104,7 +115,7 @@ public class VSMathUtils {
 
     public static double clamp(double x, double threshold){
         if(x > threshold)return threshold;
-        if(x < - threshold)return threshold;
+        if(x < - threshold)return -threshold;
         return x;
     }
 
@@ -245,6 +256,7 @@ public class VSMathUtils {
                 new Matrix3d(inertia.getMomentOfInertiaTensor()),
                 new Matrix3d(ship.getTransform().getShipToWorld()),
                 new Matrix4d(ship.getTransform().getShipToWorld()),
+                new Matrix4d(ship.getTransform().getWorldToShip()),
                 inertia.getShipMass()
         );
     }
@@ -279,8 +291,9 @@ public class VSMathUtils {
 
     public static Quaterniond rotationToAlign(Direction align_x, Direction forward_x, Direction align_y, Direction forward_y){
         if(!(isVertical(align_x, forward_x) && isVertical(align_y, forward_y)))return new Quaterniond();
-        Quaterniond q_x = rotationToAlign(align_x.getOpposite(), forward_x);
-        Quaterniond q_y = rotationToAlign(align_y, forward_y);
-        return new Quaterniond(q_x).mul(q_y.conjugate()).normalize();
+        Matrix3d m_x = getRotationMatrixOfPlacement(align_x.getOpposite(), forward_x);
+        Matrix3d m_y = getRotationMatrixOfPlacement(align_y, forward_y);
+        Matrix3d y2x = new Matrix3d(m_x.transpose()).mul(new Matrix3d(m_y));
+        return m2q(y2x.transpose());
     }
 }

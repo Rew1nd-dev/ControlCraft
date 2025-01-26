@@ -2,16 +2,15 @@ package com.verr1.vscontrolcraft.compat.cctweaked.peripherals;
 
 import com.google.common.collect.Sets;
 import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
-import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlockEntity;
-import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
+import com.verr1.vscontrolcraft.utils.CCUtils;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3d;
 import org.joml.Matrix3dc;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,7 +56,7 @@ public class ServoMotorPeripheral implements IPeripheral {
 
     @LuaFunction
     public void setTargetAngle(double angle){
-        servoMotorBlockEntity.getControllerInfoHolder().setTargetAngle(angle);
+        servoMotorBlockEntity.getControllerInfoHolder().setTarget(angle);
     }
 
     @LuaFunction
@@ -65,8 +64,8 @@ public class ServoMotorPeripheral implements IPeripheral {
         Map<String, Object> own = servoMotorBlockEntity.ownPhysics.read().getCCPhysics();
         Map<String, Object> asm = servoMotorBlockEntity.asmPhysics.read().getCCPhysics();
         return Map.of(
-                "servo", own,
-                "assem", asm
+                "servomotor", own,
+                "companion", asm
         );
     }
 
@@ -77,15 +76,15 @@ public class ServoMotorPeripheral implements IPeripheral {
 
 
     @LuaFunction
-    public Matrix3d getRelative(){
+    public List<List<Double>> getRelative(){
         Matrix3dc own = servoMotorBlockEntity.ownPhysics.read().rotationMatrix();
         Matrix3dc asm = servoMotorBlockEntity.asmPhysics.read().rotationMatrix();
-        return VSMathUtils.get_xc2yc(own, asm);
+        return CCUtils.dumpMat3(VSMathUtils.get_xc2yc(own, asm));
     }
 
     @LuaFunction
-    public void applyTorque(double scale){
-        servoMotorBlockEntity.applyTorque(scale);
+    public void setOutputTorque(double scale){
+        servoMotorBlockEntity.setOutputTorque(scale);
     }
 
 

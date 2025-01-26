@@ -1,19 +1,27 @@
 package com.verr1.vscontrolcraft.blocks.jointMotor;
 
+import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
+import com.verr1.vscontrolcraft.base.Servo.ICanBruteDirectionalConnect;
 import com.verr1.vscontrolcraft.base.Servo.ServoMotorSyncAnimationPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.PacketDistributor;
 import org.joml.*;
-import org.valkyrienskies.core.apigame.constraints.VSSlideConstraint;
 
-public class JointMotorBlockEntity extends AbstractServoMotor {
+import java.util.List;
+
+import static net.minecraft.ChatFormatting.GRAY;
+
+public class JointMotorBlockEntity extends AbstractServoMotor
+{
     private boolean assembleNextTick = false;
 
     private final LerpedFloat animatedLerpedAngle = LerpedFloat.angular();
@@ -22,6 +30,24 @@ public class JointMotorBlockEntity extends AbstractServoMotor {
     public JointMotorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         lazyTickRate = 0;
+    }
+
+    @Override
+    public boolean addToTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        Lang.translate("tooltip.stressImpact")
+                .style(GRAY)
+                .forGoggles(tooltip);
+
+        float stressTotal = getAnimatedAngle(1);
+
+        Lang.number(stressTotal)
+                .translate("generic.unit.angle")
+                .style(ChatFormatting.AQUA)
+                .space()
+                .add(Lang.translate("gui.goggles.at_current_angle")
+                        .style(ChatFormatting.DARK_GRAY))
+                .forGoggles(tooltip, 1);
+        return true;
     }
 
     public Direction getServoDirection(){
@@ -72,7 +98,7 @@ public class JointMotorBlockEntity extends AbstractServoMotor {
             assembleNextTick = false;
         }
 
-        syncAssemAttachInducer();
+        syncCompanionAttachInducer();
 
     }
 
@@ -106,5 +132,6 @@ public class JointMotorBlockEntity extends AbstractServoMotor {
     public float getAnimatedAngle(float partialTick) {
         return animatedLerpedAngle.getValue(partialTick);
     }
+
 
 }

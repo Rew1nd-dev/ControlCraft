@@ -8,11 +8,13 @@ import com.verr1.vscontrolcraft.blocks.camera.CameraBlock;
 import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkLoaderBlock;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlock;
+import com.verr1.vscontrolcraft.blocks.pivotJoint.PivotJointBlock;
 import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlock;
-import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointDataGenerator;
+import com.verr1.vscontrolcraft.blocks.revoluteJoint.DirectionalAxialAdjusableDataGenerator;
 import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlock;
+import com.verr1.vscontrolcraft.blocks.slider.SliderControllerBlock;
 import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeBlock;
-import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeDataGenerator;
+import com.verr1.vscontrolcraft.blocks.sphericalHinge.DirectionalAdjustableHingeDataGenerator;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlock;
 import com.verr1.vscontrolcraft.blocks.wingController.WingControllerBlock;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverBlock;
@@ -160,7 +162,7 @@ public class AllBlocks {
             .initialProperties(SharedProperties::stone)
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
-                    SphericalHingeDataGenerator.generate()
+                    DirectionalAdjustableHingeDataGenerator.generate()
             )
             .item()
             .transform(customItemModel())
@@ -171,7 +173,29 @@ public class AllBlocks {
             .initialProperties(SharedProperties::stone)
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
-                    RevoluteJointDataGenerator.generate()
+                    DirectionalAxialAdjusableDataGenerator.generate()
+            )
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<PivotJointBlock> PIVOT_JOINT_BLOCK = REGISTRATE
+            .block(PivotJointBlock.ID, PivotJointBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .blockstate(
+                    DirectionalAdjustableHingeDataGenerator.generate()
+            )
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<SliderControllerBlock> SLIDER_CONTROLLER_BLOCK = REGISTRATE
+            .block(SliderControllerBlock.ID, SliderControllerBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
             )
             .item()
             .transform(customItemModel())

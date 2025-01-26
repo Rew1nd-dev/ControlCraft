@@ -2,10 +2,12 @@ package com.verr1.vscontrolcraft.blocks.revoluteJoint;
 
 import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
-import com.verr1.vscontrolcraft.base.Hinge.HingeAdjustLevel;
-import com.verr1.vscontrolcraft.base.Hinge.HingeSyncLevelPacket;
-import com.verr1.vscontrolcraft.base.Hinge.IAdjustableHinge;
-import com.verr1.vscontrolcraft.base.Hinge.ICanBruteConnect;
+import com.verr1.vscontrolcraft.base.Hinge.*;
+import com.verr1.vscontrolcraft.base.Hinge.interfaces.IAdjustableHinge;
+import com.verr1.vscontrolcraft.base.Hinge.interfaces.ICanBruteConnect;
+import com.verr1.vscontrolcraft.base.Hinge.interfaces.IConstrainHolder;
+import com.verr1.vscontrolcraft.base.Hinge.interfaces.IFlippableHinge;
+import com.verr1.vscontrolcraft.base.Hinge.packets.HingeSyncClientPacket;
 import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
 import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeBlock;
@@ -30,7 +32,11 @@ import org.valkyrienskies.core.apigame.constraints.VSHingeOrientationConstraint;
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
-public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implements ICanBruteConnect, IAdjustableHinge {
+import java.util.Arrays;
+
+public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implements
+        ICanBruteConnect, IAdjustableHinge, IFlippableHinge, IConstrainHolder
+{
 
 
     private VSAttachmentConstraint attach;
@@ -43,6 +49,11 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
     }
 
     public Direction getJointDirection(){
+        Direction unflipped = getJointDirectionUnflipped();
+        return isFlipped() ? unflipped : unflipped.getOpposite();
+    }
+
+    private Direction getJointDirectionUnflipped(){
         Direction facing = getBlockState().getValue(JointMotorBlock.FACING);
         Boolean align = getBlockState().getValue(JointMotorBlock.AXIS_ALONG_FIRST_COORDINATE);
         if(facing.getAxis() != Direction.Axis.X){
@@ -77,14 +88,11 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
         updateBlockState(level, getBlockPos(), getBlockState().setValue(SphericalHingeBlock.LEVEL, hingeLevel));
     }
 
-    public static void updateBlockState(Level world, BlockPos pos, BlockState newState){
-        world.setBlock(pos, newState, 3);
-    }
 
     void syncToClient(){
         AllPackets
                 .getChannel()
-                .send(PacketDistributor.ALL.noArg(),new HingeSyncLevelPacket(getBlockPos(), getAdjustment()));
+                .send(PacketDistributor.ALL.noArg(),new HingeSyncClientPacket(getBlockPos(), getAdjustment(), isFlipped()));
     }
 
     private Vector3d getHingeConnectorPosJOML() {
@@ -118,7 +126,7 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
                 .normalize();
 
         Quaterniondc hingeQuaternion_Asm = new
-                Quaterniond(VSMathUtils.getQuaternionOfPlacement(otherHinge.getJointDirection().getOpposite()))
+                Quaterniond(VSMathUtils.getQuaternionOfPlacement(otherHinge.getJointDirection()))
                 .mul(new Quaterniond(new AxisAngle4d(Math.toRadians(90.0), 0.0, 0.0, 1.0)), new Quaterniond())
                 .normalize();
 
@@ -155,6 +163,22 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
             attach_ID = null;
             hinge_ID = null;
         }
+    }
+
+    @Override
+    public void flip() {
+        setFlipped(!isFlipped());
+        syncToClient();
+    }
+
+    @Override
+    public boolean isFlipped(){
+        return getBlockState().getValue(RevoluteJointBlock.Flipped);
+    }
+
+    @Override
+    public void setFlipped(boolean flipped) {
+        updateBlockState(level, getBlockPos(), getBlockState().setValue(RevoluteJointBlock.Flipped, flipped));
     }
 
 
@@ -198,5 +222,25 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
             ControlCraft.LOGGER.info("Failed to read saved constrains");
         }
 
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        destroyConstrain();
+    }
+
+    @Override
+    public void destroyConstrain() {
+        try{
+            if(level.isClientSide)return;
+            var shipWorldCore = (ShipObjectServerWorld) VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
+            if(hinge_ID != null)shipWorldCore.removeConstraint((int)hinge_ID);
+            if(attach_ID != null)shipWorldCore.removeConstraint((int)attach_ID);
+            hinge_ID = null;
+            attach_ID = null;
+        }catch (Exception e){
+            ControlCraft.LOGGER.error(Arrays.toString(e.getStackTrace()));
+        }
     }
 }

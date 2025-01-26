@@ -1,25 +1,17 @@
 package com.verr1.vscontrolcraft.base.Wand;
 
-import com.verr1.vscontrolcraft.base.Wand.mode.WandAdjustHingeLevelMode;
-import com.verr1.vscontrolcraft.base.Wand.mode.WandHingeConnectionMode;
-import com.verr1.vscontrolcraft.base.Wand.mode.WandJointAssembleMode;
-import com.verr1.vscontrolcraft.base.Wand.mode.WandServoAssembleMode;
-import com.verr1.vscontrolcraft.events.KeyPressEventBus;
+import com.verr1.vscontrolcraft.base.Wand.mode.*;
 import com.verr1.vscontrolcraft.registry.AllItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -30,14 +22,20 @@ public class ClientWand {
         WandHingeConnectionMode.createInstance();
         WandServoAssembleMode.createInstance();
         WandAdjustHingeLevelMode.createInstance();
+        WandFlipRevoluteJointMode.createInstance();
         WandJointAssembleMode.createInstance();
+        WandDestroyConstrainMode.createInstance();
+        WandSliderAssembleMode.createInstance();
         //KeyPressEventBus.registerListener(ClientWand::OnWandRightClick);
 
     }
     static List<IWandMode> modes = List.of(
             WandHingeConnectionMode.instance,
             WandServoAssembleMode.instance,
+            WandFlipRevoluteJointMode.instance,
             WandJointAssembleMode.instance,
+            WandSliderAssembleMode.instance,
+            WandDestroyConstrainMode.instance,
             WandAdjustHingeLevelMode.instance
     );
 

@@ -41,4 +41,13 @@ public class ShipConnectorBlockEntity extends OnShipBlockEntity{
         return companionShipDirection;
     }
 
+    public boolean hasCompanionShip(){
+        return getCompanionServerShip() != null;
+    }
+
+    public void clearCompanionShipInfo(){
+        setCompanionShipID(-1);
+        setCompanionShipDirection(Direction.UP);
+    }
+
 }

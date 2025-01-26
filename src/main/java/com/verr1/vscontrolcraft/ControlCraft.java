@@ -32,13 +32,15 @@ import org.slf4j.Logger;
 *    1. extract ServoConstrainAssembleSchedule run() function, make it inside an class specific for ship aligning task
 *    2. VS constrain serialize utilities
 *    3. Make Force Inducer removing invalids by life time
+*    4. Sync Animation Packet Simplify to one, Make Interface for all blocks with only one animated data
 *    Features:
 *    1. suicide block, or self-disassemble block
 *    2.√ magnet block, implement using constrain or ShipForceInducer
-*    3. Linker tool, configurable, multi-functional tool for Control Craft
+*    3.√ Linker tool, configurable, multi-functional tool for Control Craft
 *    4.√ Variants of bearings with different rotational behaviors
 *    5. Directional Jet rudders, and rudder controller consuming liquid(optional), just like propeller controller
 *    6. Piston with Sphere sphere_hinge connection
+*
 *    Configuration:
 *    1. make more fields configurable
 */
@@ -48,12 +50,12 @@ import org.slf4j.Logger;
 @Mod(ControlCraft.MODID)
 public class ControlCraft
 {
-    // Define mod id in a common place for everything to reference
+
     public static final String MODID = "vscontrolcraft";
-    // Directly reference a slf4j logger
+
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final CreateRegistrate REGISTRATE = CreateRegistrate.create(ControlCraft.MODID);
-    // Creates a creative tab with the id "examplemod:example_tab" for the example item, that is placed after the combat tab
+
     public ControlCraft(){
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         REGISTRATE.registerEventListeners(modEventBus);
@@ -72,9 +74,7 @@ public class ControlCraft
         AllItems.register();
         AllPackets.registerPackets();
 
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            ControlCraftClient.clientInit();
-        });
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ControlCraftClient::clientInit);
 
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);// Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
