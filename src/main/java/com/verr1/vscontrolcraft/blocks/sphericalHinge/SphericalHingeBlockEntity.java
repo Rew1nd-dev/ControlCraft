@@ -1,6 +1,8 @@
 package com.verr1.vscontrolcraft.blocks.sphericalHinge;
 
 import com.verr1.vscontrolcraft.ControlCraft;
+import com.verr1.vscontrolcraft.base.Constrain.ConstrainCenter;
+import com.verr1.vscontrolcraft.base.Constrain.DataStructure.ConstrainKey;
 import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
 import com.verr1.vscontrolcraft.base.Hinge.*;
 import com.verr1.vscontrolcraft.base.Hinge.interfaces.IAdjustableHinge;
@@ -30,11 +32,6 @@ import java.util.Arrays;
 public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implements
         ICanBruteConnect, IAdjustableHinge, IConstrainHolder
 {
-
-    protected Object attachment_ID;
-    protected VSAttachmentConstraint attachment = null;
-
-
     public SphericalHingeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
@@ -50,6 +47,8 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
         if(!(level.getExistingBlockEntity(otherHingeBlockPos) instanceof SphericalHingeBlockEntity otherHinge))return;
 
 
+        boolean isCmpOnGround = !otherHinge.isOnServerShip();
+
         VSAttachmentConstraint attachment = new VSAttachmentConstraint(
                 getServerShipID(),
                 otherHinge.getServerShipID(),
@@ -60,7 +59,7 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
                 0.0
         );
 
-        recreateConstrains(attachment);
+        recreateConstrains(attachment, isCmpOnGround);
         setCompanionShipID(otherHinge.getServerShipID());
         notifyUpdate();
     }
@@ -73,23 +72,18 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
 
     }
 
-
-
-    public void recreateConstrains(VSAttachmentConstraint Hinge)
+    public void recreateConstrains(VSAttachmentConstraint Hinge, boolean isCmpOnGround)
     {
-        this.attachment = Hinge;
-        recreateConstrains();
-    }
-
-    public void recreateConstrains(){
-        if(attachment == null)return;
-        if(level.isClientSide)return;
         var shipWorldCore = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
-        attachment_ID =  shipWorldCore.createNewConstraint(this.attachment);
 
-        if(attachment_ID == null){
-            attachment = null;
-        }
+        boolean isGrounded = !isOnServerShip();
+
+        ConstrainCenter.createOrReplaceNewConstrain(
+                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, isCmpOnGround),
+                Hinge,
+                shipWorldCore
+        );
+
     }
 
     private Vector3d getHingeConnectorPosJOML() {
@@ -98,47 +92,6 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
 
     }
 
-
-
-    public void writeSavedConstrains(CompoundTag tag){
-        tag.putBoolean("assembled", getCompanionServerShip() != null);
-        if(attachment == null)return;
-        tag.putString("assemDir", getCompanionShipDirection().getSerializedName());
-        tag.putLong("asm", getCompanionShipID());
-        tag.putLong("own", getServerShipID());
-        VSConstrainSerializeUtils.writeVSAttachmentConstrain(tag, "attach_", attachment);
-
-    }
-
-
-    public void readSavedConstrains(CompoundTag tag){
-        boolean assembled = tag.getBoolean("assembled");
-        if(!assembled)return;
-        String assemDirString = tag.getString("assemDir");
-        setCompanionShipDirection(Direction.byName(assemDirString));;
-        setCompanionShipID(tag.getLong("asm"));
-        attachment = VSConstrainSerializeUtils.readVSAttachmentConstrain(tag, "attach_");
-    }
-
-    @Override
-    protected void write(CompoundTag tag, boolean clientPacket) {
-        super.write(tag, clientPacket);
-        if(clientPacket)return;
-        writeSavedConstrains(tag);
-    }
-
-    @Override
-    protected void read(CompoundTag tag, boolean clientPacket) {
-        super.read(tag, clientPacket);
-        if(clientPacket)return;
-        try {
-            readSavedConstrains(tag);
-            DeferralExecutor.executeLater(this::recreateConstrains, 1);
-        }catch (Exception e){
-            ControlCraft.LOGGER.info("Failed to read saved constrains");
-        }
-
-    }
 
     public HingeAdjustLevel getHingeLevel(){
         return getBlockState().getValue(SphericalHingeBlock.LEVEL);
@@ -161,9 +114,6 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
     }
 
 
-
-
-
     void syncToClient(){
         if(level.isClientSide)return;
         AllPackets
@@ -173,15 +123,8 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
 
     @Override
     public void destroyConstrain() {
-        if(level.isClientSide)return;
-        try{
-            var shipWorldCore = (ShipObjectServerWorld) VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
-            if(attachment_ID != null)shipWorldCore.removeConstraint((int)attachment_ID);
-            attachment_ID = null;
-        }catch (Exception e){
-            ControlCraft.LOGGER.error(Arrays.toString(e.getStackTrace()));
-        }
-
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", false, false));
+        clearCompanionShipInfo();
     }
 
 

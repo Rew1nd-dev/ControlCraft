@@ -11,6 +11,7 @@ public class AllPartialModels {
         SERVO_TOP = block("servo_top"),
         WING_CONTROLLER_TOP = block("wing_controller_top"),
         CAMERA_LENS = block("camera_lens"),
+        RUDDER_PART = block("rudder"),
 
         SLIDER_TOP = block("slider_top"),
         SLIDER_PILLAR = block("slider_pillar");

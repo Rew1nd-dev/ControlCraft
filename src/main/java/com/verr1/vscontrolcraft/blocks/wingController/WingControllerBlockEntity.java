@@ -242,6 +242,8 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
     }
 
     private void tickAnimationData(){
+
+
         if(!level.isClientSide)return;
         clientAnimatedAngle.chase(angle, 0.1, LerpedFloat.Chaser.EXP);
         clientAnimatedAngle.tickChaser();
@@ -261,7 +263,7 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
     public static class WingControllerScrollValueBehavior extends ScrollValueBehaviour{
 
         public WingControllerScrollValueBehavior(SmartBlockEntity be) {
-            super(Lang.translateDirect("kinetics.wingbearing.rotated_angle"), be, new WingControllerValueBox());
+            super(Lang.text("Rotational Angle").component(), be, new WingControllerValueBox());
         }
 
         @Override
@@ -288,7 +290,7 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
 
         public MutableComponent formatValue(ValueSettings settings) {
             return Lang.number(Math.max(1, Math.abs(settings.value())))
-                    .add(Lang.translateDirect("generic.unit.degrees"))
+                    .add(Lang.text("Degrees"))
                     .component();
         }
 

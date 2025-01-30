@@ -1,6 +1,8 @@
 package com.verr1.vscontrolcraft.blocks.revoluteJoint;
 
 import com.verr1.vscontrolcraft.ControlCraft;
+import com.verr1.vscontrolcraft.base.Constrain.ConstrainCenter;
+import com.verr1.vscontrolcraft.base.Constrain.DataStructure.ConstrainKey;
 import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
 import com.verr1.vscontrolcraft.base.Hinge.*;
 import com.verr1.vscontrolcraft.base.Hinge.interfaces.IAdjustableHinge;
@@ -37,12 +39,6 @@ import java.util.Arrays;
 public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implements
         ICanBruteConnect, IAdjustableHinge, IFlippableHinge, IConstrainHolder
 {
-
-
-    private VSAttachmentConstraint attach;
-    private Object attach_ID;
-    private VSHingeOrientationConstraint hinge;
-    private Object hinge_ID;
 
     public RevoluteJointBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -109,6 +105,7 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
         if(!VSMathUtils.isOnServerShip(otherHingeBlockPos, (ServerLevel) level) && !isOnServerShip())return;
         if(!(level.getExistingBlockEntity(otherHingeBlockPos) instanceof RevoluteJointBlockEntity otherHinge))return;
 
+        boolean isCmpOnGround = !otherHinge.isOnServerShip();
 
         VSAttachmentConstraint attachment = new VSAttachmentConstraint(
                 getServerShipID(),
@@ -139,30 +136,36 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
                 1.0E10
         );
 
-        recreateConstrains(attachment, orientation);
+        recreateConstrains(attachment, orientation, isCmpOnGround);
         setCompanionShipID(otherHinge.getServerShipID());
         notifyUpdate();
     }
 
-    public void recreateConstrains(VSAttachmentConstraint attach, VSHingeOrientationConstraint hinge)
+    public void recreateConstrains(VSAttachmentConstraint attach, VSHingeOrientationConstraint hinge, boolean isCmpOnGround)
     {
-        this.attach = attach;
-        this.hinge = hinge;
-        recreateConstrains();
+        var shipWorldCore = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
+
+        boolean isGrounded = !isOnServerShip();
+
+        ConstrainCenter.createOrReplaceNewConstrain(
+                new ConstrainKey(getBlockPos(), getDimensionID(), "attach", isGrounded, isCmpOnGround),
+                attach,
+                shipWorldCore
+        );
+
+        ConstrainCenter.createOrReplaceNewConstrain(
+                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, isCmpOnGround),
+                hinge,
+                shipWorldCore
+        );
     }
 
-    public void recreateConstrains(){
-        if(attach == null || hinge == null)return;
-        if(level.isClientSide)return;
-        var shipWorldCore = (ShipObjectServerWorld) VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
-        attach_ID =  shipWorldCore.createNewConstraint(this.attach);
-        hinge_ID = shipWorldCore.createNewConstraint(this.hinge);
-        if(attach_ID == null || hinge_ID == null){
-            attach = null;
-            hinge = null;
-            attach_ID = null;
-            hinge_ID = null;
-        }
+    @Override
+    public void destroyConstrain() {
+        boolean isGrounded = !isOnServerShip();
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach", isGrounded, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false));
+        clearCompanionShipInfo();
     }
 
     @Override
@@ -182,65 +185,12 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
     }
 
 
-    public void writeSavedConstrains(CompoundTag tag){
-        tag.putBoolean("assembled", getCompanionServerShip() != null);
-        if(attach == null || hinge == null)return;
-        tag.putString("assemDir", getCompanionShipDirection().getSerializedName());
-        tag.putLong("asm", getCompanionShipID());
-        tag.putLong("own", getServerShipID());
-        VSConstrainSerializeUtils.writeVSAttachmentConstrain(tag, "attach_", attach);
-        VSConstrainSerializeUtils.writeVSHingeOrientationConstrain(tag, "hinge_", hinge);
-
-    }
-
-
-    public void readSavedConstrains(CompoundTag tag){
-        boolean assembled = tag.getBoolean("assembled");
-        if(!assembled)return;
-        String assemDirString = tag.getString("assemDir");
-        setCompanionShipDirection(Direction.byName(assemDirString));;
-        setCompanionShipID(tag.getLong("asm"));
-        attach = VSConstrainSerializeUtils.readVSAttachmentConstrain(tag, "attach_");
-        hinge = VSConstrainSerializeUtils.readVSHingeOrientationConstrain(tag, "hinge_");
-    }
-
-    @Override
-    protected void write(CompoundTag tag, boolean clientPacket) {
-        super.write(tag, clientPacket);
-        if(clientPacket)return;
-        writeSavedConstrains(tag);
-    }
-
-    @Override
-    protected void read(CompoundTag tag, boolean clientPacket) {
-        super.read(tag, clientPacket);
-        if(clientPacket)return;
-        try {
-            readSavedConstrains(tag);
-            DeferralExecutor.executeLater(this::recreateConstrains, 1);
-        }catch (Exception e){
-            ControlCraft.LOGGER.info("Failed to read saved constrains");
-        }
-
-    }
-
     @Override
     public void destroy() {
         super.destroy();
+        if(level.isClientSide)return;
         destroyConstrain();
     }
 
-    @Override
-    public void destroyConstrain() {
-        try{
-            if(level.isClientSide)return;
-            var shipWorldCore = (ShipObjectServerWorld) VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
-            if(hinge_ID != null)shipWorldCore.removeConstraint((int)hinge_ID);
-            if(attach_ID != null)shipWorldCore.removeConstraint((int)attach_ID);
-            hinge_ID = null;
-            attach_ID = null;
-        }catch (Exception e){
-            ControlCraft.LOGGER.error(Arrays.toString(e.getStackTrace()));
-        }
-    }
+
 }

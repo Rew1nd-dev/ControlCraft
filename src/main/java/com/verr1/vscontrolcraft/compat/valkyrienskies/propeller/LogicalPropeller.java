@@ -9,7 +9,7 @@ public record LogicalPropeller(
         boolean canDrive,
         boolean reverseTorque,
         Vector3d direction,
-        Supplier<Double> speedCallBack,
+        double speed,
         double THRUST_RATIO,
         double TORQUE_RATIO,
         ServerLevel serverLevel

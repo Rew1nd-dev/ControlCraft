@@ -1,9 +1,11 @@
 package com.verr1.vscontrolcraft.utils;
 
+import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.joml.*;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
@@ -116,6 +118,12 @@ public class VSMathUtils {
     public static double clamp(double x, double threshold){
         if(x > threshold)return threshold;
         if(x < - threshold)return -threshold;
+        return x;
+    }
+
+    public static double clamp0(double x, double threshold){
+        if(x > threshold)return 0;
+        if(x < - threshold)return 0;
         return x;
     }
 
@@ -259,6 +267,10 @@ public class VSMathUtils {
                 new Matrix4d(ship.getTransform().getWorldToShip()),
                 inertia.getShipMass()
         );
+    }
+
+    public static BlockEntity getExisting(LevelPos pos){
+        return pos.level().getExistingBlockEntity(pos.pos());
     }
 
     public static Vector3d safeNormalize(Vector3d v){

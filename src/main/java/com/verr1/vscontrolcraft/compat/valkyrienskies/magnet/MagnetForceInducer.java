@@ -1,20 +1,18 @@
 package com.verr1.vscontrolcraft.compat.valkyrienskies.magnet;
 
+import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlockEntity;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetManager;
+import com.verr1.vscontrolcraft.compat.valkyrienskies.base.AbstractExpirableForceInducer;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
+import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
 import org.valkyrienskies.core.api.ships.PhysShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
-import org.valkyrienskies.core.api.ships.ShipForcesInducer;
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-public class MagnetForceInducer implements ShipForcesInducer {
-    private final ConcurrentHashMap<LogicalMagnet, Integer> magnets = new ConcurrentHashMap<>();
-    private int TICKS_BEFORE_EXPIRED = 30;
+public class MagnetForceInducer extends AbstractExpirableForceInducer {
 
     public static MagnetForceInducer getOrCreate(ServerShip ship){
         MagnetForceInducer obj = ship.getAttachment(MagnetForceInducer.class);
@@ -25,19 +23,17 @@ public class MagnetForceInducer implements ShipForcesInducer {
         return obj;
     }
 
-    public void writePhysicsAndApplyForces(@NotNull PhysShip physShip, LogicalMagnet magnet){
+    public void writePhysicsAndApplyForces(@NotNull PhysShip physShip, LevelPos magnet){
         MagnetBlockEntity be = MagnetManager.getExisting(magnet);
         if(be == null)return;
         be.writePhysicsShipInfo(VSMathUtils.getShipPhysics((PhysShipImpl) physShip));
+        LogicalMagnet logicalMagnet = be.getLogicalMagnet();
+        if(logicalMagnet == null)return;
         Vector3d r_sc = be.getRelativePosition();
-        Vector3d attraction = MagnetManager.calculateAttraction(magnet);
+        Vector3d attraction = MagnetManager.calculateAttraction(logicalMagnet);
         physShip.applyInvariantForceToPos(attraction, r_sc);
     }
 
-    public void activated(LogicalMagnet magnet){
-        magnets.put(magnet, TICKS_BEFORE_EXPIRED);
-
-    }
 
     @Override
     public void applyForces(@NotNull PhysShip physShip) {
@@ -47,11 +43,12 @@ public class MagnetForceInducer implements ShipForcesInducer {
 
 
     public void tickAttraction(@NotNull PhysShip physShip){
-        magnets.forEach((k, v) -> writePhysicsAndApplyForces(physShip, k));
+        getLives().forEach((k, v) -> writePhysicsAndApplyForces(physShip, k));
     }
 
-    public void tickActivated(){
-        magnets.entrySet().forEach(e -> e.setValue(e.getValue() - 1));
-        magnets.entrySet().removeIf(e -> e.getValue() < 0);
+    @Override
+    public void applyForcesAndLookupPhysShips(@NotNull PhysShip physShip, @NotNull Function1<? super Long, ? extends PhysShip> lookupPhysShip) {
+
     }
+
 }

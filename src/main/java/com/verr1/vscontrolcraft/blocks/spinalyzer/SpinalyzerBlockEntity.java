@@ -2,6 +2,7 @@ package com.verr1.vscontrolcraft.blocks.spinalyzer;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SpinalyzerPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.spnialyzer.LogicalSensor;
@@ -11,6 +12,7 @@ import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
@@ -125,20 +127,12 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
         ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos((ServerLevel) level, getBlockPos());
         if(ship == null)return;
         var sensor = SpinalyzerSensor.getOrCreate(ship);
-        sensor.updateSensor(new LogicalSensor((ServerLevel) getLevel(), getBlockPos()));
+        sensor.update(new LevelPos(getBlockPos(), (ServerLevel) getLevel()));
     }
 
-    public void exitAttachedSensor(){
-        if(level.isClientSide) return;
-        ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos((ServerLevel) level, getBlockPos());
-        if(ship == null)return;
-        var sensor = SpinalyzerSensor.getOrCreate(ship);
-        sensor.removeSensor(new LogicalSensor((ServerLevel) getLevel(), getBlockPos()));
-    }
 
     @Override
     public void destroy(){
-        exitAttachedSensor();
         super.destroy();
     }
 

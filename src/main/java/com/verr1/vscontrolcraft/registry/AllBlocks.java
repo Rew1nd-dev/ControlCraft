@@ -4,8 +4,12 @@ import com.simibubi.create.foundation.data.BlockStateGen;
 import com.simibubi.create.foundation.data.SharedProperties;
 import com.simibubi.create.foundation.data.TagGen;
 import com.tterrag.registrate.util.entry.BlockEntry;
+import com.verr1.vscontrolcraft.blocks.anchor.AnchorBlock;
+import com.verr1.vscontrolcraft.blocks.annihilator.AnnihilatorBlock;
 import com.verr1.vscontrolcraft.blocks.camera.CameraBlock;
 import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkLoaderBlock;
+import com.verr1.vscontrolcraft.blocks.jet.JetBlock;
+import com.verr1.vscontrolcraft.blocks.jetRudder.JetRudderBlock;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlock;
 import com.verr1.vscontrolcraft.blocks.pivotJoint.PivotJointBlock;
@@ -197,6 +201,50 @@ public class AllBlocks {
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
             )
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<AnchorBlock> ANCHOR_BLOCK = REGISTRATE
+            .block(AnchorBlock.ID, AnchorBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<AnnihilatorBlock> ANNIHILATOR_BLOCK = REGISTRATE
+            .block(AnnihilatorBlock.ID, AnnihilatorBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<JetBlock> JET_BLOCK = REGISTRATE
+            .block(JetBlock.ID, JetBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<JetRudderBlock> JET_RUDDER_BLOCK = REGISTRATE
+            .block(JetRudderBlock.ID, JetRudderBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .item()
             .transform(customItemModel())
             .register();

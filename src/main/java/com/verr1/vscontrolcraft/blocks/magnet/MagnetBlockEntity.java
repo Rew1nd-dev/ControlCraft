@@ -2,6 +2,7 @@ package com.verr1.vscontrolcraft.blocks.magnet;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.MagnetPeripheral;
@@ -118,7 +119,7 @@ public class MagnetBlockEntity extends SmartBlockEntity {
         ServerShip ship = getServerShipOn();
         if(ship == null)return;
         MagnetForceInducer inducer = MagnetForceInducer.getOrCreate(ship);
-        inducer.activated(new LogicalMagnet(getBlockPos(), (ServerLevel)level));
+        inducer.update(new LevelPos(getBlockPos(), (ServerLevel)level));
     }
 
     @Override
@@ -132,5 +133,9 @@ public class MagnetBlockEntity extends SmartBlockEntity {
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
 
+    }
+
+    public LogicalMagnet getLogicalMagnet() {
+        return new LogicalMagnet(getBlockPos(), (ServerLevel)level);
     }
 }

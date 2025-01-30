@@ -1,29 +1,26 @@
 package com.verr1.vscontrolcraft.compat.valkyrienskies.spnialyzer;
 
+import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlockEntity;
 
+import com.verr1.vscontrolcraft.compat.valkyrienskies.base.AbstractExpirableForceInducer;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
+import kotlin.jvm.functions.Function1;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.NotNull;
 import org.valkyrienskies.core.api.ships.PhysShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
-import org.valkyrienskies.core.api.ships.ShipForcesInducer;
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-public class SpinalyzerSensor implements ShipForcesInducer {
-    private final int lazyTickRate = 30;
-    private int lazyTickCount = 0;
-    private ConcurrentHashMap<LogicalSensor, Integer> spinalsOnShip = new ConcurrentHashMap<>();
+public class SpinalyzerSensor extends AbstractExpirableForceInducer {
 
     @Override
     public void applyForces(@NotNull PhysShip physShip) {
-        lazyTick();
+        super.applyForces(physShip);
         ShipPhysics tickPhysics = VSMathUtils.getShipPhysics((PhysShipImpl) physShip);
-        spinalsOnShip.entrySet().forEach(e->{
+        getLives().entrySet().forEach(e->{
             BlockPos pos = e.getKey().pos();
             ServerLevel level = e.getKey().level();
             if(level.getExistingBlockEntity(pos) instanceof SpinalyzerBlockEntity spinal){
@@ -32,27 +29,13 @@ public class SpinalyzerSensor implements ShipForcesInducer {
         });
     }
 
-    public void updateSensor(LogicalSensor sensor){
-        spinalsOnShip.put(sensor, 1);
+
+    @Override
+    public void applyForcesAndLookupPhysShips(@NotNull PhysShip physShip, @NotNull Function1<? super Long, ? extends PhysShip> lookupPhysShip) {
+
     }
 
-    public void removeSensor(LogicalSensor sensor){
-        spinalsOnShip.remove(sensor);
-    }
 
-    public void removeInvalidControllers(){
-        spinalsOnShip.entrySet().removeIf(entry -> {
-            BlockPos pos = entry.getKey().pos();
-            ServerLevel level = entry.getKey().level();
-            return level.getExistingBlockEntity(pos) instanceof SpinalyzerBlockEntity;
-        });
-    }
-
-    public void lazyTick(){
-        if(lazyTickCount-- > 0)return;
-        lazyTickCount = lazyTickRate;
-        removeInvalidControllers();
-    }
 
     public static SpinalyzerSensor getOrCreate(@NotNull ServerShip ship) {
         SpinalyzerSensor obj = ship.getAttachment(SpinalyzerSensor.class);

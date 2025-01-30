@@ -50,7 +50,7 @@ public class OnShipBlockEntity extends SmartBlockEntity {
 
     public @Nullable ServerShip getServerShipOn(){
         if(level.isClientSide)return null;
-        ServerShip ship = VSGameUtilsKt.getShipManagingPos((ServerLevel) level, getBlockPos());
+        ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos((ServerLevel) level, getBlockPos());
         return ship;
     }
 

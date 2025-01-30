@@ -22,13 +22,14 @@ public class PIDControllerInfoHolder {
         integral_err = VSMathUtils.clamp(integral_err + curr_err * ts, MAX_INTEGRAL);
     }
 
+
     public synchronized void setTarget(double target) {
         this.target = target;
     }
 
 
     public double calculateControlValueScaleAngular() {
-        return p * curr_err + d * VSMathUtils.radErrFix(curr_err - prev_err) / ts + i * integral_err;
+        return p * VSMathUtils.radErrFix(curr_err) + d * VSMathUtils.radErrFix(curr_err - prev_err) / ts + i * integral_err;
     }
 
     public double calculateControlValueScaleLinear() {

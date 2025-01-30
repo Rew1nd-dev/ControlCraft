@@ -9,37 +9,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public class TransmitterPeripheral implements IPeripheral {
+public class TransmitterPeripheral extends AbstractAttachedPeripheral<TransmitterBlockEntity> {
 
-    private final TransmitterBlockEntity transmitterBlockEntity;
-    private final Set<IComputerAccess> computers = Sets.newConcurrentHashSet();
 
     public TransmitterPeripheral(TransmitterBlockEntity transmitterBlockEntity) {
-        this.transmitterBlockEntity = transmitterBlockEntity;
+        super(transmitterBlockEntity);
     }
 
-
-
-    @Override
-    public void attach(IComputerAccess computer) {
-        computers.add(computer);
-    }
-
-    @Override
-    public Object getTarget(){
-        return transmitterBlockEntity;
-    }
-
-    @Override
-    public void detach(IComputerAccess computer) {
-        computers.remove(computer);
-    }
 
     @Override
     public boolean equals(@Nullable IPeripheral iPeripheral) {
-        if (iPeripheral == null)return false;
-        if (!(iPeripheral instanceof TransmitterPeripheral transmitterPeripheral))return false;
-        return transmitterBlockEntity.getBlockPos() == ((TransmitterBlockEntity) transmitterPeripheral.getTarget()).getBlockPos();
+        if (!(iPeripheral instanceof TransmitterPeripheral p))return false;
+        return getTarget().getBlockPos() == p.getTarget().getBlockPos();
     }
 
 
@@ -53,12 +34,12 @@ public class TransmitterPeripheral implements IPeripheral {
     public MethodResult callRemote(IComputerAccess access, ILuaContext context, IArguments arguments) throws LuaException {
         String remoteName = arguments.getString(0);
         String methodName = arguments.getString(1);
-        return transmitterBlockEntity.callRemote(access, context, remoteName, methodName, arguments.drop(2));
+        return getTarget().callRemote(access, context, remoteName, methodName, arguments.drop(2));
     }
 
     @LuaFunction
     public void setProtocol(long p){
-        transmitterBlockEntity.setProtocol(p);
+        getTarget().setProtocol(p);
     }
 
 }

@@ -1,6 +1,10 @@
-// 1.20.1	2025-01-25T15:19:22.1818598	Registrate Provider for vscontrolcraft [Recipes, Advancements, Loot Tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud)]
+// 1.20.1	2025-01-30T00:10:42.1670052	Registrate Provider for vscontrolcraft [Recipes, Advancements, Loot Tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), Blockstates, Item models, Lang (en_us/en_ud)]
+d6c339bb0c08d89e20a4b407b5ff3efcafb8bdb6 assets/vscontrolcraft/blockstates/anchor.json
+9808c2b76c2dd6329b73e0d086ed50ce8b075ea5 assets/vscontrolcraft/blockstates/annihilator.json
 4464630cc1168b2a11025d419a09a6053060cc77 assets/vscontrolcraft/blockstates/camera.json
 fe4d8d4be2dbcfa63ffd817a4501a8b5e334a3c1 assets/vscontrolcraft/blockstates/chunk_loader.json
+196da889a3ed22ad9dd65ba29c7401eaa638c869 assets/vscontrolcraft/blockstates/jet.json
+d7d3e3458a5e20720d26f491dfc86019189e0cbb assets/vscontrolcraft/blockstates/jet_rudder.json
 a09dcaeb2dcf25b8a163d74f5d19479c1313a5f5 assets/vscontrolcraft/blockstates/joint.json
 40a398e7321d751f11181c496e1c838db32bc51d assets/vscontrolcraft/blockstates/magnet.json
 84bdc7d02595306476d904cddb0f552ef2b5ccf3 assets/vscontrolcraft/blockstates/pivot.json
@@ -14,10 +18,14 @@ fa7a4eb030d1446afa77ad0fef57c1800d5e28a6 assets/vscontrolcraft/blockstates/spher
 3a96b48f1ce93ef4f8ac6577c28e74e03c9bd38f assets/vscontrolcraft/blockstates/spinalyzer.json
 7f6e4e9d5a3ce7151a929eb7a1f8d47edf506d07 assets/vscontrolcraft/blockstates/transmitter.json
 2a6f2c9efcc11cfdf2ab3b9866ce7f4ce2695e3e assets/vscontrolcraft/blockstates/wing_controller.json
-fa098e36e502541a2b8444c85428ca3cf1af4e7d assets/vscontrolcraft/lang/en_ud.json
-ba5d4dcfc38376f6459fd32cc6eb88bef766da59 assets/vscontrolcraft/lang/en_us.json
+819f4b5801a1d189b4b7392e0708d9f850cb8ff3 assets/vscontrolcraft/lang/en_ud.json
+a5b1ffdb80b4e884c119c6e8e507ec3a6ab90eb2 assets/vscontrolcraft/lang/en_us.json
+cf769d5e18f7c425bfbcd0ae1f7c402c14f93460 assets/vscontrolcraft/models/item/anchor.json
+56b66c934c29b10635c1c16bda9be94acf15b503 assets/vscontrolcraft/models/item/annihilator.json
 b4ecc8aab3e454266f797788c7657e1a5f82a7ec assets/vscontrolcraft/models/item/camera.json
 bbdebe955e19afc5b650b42fbb0195225f8a0882 assets/vscontrolcraft/models/item/chunk_loader.json
+50e1b8470e537f9b15b7f8494767ab4c97c6b5eb assets/vscontrolcraft/models/item/jet.json
+ef9ff1bd47aa0367565aa1c5efb78868d012ca22 assets/vscontrolcraft/models/item/jet_rudder.json
 2c2149a78168ff621424696b1399d28bbd374578 assets/vscontrolcraft/models/item/joint.json
 3b9ffc6f750c3679d25e755b40d208fbdb48eb19 assets/vscontrolcraft/models/item/magnet.json
 5fad314bbae524675e0c945797f69ff1f281329b assets/vscontrolcraft/models/item/pivot.json
@@ -33,8 +41,12 @@ fa5847169992c31801e97df3dc24287b5b60b24a assets/vscontrolcraft/models/item/trans
 b8f0dbc051856f6b6a0f56e994b95da7db991080 assets/vscontrolcraft/models/item/wing_controller.json
 92c879a4dbfa8d24715ece2d7684105608efa4e6 data/minecraft/tags/blocks/mineable/axe.json
 92c879a4dbfa8d24715ece2d7684105608efa4e6 data/minecraft/tags/blocks/mineable/pickaxe.json
+8e0d5a27d00f7972cb3e1a0d9009646eec9e8564 data/vscontrolcraft/loot_tables/blocks/anchor.json
+2e0471c36e1b831c6215bfbb2efdbfebe282bebb data/vscontrolcraft/loot_tables/blocks/annihilator.json
 e70fdd75db022fa6f577974a94b05a32ef1f0e40 data/vscontrolcraft/loot_tables/blocks/camera.json
 8cd2c961cf3646cc7601b8c4c3fe4f29c1b14891 data/vscontrolcraft/loot_tables/blocks/chunk_loader.json
+8f52b8a577f73a294d5c278298a33121dd938b6d data/vscontrolcraft/loot_tables/blocks/jet.json
+7983c2aa87020bfe3ce506d8c23cf1ddaab79a79 data/vscontrolcraft/loot_tables/blocks/jet_rudder.json
 15a32dde00adbc911d99591fd21c85ed420e7bff data/vscontrolcraft/loot_tables/blocks/joint.json
 373b89695a51a93aeded7065ae777cd443a6ed9b data/vscontrolcraft/loot_tables/blocks/magnet.json
 8d8fc4b3cf09931b115d77a5c4b051c626b20f54 data/vscontrolcraft/loot_tables/blocks/pivot.json

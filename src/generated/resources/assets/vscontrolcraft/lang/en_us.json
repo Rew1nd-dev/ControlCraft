@@ -1,6 +1,10 @@
 {
+  "block.vscontrolcraft.anchor": "Anchor",
+  "block.vscontrolcraft.annihilator": "Annihilator",
   "block.vscontrolcraft.camera": "Camera",
   "block.vscontrolcraft.chunk_loader": "Chunk Loader",
+  "block.vscontrolcraft.jet": "Jet",
+  "block.vscontrolcraft.jet_rudder": "Jet Rudder",
   "block.vscontrolcraft.joint": "Joint",
   "block.vscontrolcraft.magnet": "Magnet",
   "block.vscontrolcraft.pivot": "Pivot",

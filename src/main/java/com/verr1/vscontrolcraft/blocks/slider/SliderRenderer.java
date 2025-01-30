@@ -21,19 +21,16 @@ public class SliderRenderer extends SafeBlockEntityRenderer<SliderControllerBloc
 
     @Override
     protected void renderSafe(SliderControllerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource bufferSource, int light, int overlay) {
-        float distance = (float) VSMathUtils.clamp(be.getAnimatedTargetDistance(partialTicks), 32) ;
+        float distance = (float) VSMathUtils.clamp0(be.getAnimatedTargetDistance(partialTicks), 32) ;
         BlockState state = be.getBlockState();
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
         SuperByteBuffer buffer_top = CachedBufferer.partialFacing(AllPartialModels.SLIDER_TOP, state);
         SuperByteBuffer buffer_pil = CachedBufferer.partial(AllPartialModels.SLIDER_PILLAR, state);
 
-        Vector3fc ones = new Vector3f(1, 1, 1);
 
         Vector3fc scale = new Vector3f(1, 1, 1 + distance);//be.getDirectionJOML().absolute().mul(distance).add(ones).get(new Vector3f()) ;
 
         // Apply scaling transformation
-        Matrix4f pose = new Matrix4f().scale(scale);
-        Matrix3f normal = new Matrix3f().scale(scale);
 
         buffer_pil
                 .centre()

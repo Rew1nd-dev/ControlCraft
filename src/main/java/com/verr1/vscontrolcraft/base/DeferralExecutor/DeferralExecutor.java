@@ -3,7 +3,7 @@ package com.verr1.vscontrolcraft.base.DeferralExecutor;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class DeferralExecutor {
-    private static ConcurrentLinkedDeque<DeferralRunnable> deferralTasks = new ConcurrentLinkedDeque<>();
+    private static final ConcurrentLinkedDeque<DeferralRunnable> deferralTasks = new ConcurrentLinkedDeque<>();
 
     public static void tick(){
         deferralTasks.forEach(r -> {

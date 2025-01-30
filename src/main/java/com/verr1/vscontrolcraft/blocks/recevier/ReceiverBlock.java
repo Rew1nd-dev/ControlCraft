@@ -68,7 +68,7 @@ public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlock
         PeripheralKey networkKey = entity.getNetworkKey();
         String peripheralType = entity.getAttachedPeripheralType();
         AllPackets.sendToPlayer(
-                new ReceiverOpenScreenPacket(entity.getBlockPos(), networkKey.Name(), peripheralType ,networkKey.Protocol()),
+                new ReceiverOpenScreenPacket(entity.getBlockPos(), networkKey.Name(), peripheralType, networkKey.Protocol()),
                 ((ServerPlayer)player)
         );
 

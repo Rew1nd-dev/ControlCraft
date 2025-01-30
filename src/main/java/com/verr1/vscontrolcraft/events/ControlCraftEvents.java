@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.events;
 
 import com.verr1.vscontrolcraft.Debug;
+import com.verr1.vscontrolcraft.base.Constrain.ConstrainCenter;
 import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
 import com.verr1.vscontrolcraft.base.IntervalExecutor.IntervalExecutor;
 import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkManager;
@@ -24,11 +25,17 @@ public class ControlCraftEvents {
         Debug.tick(event);
         MagnetManager.tick();
         NetworkManager.tick();
+        ConstrainCenter.tick();
     }
 
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event) {
+        ConstrainCenter.onServerStaring(event.getServer());
+    }
 
+    @SubscribeEvent
+    public static void onServerStopping(ServerStoppingEvent event) {
+        ConstrainCenter.onServerStopping(event.getServer());
     }
 
     public static void onPhysicsTickStart(){

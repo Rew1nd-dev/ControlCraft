@@ -9,37 +9,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public class WingControllerPeripheral implements IPeripheral {
-    private final WingControllerBlockEntity wingControllerBlockEntity;
-    private final Set<IComputerAccess> computers = Sets.newConcurrentHashSet();
+public class WingControllerPeripheral extends AbstractAttachedPeripheral<WingControllerBlockEntity> {
 
     public WingControllerPeripheral(WingControllerBlockEntity wingControllerBlockEntity) {
-        this.wingControllerBlockEntity = wingControllerBlockEntity;
-    }
-
-
-    @Override
-    public void attach(IComputerAccess computer) {
-        computers.add(computer);
-    }
-
-    @Override
-    public Object getTarget() {
-        return wingControllerBlockEntity;
-    }
-
-    @Override
-    public void detach(IComputerAccess computer) {
-        computers.remove(computer);
+        super(wingControllerBlockEntity);
     }
 
     @Override
     public boolean equals(@Nullable IPeripheral iPeripheral) {
-        if (iPeripheral instanceof PropellerControllerPeripheral) return false;
-        if (iPeripheral == null) return false;
-        return wingControllerBlockEntity == iPeripheral.getTarget();
+        if (!(iPeripheral instanceof WingControllerPeripheral p))return false;
+        return getTarget().getBlockPos() == p.getTarget().getBlockPos();
     }
-
 
     @Override
     public String getType() {
@@ -48,12 +28,12 @@ public class WingControllerPeripheral implements IPeripheral {
 
     @LuaFunction
     public float getAngle(){
-        return wingControllerBlockEntity.getAngle();
+        return getTarget().getAngle();
     }
 
     @LuaFunction
     public void setAngle(double angle){
-        wingControllerBlockEntity.setAngle((float)angle);
+        getTarget().setAngle((float)angle);
     }
 
 }

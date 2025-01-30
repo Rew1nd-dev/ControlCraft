@@ -1,23 +1,16 @@
 package com.verr1.vscontrolcraft.blocks.servoMotor;
 
-import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
 import com.verr1.vscontrolcraft.base.Servo.ServoMotorSyncAnimationPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.PacketDistributor;
 import org.joml.*;
-
-import java.util.List;
-
-import static net.minecraft.ChatFormatting.GRAY;
 
 public class ServoMotorBlockEntity extends AbstractServoMotor{
 
@@ -32,23 +25,7 @@ public class ServoMotorBlockEntity extends AbstractServoMotor{
         lazyTickRate = 0;
     }
 
-    @Override
-    public boolean addToTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        Lang.translate("tooltip.stressImpact")
-                .style(GRAY)
-                .forGoggles(tooltip);
 
-        float stressTotal = getAnimatedAngle(1);
-
-        Lang.number(stressTotal)
-                .translate("generic.unit.angle")
-                .style(ChatFormatting.AQUA)
-                .space()
-                .add(Lang.translate("gui.goggles.at_current_angle")
-                        .style(ChatFormatting.DARK_GRAY))
-                .forGoggles(tooltip, 1);
-        return true;
-    }
 
     public Vector3d getServoDirectionJOML(){
         return Util.Vec3itoVector3d(getBlockState().getValue(ServoMotorBlock.FACING).getNormal()) ;
@@ -112,6 +89,7 @@ public class ServoMotorBlockEntity extends AbstractServoMotor{
         animatedAngle = (float)angle;
     }
 
+    @Override
     public float getAnimatedAngle(float partialTick) {
         return animatedLerpedAngle.getValue(partialTick);
     }

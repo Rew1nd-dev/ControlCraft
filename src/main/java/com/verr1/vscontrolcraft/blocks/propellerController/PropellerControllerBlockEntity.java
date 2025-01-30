@@ -1,9 +1,9 @@
 package com.verr1.vscontrolcraft.blocks.propellerController;
 
-import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
+import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
+import com.verr1.vscontrolcraft.base.OnShipBlockEntity;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.PropellerControllerPeripheral;
-import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.LogicalPropeller;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.PropellerForceInducer;
 import com.verr1.vscontrolcraft.blocks.propeller.PropellerBlockEntity;
@@ -19,12 +19,11 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3d;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
-public class PropellerControllerBlockEntity extends KineticBlockEntity {
+public class PropellerControllerBlockEntity extends OnShipBlockEntity {
     public boolean hasAttachedPropeller = false;
 
     public SynchronizedField<Double> rotationalSpeed = new SynchronizedField<>(0.0);
@@ -74,7 +73,7 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
     public void syncAttachedPropeller(){
         Vec3i direction = this.getBlockState().getValue(BlockStateProperties.FACING).getNormal();
         BlockPos propellerPos = this.getBlockPos().offset(new BlockPos(direction.getX(), direction.getY(), direction.getZ()));
-        var attachedBlockEntity = level.getBlockEntity(propellerPos);
+        var attachedBlockEntity = level.getExistingBlockEntity(propellerPos);
         hasAttachedPropeller = attachedBlockEntity instanceof PropellerBlockEntity;
         if(!hasAttachedPropeller)return;
         PropellerBlockEntity propeller = (PropellerBlockEntity) attachedBlockEntity;
@@ -88,9 +87,6 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
         return hasAttachedPropeller;
     }
 
-    public Vector3d getDirection(){
-        return Util.Vec3itoVector3d(getBlockState().getValue(BlockStateProperties.FACING).getOpposite().getNormal());
-    }
 
     public double getTargetSpeed(){
         return rotationalSpeed.read();
@@ -102,33 +98,12 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
 
         if(ship == null)return;
         var inducer = PropellerForceInducer.getOrCreate(ship);
-        inducer.updateLogicalPropeller(
-                getBlockPos(),
-                new LogicalPropeller(
-                        canDrive(),
-                        attachPropellerReverseTorque,
-                        getDirection(),
-                        this::getTargetSpeed, // Physics Thread is running at higher frequency, send callback function to keep up with the latest
-                        attachedPropellerThrustRatio,
-                        attachedPropellerTorqueRatio,
-                        (ServerLevel) this.level   //The level is always server sided, because tick() will return at client side
-                )
-        );
+        inducer.update(new LevelPos(getBlockPos(), (ServerLevel) level));
     }
 
-    public void exitAttachedInducer(){
-        if(level.isClientSide) return;
-        ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos((ServerLevel) level, getBlockPos());
-        if(ship == null)return;
-        var inducer = PropellerForceInducer.getOrCreate(ship);
-        if(inducer == null)return;
-        inducer.removeLogicalPropeller(getBlockPos());
-
-    }
 
     @Override
     public void destroy(){
-        exitAttachedInducer();
         super.destroy();
     }
 
@@ -136,4 +111,17 @@ public class PropellerControllerBlockEntity extends KineticBlockEntity {
         rotationalSpeed.write(speed);
     }
 
+    public LogicalPropeller getLogicalPropeller() {
+        if(level.isClientSide)return null;
+        if(!isOnServerShip())return null;
+        return  new LogicalPropeller(
+                canDrive(),
+                attachPropellerReverseTorque,
+                getDirectionJOML(),
+                getTargetSpeed(),
+                attachedPropellerThrustRatio,
+                attachedPropellerTorqueRatio,
+                (ServerLevel) this.level
+        );
+    }
 }

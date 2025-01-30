@@ -4,8 +4,6 @@ package com.verr1.vscontrolcraft.blocks.wingController;
 import com.simibubi.create.content.contraptions.AssemblyException;
 import com.simibubi.create.content.contraptions.bearing.BearingContraption;
 import com.simibubi.create.content.kinetics.base.KineticBlock;
-import com.simibubi.create.infrastructure.config.AllConfigs;
-import com.verr1.vscontrolcraft.compat.valkyrienskies.wing.LogicalWing;
 import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -42,10 +40,5 @@ public class WingContraption extends BearingContraption {
         return true;
     }
 
-    public static LogicalWing calcWingGeometry(WingContraption physicalWing){
-        Vector3d facing = Util.Vec3itoVector3d(physicalWing.facing.getNormal());
-        int A = physicalWing.sailBlocks;
-        return null;
-    }
 
 }

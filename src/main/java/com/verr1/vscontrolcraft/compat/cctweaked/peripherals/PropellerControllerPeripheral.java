@@ -9,12 +9,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public class PropellerControllerPeripheral implements IPeripheral {
-    private final PropellerControllerBlockEntity controllerBlockEntity;
-    private final Set<IComputerAccess> computers = Sets.newConcurrentHashSet();
+public class PropellerControllerPeripheral extends AbstractAttachedPeripheral<PropellerControllerBlockEntity> {
 
     public PropellerControllerPeripheral(PropellerControllerBlockEntity controllerBlockEntity) {
-        this.controllerBlockEntity = controllerBlockEntity;
+        super(controllerBlockEntity);
     }
 
     @Override
@@ -22,37 +20,22 @@ public class PropellerControllerPeripheral implements IPeripheral {
         return "PropellerController";
     }
 
-    @Override
-    public void attach(IComputerAccess computer) {
-        computers.add(computer);
-        IPeripheral.super.attach(computer);
-    }
 
-    @Override
-    public Object getTarget(){
-        return controllerBlockEntity;
-    }
-
-    @Override
-    public void detach(IComputerAccess computer) {
-        computers.remove(computer);
-    }
 
     @Override
     public boolean equals(@Nullable IPeripheral iPeripheral) {
-        if (iPeripheral == null)return false;
-        if (!(iPeripheral instanceof PropellerControllerPeripheral))return false;
-        return controllerBlockEntity == iPeripheral.getTarget();
+        if (!(iPeripheral instanceof PropellerControllerPeripheral p))return false;
+        return getTarget().getBlockPos() == p.getTarget().getBlockPos();
     }
 
     @LuaFunction
     public void setTargetSpeed(double speed){
-        controllerBlockEntity.setTargetSpeed(speed);
+        getTarget().setTargetSpeed(speed);
     }
 
     @LuaFunction
     public double getTargetSpeed(){
-        return controllerBlockEntity.getTargetSpeed();
+        return getTarget().getTargetSpeed();
     }
 
 }

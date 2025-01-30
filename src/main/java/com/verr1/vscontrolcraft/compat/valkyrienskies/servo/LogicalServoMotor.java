@@ -11,7 +11,7 @@ public record LogicalServoMotor(
         ServerLevel level,
         Direction servoDir,
         Direction assemDir,
-        Supplier<Double> torqueCallBack
+        double torque
 ) {
 
 }

@@ -32,23 +32,6 @@ public class JointMotorBlockEntity extends AbstractServoMotor
         lazyTickRate = 0;
     }
 
-    @Override
-    public boolean addToTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        Lang.translate("tooltip.stressImpact")
-                .style(GRAY)
-                .forGoggles(tooltip);
-
-        float stressTotal = getAnimatedAngle(1);
-
-        Lang.number(stressTotal)
-                .translate("generic.unit.angle")
-                .style(ChatFormatting.AQUA)
-                .space()
-                .add(Lang.translate("gui.goggles.at_current_angle")
-                        .style(ChatFormatting.DARK_GRAY))
-                .forGoggles(tooltip, 1);
-        return true;
-    }
 
     public Direction getServoDirection(){
 

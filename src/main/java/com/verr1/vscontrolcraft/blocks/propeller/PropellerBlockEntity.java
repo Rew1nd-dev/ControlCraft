@@ -1,15 +1,19 @@
 package com.verr1.vscontrolcraft.blocks.propeller;
 
+import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.vscontrolcraft.base.PacketHandler;
 import com.verr1.vscontrolcraft.base.ISyncable;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,13 +23,15 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 
+import static net.minecraft.ChatFormatting.GRAY;
+
 /*
 * TODO:
-*  1. add some propeller classes that extends this class
-*  2. make propeller stat changeable (GUI)
+*  1.   add some propeller classes that extends this class
+*  2. √ make propeller stat changeable (GUI)
 * */
 
-public class PropellerBlockEntity extends SmartBlockEntity implements ISyncable{
+public class PropellerBlockEntity extends SmartBlockEntity implements ISyncable, IHaveGoggleInformation {
     public double ThrustRatio = 1000;
     public double TorqueRatio = 1000;
     public boolean ReverseTorque = false;
@@ -119,30 +125,21 @@ public class PropellerBlockEntity extends SmartBlockEntity implements ISyncable{
         }
     }
 
-    public static class PropellerAnimationDataHandler extends PacketHandler {
-        private double rotationalSpeed;
+    @Override
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        Lang.text("Propeller Statistic")
+                .style(GRAY)
+                .forGoggles(tooltip);
 
-        public PropellerAnimationDataHandler(){
-            rotationalSpeed = 0;
-        }
+        float omega = (float)rotationalSpeed;
 
-        public PropellerAnimationDataHandler(double speed){
-            rotationalSpeed = speed;
-        }
-
-        @Override
-        public void readBuffer(FriendlyByteBuf buffer) {
-            rotationalSpeed = buffer.readDouble();
-        }
-
-        @Override
-        public void writeBuffer(FriendlyByteBuf buffer) {
-            buffer.writeDouble(rotationalSpeed);
-        }
-
-        @Override
-        public void handle(BlockEntity be) {
-            ((PropellerBlockEntity) be).setVisualRotationalSpeed(rotationalSpeed);
-        }
+        Lang.number(omega)
+                .text("/s")
+                .style(ChatFormatting.AQUA)
+                .space()
+                .add(Lang.text("current omega")
+                        .style(ChatFormatting.DARK_GRAY))
+                .forGoggles(tooltip, 1);
+        return true;
     }
 }

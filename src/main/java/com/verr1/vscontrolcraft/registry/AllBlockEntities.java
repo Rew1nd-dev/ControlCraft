@@ -1,11 +1,20 @@
 package com.verr1.vscontrolcraft.registry;
 
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
+import com.verr1.vscontrolcraft.blocks.anchor.AnchorBlock;
+import com.verr1.vscontrolcraft.blocks.anchor.AnchorBlockEntity;
+import com.verr1.vscontrolcraft.blocks.annihilator.AnnihilatorBlock;
+import com.verr1.vscontrolcraft.blocks.annihilator.AnnihilatorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.camera.CameraBlock;
 import com.verr1.vscontrolcraft.blocks.camera.CameraBlockEntity;
 import com.verr1.vscontrolcraft.blocks.camera.CameraRenderer;
 import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkLoaderBlock;
 import com.verr1.vscontrolcraft.blocks.chunkLoader.ChunkLoaderBlockEntity;
+import com.verr1.vscontrolcraft.blocks.jet.JetBlock;
+import com.verr1.vscontrolcraft.blocks.jet.JetBlockEntity;
+import com.verr1.vscontrolcraft.blocks.jetRudder.JetRudderBlock;
+import com.verr1.vscontrolcraft.blocks.jetRudder.JetRudderBlockEntity;
+import com.verr1.vscontrolcraft.blocks.jetRudder.JetRudderRenderer;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlock;
@@ -35,8 +44,6 @@ import com.verr1.vscontrolcraft.blocks.propeller.PropellerBlock;
 import com.verr1.vscontrolcraft.blocks.propeller.PropellerBlockEntity;
 import com.verr1.vscontrolcraft.blocks.propellerController.PropellerControllerBlock;
 import com.verr1.vscontrolcraft.blocks.propellerController.PropellerControllerBlockEntity;
-import com.verr1.vscontrolcraft.blocks.propellerController.PropellerControllerInstance;
-import com.verr1.vscontrolcraft.blocks.propellerController.PropellerControllerRenderer;
 import com.verr1.vscontrolcraft.blocks.propeller.PropellerRenderer;
 import com.verr1.vscontrolcraft.blocks.wingController.WingControllerRenderer;
 
@@ -50,9 +57,7 @@ public class AllBlockEntities {
 
     public static final BlockEntityEntry<PropellerControllerBlockEntity> PROPELLER_CONTROLLER_BLOCKENTITY = REGISTRATE
             .blockEntity(PropellerControllerBlock.ID, PropellerControllerBlockEntity::new)
-            .instance(()-> PropellerControllerInstance::new)
             .validBlock(AllBlocks.PROPELLER_CONTROLLER)
-            .renderer(() -> PropellerControllerRenderer::new)
             .register();
 
     public static final BlockEntityEntry<PropellerBlockEntity> PROPELLER_BLOCKENTITY = REGISTRATE
@@ -124,6 +129,27 @@ public class AllBlockEntities {
             .blockEntity(SliderControllerBlock.ID, SliderControllerBlockEntity::new)
             .validBlock(AllBlocks.SLIDER_CONTROLLER_BLOCK)
             .renderer(() -> SliderRenderer::new)
+            .register();
+
+    public static final BlockEntityEntry<AnchorBlockEntity> ANCHOR_BLOCKENTITY = REGISTRATE
+            .blockEntity(AnchorBlock.ID, AnchorBlockEntity::new)
+            .validBlock(AllBlocks.ANCHOR_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<AnnihilatorBlockEntity> ANNIHILATOR_BLOCKENTITY = REGISTRATE
+            .blockEntity(AnnihilatorBlock.ID, AnnihilatorBlockEntity::new)
+            .validBlock(AllBlocks.ANNIHILATOR_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<JetBlockEntity> JET_BLOCKENTITY = REGISTRATE
+            .blockEntity(JetBlock.ID, JetBlockEntity::new)
+            .validBlock(AllBlocks.JET_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<JetRudderBlockEntity> JET_RUDDER_BLOCKENTITY = REGISTRATE
+            .blockEntity(JetRudderBlock.ID, JetRudderBlockEntity::new)
+            .validBlock(AllBlocks.JET_RUDDER_BLOCK)
+            .renderer(() -> JetRudderRenderer::new)
             .register();
 
     public static void register(){

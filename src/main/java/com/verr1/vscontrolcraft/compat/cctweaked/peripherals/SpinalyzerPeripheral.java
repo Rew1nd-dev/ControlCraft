@@ -16,29 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class SpinalyzerPeripheral implements IPeripheral {
-    private SpinalyzerBlockEntity spinalyzerBlockEntity;
-
-    private final Set<IComputerAccess> computers = Sets.newConcurrentHashSet();
+public class SpinalyzerPeripheral extends AbstractAttachedPeripheral<SpinalyzerBlockEntity> {
 
     public SpinalyzerPeripheral(SpinalyzerBlockEntity be){
-        spinalyzerBlockEntity = be;
+        super(be);
     }
 
-    @Override
-    public void attach(IComputerAccess computer) {
-        computers.add(computer);
-    }
-
-    @Override
-    public Object getTarget(){
-        return spinalyzerBlockEntity;
-    }
-
-    @Override
-    public void detach(IComputerAccess computer) {
-        computers.remove(computer);
-    }
 
     @Override
     public String getType() {
@@ -47,21 +30,19 @@ public class SpinalyzerPeripheral implements IPeripheral {
 
     @Override
     public boolean equals(@Nullable IPeripheral iPeripheral) {
-        if (iPeripheral instanceof PropellerControllerPeripheral)return false;
-        if (iPeripheral == null)return false;
-        return spinalyzerBlockEntity == iPeripheral.getTarget();
+        if (!(iPeripheral instanceof SpinalyzerPeripheral p))return false;
+        return getTarget().getBlockPos() == p.getTarget().getBlockPos();
     }
 
     @LuaFunction
     public List<Double> getQuaternion(){
-        Quaterniondc q = spinalyzerBlockEntity.getQuaternion();
-        computers.forEach(e->{e.queueEvent("t", 1);});
+        Quaterniondc q = getTarget().getQuaternion();
         return List.of(q.x(), q.y(), q.z(), q.w());
     }
 
     @LuaFunction
     public List<List<Double>> getTransform(){
-        Matrix3d m = spinalyzerBlockEntity.getRotationMatrix_wc2sc();
+        Matrix3d m = getTarget().getRotationMatrix_wc2sc();
         return List.of(
             List.of(m.m00, m.m10, m.m20),
             List.of(m.m01, m.m11, m.m21),
@@ -71,7 +52,7 @@ public class SpinalyzerPeripheral implements IPeripheral {
 
     @LuaFunction
     public List<List<Double>> getRelativeTransform(){
-        Matrix3d m = spinalyzerBlockEntity.getRelativeSourceTransform();
+        Matrix3d m = getTarget().getRelativeSourceTransform();
         return List.of(
             List.of(m.m00, m.m01, m.m02),
             List.of(m.m10, m.m11, m.m12),
@@ -81,12 +62,12 @@ public class SpinalyzerPeripheral implements IPeripheral {
 
     @LuaFunction
     public double getRelativeAngle(int axis){
-        return spinalyzerBlockEntity.getRotationAngle(axis);
+        return getTarget().getRotationAngle(axis);
     }
 
     @LuaFunction
     public Map<String, Object> getPhysicsInfo(){
-        return spinalyzerBlockEntity.physics.read().getCCPhysics();
+        return getTarget().physics.read().getCCPhysics();
     }
 
 

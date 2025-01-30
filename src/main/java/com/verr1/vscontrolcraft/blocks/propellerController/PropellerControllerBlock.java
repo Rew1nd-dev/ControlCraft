@@ -6,12 +6,17 @@ import com.simibubi.create.foundation.block.IBE;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import org.jetbrains.annotations.Nullable;
 
-public class PropellerControllerBlock extends DirectionalKineticBlock implements ICogWheel, IBE<PropellerControllerBlockEntity> {
+public class PropellerControllerBlock extends DirectionalBlock implements IBE<PropellerControllerBlockEntity> {
 
     public static final String ID = "propeller_controller";
 
@@ -21,19 +26,16 @@ public class PropellerControllerBlock extends DirectionalKineticBlock implements
 
 
     @Override
-    public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
-        return face == state.getValue(FACING);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(FACING);
+        super.createBlockStateDefinition(builder);
     }
 
+    @Nullable
     @Override
-    public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving){
-        //ControlCraftMod.LOGGER.info("ChunkLoaderBlock.onRemove called at" + pos.toString());
-        IBE.onRemove(state, worldIn, pos, newState);
-    }
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
 
-    @Override
-    public Direction.Axis getRotationAxis(BlockState state) {
-        return state.getValue(FACING).getAxis();
+        return defaultBlockState().setValue(FACING, context.getClickedFace().getOpposite());
     }
 
     @Override

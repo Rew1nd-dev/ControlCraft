@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.blocks.magnet;
 
+import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.magnet.LogicalMagnet;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +34,14 @@ public class MagnetManager {
             return !magnet.isRemoved();
         }
         return false;
+    }
+
+    public static @Nullable MagnetBlockEntity getExisting(LevelPos element){
+        if(element.level().getExistingBlockEntity(element.pos()) instanceof MagnetBlockEntity magnet){
+            if(magnet.isRemoved())return null;
+            return magnet;
+        }
+        return null;
     }
 
     public static @Nullable MagnetBlockEntity getExisting(LogicalMagnet element){

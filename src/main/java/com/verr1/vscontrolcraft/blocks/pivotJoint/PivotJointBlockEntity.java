@@ -1,6 +1,8 @@
 package com.verr1.vscontrolcraft.blocks.pivotJoint;
 
 import com.verr1.vscontrolcraft.ControlCraft;
+import com.verr1.vscontrolcraft.base.Constrain.ConstrainCenter;
+import com.verr1.vscontrolcraft.base.Constrain.DataStructure.ConstrainKey;
 import com.verr1.vscontrolcraft.base.Hinge.HingeAdjustLevel;
 import com.verr1.vscontrolcraft.base.Hinge.interfaces.IAdjustableHinge;
 import com.verr1.vscontrolcraft.base.Hinge.interfaces.ICanBruteConnect;
@@ -32,11 +34,6 @@ import java.util.Arrays;
 public class PivotJointBlockEntity extends ShipConnectorBlockEntity implements
         ICanBruteConnect, IConstrainHolder, IAdjustableHinge
 {
-
-    private VSAttachmentConstraint attach;
-    private Object attach_ID;
-    private VSHingeOrientationConstraint hinge;
-    private Object hinge_ID;
 
     public PivotJointBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -86,6 +83,7 @@ public class PivotJointBlockEntity extends ShipConnectorBlockEntity implements
         if(!VSMathUtils.isOnServerShip(otherHingeBlockPos, (ServerLevel) level) && !isOnServerShip())return;
         if(!(level.getExistingBlockEntity(otherHingeBlockPos) instanceof PivotJointBlockEntity otherHinge))return;
 
+        boolean isCmpOnGround = !otherHinge.isOnServerShip();
 
         VSAttachmentConstraint attachment = new VSAttachmentConstraint(
                 getServerShipID(),
@@ -116,30 +114,36 @@ public class PivotJointBlockEntity extends ShipConnectorBlockEntity implements
                 1.0E10
         );
 
-        recreateConstrains(attachment, orientation);
+        recreateConstrains(attachment, orientation, isCmpOnGround);
         setCompanionShipID(otherHinge.getServerShipID());
         notifyUpdate();
     }
 
-    public void recreateConstrains(VSAttachmentConstraint attach, VSHingeOrientationConstraint hinge)
+    public void recreateConstrains(VSAttachmentConstraint attach, VSHingeOrientationConstraint hinge, boolean isCmpOnGround)
     {
-        this.attach = attach;
-        this.hinge = hinge;
-        recreateConstrains();
+        var shipWorldCore = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
+
+        boolean isGrounded = !isOnServerShip();
+
+        ConstrainCenter.createOrReplaceNewConstrain(
+                new ConstrainKey(getBlockPos(), getDimensionID(), "attach", isGrounded, isCmpOnGround),
+                attach,
+                shipWorldCore
+        );
+
+        ConstrainCenter.createOrReplaceNewConstrain(
+                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, isCmpOnGround),
+                hinge,
+                shipWorldCore
+        );
     }
 
-    public void recreateConstrains(){
-        if(attach == null || hinge == null)return;
-        if(level.isClientSide)return;
-        var shipWorldCore = (ShipObjectServerWorld) VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
-        attach_ID =  shipWorldCore.createNewConstraint(this.attach);
-        hinge_ID = shipWorldCore.createNewConstraint(this.hinge);
-        if(attach_ID == null || hinge_ID == null){
-            attach = null;
-            hinge = null;
-            attach_ID = null;
-            hinge_ID = null;
-        }
+    @Override
+    public void destroyConstrain() {
+        // the last 2 element does need to be the same
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach", false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", false, false));
+        clearCompanionShipInfo();
     }
 
     @Override
@@ -148,17 +152,5 @@ public class PivotJointBlockEntity extends ShipConnectorBlockEntity implements
         destroyConstrain();
     }
 
-    @Override
-    public void destroyConstrain() {
-        try{
-            if(level.isClientSide)return;
-            var shipWorldCore = (ShipObjectServerWorld) VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
-            if(hinge_ID != null)shipWorldCore.removeConstraint((int)hinge_ID);
-            if(attach_ID != null)shipWorldCore.removeConstraint((int)attach_ID);
-            hinge_ID = null;
-            attach_ID = null;
-        }catch (Exception e){
-            ControlCraft.LOGGER.error(Arrays.toString(e.getStackTrace()));
-        }
-    }
+
 }

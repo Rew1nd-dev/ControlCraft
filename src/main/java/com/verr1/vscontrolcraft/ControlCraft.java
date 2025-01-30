@@ -25,21 +25,22 @@ import org.slf4j.Logger;
 * TODO:
 *    Visualization:
 *    1. add tool tips for blocks, need data syncing.
-*    2. render servo top part as a moving segment, rotate as angle changes
-*    3. remake wing controller model, make a moving part connected with wing block
+*    2.√ render servo top part as a moving segment, rotate as angle changes
+*    3.√ remake wing controller model, make a moving part connected with wing block
 *    4.
 *    Functionality:
-*    1. extract ServoConstrainAssembleSchedule run() function, make it inside an class specific for ship aligning task
-*    2. VS constrain serialize utilities
-*    3. Make Force Inducer removing invalids by life time
+*    1.√ extract ServoConstrainAssembleSchedule run() function, make it inside an class specific for ship aligning task
+*    2.√ VS constrain serialize utilities
+*    3.√ Make Force Inducer removing invalids by life time
 *    4. Sync Animation Packet Simplify to one, Make Interface for all blocks with only one animated data
 *    Features:
 *    1. suicide block, or self-disassemble block
 *    2.√ magnet block, implement using constrain or ShipForceInducer
 *    3.√ Linker tool, configurable, multi-functional tool for Control Craft
 *    4.√ Variants of bearings with different rotational behaviors
-*    5. Directional Jet rudders, and rudder controller consuming liquid(optional), just like propeller controller
-*    6. Piston with Sphere sphere_hinge connection
+*    5.  Directional Jet rudders, and rudder controller consuming liquid(optional), just like propeller controller
+*    6.√ Piston with Sphere sphere_hinge connection
+*    7.  Mass-adjustable block
 *
 *    Configuration:
 *    1. make more fields configurable
@@ -94,7 +95,6 @@ public class ControlCraft
         if(FMLEnvironment.dist == Dist.CLIENT){
             modEventBus.addListener(this::clientSetup);
         }
-
         // Register ourselves for server and other game events we are interested in
 
 
