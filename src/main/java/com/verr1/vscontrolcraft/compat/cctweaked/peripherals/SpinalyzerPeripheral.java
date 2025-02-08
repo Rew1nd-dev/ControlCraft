@@ -35,13 +35,13 @@ public class SpinalyzerPeripheral extends AbstractAttachedPeripheral<SpinalyzerB
     }
 
     @LuaFunction
-    public List<Double> getQuaternion(){
+    public final List<Double> getQuaternion(){
         Quaterniondc q = getTarget().getQuaternion();
         return List.of(q.x(), q.y(), q.z(), q.w());
     }
 
     @LuaFunction
-    public List<List<Double>> getTransform(){
+    public final List<List<Double>> getTransform(){
         Matrix3d m = getTarget().getRotationMatrix_wc2sc();
         return List.of(
             List.of(m.m00, m.m10, m.m20),
@@ -51,7 +51,7 @@ public class SpinalyzerPeripheral extends AbstractAttachedPeripheral<SpinalyzerB
     }
 
     @LuaFunction
-    public List<List<Double>> getRelativeTransform(){
+    public final List<List<Double>> getRelativeTransform(){
         Matrix3d m = getTarget().getRelativeSourceTransform();
         return List.of(
             List.of(m.m00, m.m01, m.m02),
@@ -61,12 +61,12 @@ public class SpinalyzerPeripheral extends AbstractAttachedPeripheral<SpinalyzerB
     }
 
     @LuaFunction
-    public double getRelativeAngle(int axis){
+    public final double getRelativeAngle(int axis){
         return getTarget().getRotationAngle(axis);
     }
 
     @LuaFunction
-    public Map<String, Object> getPhysicsInfo(){
+    public final Map<String, Object> getPhysicsInfo(){
         return getTarget().physics.read().getCCPhysics();
     }
 

@@ -5,8 +5,10 @@ import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
-import com.verr1.vscontrolcraft.base.PacketHandler;
 import com.verr1.vscontrolcraft.base.ISyncable;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
+import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
+import com.verr1.vscontrolcraft.base.UltraTerminal.WidgetType;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.ChatFormatting;
@@ -31,7 +33,9 @@ import static net.minecraft.ChatFormatting.GRAY;
 *  2. √ make propeller stat changeable (GUI)
 * */
 
-public class PropellerBlockEntity extends SmartBlockEntity implements ISyncable, IHaveGoggleInformation {
+public class PropellerBlockEntity extends SmartBlockEntity implements
+        ISyncable, IHaveGoggleInformation
+{
     public double ThrustRatio = 1000;
     public double TorqueRatio = 1000;
     public boolean ReverseTorque = false;
@@ -39,6 +43,8 @@ public class PropellerBlockEntity extends SmartBlockEntity implements ISyncable,
 
     public LerpedFloat angle;
     public float targetAngle = 0;
+
+
 
     public PropellerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -142,4 +148,6 @@ public class PropellerBlockEntity extends SmartBlockEntity implements ISyncable,
                 .forGoggles(tooltip, 1);
         return true;
     }
+
+
 }

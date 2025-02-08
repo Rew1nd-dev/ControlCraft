@@ -2,7 +2,10 @@ package com.verr1.vscontrolcraft.base.Wand.mode.base;
 
 import com.verr1.vscontrolcraft.base.Wand.IWandMode;
 import com.verr1.vscontrolcraft.base.Wand.WandSelection;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+@OnlyIn(value = Dist.CLIENT)
 public abstract class WandAbstractMultipleSelectionMode implements IWandMode {
     private final int lazyTickRate = 50;
     private int lazyTick = 0;

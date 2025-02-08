@@ -3,7 +3,7 @@ package com.verr1.vscontrolcraft.base.Constrain.DataStructure;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 
-public record ConstrainKey(BlockPos pos, String dimension, String name, boolean ship_1_isGround, boolean ship_2_isGround) {
+public record ConstrainKey(BlockPos pos, String dimension, String name, boolean ship_1_isGround, boolean ship_2_isGround, boolean temp) {
     @Override
     public int hashCode() {
         return pos.hashCode();
@@ -27,6 +27,7 @@ public record ConstrainKey(BlockPos pos, String dimension, String name, boolean 
         tag.putString("level", dimension);
         tag.putBoolean("ship_1_isGround", ship_1_isGround);
         tag.putBoolean("ship_2_isGround", ship_2_isGround);
+        tag.putBoolean("temp", temp);
         return tag;
     }
 
@@ -36,7 +37,8 @@ public record ConstrainKey(BlockPos pos, String dimension, String name, boolean 
         var name = tag.getString("name");
         var ship_1_isGround = tag.getBoolean("ship_1_isGround");
         var ship_2_isGround = tag.getBoolean("ship_2_isGround");
-        return new ConstrainKey(pos, level, name, ship_1_isGround, ship_2_isGround);
+        var temp = tag.getBoolean("temp");
+        return new ConstrainKey(pos, level, name, ship_1_isGround, ship_2_isGround, temp);
     }
 
 

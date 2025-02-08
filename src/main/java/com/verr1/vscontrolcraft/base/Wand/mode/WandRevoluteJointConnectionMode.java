@@ -9,7 +9,11 @@ import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+
+@OnlyIn(value = Dist.CLIENT)
 public class WandRevoluteJointConnectionMode extends WandAbstractDualSelectionMode {
     public static final String ID = "hinge_connection";
 

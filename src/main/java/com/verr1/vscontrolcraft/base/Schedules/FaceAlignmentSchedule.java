@@ -21,13 +21,9 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
 
     private boolean hasForcedQuaternionProvider = false;
     private boolean hasOverriddenAlignExtra = false;
-
     private Runnable onExpiredTask = () -> {};
-
     private Quaterniond extraRotation = new Quaterniond();
-
     private Quaterniond forcedQuaternion = new Quaterniond();
-
     private Quaterniond overriddenAlignExtra = new Quaterniond();
 
     @Override

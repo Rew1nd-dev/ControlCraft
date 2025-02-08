@@ -29,11 +29,15 @@ import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorRenderer;
 import com.verr1.vscontrolcraft.blocks.slider.SliderControllerBlock;
 import com.verr1.vscontrolcraft.blocks.slider.SliderControllerBlockEntity;
 import com.verr1.vscontrolcraft.blocks.slider.SliderRenderer;
+import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialAnchorBlock;
+import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialAnchorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeBlock;
 import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlock;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerRenderer;
+import com.verr1.vscontrolcraft.blocks.terminal.TerminalBlock;
+import com.verr1.vscontrolcraft.blocks.terminal.TerminalBlockEntity;
 import com.verr1.vscontrolcraft.blocks.wingController.WingControllerBlock;
 import com.verr1.vscontrolcraft.blocks.wingController.WingControllerBlockEntity;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverBlock;
@@ -150,6 +154,16 @@ public class AllBlockEntities {
             .blockEntity(JetRudderBlock.ID, JetRudderBlockEntity::new)
             .validBlock(AllBlocks.JET_RUDDER_BLOCK)
             .renderer(() -> JetRudderRenderer::new)
+            .register();
+
+    public static final BlockEntityEntry<SpatialAnchorBlockEntity> SPATIAL_ANCHOR_BLOCKENTITY = REGISTRATE
+            .blockEntity(SpatialAnchorBlock.ID, SpatialAnchorBlockEntity::new)
+            .validBlock(AllBlocks.SPATIAL_ANCHOR_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<TerminalBlockEntity> TERMINAL_BLOCKENTITY = REGISTRATE
+            .blockEntity(TerminalBlock.ID, TerminalBlockEntity::new)
+            .validBlock(AllBlocks.TERMINAL_BLOCK)
             .register();
 
     public static void register(){

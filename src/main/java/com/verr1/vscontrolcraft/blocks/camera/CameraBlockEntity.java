@@ -2,7 +2,6 @@ package com.verr1.vscontrolcraft.blocks.camera;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,11 +36,12 @@ public class CameraBlockEntity extends SmartBlockEntity {
         super(type, pos, state);
     }
 
+
     public Vector3d getCameraPosition() {
         Vec3 front = getBlockPos().getCenter();
         Vector3d front3d_wc = new Vector3d(front.x, front.y, front.z);
         if(!level.isClientSide)return front3d_wc;
-        ClientShip ship = (ClientShip)VSGameUtilsKt.getShipManagingPos((ClientLevel)level, getBlockPos());
+        ClientShip ship = (ClientShip)VSGameUtilsKt.getShipManagingPos(level, getBlockPos());
         if(ship == null)return front3d_wc;
         Vector3dc shipPos_wc = ship.getTransform().getPositionInShip();
         Vector3d relative_sc = new Vector3d(front3d_wc).sub(shipPos_wc);
@@ -57,14 +57,14 @@ public class CameraBlockEntity extends SmartBlockEntity {
     }
 
     public ClientShip getClientShip(){
-        ClientShip ship = (ClientShip)VSGameUtilsKt.getShipManagingPos((ClientLevel)level, getBlockPos());
+        ClientShip ship = (ClientShip)VSGameUtilsKt.getShipManagingPos(level, getBlockPos());
         return ship;
     }
 
     public Quaterniondc getCameraBaseRotation(){
         Quaterniond q = new Quaterniond();
         if(!level.isClientSide)return q;
-        ClientShip ship = (ClientShip)VSGameUtilsKt.getShipManagingPos((ClientLevel)level, getBlockPos());
+        ClientShip ship = (ClientShip)VSGameUtilsKt.getShipManagingPos(level, getBlockPos());
         if(ship == null)return q;
         return ship.getTransform().getShipToWorldRotation();
     }

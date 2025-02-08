@@ -14,12 +14,17 @@ import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
 import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlock;
 import com.verr1.vscontrolcraft.blocks.pivotJoint.PivotJointBlock;
 import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlock;
-import com.verr1.vscontrolcraft.blocks.revoluteJoint.DirectionalAxialAdjusableDataGenerator;
+import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointDataGenerator;
 import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlock;
 import com.verr1.vscontrolcraft.blocks.slider.SliderControllerBlock;
+import com.verr1.vscontrolcraft.blocks.spatialAnchor.DirectionalAxialFlippableDataGenerator;
+import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialAnchorBlock;
+import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialAnchorDataGenerator;
+import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialMovementBehavior;
 import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeBlock;
 import com.verr1.vscontrolcraft.blocks.sphericalHinge.DirectionalAdjustableHingeDataGenerator;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlock;
+import com.verr1.vscontrolcraft.blocks.terminal.TerminalBlock;
 import com.verr1.vscontrolcraft.blocks.wingController.WingControllerBlock;
 import com.verr1.vscontrolcraft.blocks.recevier.ReceiverBlock;
 import com.verr1.vscontrolcraft.blocks.transmitter.TransmitterBlock;
@@ -28,6 +33,7 @@ import com.verr1.vscontrolcraft.blocks.propellerController.PropellerControllerBl
 import net.minecraft.world.level.material.MapColor;
 
 
+import static com.simibubi.create.AllMovementBehaviours.movementBehaviour;
 import static com.simibubi.create.foundation.data.ModelGen.customItemModel;
 import static com.verr1.vscontrolcraft.ControlCraft.REGISTRATE;
 
@@ -177,7 +183,7 @@ public class AllBlocks {
             .initialProperties(SharedProperties::stone)
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
-                    DirectionalAxialAdjusableDataGenerator.generate()
+                    RevoluteJointDataGenerator.generate()
             )
             .item()
             .transform(customItemModel())
@@ -240,6 +246,29 @@ public class AllBlocks {
 
     public static final BlockEntry<JetRudderBlock> JET_RUDDER_BLOCK = REGISTRATE
             .block(JetRudderBlock.ID, JetRudderBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<SpatialAnchorBlock> SPATIAL_ANCHOR_BLOCK = REGISTRATE
+            .block(SpatialAnchorBlock.ID, SpatialAnchorBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .blockstate(
+                    SpatialAnchorDataGenerator.generate()
+            )
+            .onRegister(movementBehaviour(new SpatialMovementBehavior()))
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<TerminalBlock> TERMINAL_BLOCK = REGISTRATE
+            .block(TerminalBlock.ID, TerminalBlock::new)
             .initialProperties(SharedProperties::stone)
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)

@@ -7,8 +7,12 @@ import com.verr1.vscontrolcraft.base.Constrain.ConstrainCenter;
 import com.verr1.vscontrolcraft.base.Constrain.DataStructure.ConstrainKey;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
+import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
 import com.verr1.vscontrolcraft.base.Hinge.interfaces.IConstrainHolder;
 import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
+import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
+import com.verr1.vscontrolcraft.base.UltraTerminal.WidgetType;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.ServoMotorPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.servo.LogicalServoMotor;
@@ -30,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint;
+import org.valkyrienskies.core.apigame.constraints.VSFixedOrientationConstraint;
 import org.valkyrienskies.core.apigame.constraints.VSHingeOrientationConstraint;
 import org.valkyrienskies.core.impl.game.ships.ShipDataCommon;
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld;
@@ -46,7 +51,7 @@ import java.util.Objects;
 import static net.minecraft.ChatFormatting.GRAY;
 
 public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implements
-        IHaveGoggleInformation, IConstrainHolder, IPIDController, ICanBruteDirectionalConnect
+        IHaveGoggleInformation, IConstrainHolder, IPIDController, ICanBruteDirectionalConnect, ITerminalDevice
 {
     protected ServoMotorPeripheral peripheral;
     protected LazyOptional<IPeripheral> peripheralCap;
@@ -57,7 +62,61 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     public SynchronizedField<ShipPhysics> asmPhysics = new SynchronizedField<>(ShipPhysics.EMPTY);
     public SynchronizedField<Double> controlTorque = new SynchronizedField<>(0.0);
 
-    private final PIDControllerInfoHolder servoController = new PIDControllerInfoHolder();
+    private final List<NumericField> fields = List.of(
+            new NumericField(
+                    controlTorque::read,
+                    controlTorque::write,
+                    "Torque",
+                    WidgetType.SLIDE
+            ),
+            new NumericField(
+                    () -> this.getControllerInfoHolder().getTarget(),
+                    t -> this.getControllerInfoHolder().setTarget(t),
+                    "target",
+                    WidgetType.SLIDE
+            ),
+            new NumericField(
+                    () -> this.getControllerInfoHolder().getPIDParams().p(),
+                    p -> this.getControllerInfoHolder().setP(p),
+                    "P",
+                    WidgetType.SLIDE
+            ),
+            new NumericField(
+                    () -> this.getControllerInfoHolder().getPIDParams().i(),
+                    i -> this.getControllerInfoHolder().setI(i),
+                    "I",
+                    WidgetType.SLIDE
+            ),
+            new NumericField(
+                    () -> this.getControllerInfoHolder().getPIDParams().d(),
+                    d -> this.getControllerInfoHolder().setD(d),
+                    "D",
+                    WidgetType.SLIDE
+            )
+    );
+
+    @Override
+    public List<NumericField> fields() {
+        return fields;
+    }
+
+    @Override
+    public String name() {
+        return "servo";
+    }
+
+    public boolean isAdjustingAngle() {
+        return isAdjustingAngle;
+    }
+
+
+    private boolean isAdjustingAngle = false;
+
+    private final PID defaultAngularModeParams = new PID(24, 0, 14);
+    private final PID defaultAngularSpeedModeParams = new PID(10, 0, 0);
+
+    private final PIDControllerInfoHolder servoController = new PIDControllerInfoHolder().setParameter(defaultAngularSpeedModeParams);
+
 
     @Override
     public PIDControllerInfoHolder getControllerInfoHolder(){
@@ -114,7 +173,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         Matrix3dc own = ownPhysics.read().rotationMatrix().transpose(new Matrix3d()); //wc2sc
         Matrix3dc asm = asmPhysics.read().rotationMatrix().transpose(new Matrix3d());
         if(getCompanionShipDirection() == null)return 0;
-        return VSMathUtils.get_xc2yc(own, asm, getServoDirection(), getCompanionShipDirection());
+        return VSMathUtils.get_yc2xc(own, asm, getServoDirection(), getCompanionShipDirection());
     }
 
 
@@ -134,7 +193,19 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     }
 
 
+    public void setMode(boolean adjustAngle){
+        isAdjustingAngle = adjustAngle;
+        if(isAdjustingAngle){
+            getControllerInfoHolder().setParameter(defaultAngularModeParams);
+        }else{
+            getControllerInfoHolder().setParameter(defaultAngularSpeedModeParams);
+        }
+        setChanged();
+    }
 
+    public void toggleMode(){
+        setMode(!isAdjustingAngle);
+    }
 
 
     public void syncCompanionAttachInducer(){
@@ -155,9 +226,72 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 (ServerLevel) level,
                 getServoDirection(),
                 getCompanionShipDirection(),
+                isAdjustingAngle,
                 getOutputTorque()
         );
     }
+
+
+    public void lock(){
+        if(level.isClientSide)return;
+        if(!hasCompanionShip())return;
+
+        Quaterniondc hingeQuaternion_Own = new
+                Quaterniond(VSMathUtils.getQuaternionOfPlacement(getServoDirection()))
+                .mul(new Quaterniond(new AxisAngle4d(Math.toRadians(90.0), 0.0, 0.0, 1.0)), new Quaterniond())
+                .normalize();
+
+        double dumbFix = getServoDirection().getAxisDirection() == Direction.AxisDirection.POSITIVE ? Math.PI / 2 : -Math.PI / 2;
+
+        Quaterniondc hingeQuaternion_Cmp = new Quaterniond()
+                .rotateAxis(dumbFix + getServoAngle(), getServoDirectionJOML())  // dumb fixing
+                .mul(VSMathUtils.getQuaternionOfPlacement(getCompanionShipDirection().getOpposite()))
+                .mul(new Quaterniond(new AxisAngle4d(Math.toRadians(90.0), 0.0, 0.0, 1.0)), new Quaterniond())
+                .normalize();
+
+
+        VSFixedOrientationConstraint fixed = new VSFixedOrientationConstraint(
+                getServerShipID(),
+                getCompanionShipID(),
+                1.0E-10,
+                hingeQuaternion_Own,
+                hingeQuaternion_Cmp,
+                1.0E10
+        );
+        /*
+        // Sometime this cause a pulse, I tried to fix it like this, but it didn't work
+
+        ConstrainCenter.removeConstrain(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isOnServerShip(), false, false));
+        DeferralExecutor.executeLater(
+                ()-> ConstrainCenter.createOrReplaceNewConstrain(
+                        new ConstrainKey(getBlockPos(), getDimensionID(), "fixed", !isOnServerShip(), false, false),
+                        fixed,
+                        VSGameUtilsKt.getShipObjectWorld((ServerLevel) level)
+                ),
+                1
+        );
+        * */
+        ConstrainCenter.createOrReplaceNewConstrain(
+                new ConstrainKey(getBlockPos(), getDimensionID(), "fixed", !isOnServerShip(), false, false),
+                fixed,
+                VSGameUtilsKt.getShipObjectWorld((ServerLevel) level)
+        );
+    }
+
+
+    public void unlock(){
+        if(level.isClientSide)return;
+        /*
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "fixed", !isOnServerShip(), false, false));
+        ConstrainCenter.retrieveConstrain(
+                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isOnServerShip(), false, true),
+                VSGameUtilsKt.getShipObjectWorld((ServerLevel) level)
+        );
+        * */
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "fixed", !isOnServerShip(), false, false));
+
+    }
+
 
     public void bruteDirectionalConnectWith(BlockPos assemPos, Direction assemDir){
         Direction servoDir = getServoDirection();
@@ -173,7 +307,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 .mul(new Quaterniond(new AxisAngle4d(Math.toRadians(90.0), 0.0, 0.0, 1.0)), new Quaterniond())
                 .normalize();
 
-        Quaterniondc hingeQuaternion_Asm = new
+        Quaterniondc hingeQuaternion_Cmp = new
                 Quaterniond(VSMathUtils.getQuaternionOfPlacement(assemDir.getOpposite()))
                 .mul(new Quaterniond(new AxisAngle4d(Math.toRadians(90.0), 0.0, 0.0, 1.0)), new Quaterniond())
                 .normalize();
@@ -183,7 +317,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 assemShipID,
                 ownerShipID,
                 1.0E-10,
-                hingeQuaternion_Asm, //new Quaterniond(),//
+                hingeQuaternion_Cmp, //new Quaterniond(),//
                 hingeQuaternion_Own, //new Quaterniond(),//
                 1.0E10
         );
@@ -219,25 +353,24 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     }
 
     public void recreateConstrains(VSHingeOrientationConstraint hinge, VSAttachmentConstraint attach_1, VSAttachmentConstraint attach_2){
-
         var shipWorldCore = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
 
         boolean isGrounded = !isOnServerShip();
 
         ConstrainCenter.createOrReplaceNewConstrain(
-                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false),
+                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false, false),
                 hinge,
                 shipWorldCore
         );
 
         ConstrainCenter.createOrReplaceNewConstrain(
-                new ConstrainKey(getBlockPos(), getDimensionID(), "attach_1", isGrounded, false),
+                new ConstrainKey(getBlockPos(), getDimensionID(), "attach_1", isGrounded, false, false),
                 attach_1,
                 shipWorldCore
         );
 
         ConstrainCenter.createOrReplaceNewConstrain(
-                new ConstrainKey(getBlockPos(), getDimensionID(), "attach_2", isGrounded, false),
+                new ConstrainKey(getBlockPos(), getDimensionID(), "attach_2", isGrounded, false, false),
                 attach_2,
                 shipWorldCore
         );
@@ -246,9 +379,9 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     @Override
     public void destroyConstrain() {
         boolean isGrounded = !isOnServerShip();
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false));
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach_1", isGrounded, false));
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach_2", isGrounded, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach_1", isGrounded, false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach_2", isGrounded, false, false));
         clearCompanionShipInfo();
     }
 
@@ -256,7 +389,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
 
     @Override
     public void bruteDirectionalConnectWith(BlockPos assemPos, Direction align, Direction forward){
-        // motor assembly does not require to reference forward direction, since it will rotate along align-axis,
+        // motor assembly Does Not require to reference forward direction, since it will rotate along align-axis,
         // it will be fine as long as the ship is placed correctly before being assembled
         bruteDirectionalConnectWith(assemPos, align);
     }
@@ -347,9 +480,9 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
 
     public void constrainAlive(){
         boolean isGrounded = !isOnServerShip();
-        ConstrainCenter.alive(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false));
-        ConstrainCenter.alive(new ConstrainKey(getBlockPos(), getDimensionID(), "attach_1", isGrounded, false));
-        ConstrainCenter.alive(new ConstrainKey(getBlockPos(), getDimensionID(), "attach_2", isGrounded, false));
+        ConstrainCenter.alive(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false, false));
+        ConstrainCenter.alive(new ConstrainKey(getBlockPos(), getDimensionID(), "attach_1", isGrounded, false, false));
+        ConstrainCenter.alive(new ConstrainKey(getBlockPos(), getDimensionID(), "attach_2", isGrounded, false, false));
     }
 
     @Override
@@ -363,7 +496,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         ServerShip asm = getCompanionServerShip();
         ServerShip own = getServerShipOn();
         if(asm == null)return;
-        double startAngle = VSMathUtils.get_xc2yc(own, asm, getServoDirection(), getCompanionShipDirection());
+        double startAngle = VSMathUtils.get_yc2xc(own, asm, getServoDirection(), getCompanionShipDirection());
         getControllerInfoHolder().setTarget(startAngle);
     }
 
@@ -390,106 +523,5 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     public abstract float getAnimatedAngle(float partialTick);
 }
 
-/*
-    public void destroyConstrain(){
-        if(savedHinge == null || savedAttach_1 == null || savedAttach_2 == null)return;
-        var shipWorldCore = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld(level);
-        try{
-            shipWorldCore.removeConstraint((int)Hinge_ID_1);
-            shipWorldCore.removeConstraint((int)Attach_ID_1);
-            shipWorldCore.removeConstraint((int)Attach_ID_2);
-            clearCompanionShipInfo();
-            savedHinge = null;
-            savedAttach_1 = null;
-            savedAttach_2 = null;
-            Hinge_ID_1 = null;
-            Attach_ID_1 = null;
-            Attach_ID_2 = null;
-        }catch (Exception e){
-            ControlCraft.LOGGER.info(Arrays.toString(e.getStackTrace()));
-        }
-    }
-
-    public void recreateConstrains(
-            VSHingeOrientationConstraint hinge,
-            VSAttachmentConstraint attach_1,
-            VSAttachmentConstraint attach_2)
-    {
-        savedHinge = hinge;
-        savedAttach_1 = attach_1;
-        savedAttach_2 = attach_2;
-        recreateConstrains();
-    }
-
-
-    public void recreateConstrains(){
-        if(savedHinge == null || savedAttach_1 == null || savedAttach_2 == null)return;
-        if(level.isClientSide)return;
-        var shipWorldCore = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
-        Hinge_ID_1 =  shipWorldCore.createNewConstraint(savedHinge);
-        Attach_ID_1 =  shipWorldCore.createNewConstraint(savedAttach_1);
-        Attach_ID_2 =  shipWorldCore.createNewConstraint(savedAttach_2);
-
-        if(Hinge_ID_1 == null || Attach_ID_1 == null || Attach_ID_2 == null){
-            savedHinge = null;
-            savedAttach_1 = null;
-            savedAttach_2 = null;
-            Hinge_ID_1 = null;
-            Attach_ID_1 = null;
-            Attach_ID_2 = null;
-        }
-
-
-    }
-
-    public void writeSavedConstrains(CompoundTag tag){
-        tag.putBoolean("assembled", getCompanionServerShip() != null);
-        if(savedHinge == null || savedAttach_1 == null || savedAttach_2 == null)return;
-        tag.putString("assemDir", getCompanionShipDirection().getSerializedName());
-        tag.putLong("asm", getCompanionShipID());
-        tag.putLong("own", getServerShipID());
-        VSConstrainSerializeUtils.writeVSAttachmentConstrain(tag, "attach_1", savedAttach_1);
-        VSConstrainSerializeUtils.writeVSAttachmentConstrain(tag, "attach_2", savedAttach_2);
-        VSConstrainSerializeUtils.writeVSHingeOrientationConstrain(tag, "hinge", savedHinge);
-
-    }
-
-
-    public void readSavedConstrains(CompoundTag tag){
-        boolean assembled = tag.getBoolean("assembled");
-        if(!assembled)return;
-        String assemDirString = tag.getString("assemDir");
-        Direction assemDir = Direction.byName(assemDirString);
-        long asm = tag.getLong("asm");
-        long own = tag.getLong("own");
-
-        savedAttach_1 = VSConstrainSerializeUtils.readVSAttachmentConstrain(tag, "attach_1");
-        savedAttach_2 = VSConstrainSerializeUtils.readVSAttachmentConstrain(tag, "attach_2");
-        savedHinge = VSConstrainSerializeUtils.readVSHingeOrientationConstrain(tag, "hinge");
-
-        setCompanionShipID(asm);
-        setCompanionShipDirection(assemDir);
-    }
-
-    @Override
-    protected void write(CompoundTag tag, boolean clientPacket) {
-        super.write(tag, clientPacket);
-        if(clientPacket)return;
-        writeSavedConstrains(tag);
-    }
-
-    @Override
-    protected void read(CompoundTag tag, boolean clientPacket) {
-        super.read(tag, clientPacket);
-        if(clientPacket)return;
-        try {
-            readSavedConstrains(tag);
-            //DeferralExecutor.executeLater(this::recreateConstrains, 1);
-        }catch (Exception e){
-            ControlCraft.LOGGER.info("Failed to read saved constrains");
-        }
-
-    }
-    * */
 
 

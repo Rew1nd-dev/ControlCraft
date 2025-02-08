@@ -23,7 +23,7 @@ public class ServoMotorRenderer extends SafeBlockEntityRenderer<ServoMotorBlockE
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
         SuperByteBuffer buffer = CachedBufferer.partialFacing(AllPartialModels.SERVO_TOP, state);
 
-        buffer.rotateCentered(state.getValue(BlockStateProperties.FACING), angle)
+        buffer.rotateCentered(state.getValue(BlockStateProperties.FACING), (float) Math.toRadians(angle))
                 .light(light)
                 .renderInto(ms, solid);
     }

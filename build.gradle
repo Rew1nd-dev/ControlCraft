@@ -1,10 +1,11 @@
+
 plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id "org.jetbrains.kotlin.jvm" version "1.9.10"
-
+    id "com.gradleup.shadow" version "8.3.0"
     id 'org.spongepowered.mixin' version '0.7.+'
 }
 
@@ -19,30 +20,13 @@ base {
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+
+
+
 minecraft {
-    // The mappings can be changed at any time and must be in the following format.
-    // Channel:   Version:
-    // official   MCVersion             Official field/method names from Mojang mapping files
-    // parchment  YYYY.MM.DD-MCVersion  Open community-sourced parameter names and javadocs layered on top of official
-    //
-    // You must be aware of the Mojang license when using the 'official' or 'parchment' mappings.
-    // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
-    //
-    // Parchment is an unofficial project maintained by ParchmentMC, separate from MinecraftForge
-    // Additional setup is needed to use their mappings: https://parchmentmc.org/docs/getting-started
-    //
-    // Use non-default mappings at your own risk. They may not always work.
-    // Simply re-run your setup task after changing the mappings to update your workspace.
+
     mappings channel: mapping_channel, version: mapping_version
 
-    // When true, this property will have all Eclipse/IntelliJ IDEA run configurations run the "prepareX" task for the given run configuration before launching the game.
-    // In most cases, it is not necessary to enable.
-    // enableEclipsePrepareRuns = true
-    // enableIdeaPrepareRuns = true
-
-    // This property allows configuring Gradle's ProcessResources task(s) to run on IDE output locations before launching the game.
-    // It is REQUIRED to be set to true for this template to function.
-    // See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
     copyIdeResources = true
 
     // When true, this property will add the folder name of all declared run configurations to generated IDE run configurations.
@@ -139,6 +123,10 @@ repositories {
     flatDir {
          dirs 'libs'
     }
+    maven {
+        // 阿里云镜像，方便国内开发
+        url = uri("https://maven.aliyun.com/repository/public/")
+    }
     maven { url = 'https://maven.minecraftforge.net' }
     maven {
         name = 'tterrag maven'
@@ -168,10 +156,19 @@ repositories {
         }
     }
 
+    maven{
+        url = "https://repo.essential.gg/repository/maven-public"
+    }
+
+    maven {
+        name = "CottonMC"
+        url = "https://server.bbkr.space/artifactory/libs-release"
+    }
+
     repositories {
         maven { url = "https://maven.bawnorton.com/releases" }
     }
-
+    gradlePluginPortal()
     mavenCentral()
 }
 
@@ -188,9 +185,14 @@ dependencies {
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
+
+
+/*
     implementation "org.lwjgl:lwjgl:3.3.6"
     implementation "org.lwjgl:lwjgl-glfw:3.3.6"
     implementation "org.lwjgl:lwjgl-opengl:3.3.6"
+* */
+
 
     // create dependencies
     implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }
@@ -226,14 +228,29 @@ dependencies {
     implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.4.1")) {
         jarJar.ranged(it, "[0.4.1,)")
     }
+    /*
 
+    *
+    */
 
+    // runtimeOnly fg.deobf("dev.architectury:architectury-forge:${architectury_api_version}")
     implementation fg.deobf("maven.modrinth:sodium:mc1.20.1-0.5.11")
 
     compileOnly(annotationProcessor("com.bawnorton.mixinsquared:mixinsquared-common:0.2.0-beta.6"))
     implementation(jarJar("com.bawnorton.mixinsquared:mixinsquared-forge:0.2.0-beta.6")) {
         jarJar.ranged(it, "[0.2.0-beta.6,)")
     }
+
+    // implementation ("gg.essential:elementa-unstable-layoutdsl:$elementaVersion")
+    // Add Elementa dependency. For the latest $elementaVersion, see the badge below this code snippet.
+    // implementation ("gg.essential:elementa:$elementaVersion")
+    // implementation ("gg.essential:universalcraft-1.20.1-forge:$ucVersion")
+
+/*
+
+*
+*/
+
 
     // Tweaked Controllers dependencies
     implementation fg.deobf("curse.maven:create-tweaked-controllers-898849:5206625")
@@ -279,6 +296,17 @@ tasks.named('processResources', ProcessResources).configure {
         expand replaceProperties + [project: project]
     }
 }
+/*
+shadowJar {
+    archiveClassifier.set(null)
+    relocate("gg.essential.elementa", "com.verr1.elementa")
+    // elementa dependencies
+    relocate("gg.essential.universalcraft", "com.verr1.universalcraft")
+
+}
+
+tasks.named('reobfJar').configure { dependsOn(tasks.named("shadowJar")) }
+* */
 
 // Example for how to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar).configure {
@@ -297,6 +325,8 @@ tasks.named('jar', Jar).configure {
     // This is the preferred method to reobfuscate your jar file
     finalizedBy 'reobfJar'
 }
+
+
 
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing:
 // tasks.named('publish').configure {

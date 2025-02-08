@@ -126,13 +126,13 @@ public class PivotJointBlockEntity extends ShipConnectorBlockEntity implements
         boolean isGrounded = !isOnServerShip();
 
         ConstrainCenter.createOrReplaceNewConstrain(
-                new ConstrainKey(getBlockPos(), getDimensionID(), "attach", isGrounded, isCmpOnGround),
+                new ConstrainKey(getBlockPos(), getDimensionID(), "attach", isGrounded, isCmpOnGround, false),
                 attach,
                 shipWorldCore
         );
 
         ConstrainCenter.createOrReplaceNewConstrain(
-                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, isCmpOnGround),
+                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, isCmpOnGround, false),
                 hinge,
                 shipWorldCore
         );
@@ -141,8 +141,8 @@ public class PivotJointBlockEntity extends ShipConnectorBlockEntity implements
     @Override
     public void destroyConstrain() {
         // the last 2 element does need to be the same
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach", false, false));
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach", false, false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", false, false, false));
         clearCompanionShipInfo();
     }
 

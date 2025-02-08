@@ -14,7 +14,8 @@ public record ShipPhysics(Vector3dc velocity,
                           Matrix3dc rotationMatrix,
                           Matrix4dc s2wTransform,
                           Matrix4dc w2sTransform,
-                          double mass
+                          double mass,
+                          Long ID
 ){
     public static ShipPhysics EMPTY = new ShipPhysics(
             new Vector3d(),
@@ -25,7 +26,8 @@ public record ShipPhysics(Vector3dc velocity,
             new Matrix3d(),
             new Matrix4d(),
             new Matrix4d(),
-            0
+            0,
+            -1L
     );
 
     public Map<String, Object> getCCPhysics(){
@@ -34,7 +36,9 @@ public record ShipPhysics(Vector3dc velocity,
                 "omega", CCUtils.dumpVec3(omega()),
                 "position", CCUtils.dumpVec3(position()),
                 "quaternion", CCUtils.dumpVec4(quaternion()),
-                "up", CCUtils.dumpVec3(quaternion().transform(new Vector3d(0, 1, 0)))
+                "up", CCUtils.dumpVec3(quaternion().transform(new Vector3d(0, 1, 0))),
+                "mass", mass(),
+                "id", ID()
         );
     }
 

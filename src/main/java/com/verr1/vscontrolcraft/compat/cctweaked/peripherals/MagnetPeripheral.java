@@ -35,12 +35,12 @@ public class MagnetPeripheral extends AbstractAttachedPeripheral<MagnetBlockEnti
     }
 
     @LuaFunction
-    public double getStrength(){
+    public final double getStrength(){
         return getTarget().getStrength();
     }
 
     @LuaFunction
-    public void setStrength(double strength){
+    public final void setStrength(double strength){
         getTarget().setStrength(strength);
     }
 

@@ -148,13 +148,13 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
         boolean isGrounded = !isOnServerShip();
 
         ConstrainCenter.createOrReplaceNewConstrain(
-                new ConstrainKey(getBlockPos(), getDimensionID(), "attach", isGrounded, isCmpOnGround),
+                new ConstrainKey(getBlockPos(), getDimensionID(), "attach", isGrounded, isCmpOnGround, false),
                 attach,
                 shipWorldCore
         );
 
         ConstrainCenter.createOrReplaceNewConstrain(
-                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, isCmpOnGround),
+                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, isCmpOnGround, false),
                 hinge,
                 shipWorldCore
         );
@@ -163,8 +163,8 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
     @Override
     public void destroyConstrain() {
         boolean isGrounded = !isOnServerShip();
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach", isGrounded, false));
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach", isGrounded, false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false, false));
         clearCompanionShipInfo();
     }
 

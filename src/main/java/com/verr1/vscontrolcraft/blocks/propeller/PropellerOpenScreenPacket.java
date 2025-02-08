@@ -2,7 +2,6 @@ package com.verr1.vscontrolcraft.blocks.propeller;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
-import com.verr1.vscontrolcraft.blocks.recevier.ReceiverScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -54,7 +53,7 @@ public class PropellerOpenScreenPacket extends SimplePacketBase {
 
             if(pos == null)return;
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                ScreenOpener.open(new PropellerScreen(pos, reverseTorque, thrust_ratio, torque_ratio));
+                ScreenOpener.open(new PropellerScreen(pos, thrust_ratio, torque_ratio));
             });
 
         });

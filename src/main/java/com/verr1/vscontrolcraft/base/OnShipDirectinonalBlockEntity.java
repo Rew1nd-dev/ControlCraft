@@ -1,7 +1,6 @@
 package com.verr1.vscontrolcraft.base;
 
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,18 +17,14 @@ import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Optional;
 
-public class OnShipBlockEntity extends SmartBlockEntity {
-    public OnShipBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+public class OnShipDirectinonalBlockEntity extends KineticBlockEntity {
+
+    public OnShipDirectinonalBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
-    @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-
-    }
 
     public static void updateBlockState(Level world, BlockPos pos, BlockState newState){
         world.setBlock(pos, newState, 3);
@@ -40,7 +35,8 @@ public class OnShipBlockEntity extends SmartBlockEntity {
     }
 
     public Direction getDirection(){
-        return getBlockState().getValue(BlockStateProperties.FACING);
+        if(getBlockState().hasProperty(BlockStateProperties.FACING)) return getBlockState().getValue(BlockStateProperties.FACING);
+        return Direction.UP;
     }
 
 

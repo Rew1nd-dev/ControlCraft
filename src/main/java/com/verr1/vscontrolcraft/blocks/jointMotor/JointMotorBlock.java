@@ -1,11 +1,13 @@
 package com.verr1.vscontrolcraft.blocks.jointMotor;
 
 import com.simibubi.create.AllItems;
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
 import com.verr1.vscontrolcraft.base.Servo.PID;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerOpenScreenPacket;
+import com.verr1.vscontrolcraft.base.Servo.PIDControllerType;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -18,6 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -30,7 +33,9 @@ import static com.verr1.vscontrolcraft.registry.AllShapes.HALF_BOX_BASE;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class JointMotorBlock extends DirectionalAxisKineticBlock implements IBE<JointMotorBlockEntity> {
+public class JointMotorBlock extends DirectionalAxisKineticBlock implements
+        IBE<JointMotorBlockEntity> , IWrenchable
+{
     public static final String ID = "joint";
 
     public JointMotorBlock(Properties p_49795_) {
@@ -40,14 +45,26 @@ public class JointMotorBlock extends DirectionalAxisKineticBlock implements IBE<
 
     protected void displayScreen(AbstractServoMotor entity, Player player){
 
-        double a = entity.getControllerInfoHolder().getTarget();
+        double t = entity.getControllerInfoHolder().getTarget();
+        double v = entity.getControllerInfoHolder().getValue();
         PID pidParams = entity.getControllerInfoHolder().getPIDParams();
 
         AllPackets.sendToPlayer(
-                new PIDControllerOpenScreenPacket(pidParams, a, entity.getBlockPos()),
+                new PIDControllerOpenScreenPacket(pidParams, v, t, entity.getBlockPos(), PIDControllerType.JOINT),
                 ((ServerPlayer)player)
         );
 
+    }
+
+    @Override
+    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
+                                boolean isMoving)  {
+        if(worldIn.isClientSide)return;
+        if(worldIn.hasNeighborSignal(pos)){
+            withBlockEntityDo(worldIn, pos, AbstractServoMotor::lock);
+        }else{
+            withBlockEntityDo(worldIn, pos, AbstractServoMotor::unlock);
+        }
     }
 
     @Override
@@ -63,13 +80,13 @@ public class JointMotorBlock extends DirectionalAxisKineticBlock implements IBE<
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
                                  BlockHitResult hit){
-        if(worldIn.isClientSide)return InteractionResult.SUCCESS;
-        if(AllItems.WRENCH.isIn(player.getItemInHand(InteractionHand.MAIN_HAND))) {
+        if(worldIn.isClientSide)return InteractionResult.PASS;
+        if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty() && player.isShiftKeyDown()) {
             withBlockEntityDo(worldIn, pos, JointMotorBlockEntity::setAssembleNextTick);
         }else if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
             withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.PASS;
     }
 
 

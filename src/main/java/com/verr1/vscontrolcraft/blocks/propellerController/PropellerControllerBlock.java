@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import org.jetbrains.annotations.Nullable;
 
-public class PropellerControllerBlock extends DirectionalBlock implements IBE<PropellerControllerBlockEntity> {
+public class PropellerControllerBlock extends DirectionalKineticBlock implements IBE<PropellerControllerBlockEntity> {
 
     public static final String ID = "propeller_controller";
 
@@ -24,12 +24,6 @@ public class PropellerControllerBlock extends DirectionalBlock implements IBE<Pr
         super(properties);
     }
 
-
-    @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
-        super.createBlockStateDefinition(builder);
-    }
 
     @Nullable
     @Override
@@ -46,5 +40,15 @@ public class PropellerControllerBlock extends DirectionalBlock implements IBE<Pr
     @Override
     public BlockEntityType<? extends PropellerControllerBlockEntity> getBlockEntityType() {
         return AllBlockEntities.PROPELLER_CONTROLLER_BLOCKENTITY.get();
+    }
+
+    @Override
+    public Direction.Axis getRotationAxis(BlockState state) {
+        return state.getValue(FACING).getAxis();
+    }
+
+    @Override
+    public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
+        return face == state.getValue(FACING).getOpposite();
     }
 }

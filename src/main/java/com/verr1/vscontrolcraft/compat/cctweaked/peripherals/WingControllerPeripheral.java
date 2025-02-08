@@ -27,12 +27,12 @@ public class WingControllerPeripheral extends AbstractAttachedPeripheral<WingCon
     }
 
     @LuaFunction
-    public float getAngle(){
+    public final float getAngle(){
         return getTarget().getAngle();
     }
 
     @LuaFunction
-    public void setAngle(double angle){
+    public final void setAngle(double angle){
         getTarget().setAngle((float)angle);
     }
 

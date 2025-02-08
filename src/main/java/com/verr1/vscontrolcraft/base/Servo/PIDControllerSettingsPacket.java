@@ -45,7 +45,7 @@ public class PIDControllerSettingsPacket extends SimplePacketBase {
         context.enqueueWork(() -> {
             BlockEntity be = context.getSender().level().getBlockEntity(pos);
             if(be instanceof IPIDController controller){
-                controller.getControllerInfoHolder().setParameter(p, d, i).setTarget(value);
+                controller.getControllerInfoHolder().setParameter(p, i, d).setTarget(value);
             }
 
         });

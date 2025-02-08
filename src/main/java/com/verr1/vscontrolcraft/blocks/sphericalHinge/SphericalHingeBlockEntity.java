@@ -79,7 +79,7 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
         boolean isGrounded = !isOnServerShip();
 
         ConstrainCenter.createOrReplaceNewConstrain(
-                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, isCmpOnGround),
+                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, isCmpOnGround, false),
                 Hinge,
                 shipWorldCore
         );
@@ -123,7 +123,7 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
 
     @Override
     public void destroyConstrain() {
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", false, false, false));
         clearCompanionShipInfo();
     }
 

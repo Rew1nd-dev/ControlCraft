@@ -2,6 +2,7 @@ package com.verr1.vscontrolcraft.compat.valkyrienskies.jet;
 
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.blocks.jet.JetBlockEntity;
+import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.anchor.AnchorForceInducer;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.base.AbstractExpirableForceInducer;
 import com.verr1.vscontrolcraft.utils.Util;
@@ -33,6 +34,8 @@ public class JetForceInducer extends AbstractExpirableForceInducer {
 
     public void jetControl(LevelPos pos, PhysShipImpl physShip){
         if(!(VSMathUtils.getExisting(pos) instanceof JetBlockEntity jet))return;
+        jet.physics.write(VSMathUtils.getShipPhysics(physShip));
+
         LogicalJet logicalJet = jet.getLogicalJet();
         Vector3dc dir = logicalJet.direction();
         double thrust = logicalJet.thrust();

@@ -2,7 +2,10 @@ package com.verr1.vscontrolcraft.blocks.propellerController;
 
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
-import com.verr1.vscontrolcraft.base.OnShipBlockEntity;
+import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
+import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
+import com.verr1.vscontrolcraft.base.UltraTerminal.WidgetType;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.PropellerControllerPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.LogicalPropeller;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.PropellerForceInducer;
@@ -23,7 +26,11 @@ import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
-public class PropellerControllerBlockEntity extends OnShipBlockEntity {
+import java.util.List;
+
+public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntity implements
+        ITerminalDevice
+{
     public boolean hasAttachedPropeller = false;
 
     public SynchronizedField<Double> rotationalSpeed = new SynchronizedField<>(0.0);
@@ -35,6 +42,15 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity {
 
     private PropellerControllerPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
+
+    private final List<NumericField> fields = List.of(
+            new NumericField(
+                    rotationalSpeed::read,
+                    rotationalSpeed::write,
+                    "Speed",
+                    WidgetType.SLIDE
+            )
+    );
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -103,6 +119,12 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity {
 
 
     @Override
+    public void onSpeedChanged(float previousSpeed) {
+        super.onSpeedChanged(previousSpeed);
+        rotationalSpeed.write((double)speed);
+    }
+
+    @Override
     public void destroy(){
         super.destroy();
     }
@@ -123,5 +145,15 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity {
                 attachedPropellerTorqueRatio,
                 (ServerLevel) this.level
         );
+    }
+
+    @Override
+    public List<NumericField> fields() {
+        return fields;
+    }
+
+    @Override
+    public String name() {
+        return "propeller controller";
     }
 }

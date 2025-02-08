@@ -12,6 +12,10 @@ import com.verr1.vscontrolcraft.base.Servo.ICanBruteDirectionalConnect;
 import com.verr1.vscontrolcraft.base.Servo.IPIDController;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerInfoHolder;
 import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
+import com.verr1.vscontrolcraft.base.UltraTerminal.Field;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
+import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
+import com.verr1.vscontrolcraft.base.UltraTerminal.WidgetType;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SliderControllerPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.slider.LogicalSlider;
@@ -50,10 +54,10 @@ import java.util.Objects;
 import static net.minecraft.ChatFormatting.GRAY;
 
 public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implements
-        IPIDController, ICanBruteDirectionalConnect, IConstrainHolder, IHaveGoggleInformation
+        IPIDController, ICanBruteDirectionalConnect, IConstrainHolder, IHaveGoggleInformation, ITerminalDevice
 {
 
-    private final double MAX_SLIDE_DISTANCE = 8;
+    private final double MAX_SLIDE_DISTANCE = 32;
 
     public SynchronizedField<ShipPhysics> ownPhysics = new SynchronizedField<>(ShipPhysics.EMPTY);
     public SynchronizedField<ShipPhysics> cmpPhysics = new SynchronizedField<>(ShipPhysics.EMPTY);
@@ -69,6 +73,39 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
     private SliderControllerPeripheral peripheral;
     protected LazyOptional<IPeripheral> peripheralCap;
 
+    private List<NumericField> fields = List.of(
+            new NumericField(
+                    controlForce::read,
+                    controlForce::write,
+                    "Force",
+                    WidgetType.SLIDE
+            ),
+            new NumericField(
+                    () -> this.getControllerInfoHolder().getTarget(),
+                    t -> this.getControllerInfoHolder().setTarget(t),
+                    "target",
+                    WidgetType.SLIDE
+            ),
+            new NumericField(
+                    () -> this.getControllerInfoHolder().getPIDParams().p(),
+                    p -> this.getControllerInfoHolder().setP(p),
+                    "P",
+                    WidgetType.SLIDE
+            ),
+            new NumericField(
+                    () -> this.getControllerInfoHolder().getPIDParams().i(),
+                    i -> this.getControllerInfoHolder().setI(i),
+                    "I",
+                    WidgetType.SLIDE
+            ),
+            new NumericField(
+                    () -> this.getControllerInfoHolder().getPIDParams().d(),
+                    d -> this.getControllerInfoHolder().setD(d),
+                    "D",
+                    WidgetType.SLIDE
+            )
+    );
+
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -83,7 +120,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         return super.getCapability(cap, side);
     }
 
-    private final PIDControllerInfoHolder controllerInfoHolder = new PIDControllerInfoHolder().setParameter(0.5, 14, 0);
+    private final PIDControllerInfoHolder controllerInfoHolder = new PIDControllerInfoHolder().setParameter(0.5, 0, 14);
 
     public SliderControllerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -110,6 +147,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
     @Override
     public void bruteDirectionalConnectWith(BlockPos assemPos, Direction forward, Direction align){
         if(!VSMathUtils.isVertical(align, forward))return;
+
 
         Direction selfAlign = getAlign();
         Direction selfForward = getForward();
@@ -152,6 +190,12 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         setCompanionShipDirection(align);
         notifyUpdate();
 
+    }
+
+    @Override
+    public void onSpeedChanged(float previousSpeed) {
+        super.onSpeedChanged(previousSpeed);
+        getControllerInfoHolder().setP(speed);
     }
 
     @Override
@@ -294,13 +338,13 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
 
 
          ConstrainCenter.createOrReplaceNewConstrain(
-                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false),
+                new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false, false),
                 hinge_0,
                 shipWorldCore
         );
 
         ConstrainCenter.createOrReplaceNewConstrain(
-                new ConstrainKey(getBlockPos(), getDimensionID(), "slide", isGrounded, false),
+                new ConstrainKey(getBlockPos(), getDimensionID(), "slide", isGrounded, false, false),
                 slide,
                 shipWorldCore
         );
@@ -318,7 +362,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
 
 
     public void syncCachedPos(){
-        VSSlideConstraint slide = (VSSlideConstraint)ConstrainCenter.get(new ConstrainKey(getBlockPos(), getDimensionID(), "slide", !isOnServerShip(), false));
+        VSSlideConstraint slide = (VSSlideConstraint)ConstrainCenter.get(new ConstrainKey(getBlockPos(), getDimensionID(), "slide", !isOnServerShip(), false, false));
         if(slide == null)return;
         cachedPos_Own.write(new Vector3d(slide.getLocalPos0()));
         cachedPos_Cmp.write(new Vector3d(slide.getLocalPos1()));
@@ -333,8 +377,8 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
 
     public void destroyConstrain(){
         boolean isGrounded = !isOnServerShip();
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false));
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "slide", isGrounded, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "slide", isGrounded, false, false));
         clearCompanionShipInfo();
     }
 
@@ -413,5 +457,15 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
                 cmp_loc,
                 getOutputForce()
         );
+    }
+
+    @Override
+    public List<NumericField> fields() {
+        return fields;
+    }
+
+    @Override
+    public String name() {
+        return "Slider Device";
     }
 }

@@ -79,7 +79,10 @@ public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlock
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
                                  BlockHitResult hit){
         if(worldIn.isClientSide)return InteractionResult.PASS;
-        withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
+        if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
+            withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
+        }
+
         return InteractionResult.PASS;
     }
 

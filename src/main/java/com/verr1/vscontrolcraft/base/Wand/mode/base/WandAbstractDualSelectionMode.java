@@ -5,11 +5,12 @@ import com.verr1.vscontrolcraft.base.Wand.WandSelection;
 import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+
+@OnlyIn(value = Dist.CLIENT)
 public abstract class WandAbstractDualSelectionMode extends WandAbstractMultipleSelectionMode {
-
-
-
 
     protected WandAbstractDualSelectionMode(){
 

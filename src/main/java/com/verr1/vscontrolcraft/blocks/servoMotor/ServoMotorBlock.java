@@ -1,11 +1,15 @@
 package com.verr1.vscontrolcraft.blocks.servoMotor;
 
 import com.simibubi.create.AllItems;
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
 import com.verr1.vscontrolcraft.base.Servo.PID;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerOpenScreenPacket;
+import com.verr1.vscontrolcraft.base.Servo.PIDControllerType;
+import com.verr1.vscontrolcraft.blocks.annihilator.AnnihilatorBlockEntity;
+import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlockEntity;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.core.BlockPos;
@@ -17,6 +21,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -25,7 +31,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import static com.verr1.vscontrolcraft.registry.AllShapes.HALF_BOX_BASE;
 
-public class ServoMotorBlock extends DirectionalKineticBlock implements IBE<ServoMotorBlockEntity> {
+
+public class ServoMotorBlock extends DirectionalKineticBlock implements
+        IBE<ServoMotorBlockEntity>, IWrenchable
+{
     public static String ID = "servo";
 
     public ServoMotorBlock(Properties properties) {
@@ -34,31 +43,48 @@ public class ServoMotorBlock extends DirectionalKineticBlock implements IBE<Serv
 
     @Override
     public Direction.Axis getRotationAxis(BlockState state) {
-        return null;
+        return state.getValue(FACING).getAxis();
+    }
+
+    @Override
+    public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
+        return state.getValue(FACING).getOpposite() == face;
     }
 
     protected void displayScreen(AbstractServoMotor entity, Player player){
 
-        double a = entity.getControllerInfoHolder().getTarget();
+        double t = entity.getControllerInfoHolder().getTarget();
+        double v = entity.getControllerInfoHolder().getValue();
         PID pidParams = entity.getControllerInfoHolder().getPIDParams();
 
         AllPackets.sendToPlayer(
-                new PIDControllerOpenScreenPacket(pidParams, a, entity.getBlockPos()),
+                new PIDControllerOpenScreenPacket(pidParams, v, t, entity.getBlockPos(), PIDControllerType.SERVO),
                 ((ServerPlayer)player)
         );
 
     }
 
     @Override
+    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
+                                boolean isMoving)  {
+        if(worldIn.isClientSide)return;
+        if(worldIn.hasNeighborSignal(pos)){
+            withBlockEntityDo(worldIn, pos, AbstractServoMotor::lock);
+        }else{
+            withBlockEntityDo(worldIn, pos, AbstractServoMotor::unlock);
+        }
+    }
+
+    @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
                                  BlockHitResult hit){
-        if(worldIn.isClientSide)return InteractionResult.SUCCESS;
-        if(AllItems.WRENCH.isIn(player.getItemInHand(InteractionHand.MAIN_HAND))) {
+        if(worldIn.isClientSide)return InteractionResult.PASS;
+        if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty() && player.isShiftKeyDown()) {
             withBlockEntityDo(worldIn, pos, ServoMotorBlockEntity::setAssembleNextTick);
         }else if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
             withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.PASS;
     }
 
     @Override

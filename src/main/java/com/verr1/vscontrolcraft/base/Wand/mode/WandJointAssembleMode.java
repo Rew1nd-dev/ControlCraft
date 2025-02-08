@@ -13,9 +13,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.awt.*;
 
+
+@OnlyIn(value = Dist.CLIENT)
 public class WandJointAssembleMode extends WandAbstractTripleSelectionMode {
     public static final String ID = "joint_assemble";
     public static WandJointAssembleMode instance;
@@ -71,7 +75,8 @@ public class WandJointAssembleMode extends WandAbstractTripleSelectionMode {
                                 assemAlign,
                                 align,
                                 assemForward,
-                                forward
+                                forward,
+                                false
                 )
             );
     }

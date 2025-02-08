@@ -31,10 +31,17 @@ public class TransmitterPeripheral extends AbstractAttachedPeripheral<Transmitte
 
 
     @LuaFunction
-    public MethodResult callRemote(IComputerAccess access, ILuaContext context, IArguments arguments) throws LuaException {
+    public final MethodResult callRemote(IComputerAccess access, ILuaContext context, IArguments arguments) throws LuaException {
         String remoteName = arguments.getString(0);
         String methodName = arguments.getString(1);
         return getTarget().callRemote(access, context, remoteName, methodName, arguments.drop(2));
+    }
+
+    @LuaFunction
+    public final MethodResult callRemoteAsync(IComputerAccess access, ILuaContext context, IArguments arguments) throws LuaException {
+        String remoteName = arguments.getString(0);
+        String methodName = arguments.getString(1);
+        return getTarget().callRemoteAsync(access, context, remoteName, methodName, arguments.drop(2));
     }
 
     @LuaFunction

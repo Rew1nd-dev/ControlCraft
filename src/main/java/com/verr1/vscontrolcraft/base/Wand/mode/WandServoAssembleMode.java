@@ -10,9 +10,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.awt.*;
 
+
+@OnlyIn(value = Dist.CLIENT)
 public class WandServoAssembleMode extends WandAbstractDualSelectionMode {
     public static final String ID = "servo_assemble";
 

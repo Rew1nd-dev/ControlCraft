@@ -1,7 +1,7 @@
 package com.verr1.vscontrolcraft.blocks.anchor;
 
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
-import com.verr1.vscontrolcraft.base.OnShipBlockEntity;
+import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.anchor.AnchorForceInducer;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.anchor.LogicalAnchor;
 import net.minecraft.core.BlockPos;
@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.valkyrienskies.core.api.ships.ServerShip;
 
-public class AnchorBlockEntity extends OnShipBlockEntity {
+public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity {
 
 
 

@@ -1,28 +1,27 @@
 package com.verr1.vscontrolcraft.blocks.spinalyzer;
 
-import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.foundation.block.IBE;
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.data.SpecialBlockStateGen;
-import com.tterrag.registrate.providers.DataGenContext;
-import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
+import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
-import com.verr1.vscontrolcraft.registry.AllBlockStates;
-import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 
 import static com.verr1.vscontrolcraft.registry.AllShapes.HALF_BOX_BASE;
 
@@ -55,11 +54,14 @@ public class SpinalyzerBlock extends DirectionalBlock implements IBE<SpinalyzerB
     }
 
     @Override
-    public InteractionResult onWrenched(BlockState state, UseOnContext context) {
-        if(context.getClickedFace() != state.getValue(FACING)){
-            // BlockState newState = state.setValue(ROTATION,(state.getValue(ROTATION) + 1) % 4);
+    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
+                                 BlockHitResult hit){
+        if(worldIn.isClientSide){
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+                // ScreenOpener.open(new TestScreen());
+            });
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.PASS;
     }
 
     @Override

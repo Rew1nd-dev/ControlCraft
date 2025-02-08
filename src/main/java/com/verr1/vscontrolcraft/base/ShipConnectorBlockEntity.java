@@ -1,7 +1,5 @@
 package com.verr1.vscontrolcraft.base;
 
-import com.verr1.vscontrolcraft.base.Constrain.ConstrainCenter;
-import com.verr1.vscontrolcraft.base.Constrain.DataStructure.ConstrainKey;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -9,16 +7,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.valkyrienskies.core.api.ships.ServerShip;
-import org.valkyrienskies.core.apigame.constraints.VSConstraint;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
-import java.util.Collection;
-import java.util.Objects;
-
-public class ShipConnectorBlockEntity extends OnShipBlockEntity{
+public class ShipConnectorBlockEntity extends OnShipDirectinonalBlockEntity {
 
     private long companionShipID;
-    private Direction companionShipDirection;
+    private Direction companionShipDirection = Direction.UP;
 
     public ShipConnectorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);

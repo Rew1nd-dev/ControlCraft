@@ -15,7 +15,7 @@ license="${mod_license}"
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 # The modid of the mod
-modId="${mod_id}" #mandatory
+modId="vscontrolcraft" #mandatory
 # The version number of the mod
 version="${mod_version}" #mandatory
 # A display name for the mod
@@ -41,7 +41,7 @@ authors="${mod_authors}" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''${mod_description}'''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
-[[dependencies.${mod_id}]] #optional
+[[dependencies.vscontrolcraft]] #optional
     # the modid of the dependency
     modId="forge" #mandatory
     # Does this dependency have to exist - if not, ordering below must be specified
@@ -55,7 +55,7 @@ description='''${mod_description}'''
     # Side this dependency is applied on - BOTH, CLIENT, or SERVER
     side="BOTH"
 # Here's another dependency
-[[dependencies.${mod_id}]]
+[[dependencies.vscontrolcraft]]
     modId="minecraft"
     mandatory=true
     # This version range declares a minimum of the current minecraft version up to but not including the next major version
@@ -63,7 +63,7 @@ description='''${mod_description}'''
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.vscontrolcraft]]
 modId="create"
 mandatory=true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
@@ -71,7 +71,7 @@ versionRange="[0.5.1,)"
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.vscontrolcraft]]
 modId="computercraft"
 mandatory=true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version

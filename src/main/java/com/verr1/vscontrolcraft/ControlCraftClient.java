@@ -1,12 +1,15 @@
 package com.verr1.vscontrolcraft;
 
 import com.simibubi.create.foundation.render.SuperByteBufferCache;
+import com.verr1.vscontrolcraft.base.Wand.render.WandGUI;
 import com.verr1.vscontrolcraft.registry.AllPartialModels;
 import com.verr1.vscontrolcraft.render.CachedBufferer;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 public class ControlCraftClient {
     public static final SuperByteBufferCache BUFFER_CACHE = new SuperByteBufferCache();
+
+    public static final WandGUI ClientWandHandler = new WandGUI();
 
     public static void clientInit(){
         ControlCraft.LOGGER.info("Try CC Generic Block");
@@ -17,4 +20,6 @@ public class ControlCraftClient {
         BUFFER_CACHE.registerCompartment(CachedBufferer.CC_DIRECTIONAL_PARTIAL);
         AllPartialModels.init();
     }
+
+
 }

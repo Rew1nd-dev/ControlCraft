@@ -7,6 +7,8 @@ import dan200.computercraft.shared.peripheral.monitor.MonitorWatcher;
 import dan200.computercraft.shared.util.TickScheduler;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 
 public class ComputerCraftDelegation {
 
@@ -14,6 +16,22 @@ public class ComputerCraftDelegation {
     private static Thread ComputerCraftDelegateThread = null;
     private static final Object lock = new Object();
     private static boolean isLocked = true;
+
+
+    private static final ConcurrentLinkedQueue<Runnable> mainThreadTasks = new ConcurrentLinkedQueue<>();
+
+    public static void issueMainThreadTask(Runnable r){
+        if(mainThreadTasks.size() < 512)mainThreadTasks.add(r);
+    }
+
+    private static void executeAllMainThreadTask(){
+        while (!mainThreadTasks.isEmpty())mainThreadTasks.poll().run();
+    }
+
+    public static void tick(){
+        executeAllMainThreadTask();
+    }
+
 
     private static void DelegateRun() {
         if(!Config.OverclockComputerCraft)return;

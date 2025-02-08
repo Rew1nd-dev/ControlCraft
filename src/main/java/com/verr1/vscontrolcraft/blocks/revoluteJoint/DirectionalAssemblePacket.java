@@ -20,6 +20,7 @@ public class DirectionalAssemblePacket extends SimplePacketBase {
     Direction servoAlign;
     Direction assemForward;
     Direction servoForward;
+    boolean forced;
 
     public DirectionalAssemblePacket(
             BlockPos assemPos,
@@ -27,13 +28,15 @@ public class DirectionalAssemblePacket extends SimplePacketBase {
             Direction assemAlign,
             Direction servoAlign,
             Direction assemForward,
-            Direction servoForward) {
+            Direction servoForward,
+            boolean forced) {
         this.assemPos = assemPos;
         this.servoPos = servoPos;
         this.assemAlign = assemAlign;
         this.servoAlign = servoAlign;
         this.assemForward = assemForward;
         this.servoForward = servoForward;
+        this.forced = forced;
     }
 
     public DirectionalAssemblePacket(FriendlyByteBuf buf) {
@@ -43,6 +46,7 @@ public class DirectionalAssemblePacket extends SimplePacketBase {
         servoAlign = buf.readEnum(Direction.class);
         assemForward = buf.readEnum(Direction.class);
         servoForward = buf.readEnum(Direction.class);
+        forced = buf.readBoolean();
     }
 
     @Override
@@ -53,38 +57,47 @@ public class DirectionalAssemblePacket extends SimplePacketBase {
         buffer.writeEnum(servoAlign);
         buffer.writeEnum(assemForward);
         buffer.writeEnum(servoForward);
+        buffer.writeBoolean(forced);
     }
 
     @Override
     public boolean handle(NetworkEvent.Context context) {
         context.enqueueWork(() -> {
-            FaceAlignmentSchedule task =
-                new FaceAlignmentSchedule
-                        .builder()
-                        .basic(
-                            servoPos,
-                            servoAlign,
-                            assemPos,
-                            assemAlign,
-                            (ServerLevel) context.getSender().level(),
-                            10
-                        )
-                        .withExpiredTask(() -> {
-                            BlockEntity be = context.getSender().level().getExistingBlockEntity(servoPos);
-                            if(be instanceof ICanBruteDirectionalConnect joint){
-                                joint.bruteDirectionalConnectWith(assemPos, assemForward, assemAlign);
-                            }
-                        })
-                        .withOverriddenAlignExtra(
-                                VSMathUtils.rotationToAlign(
+            if(forced){
+                BlockEntity be = context.getSender().level().getExistingBlockEntity(servoPos);
+                if(be instanceof ICanBruteDirectionalConnect icbdc){
+                    icbdc.bruteDirectionalConnectWith(assemPos, assemForward, assemAlign);
+                }
+            }else{
+                FaceAlignmentSchedule task =
+                        new FaceAlignmentSchedule
+                                .builder()
+                                .basic(
+                                        servoPos,
                                         servoAlign,
-                                        servoForward,
+                                        assemPos,
                                         assemAlign,
-                                        assemForward
+                                        (ServerLevel) context.getSender().level(),
+                                        10
                                 )
-                        )
-                        .build();
-            IntervalExecutor.executeOnSchedule(task);
+                                .withExpiredTask(() -> {
+                                    BlockEntity be = context.getSender().level().getExistingBlockEntity(servoPos);
+                                    if(be instanceof ICanBruteDirectionalConnect joint){
+                                        joint.bruteDirectionalConnectWith(assemPos, assemForward, assemAlign);
+                                    }
+                                })
+                                .withOverriddenAlignExtra(
+                                        VSMathUtils.rotationToAlign(
+                                                servoAlign,
+                                                servoForward,
+                                                assemAlign,
+                                                assemForward
+                                        )
+                                )
+                                .build();
+                IntervalExecutor.executeOnSchedule(task);
+            }
+
         });
         return true;
     }

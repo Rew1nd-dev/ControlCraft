@@ -2,6 +2,8 @@ package com.verr1.vscontrolcraft.blocks.recevier;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.verr1.vscontrolcraft.ControlCraft;
+import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
 import com.verr1.vscontrolcraft.blocks.transmitter.NetworkManager;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.ILuaContext;
@@ -24,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ReceiverBlockEntity extends SmartBlockEntity {
 
@@ -31,6 +34,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity {
     private final Map<String, PeripheralMethod> methods = new HashMap<>();
     private PeripheralKey networkKey = PeripheralKey.NULL;
 
+    private ConcurrentLinkedQueue<Runnable> syncTasks = new ConcurrentLinkedQueue<>();
 
     public MethodResult callPeripheral(IComputerAccess access, ILuaContext context, String methodName, IArguments args) throws LuaException {
         if(level.isClientSide)return MethodResult.of(null, "You Are Calling This On The Client Side, Nothing Returned");
@@ -38,11 +42,35 @@ public class ReceiverBlockEntity extends SmartBlockEntity {
         if(!methods.containsKey(methodName))return MethodResult.of(null, "Receiver Called, But Method Not Found");
         if(access == null)return MethodResult.of(null, "Receiver Called, But No Access Provided");
         return methods.get(methodName).apply(attachedPeripheral, context, access, args);
+    }
 
+    public MethodResult callPeripheralAsync(IComputerAccess access, ILuaContext context, String methodName, IArguments args){
+        if(level.isClientSide)return MethodResult.of(null, "You Are Calling This On The Client Side, Nothing Returned");
+        if(attachedPeripheral == null) return MethodResult.of(null, "Receiver Called, But No Peripheral Attached");
+        if(!methods.containsKey(methodName))return MethodResult.of(null, "Receiver Called, But Method Not Found");
+        if(access == null)return MethodResult.of(null, "Receiver Called, But No Access Provided");
+        enqueueTask(()->{
+            try {
+                methods.get(methodName).apply(attachedPeripheral, context, access, args);
+            } catch (Exception e) {
+                ControlCraft.LOGGER.info("Lua Exception Of: {}", e.getMessage());
+            }
+        });
+        return MethodResult.of("queued");
+    }
+
+    public void enqueueTask(Runnable r){
+        if(syncTasks.size() < 256) syncTasks.add(r);
+    }
+
+    public void executeAll(){
+        while(!syncTasks.isEmpty()){
+            syncTasks.poll().run();
+        }
     }
 
     public String getAttachedPeripheralType(){
-        if(level.isClientSide)return "You Are Calling This On The Client Side Nothing Returned";
+        if(level.isClientSide)return "You Are Calling This On The Client Side, Nothing Returned";
         if(attachedPeripheral == null)return "Not Attached";
         return attachedPeripheral.getType();
     }
@@ -84,6 +112,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity {
     }
 
     public void resetNetworkRegistry(PeripheralKey newKey){
+        if(level == null)return;
         if(level.isClientSide)return;
         if(Objects.equals(newKey.Name(), ""))return;
         networkKey = NetworkManager.registerAndGetKey(newKey, getBlockPos());
@@ -95,6 +124,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity {
         super.tick();
         if(level.isClientSide)return;
         NetworkManager.activate(getBlockPos());
+        executeAll();
     }
 
     @Override
@@ -131,7 +161,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity {
         if(!clientPacket){
             long protocol = tag.getLong("protocol");
             String name = tag.getString("name");
-            resetNetworkRegistry(new PeripheralKey(name, protocol));
+            syncTasks.add(()-> resetNetworkRegistry(new PeripheralKey(name, protocol)));
         }
     }
 

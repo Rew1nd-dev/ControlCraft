@@ -29,7 +29,7 @@ public class Config
 
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
-    public static boolean OverclockComputerCraft;
+    public static boolean OverclockComputerCraft = false;
 
 
     private static boolean validateItemName(final Object obj)
@@ -41,11 +41,6 @@ public class Config
     static void onLoad(final ModConfigEvent event)
     {
         OverclockComputerCraft = CC_OverLocking.get();
-        /* convert the list of strings into a set of items
-        items = ITEM_STRINGS.get().stream()
-                .map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)))
-                .collect(Collectors.toSet());
-        * */
 
 
     }

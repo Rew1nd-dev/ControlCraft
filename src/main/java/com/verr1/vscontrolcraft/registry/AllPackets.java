@@ -3,6 +3,7 @@ package com.verr1.vscontrolcraft.registry;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.Hinge.packets.*;
+import com.verr1.vscontrolcraft.base.Servo.PIDControllerCycleModePacket;
 import com.verr1.vscontrolcraft.blocks.anchor.AnchorOpenScreenPacket;
 import com.verr1.vscontrolcraft.blocks.anchor.AnchorSettingsPacket;
 import com.verr1.vscontrolcraft.blocks.jetRudder.JetRudderSyncAnimationPacket;
@@ -19,7 +20,12 @@ import com.verr1.vscontrolcraft.base.Servo.PIDControllerOpenScreenPacket;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerSettingsPacket;
 import com.verr1.vscontrolcraft.base.Servo.ServoMotorSyncAnimationPacket;
 import com.verr1.vscontrolcraft.blocks.slider.SliderSyncAnimationPacket;
+import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialConnectPacket;
+import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialOpenScreenPacket;
+import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialSettingsPacket;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerLinkPacket;
+import com.verr1.vscontrolcraft.blocks.terminal.TerminalOpenScreenPacket;
+import com.verr1.vscontrolcraft.blocks.terminal.TerminalSettingsPacket;
 import com.verr1.vscontrolcraft.blocks.wingController.WingControllerSyncAnimationPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -43,12 +49,16 @@ public enum AllPackets {
     SERVOMOTOR_SETTINGS(PIDControllerSettingsPacket.class, PIDControllerSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
     MAGNET_SETTINGS(MagnetSettingsPacket.class, MagnetSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
     ANCHOR_SETTINGS(AnchorSettingsPacket.class, AnchorSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    SPATIAL_SETTINGS(SpatialSettingsPacket.class, SpatialSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    TERMINAL_SETTINGS(TerminalSettingsPacket.class, TerminalSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
     SPINALYZER_TARGET_SELECTION(SpinalyzerLinkPacket.class, SpinalyzerLinkPacket::new, NetworkDirection.PLAY_TO_SERVER),
     SERVOMOTOR_CONSTRAIN_ASSEMBLE(SimpleAssemblePacket.class, SimpleAssemblePacket::new, NetworkDirection.PLAY_TO_SERVER),
     JOINTMOTOR_CONSTRAIN_ASSEMBLE(DirectionalAssemblePacket.class, DirectionalAssemblePacket::new, NetworkDirection.PLAY_TO_SERVER),
     HINGE_BRUTE_CONNECTION(HingeBruteConnectPacket.class, HingeBruteConnectPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    ANCHOR_CONNECTION(SpatialConnectPacket.class, SpatialConnectPacket::new, NetworkDirection.PLAY_TO_SERVER),
     HINGE_FLIP(HingeFlipPacket.class, HingeFlipPacket::new, NetworkDirection.PLAY_TO_SERVER),
     DESTROY_CONSTRAIN(DestroyConstrainPacket.class, DestroyConstrainPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    SERVO_TOGGLE_MODE(PIDControllerCycleModePacket.class, PIDControllerCycleModePacket::new, NetworkDirection.PLAY_TO_SERVER),
     HINGE_ADJUSTMENT(HingeAdjustLevelPacket.class, HingeAdjustLevelPacket::new, NetworkDirection.PLAY_TO_SERVER),
 
     //Server To Client
@@ -57,6 +67,8 @@ public enum AllPackets {
     SERVOMOTOR_SCREEN_OPEN(PIDControllerOpenScreenPacket.class, PIDControllerOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     MAGNET_SCREEN_OPEN(MagnetOpenScreenPacket.class, MagnetOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     ANCHOR_SCREEN_OPEN(AnchorOpenScreenPacket.class, AnchorOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
+    SPATIAL_SCREEN_OPEN(SpatialOpenScreenPacket.class, SpatialOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
+    TERMINAL_SCREEN_OPEN(TerminalOpenScreenPacket.class, TerminalOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     SYNC_SERVOMOTOR_ANIMATION(ServoMotorSyncAnimationPacket.class, ServoMotorSyncAnimationPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     SYNC_PROPELLER_ANIMATION(PropellerSyncAnimationPacket.class, PropellerSyncAnimationPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     SYNC_WING_CONTROLLER_ANIMATION(WingControllerSyncAnimationPacket.class, WingControllerSyncAnimationPacket::new, NetworkDirection.PLAY_TO_CLIENT),

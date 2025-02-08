@@ -13,9 +13,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MagnetManager {
-    private static int lazyTickRate = 30;
-    private static int lazyTick = 0;
-    private static int TICKS_BEFORE_EXPIRED = 10;
+    private static final int TICKS_BEFORE_EXPIRED = 10;
 
 
     private static final Map<LogicalMagnet, Integer> magnets = new ConcurrentHashMap<>();

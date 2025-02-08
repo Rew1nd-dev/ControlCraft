@@ -14,8 +14,10 @@
   "block.vscontrolcraft.revolute_joint": "Revolute Joint",
   "block.vscontrolcraft.servo": "Servo",
   "block.vscontrolcraft.slider": "Slider",
+  "block.vscontrolcraft.spatial_anchor": "Spatial Anchor",
   "block.vscontrolcraft.sphere_hinge": "Sphere Hinge",
   "block.vscontrolcraft.spinalyzer": "Spinalyzer",
+  "block.vscontrolcraft.terminal": "Terminal",
   "block.vscontrolcraft.transmitter": "Transmitter",
   "block.vscontrolcraft.wing_controller": "Wing Controller",
   "item.vscontrolcraft.awe_in_wand": "Awe-In-Wand"

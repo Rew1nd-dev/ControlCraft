@@ -6,7 +6,11 @@ import com.verr1.vscontrolcraft.base.Wand.WandSelection;
 import com.verr1.vscontrolcraft.base.Wand.mode.base.WandAbstractMultipleSelectionMode;
 import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import com.verr1.vscontrolcraft.registry.AllPackets;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+
+@OnlyIn(value = Dist.CLIENT)
 public class WandDestroyConstrainMode extends WandAbstractMultipleSelectionMode {
     public static final String ID = "destroy_constrain";
 

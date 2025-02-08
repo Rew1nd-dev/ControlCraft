@@ -9,6 +9,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.*;
 
 import java.lang.Math;
+import java.util.List;
 
 import static com.verr1.vscontrolcraft.registry.AllBlockStates.ROTATION;
 
@@ -34,6 +35,17 @@ public class Util {
             angle += 360;
         }
         return angle;
+    }
+
+    public double getDouble(List<Double> list, int index){
+        if(index < list.size()){
+            return list.get(index);
+        }
+        return 0;
+    }
+
+    public static double clamp1(double x){
+        return Math.atan(x) / Math.PI * 0.5;
     }
 
     public static Matrix3d getRotationMatrix(BlockState state) {
@@ -84,43 +96,10 @@ public class Util {
         return matrix;
     }
 
-    public static Pair<Integer, Integer> getRotations(Direction facing, int rotation) {
-           // 获取旋转
 
-        int xRotation = 0; // 默认 XRotation
-        int yRotation = switch (facing) {
-            case UP -> {
-                xRotation = -90;
-                yield rotation * 90;
-            }
-            case DOWN -> {
-                xRotation = 90;
-                yield rotation * 90;
-            }
-            case NORTH -> {
-                xRotation = 0;
-                yield rotation * 90;
-            }
-            case SOUTH -> {
-                xRotation = 0;
-                yield 180 + rotation * 90;
-            }
-            case EAST -> {
-                xRotation = 0;
-                yield 90 + rotation * 90;
-            }
-            case WEST -> {
-                xRotation = 0;
-                yield 270 + rotation * 90;
-            }
-        };
-
-        yRotation = Math.floorMod(yRotation, 360);
-
-        return Pair.of(xRotation, yRotation);
-    }
 
     public static boolean tryParseLongFilter(String s) {
+        if(s.isEmpty() || s.equals("-"))return true;
         try{
             Long.parseLong(s);
             return true;
@@ -138,6 +117,7 @@ public class Util {
     }
 
     public static boolean tryParseDoubleFilter(String s) {
+        if(s.isEmpty() || s.equals("-"))return true;
         try{
             Double.parseDouble(s);
             return true;
@@ -147,6 +127,7 @@ public class Util {
     }
 
     public static boolean tryParseClampedDoubleFilter(String s, double threshold){
+        if(s.isEmpty() || s.equals("-"))return true;
         try{
             double d = Double.parseDouble(s);
             if(Math.abs(d) < threshold)return true;

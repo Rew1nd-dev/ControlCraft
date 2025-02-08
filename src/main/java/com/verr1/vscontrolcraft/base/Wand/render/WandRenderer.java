@@ -16,7 +16,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+
+@OnlyIn(value = Dist.CLIENT)
 public class WandRenderer {
     public static Vec3
             NWD = new Vec3(0, 0, 0),

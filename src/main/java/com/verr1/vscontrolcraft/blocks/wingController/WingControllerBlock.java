@@ -1,6 +1,8 @@
 package com.verr1.vscontrolcraft.blocks.wingController;
 
+import com.simibubi.create.AllItems;
 import com.simibubi.create.content.contraptions.bearing.BearingBlock;
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
@@ -17,11 +19,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import static com.verr1.vscontrolcraft.registry.AllShapes.HALF_BOX_BASE;
 
-public class WingControllerBlock extends BearingBlock implements IBE<WingControllerBlockEntity> {
+public class WingControllerBlock extends BearingBlock implements
+        IBE<WingControllerBlockEntity>
+{
     public static final String ID = "wing_controller";
 
     public WingControllerBlock(Properties properties) {
@@ -33,14 +38,10 @@ public class WingControllerBlock extends BearingBlock implements IBE<WingControl
         return null;
     }
 
-    @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_49915_) {
-        super.createBlockStateDefinition(p_49915_);
-    }
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-        return HALF_BOX_BASE.get(state.getValue(FACING));
+        return Shapes.block();
     }
 
     @Override
@@ -57,7 +58,7 @@ public class WingControllerBlock extends BearingBlock implements IBE<WingControl
             if (worldIn.isClientSide)
                 return InteractionResult.SUCCESS;
             withBlockEntityDo(worldIn, pos, be -> {
-                if(be.running == false){
+                if(!be.running){
                     be.assemble();
                 }else{
                     be.disassemble();

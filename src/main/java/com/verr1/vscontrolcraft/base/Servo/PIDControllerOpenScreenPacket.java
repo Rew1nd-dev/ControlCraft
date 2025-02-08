@@ -17,15 +17,19 @@ public class PIDControllerOpenScreenPacket extends SimplePacketBase {
     private double d;
     private double i;
 
+    private PIDControllerType type;
     private double value;
+    private double target;
     private BlockPos pos;
 
-    public PIDControllerOpenScreenPacket(PID params, double a, BlockPos pos) {
+    public PIDControllerOpenScreenPacket(PID params, double value, double target, BlockPos pos, PIDControllerType type) {
         this.p = params.p();
         this.d = params.d();
         this.i = params.i();
-        this.value = a;
+        this.value = value;
+        this.target = target;
         this.pos = pos;
+        this.type = type;
     }
 
     public PIDControllerOpenScreenPacket(FriendlyByteBuf buf) {
@@ -33,7 +37,9 @@ public class PIDControllerOpenScreenPacket extends SimplePacketBase {
         d = buf.readDouble();
         i = buf.readDouble();
         value = buf.readDouble();
+        target = buf.readDouble();
         pos = buf.readBlockPos();
+        type = buf.readEnum(PIDControllerType.class);
     }
 
 
@@ -43,7 +49,9 @@ public class PIDControllerOpenScreenPacket extends SimplePacketBase {
         buffer.writeDouble(d);
         buffer.writeDouble(i);
         buffer.writeDouble(value);
+        buffer.writeDouble(target);
         buffer.writeBlockPos(pos);
+        buffer.writeEnum(type);
     }
 
     @OnlyIn(value = Dist.CLIENT)
@@ -58,7 +66,7 @@ public class PIDControllerOpenScreenPacket extends SimplePacketBase {
 
             if(pos == null)return;
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                ScreenOpener.open(new PIDControllerScreen(pos, p, i, d, value));
+                ScreenOpener.open(new PIDControllerScreen(pos, p, i, d, value, target, type));
             });
 
         });

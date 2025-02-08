@@ -1,6 +1,5 @@
 package com.verr1.vscontrolcraft.compat.valkyrienskies.servo;
 
-import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.base.AbstractExpirableForceInducer;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.generic.PhysShipWrapper;
@@ -14,7 +13,6 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.PhysShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
-import org.valkyrienskies.core.api.ships.ShipForcesInducer;
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
 
 public class ServoMotorForceInducer extends AbstractExpirableForceInducer {
@@ -28,27 +26,35 @@ public class ServoMotorForceInducer extends AbstractExpirableForceInducer {
         return obj;
     }
 
-    public void servoControl(BlockPos servoPos, PhysShipWrapper servoShip, PhysShipWrapper assemShip, LogicalServoMotor property){
+    public void servoControl(BlockPos servoPos, PhysShipWrapper servShip, PhysShipWrapper compShip, LogicalServoMotor property){
         BlockEntity be = property.level().getExistingBlockEntity(servoPos);
         if(!(be instanceof AbstractServoMotor servo))return;
-        double angle = VSMathUtils.get_xc2yc(servoShip, assemShip, property.servoDir(), property.assemDir());
+
+
+        double metric = property.angleOrSpeed() ?
+                VSMathUtils.get_yc2xc(servShip, compShip, property.servDir(), property.compDir()) :
+                VSMathUtils.get_dyc2xc(servShip, compShip, servShip.getOmega(), compShip.getOmega(), property.servDir(), property.compDir());
+
+
         // servo.debug_angle_accessor = angle;
 
-        int id = assemShip.getImpl().getTransform().getShipToWorldScaling().minComponent();
-        double scale_i = assemShip.getImpl().getTransform().getShipToWorldScaling().get(id);
+        int id = compShip.getImpl().getTransform().getShipToWorldScaling().minComponent();
+        double scale_i = compShip.getImpl().getTransform().getShipToWorldScaling().get(id);
         double inertia_scale_ratio = Math.pow(scale_i, 5);
 
-        double accel_scale = servo.getControllerInfoHolder().calculateControlValueScaleAngular();
+        double accel_scale = servo.getControllerInfoHolder().calculateControlValueScale(property.angleOrSpeed());
+        accel_scale = VSMathUtils.clamp(accel_scale, 1000);
         double control_torque = property.torque();
-        double internal_torque = assemShip.getImpl().getInertia().getMomentOfInertiaTensor().m00() * inertia_scale_ratio * accel_scale;
-        Vector3dc direction = Util.Vec3itoVector3d(property.servoDir().getNormal());
+        double internal_torque = compShip.getImpl().getInertia().getMomentOfInertiaTensor().m00() * inertia_scale_ratio * accel_scale;
+        Vector3dc direction = Util.Vec3itoVector3d(property.servDir().getNormal());
 
         Vector3dc controlTorque_sc = direction.mul((-control_torque + internal_torque) * -1  , new Vector3d()); //
-        Vector3dc controlTorque_wc = VSMathUtils.get_sc2wc(servoShip).transform(controlTorque_sc, new Vector3d());
-        servo.getControllerInfoHolder().overrideError(angle);
+        Vector3dc controlTorque_wc = VSMathUtils.get_sc2wc(servShip).transform(controlTorque_sc, new Vector3d());
 
-        assemShip.getImpl().applyInvariantTorque(controlTorque_wc);
-        servoShip.getImpl().applyInvariantTorque(controlTorque_wc.mul(-1, new Vector3d()));
+        servo.getControllerInfoHolder().overrideError(metric);
+
+        compShip.getImpl().applyInvariantTorque(controlTorque_wc);
+        servShip.getImpl().applyInvariantTorque(controlTorque_wc.mul(-1, new Vector3d()));
     }
 
     public void writePhysics(BlockPos servoPos, PhysShipWrapper servoShip, PhysShipWrapper assemShip, LogicalServoMotor property){
@@ -74,7 +80,7 @@ public class ServoMotorForceInducer extends AbstractExpirableForceInducer {
                 if(!(VSMathUtils.getExisting(levelPos) instanceof AbstractServoMotor servo))return;
                 LogicalServoMotor logicalServoMotor = servo.getLogicalServoMotor();
                 if(logicalServoMotor == null)return;
-                PhysShipWrapper servoShip = new PhysShipWrapper((PhysShipImpl) lookupPhysShip.invoke(logicalServoMotor.servoShipID()));
+                PhysShipWrapper servoShip = new PhysShipWrapper((PhysShipImpl) lookupPhysShip.invoke(logicalServoMotor.servShipID()));
                 if(servoShip.getImpl() == null)return;
                 servoControl(levelPos.pos(), servoShip, assemShip, logicalServoMotor);
                 writePhysics(levelPos.pos(), servoShip, assemShip, logicalServoMotor);

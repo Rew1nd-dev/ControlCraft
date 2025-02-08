@@ -29,12 +29,12 @@ public class PropellerControllerPeripheral extends AbstractAttachedPeripheral<Pr
     }
 
     @LuaFunction
-    public void setTargetSpeed(double speed){
+    public final void setTargetSpeed(double speed){
         getTarget().setTargetSpeed(speed);
     }
 
     @LuaFunction
-    public double getTargetSpeed(){
+    public final double getTargetSpeed(){
         return getTarget().getTargetSpeed();
     }
 

@@ -19,7 +19,10 @@ import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.VecHelper;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.vscontrolcraft.ControlCraft;
-import com.verr1.vscontrolcraft.base.PacketHandler;
+import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
+import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
+import com.verr1.vscontrolcraft.base.UltraTerminal.WidgetType;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.WingControllerPeripheral;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
@@ -47,9 +50,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class WingControllerBlockEntity extends SmartBlockEntity implements IBearingBlockEntity {
+public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity implements
+        IBearingBlockEntity, ITerminalDevice
+{
     protected ControlledContraptionEntity physicalWing;
-    protected LerpedFloat clientAnimatedAngle;
+    protected LerpedFloat clientAnimatedAngle = LerpedFloat.angular();
     protected float angle;
     protected float adjustSpeed;
     protected boolean running;
@@ -59,6 +64,15 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
 
     private WingControllerPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
+
+    private final List<NumericField> fields = List.of(
+            new NumericField(
+                    () -> (double)angle,
+                    v -> setAngle(v.floatValue()),
+                    "Angle In Degree",
+                    WidgetType.SLIDE
+            )
+    );
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -76,7 +90,6 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
     public WingControllerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         lazyTickRate = 3;
-        clientAnimatedAngle = LerpedFloat.angular();
     }
 
     public void assemble(){
@@ -133,6 +146,14 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
         if(!level.isClientSide){
             syncClient();
         }
+    }
+
+    @Override
+    public void destroy() {
+        if(!level.isClientSide){
+            disassemble();
+        }
+        super.destroy();
     }
 
     @Override
@@ -258,6 +279,15 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
         }
     }
 
+    @Override
+    public List<NumericField> fields() {
+        return fields;
+    }
+
+    @Override
+    public String name() {
+        return "Wing Controller";
+    }
 
 
     public static class WingControllerScrollValueBehavior extends ScrollValueBehaviour{
@@ -290,7 +320,7 @@ public class WingControllerBlockEntity extends SmartBlockEntity implements IBear
 
         public MutableComponent formatValue(ValueSettings settings) {
             return Lang.number(Math.max(1, Math.abs(settings.value())))
-                    .add(Lang.text("Degrees"))
+                    .add(Lang.text(" °"))
                     .component();
         }
 

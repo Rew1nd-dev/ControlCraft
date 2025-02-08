@@ -1,10 +1,14 @@
 package com.verr1.vscontrolcraft.blocks.sphericalHinge;
 
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.foundation.block.IBE;
 import com.verr1.vscontrolcraft.base.Hinge.HingeAdjustLevel;
+import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlockEntity;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
@@ -17,7 +21,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import static com.verr1.vscontrolcraft.registry.AllShapes.*;
 
-public class SphericalHingeBlock extends DirectionalBlock implements IBE<SphericalHingeBlockEntity> {
+public class SphericalHingeBlock extends DirectionalBlock implements
+        IBE<SphericalHingeBlockEntity>, IWrenchable
+{
     public static final String ID = "sphere_hinge";
 
     public static final EnumProperty<HingeAdjustLevel> LEVEL = EnumProperty.create("hinge_level", HingeAdjustLevel.class);
@@ -31,7 +37,11 @@ public class SphericalHingeBlock extends DirectionalBlock implements IBE<Spheric
         return defaultBlockState().setValue(FACING, context.getClickedFace());
     }
 
-
+    @Override
+    public InteractionResult onWrenched(BlockState state, UseOnContext context) {
+        withBlockEntityDo(context.getLevel(), context.getClickedPos(), SphericalHingeBlockEntity::adjust);
+        return InteractionResult.PASS;
+    }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

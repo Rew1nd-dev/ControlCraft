@@ -10,7 +10,11 @@ import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlockEntity;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.HitResult;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+
+@OnlyIn(value = Dist.CLIENT)
 public class WandFlipRevoluteJointMode extends WandAbstractMultipleSelectionMode {
     public static final String ID = "flip_revolute_joint";
 

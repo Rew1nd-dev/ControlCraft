@@ -6,17 +6,20 @@ public class PIDControllerInfoHolder {
     private double curr_err = 0;
     private double prev_err = 0;
 
+    private double curr = 0;
+
     private double integral_err = 0;
-    private double MAX_INTEGRAL = 10;
+    private final double MAX_INTEGRAL = 100;
 
-    private double p = 24;
-    private double d = 14;
+    private double p = 0;
+    private double d = 0;
     private double i = 0;
-    private double ts = 0.01667; // assuming servo controlled by physics thread
+    private final double ts = 0.01667; // assuming servo controlled by physics thread
 
-    private double target = 1.57;
+    private double target = 0;
 
     public synchronized void overrideError(double value) {
+        curr = value;
         prev_err = curr_err;
         curr_err = target - value;
         integral_err = VSMathUtils.clamp(integral_err + curr_err * ts, MAX_INTEGRAL);
@@ -29,11 +32,11 @@ public class PIDControllerInfoHolder {
 
 
     public double calculateControlValueScaleAngular() {
-        return p * VSMathUtils.radErrFix(curr_err) + d * VSMathUtils.radErrFix(curr_err - prev_err) / ts + i * integral_err;
+        return (p * VSMathUtils.radErrFix(curr_err) + d * VSMathUtils.radErrFix(curr_err - prev_err) / ts + i * integral_err);
     }
 
     public double calculateControlValueScaleLinear() {
-        return p * curr_err + d * (curr_err - prev_err) / ts + i * integral_err;
+        return (p * curr_err + d * (curr_err - prev_err) / ts + i * integral_err);
     }
     public double calculateControlValueScaleNonlinear() {
         double ce = VSMathUtils.clamp(curr_err, 2);
@@ -41,10 +44,29 @@ public class PIDControllerInfoHolder {
         return p * pv + d * (curr_err - prev_err) / ts + i * integral_err;
     }
 
-    public PIDControllerInfoHolder setParameter(double p, double d, double i) {
+    public double calculateControlValueScale(boolean angular){
+        return angular ? calculateControlValueScaleAngular() : calculateControlValueScaleLinear();
+    }
+
+    public PIDControllerInfoHolder setParameter(double p, double i, double d) {
         this.p = p;
         this.d = d;
         this.i = i;
+        return this;
+    }
+
+    public PIDControllerInfoHolder setP(double p){
+        this.p = p;
+        return this;
+    }
+
+    public PIDControllerInfoHolder setI(double i){
+        this.i = i;
+        return this;
+    }
+
+    public PIDControllerInfoHolder setD(double d){
+        this.d = d;
         return this;
     }
 
@@ -63,4 +85,7 @@ public class PIDControllerInfoHolder {
     public double getTarget() {
         return target;
     }
+
+    public double getValue(){return curr;}
+
 }

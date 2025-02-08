@@ -29,17 +29,17 @@ public class JetPeripheral extends AbstractAttachedPeripheral<JetBlockEntity> {
     }
 
     @LuaFunction
-    public void setOutputThrust(double thrust){
+    public final void setOutputThrust(double thrust){
         getTarget().thrust.write(thrust);
     }
 
     @LuaFunction
-    public void setHorizontalTilt(double angle){
+    public final void setHorizontalTilt(double angle){
         getTarget().horizontalAngle.write(angle);
     }
 
     @LuaFunction
-    public void setVerticalTilt(double angle){
+    public final void setVerticalTilt(double angle){
         getTarget().verticalAngle.write(angle);
     }
 

@@ -74,6 +74,26 @@ public class TransmitterBlockEntity extends SmartBlockEntity {
                     );
     }
 
+    public MethodResult callRemoteAsync(IComputerAccess access,
+                                        ILuaContext context,
+                                        String peripheralName,
+                                        String methodName,
+                                        IArguments args)throws LuaException
+    {
+        BlockPos peripheralPos = NetworkManager.getRegisteredPeripheralPos(new PeripheralKey(peripheralName, currentProtocol));
+        if(peripheralPos == null)return MethodResult.of(null, "Receiver Not Registered");
+        if(getLevel() == null)return MethodResult.of(null, "Level Is Null");
+        BlockEntity receiver = getLevel().getExistingBlockEntity(peripheralPos);
+        if(!(receiver instanceof ReceiverBlockEntity))return MethodResult.of(null, "Peripheral Is Not A Receiver");
+        return ((ReceiverBlockEntity)receiver)
+                .callPeripheralAsync(
+                        access,
+                        context,
+                        methodName,
+                        args
+                );
+    }
+
     @Override
     public void tick(){
         if(level.isClientSide)return;

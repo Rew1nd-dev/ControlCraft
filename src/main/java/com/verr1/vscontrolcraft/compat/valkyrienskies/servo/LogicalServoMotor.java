@@ -3,14 +3,13 @@ package com.verr1.vscontrolcraft.compat.valkyrienskies.servo;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 
-import java.util.function.Supplier;
-
 public record LogicalServoMotor(
-        long servoShipID,
-        long assembledShipID,
+        long servShipID,
+        long compShipID,
         ServerLevel level,
-        Direction servoDir,
-        Direction assemDir,
+        Direction servDir,
+        Direction compDir,
+        boolean angleOrSpeed,
         double torque
 ) {
 

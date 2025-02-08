@@ -1,12 +1,16 @@
 package com.verr1.vscontrolcraft.blocks.revoluteJoint;
 
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import com.verr1.vscontrolcraft.base.Hinge.HingeAdjustLevel;
+import com.verr1.vscontrolcraft.blocks.pivotJoint.PivotJointBlockEntity;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -25,7 +29,7 @@ import static com.verr1.vscontrolcraft.registry.AllShapes.FLAT_BASE;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class RevoluteJointBlock extends DirectionalAxisKineticBlock implements IBE<RevoluteJointBlockEntity> {
+public class RevoluteJointBlock extends DirectionalAxisKineticBlock implements IBE<RevoluteJointBlockEntity>, IWrenchable {
     public static final String ID = "revolute_joint";
 
 
@@ -40,6 +44,25 @@ public class RevoluteJointBlock extends DirectionalAxisKineticBlock implements I
     public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
         return false;
     }
+
+
+    @Override
+    public InteractionResult onWrenched(BlockState state, UseOnContext context) {
+        withBlockEntityDo(context.getLevel(), context.getClickedPos(), RevoluteJointBlockEntity::adjust);
+        return InteractionResult.PASS;
+    }
+
+    @Override
+    public InteractionResult onSneakWrenched(BlockState state, UseOnContext context) {
+        if(context.getClickedFace() != state.getValue(FACING))return InteractionResult.FAIL;
+        if(state.getValue(Flipped)){
+            super.onWrenched(state, context);
+        }
+        withBlockEntityDo(context.getLevel(), context.getClickedPos(), RevoluteJointBlockEntity::flip);
+        return InteractionResult.PASS;
+    }
+
+
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

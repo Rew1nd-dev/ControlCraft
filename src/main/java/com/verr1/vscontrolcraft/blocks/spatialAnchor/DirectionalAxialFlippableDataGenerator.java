@@ -1,4 +1,4 @@
-package com.verr1.vscontrolcraft.blocks.revoluteJoint;
+package com.verr1.vscontrolcraft.blocks.spatialAnchor;
 
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.tterrag.registrate.providers.DataGenContext;
@@ -12,8 +12,7 @@ import net.minecraftforge.client.model.generators.ModelFile;
 
 import static com.simibubi.create.foundation.data.BlockStateGen.directionalAxisBlock;
 
-public class DirectionalAxialAdjusableDataGenerator {
-
+public class DirectionalAxialFlippableDataGenerator {
     public static <T extends DirectionalAxisKineticBlock> NonNullBiConsumer<DataGenContext<Block, T>, RegistrateBlockstateProvider> generate(){
         return (c, p) -> directionalAxisBlock(c, p, getModelFunc(c, p));
     }
@@ -22,11 +21,11 @@ public class DirectionalAxialAdjusableDataGenerator {
         return
                 (blockState, isVertical) ->
                 {
-                    String levelName = blockState.getValue(SphericalHingeBlock.LEVEL).name().toLowerCase();
-                    String vertical = isVertical ? "_vertical" : "_horizontal";
+                    boolean isFlipped = blockState.getValue(SpatialAnchorBlock.FLIPPED);
+                    String vertical = isVertical ? "vertical" : "horizontal";
+                    String flipped = isFlipped ? "_flipped" : "";
                     String name = context.getName();
-                    return prov.models().getExistingFile(prov.modLoc("block/" + name + "/rvl_" + levelName + vertical));
+                    return prov.models().getExistingFile(prov.modLoc("block/" + name + "/" + vertical + flipped));
                 };
     }
-
 }

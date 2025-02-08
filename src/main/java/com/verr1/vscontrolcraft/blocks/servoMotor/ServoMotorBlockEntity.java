@@ -12,6 +12,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.PacketDistributor;
 import org.joml.*;
 
+import java.lang.Math;
+
 public class ServoMotorBlockEntity extends AbstractServoMotor{
 
     private boolean assembleNextTick = false;
@@ -51,6 +53,14 @@ public class ServoMotorBlockEntity extends AbstractServoMotor{
         assembleNextTick = true;
     }
 
+
+    @Override
+    public void onSpeedChanged(float previousSpeed) {
+        super.onSpeedChanged(previousSpeed);
+        double createInput2Omega = speed / 60 * 2 * Math.PI;
+        if(!isAdjustingAngle()) getControllerInfoHolder().setTarget(createInput2Omega);
+    }
+
     @Override
     public void tick() {
         super.tick();
@@ -66,7 +76,7 @@ public class ServoMotorBlockEntity extends AbstractServoMotor{
     }
 
     public void tickAnimation(){
-        animatedLerpedAngle.chase(animatedAngle, 0.5, LerpedFloat.Chaser.EXP);
+        animatedLerpedAngle.chase(Math.toDegrees(animatedAngle), 0.5, LerpedFloat.Chaser.EXP);
         animatedLerpedAngle.tickChaser();
     }
 

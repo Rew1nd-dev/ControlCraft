@@ -1,66 +1,46 @@
 package com.verr1.vscontrolcraft.base.Wand;
 
-import com.verr1.vscontrolcraft.base.Wand.mode.*;
+import com.verr1.vscontrolcraft.base.Wand.render.WandModesType;
 import com.verr1.vscontrolcraft.registry.AllItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.List;
-
-
+@OnlyIn(value = Dist.CLIENT)
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
-public class ClientWand {
+public class ClientWand{
 
-    static {
-        WandHingeConnectionMode.createInstance();
-        WandServoAssembleMode.createInstance();
-        WandAdjustHingeLevelMode.createInstance();
-        WandFlipRevoluteJointMode.createInstance();
-        WandJointAssembleMode.createInstance();
-        WandDestroyConstrainMode.createInstance();
-        WandSliderAssembleMode.createInstance();
-        //KeyPressEventBus.registerListener(ClientWand::OnWandRightClick);
 
-    }
-    static List<IWandMode> modes = List.of(
-            WandHingeConnectionMode.instance,
-            WandServoAssembleMode.instance,
-            WandFlipRevoluteJointMode.instance,
-            WandJointAssembleMode.instance,
-            WandSliderAssembleMode.instance,
-            WandDestroyConstrainMode.instance,
-            WandAdjustHingeLevelMode.instance
-    );
-
-    private static int index = 0;
+    public static WandModesType currentType = WandModesType.DESTROY;
 
     public static void select(WandSelection selection){
-        modes.get(index).onSelection(selection);
+        WandModesType.modeOf(currentType).onSelection(selection);
     }
 
     public static void deselect(){
-        modes.get(index).onDeselect();
+        WandModesType.modeOf(currentType).onDeselect();
     }
 
     public static void flush(){
-        modes.get(index).onClear();
+        WandModesType.modeOf(currentType).onClear();
     }
 
     public static void confirm(){
-        modes.get(index).onConfirm();
+        WandModesType.modeOf(currentType).onConfirm();
     }
 
     public static void tick(){
-        modes.get(index).onTick();
+        WandModesType.modeOf(currentType).onTick();
     }
 
+    /*
     public static void switchUpMode(){
         index = ((index + 1) % modes.size());
         informLocalPlayer();
@@ -69,15 +49,19 @@ public class ClientWand {
     public static void switchDownMode(){
         index = ((index - 1 + modes.size()) % modes.size());
         informLocalPlayer();
-
     }
+    * */
+
 
     public static void informLocalPlayer(){
         LocalPlayer player = Minecraft.getInstance().player;
         if(player == null)return;
-        player.sendSystemMessage(Component.literal("current mode: " + modes.get(index).getID()));
+        player.sendSystemMessage(Component.literal("current mode: " + WandModesType.modeOf(currentType).getID()));
     }
 
+    public static void setMode(WandModesType mode){
+        currentType = mode;
+    }
 
     @SubscribeEvent
     public static void onRightClick(PlayerInteractEvent.RightClickBlock event){
@@ -108,8 +92,11 @@ public class ClientWand {
         if(!event.getLevel().isClientSide)return;
         if(!isClientWandInHand())return;
         flush();
+        /*
         if(!event.getEntity().isShiftKeyDown())switchUpMode();
         if( event.getEntity().isShiftKeyDown())switchDownMode();
+        * */
+
 
     }
 

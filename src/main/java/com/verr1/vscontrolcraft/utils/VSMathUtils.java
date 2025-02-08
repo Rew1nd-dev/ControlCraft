@@ -5,6 +5,8 @@ import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.joml.*;
 import org.valkyrienskies.core.api.ships.ServerShip;
@@ -20,7 +22,6 @@ import java.lang.Math;
 
 //XC2YC:  [X, Y, Z]: X: the X unit basis in YC coordinate represented by XC coordinate unit vector basis,
 //                      such that XC2YC * v_x(represented in XC coordinate) = v_y(represented in YC coordinate)
-
 public class VSMathUtils {
 
 
@@ -72,8 +73,12 @@ public class VSMathUtils {
         return xFace_sc;
     }
 
-    public static String getDimensionID(ServerLevel level){
+    public static String getDimensionID(Level level){
         return VSGameUtilsKt.getDimensionId(level);
+    }
+
+    public static boolean isSameDimension(Level x, Level y){
+        return getDimensionID(x).equals(getDimensionID(y));
     }
 
     public static long getServerShipID(BlockPos pos, ServerLevel level){
@@ -88,19 +93,50 @@ public class VSMathUtils {
         return getServerShip(pos, level) != null;
     }
 
-    public static ServerShip getServerShip(BlockPos pos, ServerLevel level){
+
+    public static @Nullable ServerShip getServerShip(LevelPos pos){
+        return getServerShip(pos.pos(), pos.level());
+    }
+
+    public static @Nullable ServerShip getServerShip(BlockPos pos, ServerLevel level){
         if(level.isClientSide)return null;
         ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos(level, pos);
         return ship;
     }
 
 
+    public static Quaterniondc getQuaternion(LevelPos pos){
+        ServerShip xShip = VSGameUtilsKt.getShipObjectManagingPos(pos.level(), pos.pos());
+        if(xShip == null)return new Quaterniond();
+        Quaterniondc xBaseQuaternion = xShip.getTransform().getShipToWorldRotation();
+        return xBaseQuaternion;
+    }
+
     public static Vector3d getAbsolutePosition(BlockPos pos, ServerLevel level, Direction facing){
         ServerShip ship = getServerShip(pos, level);
-        Vector3d faceCenter = getFaceCenterPos(level, pos, facing);
+        Vector3d faceCenter = getFaceCenterPosNoTransform(pos, facing);
         if(ship == null)return faceCenter;
         var faceCenter_wc = ship.getTransform().getShipToWorld().transformPosition(faceCenter, new Vector3d());
         return faceCenter_wc;
+    }
+
+    public static Vector3d getAbsolutePosition(LevelPos pos){
+        return getAbsolutePosition(pos.level(), pos.pos());
+    }
+
+    public static Vector3d getAbsolutePosition(ServerLevel level, BlockPos pos){
+        ServerShip ship = getServerShip(pos, level);
+        Vector3d p_sc = Util.Vec3toVector3d(pos.getCenter());
+        if(ship == null)return p_sc;
+        var p_wc = ship.getTransform().getShipToWorld().transformPosition(p_sc, new Vector3d());
+        return p_wc;
+    }
+
+    public static boolean isOnSameShip(LevelPos x, LevelPos y){
+        ServerShip sx = getServerShip(x);
+        ServerShip sy = getServerShip(y);
+        if(sx == null || sy == null)return false;
+        return sx.getId() == sy.getId();
     }
 
     // force: xq is applied
@@ -114,6 +150,27 @@ public class VSMathUtils {
         double r3 = Math.pow(x2y.length(), 3);
         return new Vector3d(yi).cross(new Vector3d(xi).cross(x2y)).mul(-1e0 / r3);
     }
+
+
+    // get the relative 2-D rotational speed Omega(double) of two ships (wy relative to ship_x),
+    // useful when they are connected by motors
+    public static double get_dyc2xc(@Nullable Ship ship_x, @Nullable Ship ship_y, Vector3dc w_x, Vector3dc w_y, Direction d_x, Direction d_y){
+        Matrix3dc m_wc2xc = get_wc2sc(ship_x);
+        Vector3dc w_y2x_wc = w_y.sub(w_x, new Vector3d());
+        Vector3dc w_y2x_xc = m_wc2xc.transform(w_y2x_wc, new Vector3d());
+
+        int sign = (d_x == Direction.DOWN || d_x == Direction.WEST || d_x == Direction.NORTH) ? 1 : -1;
+        double w_y2x =
+                switch (d_x.getAxis()){
+                    case X -> w_y2x_xc.x() * sign;
+                    case Y -> w_y2x_xc.y() * sign;
+                    case Z -> w_y2x_xc.z() * sign;
+                };
+
+        return w_y2x;
+
+    }
+
 
     public static double clamp(double x, double threshold){
         if(x > threshold)return threshold;
@@ -137,38 +194,40 @@ public class VSMathUtils {
         return ship.getTransform().getShipToWorld().get3x3(new Matrix3d());
     }
 
-    public static Matrix3d get_xc2yc(@Nullable Ship ship_x, @Nullable Ship ship_y){
+    public static Matrix3d get_yc2xc(@Nullable Ship ship_x, @Nullable Ship ship_y){
         Matrix3d wc2sc_x = get_wc2sc(ship_x);
         Matrix3d wc2sc_y = get_wc2sc(ship_y);
-        return get_xc2yc(wc2sc_x, wc2sc_y);
+        return get_yc2xc(wc2sc_x, wc2sc_y);
     }
 
-    public static Matrix3d get_xc2yc(Matrix3dc wc2sc_x, Matrix3dc wc2sc_y){
+
+    // transform vector represented by yc-basis to be represented by xc-basis
+    public static Matrix3d get_yc2xc(Matrix3dc wc2sc_x, Matrix3dc wc2sc_y){
         return new Matrix3d(wc2sc_x).mul(new Matrix3d(wc2sc_y).transpose());
     }
 
-    public static double get_xc2yc(Matrix3dc wc2sc_x, Matrix3dc wc2sc_y, Direction direction){
-        Matrix3d m = get_xc2yc(wc2sc_x, wc2sc_y);
-        return get_xc2yc(m, direction);
+    public static double get_yc2xc(Matrix3dc wc2sc_x, Matrix3dc wc2sc_y, Direction direction){
+        Matrix3d m = get_yc2xc(wc2sc_x, wc2sc_y);
+        return get_yc2xc(m, direction);
     }
 
-    public static double get_xc2yc(Matrix3dc xc2yc, Direction direction){
+    public static double get_yc2xc(Matrix3dc yc2xc, Direction direction){
         Direction.Axis axis = direction.getAxis();
         double sign = (direction == Direction.UP || direction == Direction.WEST || direction == Direction.NORTH) ? -1 : 1;
         if(axis == Direction.Axis.X){ // rotating around x-axis
-            return Math.atan2(xc2yc.m21(), xc2yc.m22()) * sign; // z.y / z.z
+            return Math.atan2(yc2xc.m21(), yc2xc.m22()) * sign; // z.y / z.z
         }
         if (axis == Direction.Axis.Y){ // rotating around y-axis
-            return Math.atan2(xc2yc.m20(), xc2yc.m22()) * sign; // z.x / z.z
+            return Math.atan2(yc2xc.m20(), yc2xc.m22()) * sign; // z.x / z.z
         }
         if (axis == Direction.Axis.Z){ // rotating around z-axis
-            return Math.atan2(xc2yc.m10(), xc2yc.m11()) * sign; // y.x / y.y
+            return Math.atan2(yc2xc.m10(), yc2xc.m11()) * sign; // y.x / y.y
         }
         return 0;
     }
 
-    public static double get_xc2yc(Matrix3dc xc2yc, Direction xDir, Direction yDir){
-        //xc2yc = xc2yc.transpose(new Matrix3d());
+    public static double get_yc2xc(Matrix3dc yc2xc, Direction xDir, Direction yDir){
+        //yc2xc = yc2xc.transpose(new Matrix3d());
         int[] shuffle_1 = {2, 0, 1}; // z->y->x
         int[] shuffle_2 = {1, 2, 0}; // z->x->y
         Direction.Axis axis_x = xDir.getAxis();
@@ -180,15 +239,15 @@ public class VSMathUtils {
         int s_axis_x2 = shuffle_1[axis_x.ordinal()];
 
 
-        double Y = xc2yc.get(s_axis_y0, s_axis_x1);
-        double X = xc2yc.get(s_axis_y0, s_axis_x2);
+        double Y = yc2xc.get(s_axis_y0, s_axis_x1);
+        double X = yc2xc.get(s_axis_y0, s_axis_x2);
         return -sign_0 * Math.atan2(X, Y);
 
     }
 
 
-    public static double get_xc2yc(Matrix3dc wc2sc_x, Matrix3dc wc2sc_y, Direction xDir, Direction yDir){
-        return get_xc2yc(get_xc2yc(wc2sc_x, wc2sc_y), xDir, yDir);
+    public static double get_yc2xc(Matrix3dc wc2sc_x, Matrix3dc wc2sc_y, Direction xDir, Direction yDir){
+        return get_yc2xc(get_yc2xc(wc2sc_x, wc2sc_y), xDir, yDir);
     }
 
     public static Matrix3d q2m(Quaterniondc q){
@@ -230,16 +289,16 @@ public class VSMathUtils {
         return quaternion;
     }
 
-    public static double get_xc2yc(@Nullable Ship ship_x, @Nullable Ship ship_y, Direction direction){
-        Matrix3d m = get_xc2yc(ship_x, ship_y);
-        return get_xc2yc(m, direction);
+    public static double get_yc2xc(@Nullable Ship ship_x, @Nullable Ship ship_y, Direction direction){
+        Matrix3d m = get_yc2xc(ship_x, ship_y);
+        return get_yc2xc(m, direction);
 
     }
 
-    public static double get_xc2yc(Ship ship_x, Ship ship_y, Direction xDir, Direction yDir){
+    public static double get_yc2xc(Ship ship_x, Ship ship_y, Direction xDir, Direction yDir){
         Matrix3d wc2sc_x = get_wc2sc(ship_x);
         Matrix3d wc2sc_y = get_wc2sc(ship_y);
-        return get_xc2yc(wc2sc_x, wc2sc_y, xDir, yDir);
+        return get_yc2xc(wc2sc_x, wc2sc_y, xDir, yDir);
     }
 
     public static double radErrFix(double radErr){
@@ -265,7 +324,8 @@ public class VSMathUtils {
                 new Matrix3d(ship.getTransform().getShipToWorld()),
                 new Matrix4d(ship.getTransform().getShipToWorld()),
                 new Matrix4d(ship.getTransform().getWorldToShip()),
-                inertia.getShipMass()
+                inertia.getShipMass(),
+                ship.getId()
         );
     }
 

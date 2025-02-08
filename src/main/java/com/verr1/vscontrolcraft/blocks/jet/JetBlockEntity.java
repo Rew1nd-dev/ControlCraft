@@ -2,13 +2,15 @@ package com.verr1.vscontrolcraft.blocks.jet;
 
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
-import com.verr1.vscontrolcraft.base.OnShipBlockEntity;
+import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
+import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
+import com.verr1.vscontrolcraft.base.UltraTerminal.WidgetType;
 import com.verr1.vscontrolcraft.blocks.jetRudder.JetRudderBlockEntity;
+import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.JetPeripheral;
-import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.PropellerControllerPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.jet.JetForceInducer;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.jet.LogicalJet;
-import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.PropellerForceInducer;
 import com.verr1.vscontrolcraft.utils.Util;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
@@ -24,18 +26,44 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.ServerShip;
-import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
-public class JetBlockEntity extends OnShipBlockEntity {
+import java.util.List;
+
+public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
+        ITerminalDevice
+{
 
     public SynchronizedField<Double> horizontalAngle = new SynchronizedField<>(0.0);
     public SynchronizedField<Double> verticalAngle = new SynchronizedField<>(0.0);
     public SynchronizedField<Double> thrust = new SynchronizedField<>(0.0);
 
+    public SynchronizedField<ShipPhysics> physics = new SynchronizedField<>(ShipPhysics.EMPTY);
+
     public boolean canVectorize = false;
 
     private JetPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
+
+    private final List<NumericField> fields = List.of(
+            new NumericField(
+                    thrust::read,
+                    thrust::write,
+                    "thrust",
+                    WidgetType.SLIDE
+            ),
+            new NumericField(
+                    horizontalAngle::read,
+                    horizontalAngle::write,
+                    "horizontal",
+                    WidgetType.SLIDE
+            ),
+            new NumericField(
+                    verticalAngle::read,
+                    verticalAngle::write,
+                    "vertical",
+                    WidgetType.SLIDE
+            )
+    );
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -73,25 +101,37 @@ public class JetBlockEntity extends OnShipBlockEntity {
         return Util.Vec3itoVector3d(getHorizontal().getNormal());
     }
 
+    public static Vector3d getThrustDir(double h, double v, Vector3dc basis_h, Vector3dc basis_v, Vector3dc basis_t){
+        double sh = Math.sin(h);
+        double sv = Math.sin(v);
+        double st = Math.sqrt(Math.abs(1 - 0.5 * (sh * sh + sv * sv))); // in case of < 0
+
+        Vector3d dir =
+                new Vector3d(
+                ).fma(
+                        sh,
+                        basis_h
+                ).fma(
+                        sv,
+                        basis_v
+                ).fma(
+                        st,
+                        basis_t
+                ).normalize();
+        return dir;
+    }
+
+
+
     public LogicalJet getLogicalJet(){
         Vector3dc basis_h = getHorizontalJOML();
         Vector3dc basis_v = getVerticalJOML();
-
         Vector3dc basis_t = getDirectionJOML();
 
         double h = canVectorize ? horizontalAngle.read() : 0;
         double v = canVectorize ? verticalAngle.read() : 0;
 
-
-        Vector3d dir =
-                basis_h
-                .mul(Math.sin(h), new Vector3d())
-            .add(
-                basis_v
-                .mul(Math.sin(v), new Vector3d())
-            ).add(
-                basis_t
-            ).normalize();
+        Vector3d dir = getThrustDir(h, v,basis_h, basis_v, basis_t);
 
         double t = thrust.read();
 
@@ -106,7 +146,11 @@ public class JetBlockEntity extends OnShipBlockEntity {
             return;
         };
         canVectorize = true;
-        jet.setAnimatedAngles((float) (double) horizontalAngle.read(), (float)(double) verticalAngle.read());
+        jet.setAnimatedAngles(
+                horizontalAngle.read(),
+                verticalAngle.read(),
+                thrust.read()
+        );
     }
 
     public void syncAttachedInducer(){
@@ -125,8 +169,19 @@ public class JetBlockEntity extends OnShipBlockEntity {
         syncAttachedInducer();
     }
 
+
+
     public JetBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
+    @Override
+    public List<NumericField> fields() {
+        return fields;
+    }
+
+    @Override
+    public String name() {
+        return "Jet";
+    }
 }

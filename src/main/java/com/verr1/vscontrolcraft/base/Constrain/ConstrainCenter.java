@@ -64,6 +64,35 @@ public class ConstrainCenter {
     }
 
 
+    public static void removeConstrain(ConstrainKey key){
+        if(cache.containsKey(key)){
+            cache.get(key).forceExpire();
+        }
+    }
+
+    public static void retrieveConstrain(ConstrainKey key, ServerShipWorldCore sswc){
+        if(!cache.containsKey(key))return;
+        ConstrainWithID data = cache.get(key).data();
+        Object id = sswc.createNewConstraint(data.constrain());
+        if(id == null){
+            cacheRemove(key);
+            return;
+        }
+        cachePut(
+                key,
+                new ExpirableData<>(
+                        new ConstrainWithID(
+                                data.constrain(),
+                                (int) id
+                        ),
+                        10,
+                        (d) -> {
+                            sswc.removeConstraint(d.ID());
+                            return null;
+                        }
+                )
+        );
+    }
 
 
     public static void createOrReplaceNewConstrain(ConstrainKey key, VSConstraint constrain, ServerShipWorldCore sswc){
@@ -79,9 +108,7 @@ public class ConstrainCenter {
         }
 
         Object id = sswc.createNewConstraint(constrain);
-
         if(id == null)return;
-
         cachePut(
                 key,
                 new ExpirableData<>(
@@ -94,8 +121,42 @@ public class ConstrainCenter {
                             sswc.removeConstraint(data.ID());
                             return null;
                         }
-                    )
+                )
         );
+        /*
+        // a temp constrain will not be created, just for saving
+        if(!key.temp()){
+            Object id = sswc.createNewConstraint(constrain);
+            if(id == null)return;
+            cachePut(
+                    key,
+                    new ExpirableData<>(
+                            new ConstrainWithID(
+                                    constrain,
+                                    (int) id
+                            ),
+                            10,
+                            (data) -> {
+                                sswc.removeConstraint(data.ID());
+                                return null;
+                            }
+                    )
+            );
+        }else{
+            cachePut(
+                    key,
+                    new ExpirableData<>(
+                            new ConstrainWithID(
+                                    constrain,
+                                    -1
+                            ),
+                            10,
+                            (data) -> null
+                    )
+            );
+        }
+        * */
+
     }
 
 
