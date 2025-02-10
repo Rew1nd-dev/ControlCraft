@@ -1,21 +1,12 @@
 package com.verr1.vscontrolcraft.blocks.anchor;
 
-import com.simibubi.create.AllItems;
-import com.simibubi.create.foundation.gui.AbstractSimiScreen;
-import com.simibubi.create.foundation.gui.AllGuiTextures;
-import com.simibubi.create.foundation.gui.AllIcons;
-import com.simibubi.create.foundation.gui.element.GuiGameElement;
-import com.simibubi.create.foundation.gui.widget.IconButton;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
 import com.verr1.vscontrolcraft.base.SimpleSettingScreen;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllBlocks;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,25 +26,28 @@ public class AnchorScreen extends SimpleSettingScreen {
 
     @Override
     public void startWindow() {
-        addFieldWithLabel("Air Resist", Util::tryParseDoubleFilter)
+        addNumericFieldWithLabel("Air Resist", Util::tryParseDoubleFilter)
                 .setValue(String.format("%.4f", airResistance)); // iFields[0]
-        addFieldWithLabel("Extra G", Util::tryParseDoubleFilter)
+        addNumericFieldWithLabel("Extra G", Util::tryParseDoubleFilter)
                 .setValue(String.format("%.4f", extraGravity));    // iFields[1]
 
     }
 
 
     public void register() {
+        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING)
+                .withDouble(Util.tryParseDouble(iFields.get(0).getValue()))
+                .withDouble(Util.tryParseDouble(iFields.get(1).getValue()))
+                .build();
         AllPackets
                 .getChannel()
-                .sendToServer(
-                        new AnchorSettingsPacket(
-                                Util.tryParseDouble(iFields.get(0).getValue()),
-                                Util.tryParseDouble(iFields.get(1).getValue()),
-                                pos
-                        )
-                );
+                .sendToServer(p);
         onClose();
+    }
+
+    @Override
+    public BlockPos getPos() {
+        return pos;
     }
 
     @Override

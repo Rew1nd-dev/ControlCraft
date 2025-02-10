@@ -1,7 +1,8 @@
-package com.verr1.vscontrolcraft.blocks.propeller;
+package com.verr1.vscontrolcraft.deprecated;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
+import com.verr1.vscontrolcraft.blocks.magnet.MagnetScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -12,48 +13,39 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
-public class PropellerOpenScreenPacket extends SimplePacketBase {
+public class MagnetOpenScreenPacket extends SimplePacketBase {
+    private double strength;
     private BlockPos pos;
-    private boolean reverseTorque;
-    private double thrust_ratio;
-    private double torque_ratio;
 
-    public PropellerOpenScreenPacket(BlockPos pos, boolean reverseTorque, double thrust_ratio, double torque_ratio) {
+    public MagnetOpenScreenPacket(BlockPos pos, double strength) {
         this.pos = pos;
-        this.reverseTorque = reverseTorque;
-        this.thrust_ratio = thrust_ratio;
-        this.torque_ratio = torque_ratio;
+        this.strength = strength;
     }
 
-    public PropellerOpenScreenPacket(FriendlyByteBuf buffer) {
-        pos = buffer.readBlockPos();
-        reverseTorque = buffer.readBoolean();
-        thrust_ratio = buffer.readDouble();
-        torque_ratio = buffer.readDouble();
+    public MagnetOpenScreenPacket(FriendlyByteBuf buffer) {
+        this.strength = buffer.readDouble();
+        this.pos = buffer.readBlockPos();
     }
 
     @Override
     public void write(FriendlyByteBuf buffer) {
+        buffer.writeDouble(strength);
         buffer.writeBlockPos(pos);
-        buffer.writeBoolean(reverseTorque);
-        buffer.writeDouble(thrust_ratio);
-        buffer.writeDouble(torque_ratio);
     }
 
-
+    @OnlyIn(Dist.CLIENT)
     @Override
-    @OnlyIn(value = Dist.CLIENT)
     public boolean handle(NetworkEvent.Context context) {
         context.enqueueWork(() -> {
             // It Should Occur On The Client Side
             LocalPlayer player = Minecraft.getInstance().player;
             Level world = player.level();
-            if (world == null || !world.isLoaded(pos))
+            if (!world.isLoaded(pos))
                 return;
 
             if(pos == null)return;
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                ScreenOpener.open(new PropellerScreen(pos, thrust_ratio, torque_ratio));
+                ScreenOpener.open(new MagnetScreen(pos, strength));
             });
 
         });

@@ -3,6 +3,10 @@ package com.verr1.vscontrolcraft.blocks.jetRudder;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.blocks.jet.JetBlockEntity;
+import com.verr1.vscontrolcraft.network.IPacketHandler;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
@@ -14,6 +18,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import org.joml.Vector2d;
 import org.joml.Vector3d;
@@ -21,7 +26,9 @@ import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
-public class JetRudderBlockEntity extends OnShipDirectinonalBlockEntity {
+public class JetRudderBlockEntity extends OnShipDirectinonalBlockEntity implements
+        IPacketHandler
+{
 
     public LerpedFloat animatedHorizontalAngle = LerpedFloat.angular();
     public float targetHorizontalAngle = 0;
@@ -160,12 +167,13 @@ public class JetRudderBlockEntity extends OnShipDirectinonalBlockEntity {
 
     public void syncClient() {
         if(!level.isClientSide){
-            var p = new JetRudderSyncAnimationPacket(
-                    getBlockPos(),
-                    targetHorizontalAngle,
-                    targetVerticalAngle,
-                    targetThrust
-            );
+            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_ANIMATION)
+                    .withDouble(targetHorizontalAngle)
+                    .withDouble(targetVerticalAngle)
+                    .withDouble(targetThrust)
+                    .build();
+
+
             AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
         }
     }
@@ -178,5 +186,16 @@ public class JetRudderBlockEntity extends OnShipDirectinonalBlockEntity {
         animatedVerticalAngle.tickChaser();
     }
 
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.SYNC_ANIMATION){
+            double h = packet.getDoubles().get(0);
+            double v = packet.getDoubles().get(1);
+            double t = packet.getDoubles().get(2);
+            setAnimatedAngles(h, v, t);
+        }
+    }
 
 }

@@ -4,12 +4,14 @@ import com.simibubi.create.foundation.gui.AbstractSimiScreen;
 import com.simibubi.create.foundation.gui.AllIcons;
 import com.simibubi.create.foundation.gui.element.GuiGameElement;
 import com.simibubi.create.foundation.gui.widget.IconButton;
-import com.verr1.vscontrolcraft.registry.AllBlocks;
-import com.verr1.vscontrolcraft.registry.AllGuiTextures;
-import com.verr1.vscontrolcraft.utils.Util;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldRequestPacket;
+import com.verr1.vscontrolcraft.blocks.terminal.SmallCheckbox;
+import com.verr1.vscontrolcraft.registry.AllPackets;
+import com.verr1.vscontrolcraft.registry.AllVSCCGuiTextures;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -17,16 +19,17 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class SimpleSettingScreen extends AbstractSimiScreen {
 
-    private final AllGuiTextures background = AllGuiTextures.SIMPLE_BACKGROUND_QUARTER;
+    private final AllVSCCGuiTextures background = AllVSCCGuiTextures.SIMPLE_BACKGROUND_QUARTER;
 
     private IconButton register;
+    private IconButton redstoneSettings;
 
+    // TODO: Wrap these two types, otherwise it's very easy to crash things
+    protected final List<SmallCheckbox> bFields = new ArrayList<>();
     protected final List<EditBox> iFields = new ArrayList<>(); // inputs
     protected final List<EditBox> tFields = new ArrayList<>(); // tags
     protected int labelWidth = 50;
@@ -35,7 +38,28 @@ public abstract class SimpleSettingScreen extends AbstractSimiScreen {
 
     protected int labelColor = new Color(250, 250, 180).getRGB();
 
-    public EditBox addFieldWithLabel(String label, Predicate<String> filter){
+
+    public SmallCheckbox addBooleanFieldWithLabel(String label){
+        var newI = new SmallCheckbox(0, 0, fieldWidth, lineHeight, Component.literal(""), false);
+        var newT = new EditBox(font, 0, 0, labelWidth, lineHeight, Component.literal(""));
+
+
+        newT.setBordered(false);
+        newT.setMaxLength(labelWidth);
+        newT.setEditable(false);
+        newT.setValue(label);
+        newT.setTextColorUneditable(labelColor);
+
+        addRenderableWidget(newI);
+        addRenderableWidget(newT);
+
+        bFields.add(newI);
+        tFields.add(newT);
+
+        return newI;
+    }
+
+    public EditBox addNumericFieldWithLabel(String label, Predicate<String> filter){
         var newI = new EditBox(font, 0, 0, fieldWidth, lineHeight, Component.literal(""));
         var newT = new EditBox(font, 0, 0, labelWidth, lineHeight, Component.literal(""));
 
@@ -65,12 +89,17 @@ public abstract class SimpleSettingScreen extends AbstractSimiScreen {
         super.init();
 
         iFields.clear();
+        bFields.clear();
         tFields.clear();
 
         startWindow();
         register = new IconButton(0, 0, AllIcons.I_CONFIRM);
         register.withCallback(this::register);
         addRenderableWidget(register);
+
+        redstoneSettings = new IconButton(0, 0, AllIcons.I_ACTIVE);
+        redstoneSettings.withCallback(this::redstoneSetting);
+        addRenderableWidget(redstoneSettings);
 
         GridLayout statLayout = new GridLayout(background.width, background.height);
         statLayout.setX(guiLeft + 4);
@@ -84,12 +113,23 @@ public abstract class SimpleSettingScreen extends AbstractSimiScreen {
             statLayout.addChild(iFields.get(i), i, 1);
         }
 
+        for(int i = iFields.size(); i < iFields.size() + bFields.size(); i++){
+            int j = i - iFields.size();
+            statLayout.addChild(tFields.get(i), i, 0);
+            statLayout.addChild(bFields.get(j), i, 1);
+        }
+
 
         // statLayout.addChild(register, iFields.size(), 0);
 
         register.setToolTip(Component.literal("set Params"));
         register.setY(guiTop + windowHeight - 12 - 22);
         register.setX(guiLeft + 4);
+
+        redstoneSettings.setToolTip(Component.literal("redstone interface setting"));
+        redstoneSettings.setY(guiTop + windowHeight - 12 - 22);
+        redstoneSettings.setX(guiLeft + 4 + 20);
+
         statLayout.columnSpacing(4).rowSpacing(2);
         statLayout.arrangeElements();
     }
@@ -97,6 +137,16 @@ public abstract class SimpleSettingScreen extends AbstractSimiScreen {
     public abstract void startWindow();
 
     public abstract void register();
+
+    public abstract BlockPos getPos();
+
+    public void redstoneSetting(){
+        AllPackets.getChannel().sendToServer(
+                new ExposedFieldRequestPacket(
+                        getPos()
+                )
+        );
+    }
 
     @Override
     protected void renderWindow(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {

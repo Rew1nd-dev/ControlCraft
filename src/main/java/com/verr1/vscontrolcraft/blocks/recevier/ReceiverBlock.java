@@ -63,24 +63,13 @@ public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlock
     }
 
 
-    protected void displayScreen(ReceiverBlockEntity entity, Player player){
-
-        PeripheralKey networkKey = entity.getNetworkKey();
-        String peripheralType = entity.getAttachedPeripheralType();
-        AllPackets.sendToPlayer(
-                new ReceiverOpenScreenPacket(entity.getBlockPos(), networkKey.Name(), peripheralType, networkKey.Protocol()),
-                ((ServerPlayer)player)
-        );
-
-    }
-
 
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
                                  BlockHitResult hit){
         if(worldIn.isClientSide)return InteractionResult.PASS;
         if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
-            withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
+            withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
         }
 
         return InteractionResult.PASS;

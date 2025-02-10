@@ -4,8 +4,7 @@ import com.simibubi.create.content.redstone.link.IRedstoneLinkable;
 import com.simibubi.create.content.redstone.link.RedstoneLinkNetworkHandler;
 import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
-import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
-import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
+import com.verr1.vscontrolcraft.base.UltraTerminal.*;
 import com.verr1.vscontrolcraft.registry.AllMenuTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -15,7 +14,6 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 
-import java.nio.channels.Channel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,12 +40,12 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
 
     private final ArrayList<TerminalChannel> channels = new ArrayList<>(
             List.of(
-                    new TerminalChannel(EMPTY_FREQUENCY , new Vector2d(0, 1), NumericField.EMPTY),
-                    new TerminalChannel(EMPTY_FREQUENCY , new Vector2d(0, 1), NumericField.EMPTY),
-                    new TerminalChannel(EMPTY_FREQUENCY , new Vector2d(0, 1), NumericField.EMPTY),
-                    new TerminalChannel(EMPTY_FREQUENCY , new Vector2d(0, 1), NumericField.EMPTY),
-                    new TerminalChannel(EMPTY_FREQUENCY , new Vector2d(0, 1), NumericField.EMPTY),
-                    new TerminalChannel(EMPTY_FREQUENCY , new Vector2d(0, 1), NumericField.EMPTY)
+                    new TerminalChannel(EMPTY_FREQUENCY , ExposedFieldWrapper.EMPTY, false),
+                    new TerminalChannel(EMPTY_FREQUENCY , ExposedFieldWrapper.EMPTY, false),
+                    new TerminalChannel(EMPTY_FREQUENCY , ExposedFieldWrapper.EMPTY, false),
+                    new TerminalChannel(EMPTY_FREQUENCY , ExposedFieldWrapper.EMPTY, false),
+                    new TerminalChannel(EMPTY_FREQUENCY , ExposedFieldWrapper.EMPTY, false),
+                    new TerminalChannel(EMPTY_FREQUENCY , ExposedFieldWrapper.EMPTY, false)
             )
     );
 
@@ -56,7 +53,7 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
 
 
     private void clearChannelField(){
-        channels.forEach(e -> e.setField(NumericField.EMPTY));
+        channels.forEach(e -> e.setField(ExposedFieldWrapper.EMPTY));
     }
 
     public List<TerminalChannel> getChannels(){
@@ -79,12 +76,13 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
         addToNetwork();
     }
 
-    private void setChannelField(List<NumericField> fields){
+    private void setChannelField(List<ExposedFieldWrapper> fields){
         for(int i = 0; i < min(fields.size(), channels.size()); i++){
             channels.get(i).setField(fields.get(i));
+            if(fields.get(i).field.widgetType() == WidgetType.TOGGLE)channels.get(i).setBoolean(true);
         }
         for(int i = min(fields.size(), channels.size()); i < channels.size(); i++){
-            channels.get(i).setField(NumericField.EMPTY);
+            channels.get(i).setField(ExposedFieldWrapper.EMPTY);
         }
     }
 
@@ -117,7 +115,7 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
         syncAttachedDevice();
     }
 
-    public List<NumericField> getAttachedNumericFields() {
+    public List<ExposedFieldWrapper> getAttachedNumericFields() {
         return channels.stream().map(TerminalChannel::getField).toList();
     }
 
@@ -193,8 +191,18 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
 
 
         private Couple<RedstoneLinkNetworkHandler.Frequency> key;
-        private Vector2d min_max;
-        private NumericField attachedField;
+        // private Vector2d min_max;
+        private ExposedFieldWrapper attachedField;
+
+        public boolean isBoolean() {
+            return isBoolean;
+        }
+
+        public void setBoolean(boolean aBoolean) {
+            isBoolean = aBoolean;
+        }
+
+        private boolean isBoolean;
 
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
@@ -202,10 +210,11 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
 
         private boolean enabled = true;
 
-        public TerminalChannel(Couple<RedstoneLinkNetworkHandler.Frequency> key, Vector2d min_max, NumericField attachedField) {
+        public TerminalChannel(Couple<RedstoneLinkNetworkHandler.Frequency> key, ExposedFieldWrapper attachedField, boolean isBoolean) {
             this.key = key;
-            this.min_max = min_max;
+            // this.min_max = min_max;
             this.attachedField = attachedField;
+            this.isBoolean = isBoolean;
         }
 
         public void setKey(Couple<RedstoneLinkNetworkHandler.Frequency> key) {
@@ -213,20 +222,20 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
         }
 
         public void setMinMax(Vector2d min_max){
-            this.min_max = min_max;
+            this.attachedField.min_max = min_max;
         }
 
-        public void setField(NumericField field){
+        public void setField(ExposedFieldWrapper field){
             this.attachedField = field;
         }
 
-        public NumericField getField(){
+        public ExposedFieldWrapper getField(){
             return this.attachedField;
         }
 
 
         public Vector2d getMinMax(){
-            return min_max;
+            return attachedField.min_max;
         }
 
         @Override
@@ -236,7 +245,7 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
 
         @Override
         public void setReceivedStrength(int power) {
-            attachedField.apply(min_max.x + (min_max.y - min_max.x) * power / 15);
+            attachedField.apply(power);
         }
 
         @Override

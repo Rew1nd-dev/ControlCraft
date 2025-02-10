@@ -1,10 +1,10 @@
-package com.verr1.vscontrolcraft.blocks.recevier;
+package com.verr1.vscontrolcraft.deprecated;
 
 import com.simibubi.create.foundation.networking.BlockEntityConfigurationPacket;
+import com.verr1.vscontrolcraft.blocks.recevier.PeripheralKey;
+import com.verr1.vscontrolcraft.blocks.recevier.ReceiverBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-
-import java.nio.charset.StandardCharsets;
 
 public class ReceiverRegisterPacket extends BlockEntityConfigurationPacket<ReceiverBlockEntity> {
     private String name;

@@ -1,7 +1,8 @@
-package com.verr1.vscontrolcraft.blocks.anchor;
+package com.verr1.vscontrolcraft.deprecated;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
+import com.verr1.vscontrolcraft.blocks.recevier.ReceiverScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -12,36 +13,43 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
-public class AnchorOpenScreenPacket extends SimplePacketBase {
-    private double airResistance;
-    private double extraGravity;
+public class ReceiverOpenScreenPacket extends SimplePacketBase {
     private BlockPos pos;
+    private String name;
+    private String peripheralType;
+    private long protocol;
 
-    public AnchorOpenScreenPacket(double airResistance, double extraGravity, BlockPos pos) {
-        this.airResistance = airResistance;
+    public ReceiverOpenScreenPacket(BlockPos pos, String name, String peripheralType, long protocol) {
         this.pos = pos;
-        this.extraGravity = extraGravity;
+        this.name = name;
+        this.peripheralType = peripheralType;
+        this.protocol = protocol;
     }
 
-    public AnchorOpenScreenPacket(FriendlyByteBuf buf){
-        airResistance = buf.readDouble();
-        pos = buf.readBlockPos();
-        extraGravity = buf.readDouble();
-    }
+    public ReceiverOpenScreenPacket(FriendlyByteBuf buffer) {
 
+        name = buffer.readUtf();
+        peripheralType = buffer.readUtf();
+        pos = buffer.readBlockPos();
+        protocol = buffer.readLong();
+
+    }
 
     @Override
     public void write(FriendlyByteBuf buffer) {
-
-        buffer.writeDouble(airResistance);
+        buffer.writeUtf(name);
+        buffer.writeUtf(peripheralType);
         buffer.writeBlockPos(pos);
-        buffer.writeDouble(extraGravity);
+        buffer.writeLong(protocol);
     }
 
-    @Override
+    public int maxRange(){return 20;}
+
     @OnlyIn(value = Dist.CLIENT)
+    @Override
     public boolean handle(NetworkEvent.Context context) {
         context.enqueueWork(() -> {
+            // It Should Occur On The Client Side
             LocalPlayer player = Minecraft.getInstance().player;
             Level world = player.level();
             if (world == null || !world.isLoaded(pos))
@@ -49,8 +57,9 @@ public class AnchorOpenScreenPacket extends SimplePacketBase {
 
             if(pos == null)return;
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                ScreenOpener.open(new AnchorScreen(pos, airResistance, extraGravity));
+                ScreenOpener.open(new ReceiverScreen(pos, name, peripheralType, protocol));
             });
+
         });
         return true;
     }

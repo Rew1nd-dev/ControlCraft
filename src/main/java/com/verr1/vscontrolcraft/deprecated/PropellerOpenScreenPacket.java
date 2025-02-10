@@ -1,7 +1,8 @@
-package com.verr1.vscontrolcraft.blocks.recevier;
+package com.verr1.vscontrolcraft.deprecated;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
+import com.verr1.vscontrolcraft.blocks.propeller.PropellerScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -12,40 +13,37 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
-public class ReceiverOpenScreenPacket extends SimplePacketBase {
+public class PropellerOpenScreenPacket extends SimplePacketBase {
     private BlockPos pos;
-    private String name;
-    private String peripheralType;
-    private long protocol;
+    private boolean reverseTorque;
+    private double thrust_ratio;
+    private double torque_ratio;
 
-    public ReceiverOpenScreenPacket(BlockPos pos, String name, String peripheralType, long protocol) {
+    public PropellerOpenScreenPacket(BlockPos pos, boolean reverseTorque, double thrust_ratio, double torque_ratio) {
         this.pos = pos;
-        this.name = name;
-        this.peripheralType = peripheralType;
-        this.protocol = protocol;
+        this.reverseTorque = reverseTorque;
+        this.thrust_ratio = thrust_ratio;
+        this.torque_ratio = torque_ratio;
     }
 
-    public ReceiverOpenScreenPacket(FriendlyByteBuf buffer) {
-
-        name = buffer.readUtf();
-        peripheralType = buffer.readUtf();
+    public PropellerOpenScreenPacket(FriendlyByteBuf buffer) {
         pos = buffer.readBlockPos();
-        protocol = buffer.readLong();
-
+        reverseTorque = buffer.readBoolean();
+        thrust_ratio = buffer.readDouble();
+        torque_ratio = buffer.readDouble();
     }
 
     @Override
     public void write(FriendlyByteBuf buffer) {
-        buffer.writeUtf(name);
-        buffer.writeUtf(peripheralType);
         buffer.writeBlockPos(pos);
-        buffer.writeLong(protocol);
+        buffer.writeBoolean(reverseTorque);
+        buffer.writeDouble(thrust_ratio);
+        buffer.writeDouble(torque_ratio);
     }
 
-    public int maxRange(){return 20;}
 
-    @OnlyIn(value = Dist.CLIENT)
     @Override
+    @OnlyIn(value = Dist.CLIENT)
     public boolean handle(NetworkEvent.Context context) {
         context.enqueueWork(() -> {
             // It Should Occur On The Client Side
@@ -56,7 +54,7 @@ public class ReceiverOpenScreenPacket extends SimplePacketBase {
 
             if(pos == null)return;
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                ScreenOpener.open(new ReceiverScreen(pos, name, peripheralType, protocol));
+                ScreenOpener.open(new PropellerScreen(pos, thrust_ratio, torque_ratio));
             });
 
         });

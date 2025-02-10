@@ -1,20 +1,18 @@
 package com.verr1.vscontrolcraft.base.Servo;
 
-import com.simibubi.create.AllItems;
 import com.simibubi.create.foundation.gui.AbstractSimiScreen;
 import com.simibubi.create.foundation.gui.AllIcons;
 import com.simibubi.create.foundation.gui.element.GuiGameElement;
 import com.simibubi.create.foundation.gui.widget.IconButton;
 import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Lang;
-import com.verr1.vscontrolcraft.registry.AllBlocks;
-import com.verr1.vscontrolcraft.registry.AllGuiTextures;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldRequestPacket;
+import com.verr1.vscontrolcraft.registry.AllVSCCGuiTextures;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.layouts.GridLayout;
-import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
@@ -25,7 +23,7 @@ public class PIDControllerScreen extends AbstractSimiScreen {
 
     private final Component cycleLabel = Lang.text("Cycle Mode If Applicable").component();
 
-    private final AllGuiTextures background = AllGuiTextures.SIMPLE_BACKGROUND;
+    private final AllVSCCGuiTextures background = AllVSCCGuiTextures.SIMPLE_BACKGROUND;
 
 
     private EditBox pField;
@@ -42,6 +40,8 @@ public class PIDControllerScreen extends AbstractSimiScreen {
 
     private IconButton register;
     private IconButton cycleMode;
+
+    private IconButton redstoneSettings;
 
     private final double i;
     private final double p;
@@ -83,8 +83,9 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         //layout.addChild(cycleMode, 6, 0);
 
         GridLayout buttonLayout = new GridLayout(0, 0);
-        buttonLayout.addChild(cycleMode, 0, 0);
-        buttonLayout.addChild(register, 0, 1);
+        buttonLayout.addChild(cycleMode, 0, 1);
+        buttonLayout.addChild(register, 0, 0);
+        buttonLayout.addChild(redstoneSettings, 0, 2);
         buttonLayout.columnSpacing(5);
 
         GridLayout controlValueLayout = new GridLayout(0, 0);
@@ -127,7 +128,7 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         vField.setTextColorUneditable(-1);
         vField.setBordered(false);
         vField.setMaxLength(35);
-        vField.setValue((v + "").formatted("%.4f"));
+        vField.setValue(String.format("%.2f", v));
         vField.setEditable(false);
         vField.setFilter(Util::tryParseDoubleFilter);
 
@@ -138,7 +139,7 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         tField.setTextColorUneditable(-1);
         tField.setBordered(true);
         tField.setMaxLength(35);
-        tField.setValue(t + "");
+        tField.setValue(String.format("%.2f", t));
         tField.setFilter(Util::tryParseDoubleFilter);
 
         addRenderableWidget(tField);
@@ -150,7 +151,7 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         iField.setMaxLength(35);
         iField.setFocused(true);
 
-        iField.setValue(i + "");
+        iField.setValue(String.format("%.2f", i));
         iField.setFilter(Util::tryParseDoubleFilter);
 
         setFocused(iField);
@@ -161,7 +162,7 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         pField.setTextColorUneditable(-1);
         pField.setBordered(true);
         pField.setMaxLength(35);
-        pField.setValue(p + "");
+        pField.setValue(String.format("%.2f", p));
         pField.setFilter(Util::tryParseDoubleFilter);
 
         addRenderableWidget(pField);
@@ -172,7 +173,7 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         dField.setBordered(true);
 
         dField.setMaxLength(35);
-        dField.setValue(d + "");
+        dField.setValue(String.format("%.2f", d));
         dField.setFilter(Util::tryParseDoubleFilter);
 
         addRenderableWidget(dField);
@@ -193,6 +194,12 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         cycleMode.setToolTip(cycleLabel);
 
         addRenderableWidget(cycleMode);
+
+        redstoneSettings = new IconButton(0, 0, AllIcons.I_ACTIVE);
+        redstoneSettings.withCallback(this::redstoneSetting);
+        addRenderableWidget(redstoneSettings);
+
+
 
         if(type == PIDControllerType.SLIDER)cycleMode.visible = false;
 
@@ -234,85 +241,16 @@ public class PIDControllerScreen extends AbstractSimiScreen {
 
     }
 
+    public void redstoneSetting(){
+        AllPackets.getChannel().sendToServer(
+                new ExposedFieldRequestPacket(
+                        pos
+                )
+        );
+    }
+
     @Override
     public void init(){
-        /*
-        setWindowSize(background.width, background.height);
-        super.init();
-
-        int x = guiLeft;
-        int y = guiTop;
-
-        vField = new EditBox(font, x + 49, y - 10, 131, 10, Components.literal("Current Value"));
-        vField.setTextColor(-1);
-        vField.setTextColorUneditable(-1);
-        vField.setBordered(false);
-        vField.setMaxLength(35);
-        vField.setValue(v + "");
-        vField.setEditable(false);
-        vField.setFilter(Util::tryParseDoubleFilter);
-
-        addRenderableWidget(vField);
-
-        tField = new EditBox(font, x + 49, y + 2, 131, 10, Components.literal("Target Value"));
-        tField.setTextColor(-1);
-        tField.setTextColorUneditable(-1);
-        tField.setBordered(false);
-        tField.setMaxLength(35);
-        tField.setValue(t + "");
-        tField.setFilter(Util::tryParseDoubleFilter);
-
-        addRenderableWidget(tField);
-
-        iField = new EditBox(font, x + 49, y + 14, 131, 10, Components.literal("Integral Ratio"));
-        iField.setTextColor(-1);
-        iField.setTextColorUneditable(-1);
-        iField.setBordered(false);
-        iField.setMaxLength(35);
-        iField.setFocused(true);
-
-        iField.setValue(i + "");
-        iField.setFilter(Util::tryParseDoubleFilter);
-
-        setFocused(iField);
-        addRenderableWidget(iField);
-
-        pField = new EditBox(font, x + 49, y + 26, 131, 10, Components.literal("Proportional Ratio"));
-        pField.setTextColor(-1);
-        pField.setTextColorUneditable(-1);
-        pField.setBordered(false);
-        pField.setMaxLength(35);
-        pField.setValue(p + "");
-        pField.setFilter(Util::tryParseDoubleFilter);
-
-        addRenderableWidget(pField);
-
-        dField = new EditBox(font, x + 49, y + 38, 131, 10, Components.literal("Derivative Ratio"));
-        dField.setTextColor(-1);
-        dField.setTextColorUneditable(-1);
-        dField.setBordered(false);
-        dField.setMaxLength(35);
-        dField.setValue(d + "");
-        dField.setFilter(Util::tryParseDoubleFilter);
-
-        addRenderableWidget(dField);
-
-        register = new IconButton(x + 158, y + 53, AllIcons.I_CONFIRM);
-        register.withCallback(() -> {
-            register();
-            onClose();
-        });
-        register.setToolTip(confirmLabel);
-        addRenderableWidget(register);
-
-        cycleMode = new IconButton(x + 120, y + 53, AllIcons.I_CART_ROTATE);
-        cycleMode.withCallback(() -> {
-            cycle();
-            onClose();
-        });
-        cycleMode.setToolTip(cycleLabel);
-        addRenderableWidget(cycleMode);
-        * */
         startWindow();
     }
 

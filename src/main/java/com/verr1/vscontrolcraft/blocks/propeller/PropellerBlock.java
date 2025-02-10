@@ -47,23 +47,13 @@ public class PropellerBlock extends DirectionalBlock implements IBE<PropellerBlo
         return HALF_BOX_BASE.get(state.getValue(FACING));
     }
 
-    protected void displayScreen(PropellerBlockEntity entity, Player player){
 
-        double thrustRatio = entity.getThrustRatio();
-        double torqueRatio = entity.getTorqueRatio();
-        boolean reverseTorque = entity.getReverseTorque();
-        AllPackets.sendToPlayer(
-                new PropellerOpenScreenPacket(entity.getBlockPos(), reverseTorque, thrustRatio, torqueRatio),
-                ((ServerPlayer)player)
-        );
-
-    }
 
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
                                  BlockHitResult hit){
         if(worldIn.isClientSide)return InteractionResult.PASS;
-        withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
+        withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
         return InteractionResult.PASS;
     }
 

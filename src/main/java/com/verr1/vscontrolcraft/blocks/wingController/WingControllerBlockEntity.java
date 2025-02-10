@@ -20,10 +20,12 @@ import com.simibubi.create.foundation.utility.VecHelper;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
-import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
-import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
-import com.verr1.vscontrolcraft.base.UltraTerminal.WidgetType;
+import com.verr1.vscontrolcraft.base.UltraTerminal.*;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.WingControllerPeripheral;
+import com.verr1.vscontrolcraft.network.IPacketHandler;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -42,16 +44,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
 public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity implements
-        IBearingBlockEntity, ITerminalDevice
+        IBearingBlockEntity, ITerminalDevice, IPacketHandler
 {
     protected ControlledContraptionEntity physicalWing;
     protected LerpedFloat clientAnimatedAngle = LerpedFloat.angular();
@@ -65,14 +71,17 @@ public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity imp
     private WingControllerPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
 
-    private final List<NumericField> fields = List.of(
-            new NumericField(
+    private final List<ExposedFieldWrapper> fields = List.of(
+            new ExposedFieldWrapper(
                     () -> (double)angle,
                     v -> setAngle(v.floatValue()),
-                    "Angle In Degree",
-                    WidgetType.SLIDE
+                    "Angle °",
+                    WidgetType.SLIDE,
+                    ExposedFieldType.ANGLE
             )
     );
+
+    private ExposedFieldWrapper exposedField = fields.get(0);
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -274,19 +283,44 @@ public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity imp
 
     public void syncClient(){
         if(!level.isClientSide){
-            var p = new WingControllerSyncAnimationPacket(getBlockPos(), angle);
+            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_ANIMATION)
+                    .withDouble(angle)
+                    .build();
             AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
         }
     }
 
     @Override
-    public List<NumericField> fields() {
+    public List<ExposedFieldWrapper> fields() {
         return fields;
+    }
+
+    @Override
+    public ExposedFieldWrapper getExposedField() {
+        return exposedField;
+    }
+
+    @Override
+    public void setExposedField(ExposedFieldType type, double min, double max) {
+        if (type == ExposedFieldType.ANGLE) {
+            fields.get(0).min_max.x = min;
+            fields.get(0).min_max.y = max;
+        }
+        exposedField = fields.get(0);
     }
 
     @Override
     public String name() {
         return "Wing Controller";
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.SYNC_ANIMATION){
+            double angle = packet.getDoubles().get(0);
+            setAngle((float)angle);
+        }
     }
 
 

@@ -3,10 +3,6 @@ package com.verr1.vscontrolcraft.blocks.spatialAnchor;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
-import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
-import com.verr1.vscontrolcraft.blocks.recevier.PeripheralKey;
-import com.verr1.vscontrolcraft.blocks.recevier.ReceiverBlockEntity;
-import com.verr1.vscontrolcraft.blocks.recevier.ReceiverOpenScreenPacket;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.core.BlockPos;
@@ -46,10 +42,7 @@ public class SpatialAnchorBlock extends DirectionalAxisKineticBlock implements
     public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
                                 boolean isMoving)  {
         if(worldIn.isClientSide)return;
-        withBlockEntityDo(worldIn, pos, be -> {
-            be.setRunning(be.poweredToRun());
-            be.setStatic(!be.poweredToDynamize());
-        });
+        withBlockEntityDo(worldIn, pos, be -> be.getExposedField().apply(worldIn.getBestNeighborSignal(pos)));
     }
 
     @Override
@@ -57,14 +50,6 @@ public class SpatialAnchorBlock extends DirectionalAxisKineticBlock implements
         return false;
     }
 
-    protected void displayScreen(SpatialAnchorBlockEntity entity, Player player){
-        double offset = entity.getAnchorOffset();
-        long protocol = entity.getProtocol();
-        AllPackets.sendToPlayer(
-                new SpatialOpenScreenPacket(entity.getBlockPos(), offset, protocol),
-                ((ServerPlayer)player)
-        );
-    }
 
 
     @Override
@@ -72,7 +57,7 @@ public class SpatialAnchorBlock extends DirectionalAxisKineticBlock implements
                                  BlockHitResult hit){
         if(worldIn.isClientSide)return InteractionResult.PASS;
         if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
-            withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
+            withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
         }
 
         return InteractionResult.PASS;

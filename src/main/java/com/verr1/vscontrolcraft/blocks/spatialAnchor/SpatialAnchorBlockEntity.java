@@ -1,31 +1,39 @@
 package com.verr1.vscontrolcraft.blocks.spatialAnchor;
 
+import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.base.Servo.ICanBruteDirectionalConnect;
-import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
-import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
-import com.verr1.vscontrolcraft.base.UltraTerminal.WidgetType;
+import com.verr1.vscontrolcraft.base.UltraTerminal.*;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.spatial.LogicalSpatial;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.spatial.SpatialForceInducer;
+import com.verr1.vscontrolcraft.network.IPacketHandler;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
+import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.joml.Quaterniond;
-import org.joml.Quaterniondc;
-import org.joml.Vector3d;
-import org.joml.Vector3dc;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
+import org.joml.*;
 import org.valkyrienskies.core.api.ships.ServerShip;
 
 import java.util.List;
 
 public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
-        ICanBruteDirectionalConnect , ITerminalDevice
+        ICanBruteDirectionalConnect , ITerminalDevice, IPacketHandler
 {
 
     private boolean isRunning = false;
@@ -38,44 +46,52 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
     private final int MAX_DISTANCE_SQRT_CAN_LINK = 32 * 32;
     private final SpatialScheduleInfoHolder schedule = new SpatialScheduleInfoHolder().withPID(18, 3, 12, 10);
 
-    private final List<NumericField> fields = List.of(
-            new NumericField(
+    private final List<ExposedFieldWrapper> fields = List.of(
+            new ExposedFieldWrapper(
                     this::getAnchorOffset,
                     this::setAnchorOffset,
                     "offset",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.OFFSET
             ),
-            new NumericField(
+            new ExposedFieldWrapper(
                     () -> (double) (isRunning() ? 1 : 0),
-                    v -> setRunning(v > 7.5) ,
+                    v -> setRunning(v > 0.5) ,
                     "running",
-                    WidgetType.TOGGLE
+                    WidgetType.TOGGLE,
+                    ExposedFieldType.IS_RUNNING
             ),
-            new NumericField(
+            new ExposedFieldWrapper(
                     () -> (double)(isStatic() ? 0 : 1),
-                    v -> setStatic(v > 7.5),
+                    v -> setStatic(v > 0.5),
                     "dynamic",
-                    WidgetType.TOGGLE
+                    WidgetType.TOGGLE,
+                    ExposedFieldType.IS_STATIC
             ),
-            new NumericField(
+            new ExposedFieldWrapper(
                     () -> this.getSchedule().getPp(),
                     v -> this.getSchedule().setPp(v),
                     "P",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.P
             ),
-            new NumericField(
+            new ExposedFieldWrapper(
                     () -> this.getSchedule().getI(),
                     v -> this.getSchedule().setI(v),
                     "I",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.I
             ),
-            new NumericField(
+            new ExposedFieldWrapper(
                     () -> this.getSchedule().getDp(),
                     v -> this.getSchedule().setDp(v),
                     "D",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.D
             )
     );
+
+    private ExposedFieldWrapper exposedField = fields.get(0);
 
     public SpatialScheduleInfoHolder getSchedule() {
         return schedule;
@@ -255,6 +271,7 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
 
         syncAttachedInducer();
         updateSchedule();
+        syncClient();
     }
 
     @Override
@@ -286,12 +303,87 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
 
 
     @Override
-    public List<NumericField> fields() {
+    public List<ExposedFieldWrapper> fields() {
         return fields;
+    }
+
+    @Override
+    public ExposedFieldWrapper getExposedField() {
+        return exposedField;
+    }
+
+    @Override
+    public void setExposedField(ExposedFieldType type, double min, double max) {
+        switch (type){
+            case OFFSET -> exposedField = fields.get(0);
+            case IS_RUNNING -> exposedField = fields.get(1);
+            case IS_STATIC -> exposedField = fields.get(2);
+            case P -> exposedField = fields.get(3);
+            case I -> exposedField = fields.get(4);
+            case D -> exposedField = fields.get(5);
+        }
+        exposedField.min_max = new Vector2d(min, max);
     }
 
     @Override
     public String name() {
         return "spatial anchor";
+    }
+
+    public void syncClient(){
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_ANIMATION)
+                .withBoolean(isRunning)
+                .withBoolean(isStatic)
+                .build();
+        AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
+    }
+
+    protected void displayScreen(ServerPlayer player){
+        double offset = getAnchorOffset();
+        long protocol = getProtocol();
+        boolean isRunning = isRunning();
+        boolean isStatic = isStatic();
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+                .withDouble(offset)
+                .withLong(protocol)
+                .withBoolean(isRunning)
+                .withBoolean(isStatic)
+                .build();
+
+        AllPackets.sendToPlayer(p, player);
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+            BlockPos pos = packet.getBoundPos();
+            double offset = packet.getDoubles().get(0);
+            long protocol = packet.getLongs().get(0);
+            boolean isRunning = packet.getBooleans().get(0);
+            boolean isStatic = packet.getBooleans().get(1);
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ScreenOpener.open(
+                    new SpatialScreen(pos, offset, protocol, isRunning, isStatic)
+            ));
+        }
+        if(packet.getType() == BlockBoundPacketType.SYNC_ANIMATION){
+            isRunning = packet.getBooleans().get(0);
+            isStatic = packet.getBooleans().get(1);
+        }
+
+    }
+
+    @Override
+    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.SETTING){
+            double offset = packet.getDoubles().get(0);
+            long protocol = packet.getLongs().get(0);
+            boolean isRunning = packet.getBooleans().get(0);
+            boolean isStatic = packet.getBooleans().get(1);
+            setAnchorOffset(offset);
+            setProtocol(protocol);
+            setRunning(isRunning);
+            setStatic(isStatic);
+        }
     }
 }

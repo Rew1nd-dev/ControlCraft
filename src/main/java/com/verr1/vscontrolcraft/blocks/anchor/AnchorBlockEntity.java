@@ -1,16 +1,29 @@
 package com.verr1.vscontrolcraft.blocks.anchor;
 
+import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.anchor.AnchorForceInducer;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.anchor.LogicalAnchor;
+import com.verr1.vscontrolcraft.network.IPacketHandler;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
+import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkEvent;
 import org.valkyrienskies.core.api.ships.ServerShip;
 
-public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity {
+public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
+        IPacketHandler
+{
 
 
 
@@ -55,5 +68,34 @@ public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity {
 
     public LogicalAnchor getLogicalAnchor() {
         return new LogicalAnchor(airResistance, extraGravity);
+    }
+
+    public void displayScreen(ServerPlayer player){
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+                .withDouble(airResistance)
+                .withDouble(extraGravity)
+                .build();
+
+        AllPackets.sendToPlayer(p, player);
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+            airResistance = packet.getDoubles().get(0);
+            extraGravity = packet.getDoubles().get(1);
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
+                    ScreenOpener.open(new AnchorScreen(packet.getBoundPos(), airResistance, extraGravity)
+            ));
+        }
+    }
+
+    @Override
+    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.SETTING){
+            airResistance = packet.getDoubles().get(0);
+            extraGravity = packet.getDoubles().get(1);
+        }
     }
 }

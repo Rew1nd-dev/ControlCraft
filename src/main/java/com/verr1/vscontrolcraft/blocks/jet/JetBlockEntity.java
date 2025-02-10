@@ -1,28 +1,38 @@
 package com.verr1.vscontrolcraft.blocks.jet;
 
+import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
-import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
-import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
-import com.verr1.vscontrolcraft.base.UltraTerminal.WidgetType;
+import com.verr1.vscontrolcraft.base.UltraTerminal.*;
 import com.verr1.vscontrolcraft.blocks.jetRudder.JetRudderBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.JetPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.jet.JetForceInducer;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.jet.LogicalJet;
+import com.verr1.vscontrolcraft.network.IPacketHandler;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
+import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2d;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.ServerShip;
@@ -30,7 +40,7 @@ import org.valkyrienskies.core.api.ships.ServerShip;
 import java.util.List;
 
 public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
-        ITerminalDevice
+        ITerminalDevice, IPacketHandler
 {
 
     public SynchronizedField<Double> horizontalAngle = new SynchronizedField<>(0.0);
@@ -44,26 +54,47 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
     private JetPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
 
-    private final List<NumericField> fields = List.of(
-            new NumericField(
+    private final List<ExposedFieldWrapper> fields = List.of(
+            new ExposedFieldWrapper(
                     thrust::read,
                     thrust::write,
                     "thrust",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.THRUST
             ),
-            new NumericField(
+            new ExposedFieldWrapper(
                     horizontalAngle::read,
                     horizontalAngle::write,
                     "horizontal",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.HORIZONTAL_TILT
             ),
-            new NumericField(
+            new ExposedFieldWrapper(
                     verticalAngle::read,
                     verticalAngle::write,
                     "vertical",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.VERTICAL_TILT
             )
     );
+
+    private ExposedFieldWrapper exposedField = fields.get(0);
+
+    @Override
+    public ExposedFieldWrapper getExposedField() {
+        return exposedField;
+    }
+
+    @Override
+    public void setExposedField(ExposedFieldType type, double min, double max) {
+        switch (type){
+            case THRUST -> exposedField = fields.get(0);
+            case HORIZONTAL_TILT -> exposedField = fields.get(1);
+            case VERTICAL_TILT -> exposedField = fields.get(2);
+        }
+
+        exposedField.min_max = new Vector2d(min, max);
+    }
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -176,12 +207,50 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
     }
 
     @Override
-    public List<NumericField> fields() {
+    public List<ExposedFieldWrapper> fields() {
         return fields;
     }
 
     @Override
     public String name() {
         return "Jet";
+    }
+
+    public void displayScreen(ServerPlayer player){
+        double h = horizontalAngle.read();
+        double v = verticalAngle.read();
+        double t = thrust.read();
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+                .withDouble(h)
+                .withDouble(v)
+                .withDouble(t)
+                .build();
+
+        AllPackets.sendToPlayer(p, player);
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+            double h = packet.getDoubles().get(0);
+            double v = packet.getDoubles().get(1);
+            double t = packet.getDoubles().get(2);
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
+                    ScreenOpener.open(new JetSettingsScreen(t, h, v, packet.getBoundPos())
+            ));
+        }
+    }
+
+    @Override
+    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.SETTING){
+            double t = packet.getDoubles().get(0);
+            double h = packet.getDoubles().get(1);
+            double v = packet.getDoubles().get(2);
+            thrust.write(t);
+            horizontalAngle.write(h);
+            verticalAngle.write(v);
+        }
     }
 }

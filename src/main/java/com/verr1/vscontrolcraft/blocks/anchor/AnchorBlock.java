@@ -1,7 +1,7 @@
 package com.verr1.vscontrolcraft.blocks.anchor;
 
 import com.simibubi.create.foundation.block.IBE;
-import com.verr1.vscontrolcraft.blocks.annihilator.AnnihilatorBlockEntity;
+import com.verr1.vscontrolcraft.deprecated.AnchorOpenScreenPacket;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.core.BlockPos;
@@ -54,7 +54,7 @@ public class AnchorBlock extends DirectionalBlock implements IBE<AnchorBlockEnti
                                  BlockHitResult hit){
         if(worldIn.isClientSide)return InteractionResult.PASS;
         if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
-            withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
+            withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
         }
         return InteractionResult.PASS;
     }

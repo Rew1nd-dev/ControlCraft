@@ -2,9 +2,15 @@ package com.verr1.vscontrolcraft.blocks.recevier;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
 import com.verr1.vscontrolcraft.blocks.transmitter.NetworkManager;
+import com.verr1.vscontrolcraft.network.IPacketHandler;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
+import com.verr1.vscontrolcraft.registry.AllPackets;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
@@ -19,8 +25,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +40,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ReceiverBlockEntity extends SmartBlockEntity {
+public class ReceiverBlockEntity extends SmartBlockEntity implements
+        IPacketHandler
+{
 
     private IPeripheral attachedPeripheral;
     private final Map<String, PeripheralMethod> methods = new HashMap<>();
@@ -168,6 +182,47 @@ public class ReceiverBlockEntity extends SmartBlockEntity {
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
 
+    }
+
+
+    protected void displayScreen(ServerPlayer player){
+
+        PeripheralKey networkKey = getNetworkKey();
+        String peripheralType = getAttachedPeripheralType();
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SETTING)
+                .withLong(networkKey.Protocol())
+                .withUtf8(peripheralType)
+                .withUtf8(networkKey.Name())
+                .build();
+
+        AllPackets.sendToPlayer(
+                p,
+                player
+        );
+
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.SETTING){
+            String peripheralType = packet.getUtf8s().get(0);
+            String name = packet.getUtf8s().get(1);
+            Long protocol = packet.getLongs().get(0);
+            BlockPos pos = packet.getBoundPos();
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+                ScreenOpener.open(new ReceiverScreen(pos, name, peripheralType, protocol));
+            });
+        }
+    }
+
+    @Override
+    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.SETTING){
+            String name = packet.getUtf8s().get(0);
+            Long protocol = packet.getLongs().get(0);
+            resetNetworkRegistry(new PeripheralKey(name, protocol));
+        }
     }
 
     private class InvalidPeripheralCallBack implements InvalidateCallback{

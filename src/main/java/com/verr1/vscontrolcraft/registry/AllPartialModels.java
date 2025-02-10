@@ -13,6 +13,8 @@ public class AllPartialModels {
         CAMERA_LENS = block("camera_lens"),
         RUDDER_PART = block("rudder"),
 
+        SPATIAL_CORE = block("spatial_core"),
+
         SLIDER_TOP = block("slider_top"),
         SLIDER_PILLAR = block("slider_pillar");
 

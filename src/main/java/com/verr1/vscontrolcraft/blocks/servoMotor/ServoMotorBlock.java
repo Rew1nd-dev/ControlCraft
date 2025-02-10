@@ -68,11 +68,7 @@ public class ServoMotorBlock extends DirectionalKineticBlock implements
     public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
                                 boolean isMoving)  {
         if(worldIn.isClientSide)return;
-        if(worldIn.hasNeighborSignal(pos)){
-            withBlockEntityDo(worldIn, pos, AbstractServoMotor::lock);
-        }else{
-            withBlockEntityDo(worldIn, pos, AbstractServoMotor::unlock);
-        }
+        withBlockEntityDo(worldIn, pos, be -> be.getExposedField().apply(worldIn.getBestNeighborSignal(pos)));
     }
 
     @Override

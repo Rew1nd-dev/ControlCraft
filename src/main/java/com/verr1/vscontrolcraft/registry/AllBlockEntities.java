@@ -31,6 +31,7 @@ import com.verr1.vscontrolcraft.blocks.slider.SliderControllerBlockEntity;
 import com.verr1.vscontrolcraft.blocks.slider.SliderRenderer;
 import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialAnchorBlock;
 import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialAnchorBlockEntity;
+import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialAnchorRenderer;
 import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeBlock;
 import com.verr1.vscontrolcraft.blocks.sphericalHinge.SphericalHingeBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerBlock;
@@ -159,6 +160,7 @@ public class AllBlockEntities {
     public static final BlockEntityEntry<SpatialAnchorBlockEntity> SPATIAL_ANCHOR_BLOCKENTITY = REGISTRATE
             .blockEntity(SpatialAnchorBlock.ID, SpatialAnchorBlockEntity::new)
             .validBlock(AllBlocks.SPATIAL_ANCHOR_BLOCK)
+            .renderer(() -> SpatialAnchorRenderer::new)
             .register();
 
     public static final BlockEntityEntry<TerminalBlockEntity> TERMINAL_BLOCKENTITY = REGISTRATE

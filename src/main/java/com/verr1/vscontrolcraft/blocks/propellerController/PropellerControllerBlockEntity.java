@@ -1,35 +1,46 @@
 package com.verr1.vscontrolcraft.blocks.propellerController;
 
+import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
-import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
-import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
-import com.verr1.vscontrolcraft.base.UltraTerminal.WidgetType;
+import com.verr1.vscontrolcraft.base.UltraTerminal.*;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.PropellerControllerPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.LogicalPropeller;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.PropellerForceInducer;
 import com.verr1.vscontrolcraft.blocks.propeller.PropellerBlockEntity;
+import com.verr1.vscontrolcraft.network.IPacketHandler;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
+import com.verr1.vscontrolcraft.registry.AllPackets;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2d;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.List;
+import java.util.Objects;
 
 public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntity implements
-        ITerminalDevice
+        ITerminalDevice, IPacketHandler
 {
     public boolean hasAttachedPropeller = false;
 
@@ -43,12 +54,13 @@ public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntit
     private PropellerControllerPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
 
-    private final List<NumericField> fields = List.of(
-            new NumericField(
+    private final List<ExposedFieldWrapper> fields = List.of(
+            new ExposedFieldWrapper(
                     rotationalSpeed::read,
                     rotationalSpeed::write,
                     "Speed",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.SPEED
             )
     );
 
@@ -148,12 +160,54 @@ public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntit
     }
 
     @Override
-    public List<NumericField> fields() {
+    public List<ExposedFieldWrapper> fields() {
         return fields;
+    }
+
+    private ExposedFieldWrapper exposedField = fields.get(0);
+
+    @Override
+    public ExposedFieldWrapper getExposedField() {
+        return exposedField;
+    }
+
+    @Override
+    public void setExposedField(ExposedFieldType type, double min, double max) {
+        if (type == ExposedFieldType.SPEED) {
+            exposedField = fields.get(0);
+        }
+        exposedField.min_max = new Vector2d(min, max);
     }
 
     @Override
     public String name() {
         return "propeller controller";
+    }
+
+    public void displayScreen(ServerPlayer player){
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+                .withDouble(rotationalSpeed.read())
+                .build();
+
+        AllPackets.sendToPlayer(p, player);
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+            double speed = packet.getDoubles().get(0);
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+                ScreenOpener.open(new PropellerControllerScreen(getBlockPos(), speed));
+            });
+        }
+    }
+
+    @Override
+    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
+        if (packet.getType() == BlockBoundPacketType.SETTING) {
+            double speed = packet.getDoubles().get(0);
+            setTargetSpeed(speed);
+        }
     }
 }

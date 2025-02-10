@@ -2,8 +2,8 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [32, 32],
 	"textures": {
-		"0": "vscontrolcraft:block/pivot",
-		"particle": "vscontrolcraft:block/pivot"
+		"0": "vscontrolcraft:block/pivot_full",
+		"particle": "vscontrolcraft:block/pivot_full"
 	},
 	"elements": [
 		{

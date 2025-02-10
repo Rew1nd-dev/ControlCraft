@@ -31,9 +31,10 @@ public class ChannelWrapper implements ItemLike {
         row_data.clear();
         channels.stream().map(e -> new TerminalRowData(
                 e.isListening(),
-                e.getField().name(),
-                e.getField().value(),
-                e.getMinMax()
+                e.getField().field.name(),
+                e.getField().field.value(),
+                e.getMinMax(),
+                e.isBoolean()
         )).forEach(row_data::add);
     }
 
@@ -49,6 +50,8 @@ public class ChannelWrapper implements ItemLike {
             buffer.writeDouble(row_data.get(i).value());
             buffer.writeDouble(row_data.get(i).min_max().x());
             buffer.writeDouble(row_data.get(i).min_max().y());
+
+            buffer.writeBoolean(row_data.get(i).isBoolean());
         }
     }
 
@@ -65,7 +68,8 @@ public class ChannelWrapper implements ItemLike {
                     buf.readBoolean(),
                     buf.readUtf(),
                     buf.readDouble(),
-                    new Vector2d(buf.readDouble(), buf.readDouble())
+                    new Vector2d(buf.readDouble(), buf.readDouble()),
+                    buf.readBoolean()
             );
             row_data.add(rowData);
         }

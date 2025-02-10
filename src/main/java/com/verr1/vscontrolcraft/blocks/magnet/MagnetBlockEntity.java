@@ -2,22 +2,34 @@ package com.verr1.vscontrolcraft.blocks.magnet;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.MagnetPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.magnet.LogicalMagnet;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.magnet.MagnetForceInducer;
+import com.verr1.vscontrolcraft.network.IPacketHandler;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
+import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
@@ -27,7 +39,9 @@ import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import java.util.List;
 
-public class MagnetBlockEntity extends SmartBlockEntity {
+public class MagnetBlockEntity extends SmartBlockEntity implements
+        IPacketHandler
+{
 
     private final SynchronizedField<ShipPhysics> physics = new SynchronizedField<>(ShipPhysics.EMPTY);
 
@@ -137,5 +151,35 @@ public class MagnetBlockEntity extends SmartBlockEntity {
 
     public LogicalMagnet getLogicalMagnet() {
         return new LogicalMagnet(getBlockPos(), (ServerLevel)level);
+    }
+
+    protected void displayScreen(ServerPlayer player){
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SETTING)
+                .withDouble(getStrength())
+                .build();
+        AllPackets.sendToPlayer(
+                p,
+                player
+        );
+
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.SETTING){
+            double strength = packet.getDoubles().get(0);
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+                ScreenOpener.open(new MagnetScreen(packet.getBoundPos(), strength));
+            });
+        }
+    }
+
+    @Override
+    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.SETTING){
+            double strength = packet.getDoubles().get(0);
+            setStrength(strength);
+        }
     }
 }

@@ -1,13 +1,12 @@
-package com.verr1.vscontrolcraft.blocks.jetRudder;
+package com.verr1.vscontrolcraft.deprecated;
 
 import com.simibubi.create.foundation.networking.SimplePacketBase;
-import com.verr1.vscontrolcraft.blocks.propeller.PropellerBlockEntity;
+import com.verr1.vscontrolcraft.blocks.jetRudder.JetRudderBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkEvent;
-import org.joml.Vector3d;
 
 public class JetRudderSyncAnimationPacket extends SimplePacketBase {
     private final BlockPos pos;

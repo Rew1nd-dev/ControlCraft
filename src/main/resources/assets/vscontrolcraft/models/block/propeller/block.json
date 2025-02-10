@@ -3,7 +3,7 @@
 	"texture_size": [32, 32],
 	"textures": {
 		"0": "vscontrolcraft:block/propeller_base",
-		"particle": "vscontrolcraft:block/simple_propeller"
+		"particle": "vscontrolcraft:block/propeller_base"
 	},
 	"elements": [
 		{
@@ -11,12 +11,12 @@
 			"to": [13, 4, 13],
 			"rotation": {"angle": 0, "axis": "x", "origin": [8, 8, 8]},
 			"faces": {
-				"north": {"uv": [8.24242, 0, 16, 10], "texture": "#0"},
-				"east": {"uv": [8.24242, 0, 16, 10], "texture": "#0"},
-				"south": {"uv": [8.24242, 0, 16, 10], "texture": "#0"},
-				"west": {"uv": [8.24242, 0, 16, 10], "texture": "#0"},
-				"up": {"uv": [7.75758, 16, 0, 0], "texture": "#0"},
-				"down": {"uv": [0, 0, 7.75758, 16], "texture": "#0"}
+				"north": {"uv": [5, 0, 10, 2], "texture": "#0"},
+				"east": {"uv": [5, 2, 10, 4], "texture": "#0"},
+				"south": {"uv": [5, 4, 10, 6], "texture": "#0"},
+				"west": {"uv": [5, 6, 10, 8], "texture": "#0"},
+				"up": {"uv": [5, 5, 0, 0], "texture": "#0"},
+				"down": {"uv": [5, 5, 0, 10], "texture": "#0"}
 			}
 		}
 	],

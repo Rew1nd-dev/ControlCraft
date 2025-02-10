@@ -6,10 +6,11 @@ import java.util.function.Supplier;
 public class NumericField implements Field<Double>{
     public static NumericField EMPTY = new NumericField(() -> 0.0, (v) -> {}, "empty", WidgetType.SLIDE);
 
-    private Supplier<Double> value;
-    private Consumer<Double> callback;
-    private String name;
-    private WidgetType widgetType;
+    private final Supplier<Double> value;
+    private final Consumer<Double> callback;
+    private final String name;
+    private final WidgetType widgetType;
+
 
     public NumericField(Supplier<Double> value, Consumer<Double> callback, String name, WidgetType widgetType) {
         this.value = value;
@@ -17,6 +18,7 @@ public class NumericField implements Field<Double>{
         this.name = name;
         this.widgetType = widgetType;
     }
+
 
     @Override
     public Double value(){

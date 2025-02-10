@@ -1,6 +1,7 @@
-package com.verr1.vscontrolcraft.blocks.magnet;
+package com.verr1.vscontrolcraft.deprecated;
 
 import com.simibubi.create.foundation.networking.SimplePacketBase;
+import com.verr1.vscontrolcraft.blocks.magnet.MagnetBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;

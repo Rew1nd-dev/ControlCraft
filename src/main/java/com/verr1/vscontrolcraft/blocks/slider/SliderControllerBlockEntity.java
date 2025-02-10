@@ -12,14 +12,15 @@ import com.verr1.vscontrolcraft.base.Servo.ICanBruteDirectionalConnect;
 import com.verr1.vscontrolcraft.base.Servo.IPIDController;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerInfoHolder;
 import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
-import com.verr1.vscontrolcraft.base.UltraTerminal.Field;
-import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
-import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
-import com.verr1.vscontrolcraft.base.UltraTerminal.WidgetType;
+import com.verr1.vscontrolcraft.base.UltraTerminal.*;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SliderControllerPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.slider.LogicalSlider;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.slider.SliderForceInducer;
+import com.verr1.vscontrolcraft.network.IPacketHandler;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
@@ -32,8 +33,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
@@ -54,7 +58,9 @@ import java.util.Objects;
 import static net.minecraft.ChatFormatting.GRAY;
 
 public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implements
-        IPIDController, ICanBruteDirectionalConnect, IConstrainHolder, IHaveGoggleInformation, ITerminalDevice
+        IPIDController, ICanBruteDirectionalConnect,
+        IConstrainHolder, IHaveGoggleInformation,
+        ITerminalDevice, IPacketHandler
 {
 
     private final double MAX_SLIDE_DISTANCE = 32;
@@ -73,39 +79,63 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
     private SliderControllerPeripheral peripheral;
     protected LazyOptional<IPeripheral> peripheralCap;
 
-    private List<NumericField> fields = List.of(
-            new NumericField(
+    private List<ExposedFieldWrapper> fields = List.of(
+            new ExposedFieldWrapper(
                     controlForce::read,
                     controlForce::write,
                     "Force",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.FORCE
             ),
-            new NumericField(
+            new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getTarget(),
                     t -> this.getControllerInfoHolder().setTarget(t),
                     "target",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.TARGET
             ),
-            new NumericField(
+            new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getPIDParams().p(),
                     p -> this.getControllerInfoHolder().setP(p),
                     "P",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.P
             ),
-            new NumericField(
+            new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getPIDParams().i(),
                     i -> this.getControllerInfoHolder().setI(i),
                     "I",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.I
             ),
-            new NumericField(
+            new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getPIDParams().d(),
                     d -> this.getControllerInfoHolder().setD(d),
                     "D",
-                    WidgetType.SLIDE
+                    WidgetType.SLIDE,
+                    ExposedFieldType.D
             )
     );
 
+    private ExposedFieldWrapper exposedField = fields.get(1);
+
+    @Override
+    public ExposedFieldWrapper getExposedField() {
+        return exposedField;
+    }
+
+    @Override
+    public void setExposedField(ExposedFieldType type, double min, double max) {
+        switch (type){
+            case FORCE -> exposedField = fields.get(0);
+            case TARGET -> exposedField = fields.get(1);
+            case P -> exposedField = fields.get(2);
+            case I -> exposedField = fields.get(3);
+            case D -> exposedField = fields.get(4);
+        }
+
+        exposedField.min_max = new Vector2d(min, max);
+    }
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -410,7 +440,9 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
 
     public void syncClient(){
         if(!level.isClientSide){
-            var p = new SliderSyncAnimationPacket(getBlockPos(), (float) getSlideDistance());
+            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_ANIMATION)
+                    .withDouble(getSlideDistance())
+                    .build();
             AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
         }
     }
@@ -460,12 +492,25 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
     }
 
     @Override
-    public List<NumericField> fields() {
+    public List<ExposedFieldWrapper> fields() {
         return fields;
     }
 
     @Override
     public String name() {
         return "Slider Device";
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.SYNC_ANIMATION){
+            setAnimatedDistance(packet.getDoubles().get(0).floatValue());
+        }
+    }
+
+    @Override
+    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
+
     }
 }

@@ -2,8 +2,8 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [64, 64],
 	"textures": {
-		"0": "vscontrolcraft:block/transmitter",
-		"particle": "vscontrolcraft:block/transmitter"
+		"0": "vscontrolcraft:block/terminal",
+		"particle": "vscontrolcraft:block/terminal"
 	},
 	"elements": [
 		{

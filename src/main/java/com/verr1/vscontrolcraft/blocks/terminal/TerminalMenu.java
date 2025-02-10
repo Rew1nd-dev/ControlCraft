@@ -39,17 +39,16 @@ public class TerminalMenu extends GhostItemMenu<ChannelWrapper> {
 
     @Override
     protected void addSlots() {
-        addPlayerSlots(8, 82);
+        addPlayerSlots(40 + 8, 131 + 24);
 
-        int x = 180;
-        int y = -75;
+        int x = 8;
+        int y = 8;
         int slot = 0;
 
         for (int column = 0; column < 2; ++column){
             for (int row = 0; row < 6; row++) {
-                addSlot(new SlotItemHandler(ghostInventory, slot++, x, y + row * 25));
+                addSlot(new SlotItemHandler(ghostInventory, slot++, x + column * 18, y + row * 18));
             }
-            x += 24;
         }
 
 

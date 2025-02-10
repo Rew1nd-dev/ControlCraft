@@ -1,8 +1,8 @@
-package com.verr1.vscontrolcraft.blocks.spatialAnchor;
+package com.verr1.vscontrolcraft.deprecated;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
-import com.verr1.vscontrolcraft.blocks.recevier.ReceiverScreen;
+import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -17,17 +17,23 @@ public class SpatialOpenScreenPacket extends SimplePacketBase {
     private final BlockPos pos;
     private final double offset;
     private final long protocol;
+    private final boolean isRunning;
+    private final boolean isStatic;
 
-    public SpatialOpenScreenPacket(BlockPos pos, double offset, long protocol) {
+    public SpatialOpenScreenPacket(BlockPos pos, double offset, long protocol, boolean isStatic, boolean isRunning) {
         this.pos = pos;
         this.offset = offset;
         this.protocol = protocol;
+        this.isRunning = isRunning;
+        this.isStatic = isStatic;
     }
 
     public SpatialOpenScreenPacket(FriendlyByteBuf buffer) {
         pos = buffer.readBlockPos();
         offset = buffer.readDouble();
         protocol = buffer.readLong();
+        isRunning = buffer.readBoolean();
+        isStatic = buffer.readBoolean();
     }
 
     @Override
@@ -35,6 +41,8 @@ public class SpatialOpenScreenPacket extends SimplePacketBase {
         buffer.writeBlockPos(pos);
         buffer.writeDouble(offset);
         buffer.writeLong(protocol);
+        buffer.writeBoolean(isRunning);
+        buffer.writeBoolean(isStatic);
     }
 
     @Override
@@ -48,7 +56,7 @@ public class SpatialOpenScreenPacket extends SimplePacketBase {
                 return;
 
             if(pos == null)return;
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ScreenOpener.open(new SpatialScreen(pos, offset, protocol)));
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ScreenOpener.open(new SpatialScreen(pos, offset, protocol, isRunning, isStatic)));
         });
         return true;
     }

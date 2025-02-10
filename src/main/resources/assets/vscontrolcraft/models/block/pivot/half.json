@@ -2,8 +2,8 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [32, 32],
 	"textures": {
-		"0": "vscontrolcraft:block/pivot",
-		"particle": "vscontrolcraft:block/pivot"
+		"0": "vscontrolcraft:block/pivot_full",
+		"particle": "vscontrolcraft:block/pivot_full"
 	},
 	"elements": [
 		{
@@ -28,8 +28,8 @@
 				"east": {"uv": [6, 0, 7, 6], "texture": "#0"},
 				"south": {"uv": [1, 6, 2, 12], "texture": "#0"},
 				"west": {"uv": [2, 6, 3, 12], "texture": "#0"},
-				"up": {"uv": [8, 6, 7, 5], "texture": "#0"},
-				"down": {"uv": [7, 7, 6, 8], "texture": "#0"}
+				"up": {"uv": [8, 6, 7, 5], "texture": "#missing"},
+				"down": {"uv": [7, 7, 6, 8], "texture": "#missing"}
 			}
 		},
 		{

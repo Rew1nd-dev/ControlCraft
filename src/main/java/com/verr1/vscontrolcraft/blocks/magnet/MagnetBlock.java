@@ -1,9 +1,7 @@
 package com.verr1.vscontrolcraft.blocks.magnet;
 
 import com.simibubi.create.foundation.block.IBE;
-import com.verr1.vscontrolcraft.blocks.recevier.PeripheralKey;
-import com.verr1.vscontrolcraft.blocks.recevier.ReceiverBlockEntity;
-import com.verr1.vscontrolcraft.blocks.recevier.ReceiverOpenScreenPacket;
+import com.verr1.vscontrolcraft.deprecated.MagnetOpenScreenPacket;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.core.BlockPos;
@@ -39,7 +37,6 @@ public class MagnetBlock extends DirectionalBlock implements IBE<MagnetBlockEnti
                 new MagnetOpenScreenPacket(entity.getBlockPos(), entity.getStrength()),
                 ((ServerPlayer)player)
         );
-
     }
 
     @Override
@@ -47,7 +44,7 @@ public class MagnetBlock extends DirectionalBlock implements IBE<MagnetBlockEnti
                                  BlockHitResult hit){
         if(worldIn.isClientSide)return InteractionResult.PASS;
         if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
-            withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
+            withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer)player));
         }
         return InteractionResult.PASS;
     }

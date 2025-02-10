@@ -1,18 +1,11 @@
 package com.verr1.vscontrolcraft.blocks.propeller;
 
-import com.simibubi.create.AllItems;
-import com.simibubi.create.foundation.gui.AbstractSimiScreen;
-import com.simibubi.create.foundation.gui.AllIcons;
-import com.simibubi.create.foundation.gui.element.GuiGameElement;
-import com.simibubi.create.foundation.gui.widget.IconButton;
-import com.simibubi.create.foundation.utility.Components;
 import com.verr1.vscontrolcraft.base.SimpleSettingScreen;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllBlocks;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Checkbox;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -38,22 +31,24 @@ public class PropellerScreen extends SimpleSettingScreen {
 
     @Override
     public void startWindow() {
-        addFieldWithLabel("T ratio", Util::tryParseDoubleFilter).setValue(String.format("%.4f", torque_ratio));
-        addFieldWithLabel("F ratio", Util::tryParseDoubleFilter).setValue(String.format("%.4f", thrust_ratio));
+        addNumericFieldWithLabel("T ratio", Util::tryParseDoubleFilter).setValue(String.format("%.1f", torque_ratio));
+        addNumericFieldWithLabel("F ratio", Util::tryParseDoubleFilter).setValue(String.format("%.1f", thrust_ratio));
     }
 
     public void register() {
+        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING)
+                .withDouble(Util.tryParseDouble(iFields.get(0).getValue()))
+                .withDouble(Util.tryParseDouble(iFields.get(1).getValue()))
+                .build();
         AllPackets
                 .getChannel()
-                .sendToServer(
-                        new PropellerSettingsPacket(
-                                pos,
-                                false,
-                                Util.tryParseDouble(iFields.get(1).getValue()),
-                                Util.tryParseDouble(iFields.get(0).getValue())
-                        )
-                );
+                .sendToServer(p);
         onClose();
+    }
+
+    @Override
+    public BlockPos getPos() {
+        return pos;
     }
 
     @Override
