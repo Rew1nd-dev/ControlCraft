@@ -123,10 +123,6 @@ repositories {
     flatDir {
          dirs 'libs'
     }
-    maven {
-        // 阿里云镜像，方便国内开发
-        url = uri("https://maven.aliyun.com/repository/public/")
-    }
     maven { url = 'https://maven.minecraftforge.net' }
     maven {
         name = 'tterrag maven'

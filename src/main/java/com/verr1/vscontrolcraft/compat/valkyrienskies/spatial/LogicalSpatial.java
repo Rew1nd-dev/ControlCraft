@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.compat.valkyrienskies.spatial;
 
+import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.blocks.spatialAnchor.ISpatialTarget;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
@@ -27,6 +28,7 @@ public record LogicalSpatial(
 
     @Override
     public Quaterniondc qBase(){
+        // ControlCraft.LOGGER.info("qBase: " + VSMathUtils.getQuaternion(levelPos()));
         return VSMathUtils.getQuaternion(levelPos());
     }
 

@@ -105,4 +105,12 @@ public class ClientWand{
         return Minecraft.getInstance().player.getMainHandItem().getItem() == AllItems.ALL_IN_WAND.get();
     }
 
+    // ||
+    //
+
+    public static boolean isWrenchInHand(){
+        if(Minecraft.getInstance().player == null)return false;
+        return Minecraft.getInstance().player.getMainHandItem().is(com.simibubi.create.AllItems.WRENCH.asItem());
+    }
+
 }

@@ -1,8 +1,10 @@
 package com.verr1.vscontrolcraft.blocks.slider;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
+import com.verr1.vscontrolcraft.Config;
 import com.verr1.vscontrolcraft.base.Constrain.ConstrainCenter;
 import com.verr1.vscontrolcraft.base.Constrain.DataStructure.ConstrainKey;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
@@ -10,9 +12,11 @@ import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.base.Hinge.interfaces.IConstrainHolder;
 import com.verr1.vscontrolcraft.base.Servo.ICanBruteDirectionalConnect;
 import com.verr1.vscontrolcraft.base.Servo.IPIDController;
+import com.verr1.vscontrolcraft.base.Servo.PID;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerInfoHolder;
 import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
 import com.verr1.vscontrolcraft.base.UltraTerminal.*;
+import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorScreen;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SliderControllerPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.slider.LogicalSlider;
@@ -29,14 +33,17 @@ import dan200.computercraft.shared.Capabilities;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +70,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         ITerminalDevice, IPacketHandler
 {
 
-    private final double MAX_SLIDE_DISTANCE = 32;
+    private double MAX_SLIDE_DISTANCE = 32;
 
     public SynchronizedField<ShipPhysics> ownPhysics = new SynchronizedField<>(ShipPhysics.EMPTY);
     public SynchronizedField<ShipPhysics> cmpPhysics = new SynchronizedField<>(ShipPhysics.EMPTY);
@@ -72,6 +79,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
     private final SynchronizedField<Vector3d> cachedPos_Own = new SynchronizedField<>(new Vector3d());
     private final SynchronizedField<Vector3d> cachedPos_Cmp = new SynchronizedField<>(new Vector3d());
 
+    private final PIDControllerInfoHolder controllerInfoHolder = new PIDControllerInfoHolder().setParameter(5, 0, 2);
 
     private final LerpedFloat animatedDistance = LerpedFloat.linear();
     public float animatedTargetDistance = 0;
@@ -86,35 +94,35 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
                     "Force",
                     WidgetType.SLIDE,
                     ExposedFieldType.FORCE
-            ),
+            ).withSuggestedRange(0, 1000),
             new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getTarget(),
                     t -> this.getControllerInfoHolder().setTarget(t),
                     "target",
                     WidgetType.SLIDE,
                     ExposedFieldType.TARGET
-            ),
+            ).withSuggestedRange(0, 15),
             new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getPIDParams().p(),
                     p -> this.getControllerInfoHolder().setP(p),
                     "P",
                     WidgetType.SLIDE,
                     ExposedFieldType.P
-            ),
+            ).withSuggestedRange(2, 15),
             new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getPIDParams().i(),
                     i -> this.getControllerInfoHolder().setI(i),
                     "I",
                     WidgetType.SLIDE,
                     ExposedFieldType.I
-            ),
+            ).withSuggestedRange(0, 3),
             new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getPIDParams().d(),
                     d -> this.getControllerInfoHolder().setD(d),
                     "D",
                     WidgetType.SLIDE,
                     ExposedFieldType.D
-            )
+            ).withSuggestedRange(2, 10)
     );
 
     private ExposedFieldWrapper exposedField = fields.get(1);
@@ -135,6 +143,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         }
 
         exposedField.min_max = new Vector2d(min, max);
+        setChanged();
     }
 
     @Override
@@ -150,11 +159,12 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         return super.getCapability(cap, side);
     }
 
-    private final PIDControllerInfoHolder controllerInfoHolder = new PIDControllerInfoHolder().setParameter(0.5, 0, 14);
+
 
     public SliderControllerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         lazyTickRate = 20;
+        MAX_SLIDE_DISTANCE = Config.PhysicsMaxSlideDistance;
     }
 
     public Direction getVertical(){
@@ -225,7 +235,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
     @Override
     public void onSpeedChanged(float previousSpeed) {
         super.onSpeedChanged(previousSpeed);
-        getControllerInfoHolder().setP(speed);
+        // getControllerInfoHolder().setP(speed);
     }
 
     @Override
@@ -501,16 +511,64 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         return "Slider Device";
     }
 
+    protected void displayScreen(ServerPlayer player){
+
+        double t = getControllerInfoHolder().getTarget();
+        double v = getControllerInfoHolder().getValue();
+
+        PID pidParams = getControllerInfoHolder().getPIDParams();
+
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+                .withDouble(t)
+                .withDouble(v)
+                .withDouble(pidParams.p())
+                .withDouble(pidParams.i())
+                .withDouble(pidParams.d())
+                .build();
+
+        AllPackets.sendToPlayer(p, player);
+
+    }
+
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+            double t = packet.getDoubles().get(0);
+            double v = packet.getDoubles().get(1);
+            double p = packet.getDoubles().get(2);
+            double i = packet.getDoubles().get(3);
+            double d = packet.getDoubles().get(4);
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
+                    ScreenOpener.open(new SliderScreen(getBlockPos(), p, i, d, v, t)));
+        }
         if(packet.getType() == BlockBoundPacketType.SYNC_ANIMATION){
             setAnimatedDistance(packet.getDoubles().get(0).floatValue());
         }
     }
 
-    @Override
-    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
 
+    @Override
+    protected void write(CompoundTag tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
+        if(clientPacket)return;
+        fields.forEach(e -> tag.put("field_" + e.type.name(), e.serialize()));
+        tag.putInt("exposedField", fields.indexOf(exposedField));
+        tag.put("controller", getControllerInfoHolder().serialize());
+
+    }
+
+    @Override
+    protected void read(CompoundTag tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        if(clientPacket)return;
+
+        fields.forEach(f -> f.deserialize(tag.getCompound("field_" + f.type.name())));
+        try{
+            exposedField = fields.get(tag.getInt("exposed_field"));
+        }catch (IndexOutOfBoundsException e){
+            exposedField = fields.get(0);
+        }
+        getControllerInfoHolder().deserialize(tag.getCompound("controller"));
     }
 }

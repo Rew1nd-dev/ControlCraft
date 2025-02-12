@@ -29,7 +29,9 @@ public class JetRudderBlock extends DirectionalBlock implements IBE<JetRudderBlo
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getClickedFace());
+        Direction face = context.getClickedFace();
+        if(context.getPlayer() != null && context.getPlayer().isShiftKeyDown())face = face.getOpposite();
+        return defaultBlockState().setValue(FACING, face);
     }
 
     @Override

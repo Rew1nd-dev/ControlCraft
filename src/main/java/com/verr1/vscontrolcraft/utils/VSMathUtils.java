@@ -124,6 +124,13 @@ public class VSMathUtils {
         return getAbsolutePosition(pos.level(), pos.pos());
     }
 
+    public static Vector3d getAbsolutePosition(BlockEntity e){
+        if(e.getLevel() != null && !e.getLevel().isClientSide){
+            return getAbsolutePosition((ServerLevel) e.getLevel(), e.getBlockPos());
+        }
+        return new Vector3d();
+    }
+
     public static Vector3d getAbsolutePosition(ServerLevel level, BlockPos pos){
         ServerShip ship = getServerShip(pos, level);
         Vector3d p_sc = Util.Vec3toVector3d(pos.getCenter());

@@ -40,15 +40,18 @@ public class PropellerControllerBlock extends DirectionalKineticBlock implements
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
                                  BlockHitResult hit){
         if(worldIn.isClientSide)return InteractionResult.PASS;
-        withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
+        if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
+            withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
+        }
         return InteractionResult.PASS;
     }
 
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-
-        return defaultBlockState().setValue(FACING, context.getClickedFace().getOpposite());
+        Direction face = context.getClickedFace();
+        if(context.getPlayer() != null && context.getPlayer().isShiftKeyDown())face = face.getOpposite();
+        return defaultBlockState().setValue(FACING, face);
     }
 
     @Override

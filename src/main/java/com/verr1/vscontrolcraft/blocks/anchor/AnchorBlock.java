@@ -42,12 +42,6 @@ public class AnchorBlock extends DirectionalBlock implements IBE<AnchorBlockEnti
         return defaultBlockState().setValue(FACING, context.getClickedFace());
     }
 
-    protected void displayScreen(AnchorBlockEntity entity, Player player){
-        AllPackets.sendToPlayer(
-                new AnchorOpenScreenPacket(entity.getAirResistance(), entity.getExtraGravity(), entity.getBlockPos()),
-                (ServerPlayer)player
-        );
-    }
 
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,

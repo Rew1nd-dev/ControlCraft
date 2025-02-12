@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.blocks.jet;
 
 import com.verr1.vscontrolcraft.base.SimpleSettingScreen;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllBlocks;
@@ -26,11 +27,11 @@ public class JetSettingsScreen extends SimpleSettingScreen {
 
     @Override
     public void startWindow() {
-        addNumericFieldWithLabel("Thrust", Util::tryParseDoubleFilter)
+        addNumericFieldWithLabel(ExposedFieldType.THRUST.getComponent(), Util::tryParseDoubleFilter)
                 .setValue(String.format("%.1f", thrust)); // iFields[0]
-        addNumericFieldWithLabel("Horizontal Tilt", Util::tryParseDoubleFilter)
+        addNumericFieldWithLabel(ExposedFieldType.HORIZONTAL_TILT.getComponent(), Util::tryParseDoubleFilter)
                 .setValue(String.format("%.2f", horizontalTilt)); // iFields[1]
-        addNumericFieldWithLabel("Vertical Tilt", Util::tryParseDoubleFilter)
+        addNumericFieldWithLabel(ExposedFieldType.VERTICAL_TILT.getComponent(), Util::tryParseDoubleFilter)
                 .setValue(String.format("%.2f", verticalTilt)); // iFields[2]
 
     }

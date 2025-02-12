@@ -163,7 +163,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity implements
         super.write(tag, clientPacket);
         if(!clientPacket){
             tag.putLong("protocol", networkKey.Protocol());
-            tag.putString("name", networkKey.Name());
+            tag.putString("type", networkKey.Name());
         }
 
     }
@@ -174,7 +174,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity implements
         super.read(tag, clientPacket);
         if(!clientPacket){
             long protocol = tag.getLong("protocol");
-            String name = tag.getString("name");
+            String name = tag.getString("type");
             syncTasks.add(()-> resetNetworkRegistry(new PeripheralKey(name, protocol)));
         }
     }

@@ -100,7 +100,7 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
     @Override
     public void adjust() {
         setAdjustment(getHingeLevel().next());
-        syncToClient();
+        // syncToClient();
     }
 
     @Override

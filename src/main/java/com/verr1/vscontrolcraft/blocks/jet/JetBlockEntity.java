@@ -20,6 +20,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -184,6 +185,7 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
         );
     }
 
+
     public void syncAttachedInducer(){
         if(level.isClientSide) return;
         ServerShip ship = getServerShipOn();
@@ -253,4 +255,27 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
             verticalAngle.write(v);
         }
     }
+
+    @Override
+    protected void write(CompoundTag tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
+        if(clientPacket)return;
+        fields.forEach(e -> tag.put("field_" + e.type.name(), e.serialize()));
+        tag.putInt("exposedField", fields.indexOf(exposedField));
+
+    }
+
+    @Override
+    protected void read(CompoundTag tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        if(clientPacket)return;
+
+        fields.forEach(f -> f.deserialize(tag.getCompound("field_" + f.type.name())));
+        try{
+            exposedField = fields.get(tag.getInt("exposed_field"));
+        }catch (IndexOutOfBoundsException e){
+            exposedField = fields.get(0);
+        }
+    }
+
 }

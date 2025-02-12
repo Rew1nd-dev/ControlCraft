@@ -6,6 +6,8 @@ import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.base.Servo.ICanBruteDirectionalConnect;
 import com.verr1.vscontrolcraft.base.UltraTerminal.*;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
+import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.PropellerControllerPeripheral;
+import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SpatialAnchorPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.spatial.LogicalSpatial;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.spatial.SpatialForceInducer;
 import com.verr1.vscontrolcraft.network.IPacketHandler;
@@ -15,18 +17,24 @@ import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
+import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 import org.valkyrienskies.core.api.ships.ServerShip;
 
@@ -44,7 +52,10 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
     private double anchorOffset = 1.0;
     private long protocol = 0;
     private final int MAX_DISTANCE_SQRT_CAN_LINK = 32 * 32;
-    private final SpatialScheduleInfoHolder schedule = new SpatialScheduleInfoHolder().withPID(18, 3, 12, 10);
+    private final SpatialScheduleInfoHolder schedule = new SpatialScheduleInfoHolder().withPPID(18, 3, 12, 10);
+
+    private SpatialAnchorPeripheral peripheral;
+    private LazyOptional<IPeripheral> peripheralCap;
 
     private final List<ExposedFieldWrapper> fields = List.of(
             new ExposedFieldWrapper(
@@ -76,8 +87,8 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
                     ExposedFieldType.P
             ),
             new ExposedFieldWrapper(
-                    () -> this.getSchedule().getI(),
-                    v -> this.getSchedule().setI(v),
+                    () -> this.getSchedule().getIp(),
+                    v -> this.getSchedule().setIp(v),
                     "I",
                     WidgetType.SLIDE,
                     ExposedFieldType.I
@@ -118,6 +129,19 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
                 isStatic,
                 protocol
         );
+    }
+
+    @Override
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+        if(cap == Capabilities.CAPABILITY_PERIPHERAL){
+            if(this.peripheral == null){
+                this.peripheral = new SpatialAnchorPeripheral(this);
+            }
+            if(peripheralCap == null || !peripheralCap.isPresent())
+                peripheralCap =  LazyOptional.of(() -> this.peripheral);
+            return peripheralCap.cast();
+        }
+        return super.getCapability(cap, side);
     }
 
     public void setProtocol(long protocol) {
@@ -215,6 +239,11 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
         if(tracking.pos() == getBlockPos())return false;
         if(!getDimensionID().equals(tracking.dimensionID()))return false;
         if(tracking.shipID() == getServerShipID())return false;
+        if(tracking
+                .vPos()
+                .sub(VSMathUtils.getAbsolutePosition(this), new Vector3d())
+                .lengthSquared() > MAX_DISTANCE_SQRT_CAN_LINK)return false;
+
         return true;
     }
 
@@ -338,6 +367,19 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
         AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
     }
 
+    public void flip(){
+        setFlipped(!isFlipped());
+    }
+
+    public boolean isFlipped(){
+        return getBlockState().getValue(SpatialAnchorBlock.FLIPPED);
+    }
+
+
+    public void setFlipped(boolean flipped) {
+        updateBlockState(level, getBlockPos(), getBlockState().setValue(SpatialAnchorBlock.FLIPPED, flipped));
+    }
+
     protected void displayScreen(ServerPlayer player){
         double offset = getAnchorOffset();
         long protocol = getProtocol();
@@ -385,5 +427,35 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
             setRunning(isRunning);
             setStatic(isStatic);
         }
+    }
+
+    @Override
+    protected void write(CompoundTag compound, boolean clientPacket) {
+        super.write(compound, clientPacket);
+        if(clientPacket)return;
+        fields.forEach(e -> compound.put("field_" + e.type.name(), e.serialize()));
+        compound.putInt("exposed_field", fields.indexOf(exposedField));
+        compound.putBoolean("isRunning", isRunning);
+        compound.putBoolean("isStatic", isStatic);
+        compound.putDouble("offset", anchorOffset);
+        compound.putLong("protocol", protocol);
+    }
+
+    @Override
+    protected void read(CompoundTag compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
+        if(clientPacket)return;
+        fields.forEach(e -> e.deserialize(compound.getCompound("field_" + e.type.name())));
+        try{
+            exposedField = fields.get(compound.getInt("exposed_field"));
+        }catch (IndexOutOfBoundsException e){
+            exposedField = fields.get(0);
+        }
+
+        isRunning = compound.getBoolean("isRunning");
+        isStatic = compound.getBoolean("isStatic");
+        anchorOffset = compound.getDouble("offset");
+        protocol = compound.getLong("protocol");
+
     }
 }

@@ -4,9 +4,13 @@ import com.simibubi.create.foundation.gui.AbstractSimiScreen;
 import com.simibubi.create.foundation.gui.AllIcons;
 import com.simibubi.create.foundation.gui.element.GuiGameElement;
 import com.simibubi.create.foundation.gui.widget.IconButton;
+import com.simibubi.create.foundation.gui.widget.Label;
 import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Lang;
+import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldRequestPacket;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
+import com.verr1.vscontrolcraft.registry.AllGuiLabels;
 import com.verr1.vscontrolcraft.registry.AllVSCCGuiTextures;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
@@ -15,50 +19,62 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 import java.awt.*;
 
+import static com.verr1.vscontrolcraft.registry.AllGuiLabels.*;
+import static net.minecraft.ChatFormatting.GRAY;
+
 public class PIDControllerScreen extends AbstractSimiScreen {
-    private final Component confirmLabel = Lang.text("Set Params").component();
 
-    private final Component cycleLabel = Lang.text("Cycle Mode If Applicable").component();
-
-    private final AllVSCCGuiTextures background = AllVSCCGuiTextures.SIMPLE_BACKGROUND;
+    protected final AllVSCCGuiTextures background = AllVSCCGuiTextures.SIMPLE_BACKGROUND;
 
 
-    private EditBox pField;
-    private EditBox dField;
-    private EditBox iField;
-    private EditBox vField;
-    private EditBox tField;
 
-    private EditBox pLabel;
-    private EditBox dLabel;
-    private EditBox iLabel;
-    private EditBox vLabel;
-    private EditBox tLabel;
+    protected EditBox pField;
+    protected EditBox dField;
+    protected EditBox iField;
+    protected EditBox vField;
+    protected EditBox tField;
 
-    private IconButton register;
-    private IconButton cycleMode;
+    protected Label pLabel;
+    protected Label dLabel;
+    protected Label iLabel;
+    protected Label vLabel;
+    protected Label tLabel;
 
-    private IconButton redstoneSettings;
+    protected IconButton register;
+    protected IconButton cycleMode;
 
-    private final double i;
-    private final double p;
-    private final double d;
-    private final double v;
-    private final double t;
-    private final PIDControllerType type;
-    private final BlockPos pos;
+    protected IconButton redstoneSettings;
 
-    public PIDControllerScreen(BlockPos entityPos, double p, double i, double d, double v, double t, PIDControllerType type) {
+    protected final double i;
+    protected final double p;
+    protected final double d;
+    protected final double v;
+    protected final double t;
+    protected final BlockPos pos;
+
+    protected int common_input_width = 40;
+    protected int common_input_height = 10;
+    protected int common_label_width = 50;
+    protected int common_label_height = 10;
+
+    protected int common_label_color = new Color(250, 250, 180).getRGB();
+
+    protected GridLayout totalLayout = new GridLayout(background.width, background.height);
+    protected GridLayout buttonLayout = new GridLayout(0, 0);
+    protected GridLayout controlValueLayout = new GridLayout(0, 0);
+    protected GridLayout statisticsLayout = new GridLayout(0, 0);
+
+    public PIDControllerScreen(BlockPos entityPos, double p, double i, double d, double v, double t) {
         pos = entityPos;
         this.p = p;
         this.i = i;
         this.d = d;
         this.v = v;
         this.t = t;
-        this.type = type;
     }
 
 
@@ -70,7 +86,7 @@ public class PIDControllerScreen extends AbstractSimiScreen {
 
         //layout.rowSpacing(4).columnSpacing(1);
 
-        GridLayout totalLayout = new GridLayout(background.width, background.height);
+
 
         totalLayout.setX(this.guiLeft + 4);
         totalLayout.setY(this.guiTop + 4);
@@ -82,13 +98,13 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         //layout.addChild(register, 5, 0);
         //layout.addChild(cycleMode, 6, 0);
 
-        GridLayout buttonLayout = new GridLayout(0, 0);
-        buttonLayout.addChild(cycleMode, 0, 1);
+
+        buttonLayout.addChild(cycleMode, 0, 2);
         buttonLayout.addChild(register, 0, 0);
-        buttonLayout.addChild(redstoneSettings, 0, 2);
+        buttonLayout.addChild(redstoneSettings, 0, 1);
         buttonLayout.columnSpacing(5);
 
-        GridLayout controlValueLayout = new GridLayout(0, 0);
+
         controlValueLayout.addChild(tLabel, 0, 0);
         controlValueLayout.addChild(tField, 0, 1);
         controlValueLayout.addChild(pLabel, 1, 0);
@@ -97,11 +113,12 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         controlValueLayout.addChild(iField, 2, 1);
         controlValueLayout.addChild(dLabel, 3, 0);
         controlValueLayout.addChild(dField, 3, 1);
-        controlValueLayout.rowSpacing(6);
+        controlValueLayout.rowSpacing(2).columnSpacing(3);
 
-        GridLayout statisticsLayout = new GridLayout(0, 0);
+
         statisticsLayout.addChild(vField, 0, 1);
         statisticsLayout.addChild(vLabel, 0, 0);
+        statisticsLayout.columnSpacing(3);
 
 
         // buttonLayout.defaultChildLayoutSetting().alignHorizontallyCenter().paddingLeft(13);
@@ -109,19 +126,14 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         totalLayout.addChild(controlValueLayout, 0, 0);
         totalLayout.addChild(buttonLayout, 2, 0);
 
-        totalLayout.rowSpacing(7).columnSpacing(18);
+        totalLayout.rowSpacing(2).columnSpacing(12);
 
         totalLayout.arrangeElements();
     }
 
     public void initWidgets(){
 
-        int common_input_width = 40;
-        int common_input_height = 10;
-        int common_label_width = 40;
-        int common_label_height = 10;
 
-        int common_label_color = new Color(250, 250, 180).getRGB();
 
         vField = new EditBox(font, 0, 0, common_input_width, common_input_height, Components.literal("Current Value"));
         vField.setTextColor(-1);
@@ -201,42 +213,26 @@ public class PIDControllerScreen extends AbstractSimiScreen {
 
 
 
-        if(type == PIDControllerType.SLIDER)cycleMode.visible = false;
+        pLabel = new Label(0, 0, ExposedFieldType.P.getComponent()).colored(common_label_color);
+        pLabel.text = ExposedFieldType.P.getComponent();
 
-
-        pLabel = new EditBox(font, 0, 0, common_label_width,common_label_height, Components.literal(""));
-        pLabel.setTextColorUneditable(common_label_color);
-        pLabel.setEditable(false);
-        pLabel.setBordered(false);
-        pLabel.setValue("P:");
         addRenderableWidget(pLabel);
 
-        iLabel = new EditBox(font, 0, 0, common_label_width,common_label_height, Components.literal(""));
-        iLabel.setTextColorUneditable(common_label_color);
-        iLabel.setEditable(false);
-        iLabel.setBordered(false);
-        iLabel.setValue("I:");
+        iLabel = new Label(0, 0, ExposedFieldType.I.getComponent()).colored(common_label_color);
+        iLabel.text = ExposedFieldType.I.getComponent();
         addRenderableWidget(iLabel);
 
-        dLabel = new EditBox(font, 0, 0, common_label_width,common_label_height, Components.literal(""));
-        dLabel.setTextColorUneditable(common_label_color);
-        dLabel.setEditable(false);
-        dLabel.setBordered(false);
-        dLabel.setValue("D:");
+        dLabel = new Label(0, 0, ExposedFieldType.D.getComponent()).colored(common_label_color);
+        dLabel.text = ExposedFieldType.D.getComponent();
         addRenderableWidget(dLabel);
 
-        tLabel = new EditBox(font, 0, 0, common_label_width,common_label_height, Components.literal(""));
-        tLabel.setTextColorUneditable(common_label_color);
-        tLabel.setEditable(false);
-        tLabel.setBordered(false);
-        tLabel.setValue("Target:");
+        tLabel = new Label(0, 0, ExposedFieldType.TARGET.getComponent()).colored(common_label_color);
+        tLabel.text = ExposedFieldType.TARGET.getComponent();
+
         addRenderableWidget(tLabel);
 
-        vLabel = new EditBox(font, 0, 0, common_label_width,common_label_height, Components.literal(""));
-        vLabel.setTextColorUneditable(common_label_color);
-        vLabel.setEditable(false);
-        vLabel.setBordered(false);
-        vLabel.setValue("value:");
+        vLabel = new Label(0, 0, ExposedFieldType.VALUE.getComponent()).colored(common_label_color);
+        vLabel.text = ExposedFieldType.VALUE.getComponent();
         addRenderableWidget(vLabel);
 
     }
@@ -293,12 +289,18 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         background.render(graphics, guiLeft, guiTop);
         graphics.drawCenteredString(font, title, x + (background.width - 8) / 2, y + 3, 0xFFFFFF);
 
+        ItemStack renderedItem = renderedItem();
+        if(renderedItem == null)return;
 
-
-        GuiGameElement.of(type.asItem()).scale(3)
+        GuiGameElement.of(renderedItem).scale(3)
                 .at(x, y, 0)
                 .render(graphics);
 
 
     }
+
+    protected ItemStack renderedItem(){
+        return null;
+    }
+
 }

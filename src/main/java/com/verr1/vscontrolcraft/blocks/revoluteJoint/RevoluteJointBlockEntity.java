@@ -71,7 +71,7 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
     @Override
     public void adjust() {
         setAdjustment(getHingeLevel().next());
-        syncToClient();
+        // syncToClient();
     }
 
     @Override
@@ -86,9 +86,14 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
 
 
     void syncToClient(){
+        if(level.isClientSide)return;
+        // setChanged();
+
         AllPackets
                 .getChannel()
                 .send(PacketDistributor.ALL.noArg(),new HingeSyncClientPacket(getBlockPos(), getAdjustment(), isFlipped()));
+
+
     }
 
     private Vector3d getHingeConnectorPosJOML() {
@@ -171,7 +176,7 @@ public class RevoluteJointBlockEntity extends ShipConnectorBlockEntity implement
     @Override
     public void flip() {
         setFlipped(!isFlipped());
-        syncToClient();
+        // syncToClient();  // no need for blockstate update
     }
 
     @Override

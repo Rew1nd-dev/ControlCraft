@@ -10,6 +10,7 @@ import com.verr1.vscontrolcraft.base.Servo.PIDControllerOpenScreenPacket;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerType;
 import com.verr1.vscontrolcraft.blocks.annihilator.AnnihilatorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlockEntity;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.core.BlockPos;
@@ -51,18 +52,7 @@ public class ServoMotorBlock extends DirectionalKineticBlock implements
         return state.getValue(FACING).getOpposite() == face;
     }
 
-    protected void displayScreen(AbstractServoMotor entity, Player player){
 
-        double t = entity.getControllerInfoHolder().getTarget();
-        double v = entity.getControllerInfoHolder().getValue();
-        PID pidParams = entity.getControllerInfoHolder().getPIDParams();
-
-        AllPackets.sendToPlayer(
-                new PIDControllerOpenScreenPacket(pidParams, v, t, entity.getBlockPos(), PIDControllerType.SERVO),
-                ((ServerPlayer)player)
-        );
-
-    }
 
     @Override
     public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
@@ -78,7 +68,7 @@ public class ServoMotorBlock extends DirectionalKineticBlock implements
         if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty() && player.isShiftKeyDown()) {
             withBlockEntityDo(worldIn, pos, ServoMotorBlockEntity::setAssembleNextTick);
         }else if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
-            withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
+            withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
         }
         return InteractionResult.PASS;
     }

@@ -11,6 +11,7 @@ import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -97,5 +98,21 @@ public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
             airResistance = packet.getDoubles().get(0);
             extraGravity = packet.getDoubles().get(1);
         }
+    }
+
+    @Override
+    protected void write(CompoundTag compound, boolean clientPacket) {
+        super.write(compound, clientPacket);
+        if(clientPacket)return;
+        compound.putDouble("extra_gravity", extraGravity);
+        compound.putDouble("air_resistance", airResistance);
+    }
+
+    @Override
+    protected void read(CompoundTag compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
+        if(clientPacket)return;
+        extraGravity = compound.getDouble("extra_gravity");
+        airResistance = compound.getDouble("air_resistance");
     }
 }

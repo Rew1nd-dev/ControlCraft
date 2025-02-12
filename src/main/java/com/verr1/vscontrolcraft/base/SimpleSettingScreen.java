@@ -4,6 +4,7 @@ import com.simibubi.create.foundation.gui.AbstractSimiScreen;
 import com.simibubi.create.foundation.gui.AllIcons;
 import com.simibubi.create.foundation.gui.element.GuiGameElement;
 import com.simibubi.create.foundation.gui.widget.IconButton;
+import com.simibubi.create.foundation.gui.widget.Label;
 import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldRequestPacket;
 import com.verr1.vscontrolcraft.blocks.terminal.SmallCheckbox;
 import com.verr1.vscontrolcraft.registry.AllPackets;
@@ -23,15 +24,15 @@ import java.util.function.Predicate;
 
 public abstract class SimpleSettingScreen extends AbstractSimiScreen {
 
-    private final AllVSCCGuiTextures background = AllVSCCGuiTextures.SIMPLE_BACKGROUND_QUARTER;
+    protected final AllVSCCGuiTextures background = AllVSCCGuiTextures.SIMPLE_BACKGROUND_QUARTER;
 
-    private IconButton register;
-    private IconButton redstoneSettings;
+    protected IconButton register;
+    protected IconButton redstoneSettings;
 
     // TODO: Wrap these two types, otherwise it's very easy to crash things
     protected final List<SmallCheckbox> bFields = new ArrayList<>();
     protected final List<EditBox> iFields = new ArrayList<>(); // inputs
-    protected final List<EditBox> tFields = new ArrayList<>(); // tags
+    protected final List<Label> tFields = new ArrayList<>(); // tags
     protected int labelWidth = 50;
     protected int lineHeight = 12;
     protected int fieldWidth = 40;
@@ -39,16 +40,12 @@ public abstract class SimpleSettingScreen extends AbstractSimiScreen {
     protected int labelColor = new Color(250, 250, 180).getRGB();
 
 
-    public SmallCheckbox addBooleanFieldWithLabel(String label){
+    public SmallCheckbox addBooleanFieldWithLabel(Component label){
         var newI = new SmallCheckbox(0, 0, fieldWidth, lineHeight, Component.literal(""), false);
-        var newT = new EditBox(font, 0, 0, labelWidth, lineHeight, Component.literal(""));
+        var newT = new Label(0, 0, label).colored(labelColor);
 
+        newT.text = label;
 
-        newT.setBordered(false);
-        newT.setMaxLength(labelWidth);
-        newT.setEditable(false);
-        newT.setValue(label);
-        newT.setTextColorUneditable(labelColor);
 
         addRenderableWidget(newI);
         addRenderableWidget(newT);
@@ -59,20 +56,16 @@ public abstract class SimpleSettingScreen extends AbstractSimiScreen {
         return newI;
     }
 
-    public EditBox addNumericFieldWithLabel(String label, Predicate<String> filter){
+    public EditBox addNumericFieldWithLabel(Component label, Predicate<String> filter){
         var newI = new EditBox(font, 0, 0, fieldWidth, lineHeight, Component.literal(""));
-        var newT = new EditBox(font, 0, 0, labelWidth, lineHeight, Component.literal(""));
+        var newT = new Label(0, 0, label).colored(labelColor);
 
         newI.setBordered(true);
         newI.setMaxLength(fieldWidth);
         newI.setFilter(filter);
         newI.setEditable(true);
 
-        newT.setBordered(false);
-        newT.setMaxLength(labelWidth);
-        newT.setEditable(false);
-        newT.setValue(label);
-        newT.setTextColorUneditable(labelColor);
+        newT.text = label;
 
         addRenderableWidget(newI);
         addRenderableWidget(newT);

@@ -46,7 +46,7 @@ public class PivotJointBlockEntity extends ShipConnectorBlockEntity implements
     @Override
     public void adjust() {
         setAdjustment(getHingeLevel().next());
-        syncToClient();
+        // syncToClient();
     }
 
     public Direction getJointDirection(){

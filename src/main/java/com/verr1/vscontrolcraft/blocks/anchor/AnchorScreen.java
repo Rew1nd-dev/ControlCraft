@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.blocks.anchor;
 
 import com.verr1.vscontrolcraft.base.SimpleSettingScreen;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllBlocks;
@@ -26,13 +27,18 @@ public class AnchorScreen extends SimpleSettingScreen {
 
     @Override
     public void startWindow() {
-        addNumericFieldWithLabel("Air Resist", Util::tryParseDoubleFilter)
+        addNumericFieldWithLabel(ExposedFieldType.AIR_RESISTANCE.getComponent(), Util::tryParseDoubleFilter)
                 .setValue(String.format("%.4f", airResistance)); // iFields[0]
-        addNumericFieldWithLabel("Extra G", Util::tryParseDoubleFilter)
+        addNumericFieldWithLabel(ExposedFieldType.EXTRA_GRAVITY.getComponent(), Util::tryParseDoubleFilter)
                 .setValue(String.format("%.4f", extraGravity));    // iFields[1]
 
     }
 
+    @Override
+    public void init() {
+        super.init();
+        redstoneSettings.visible = false;
+    }
 
     public void register() {
         var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING)

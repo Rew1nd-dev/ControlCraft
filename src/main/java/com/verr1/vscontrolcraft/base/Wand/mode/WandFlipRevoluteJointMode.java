@@ -2,6 +2,7 @@ package com.verr1.vscontrolcraft.base.Wand.mode;
 
 import com.jozufozu.flywheel.util.Color;
 import com.verr1.vscontrolcraft.base.Hinge.packets.HingeFlipPacket;
+import com.verr1.vscontrolcraft.base.Wand.ClientWand;
 import com.verr1.vscontrolcraft.base.Wand.IWandMode;
 import com.verr1.vscontrolcraft.base.Wand.WandSelection;
 import com.verr1.vscontrolcraft.base.Wand.mode.base.WandAbstractMultipleSelectionMode;
@@ -48,6 +49,7 @@ public class WandFlipRevoluteJointMode extends WandAbstractMultipleSelectionMode
 
     @Override
     protected void tick() {
+        if(!ClientWand.isClientWandInHand() && !ClientWand.isWrenchInHand())return;
         if(WandRenderer.lookingAt() instanceof RevoluteJointBlockEntity rvl){
             WandRenderer.drawOutline(rvl.getBlockPos(), rvl.getJointDirection(), Color.RED.getRGB(), "rvl_joint_dir");
         }

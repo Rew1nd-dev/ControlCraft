@@ -2,6 +2,7 @@ package com.verr1.vscontrolcraft.blocks.chunkLoader;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.verr1.vscontrolcraft.Config;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -19,8 +20,11 @@ public class ChunkLoaderBlockEntity extends SmartBlockEntity {
     public  static final ConcurrentHashMap<ChunkLevelPos, Integer> commonLevelChunkHolders = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Long, Integer> selfChunkDisclaimTicks = new ConcurrentHashMap<>();
 
+    private int RADIUS = 2;
+
     public ChunkLoaderBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        RADIUS = Config.ChunkLoaderRadius;
     }
 
     @Override
@@ -37,8 +41,8 @@ public class ChunkLoaderBlockEntity extends SmartBlockEntity {
                 (int) shipWorldPosition.y(),
                 (int) shipWorldPosition.z());
 
-        for(int i = -2; i <= 2; ++i) {
-            for(int j = -2; j <= 2; ++j) {
+        for(int i = -RADIUS; i <= RADIUS; ++i) {
+            for(int j = -RADIUS; j <= RADIUS; ++j) {
                 ChunkPos resetChunkPos = new ChunkPos(chunkBlockPos.offset(
                         i * 16,
                         0,

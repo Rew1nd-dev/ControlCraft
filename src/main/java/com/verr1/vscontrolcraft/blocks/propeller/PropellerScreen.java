@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.blocks.propeller;
 
 import com.verr1.vscontrolcraft.base.SimpleSettingScreen;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllBlocks;
@@ -31,8 +32,14 @@ public class PropellerScreen extends SimpleSettingScreen {
 
     @Override
     public void startWindow() {
-        addNumericFieldWithLabel("T ratio", Util::tryParseDoubleFilter).setValue(String.format("%.1f", torque_ratio));
-        addNumericFieldWithLabel("F ratio", Util::tryParseDoubleFilter).setValue(String.format("%.1f", thrust_ratio));
+        addNumericFieldWithLabel(ExposedFieldType.TORQUE_RATIO.getComponent(), Util::tryParseDoubleFilter).setValue(String.format("%.1f", torque_ratio));
+        addNumericFieldWithLabel(ExposedFieldType.THRUST_RATIO.getComponent(), Util::tryParseDoubleFilter).setValue(String.format("%.1f", thrust_ratio));
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        redstoneSettings.visible = false;
     }
 
     public void register() {

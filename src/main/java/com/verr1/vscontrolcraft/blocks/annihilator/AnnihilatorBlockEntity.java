@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.blocks.annihilator;
 
+import com.verr1.vscontrolcraft.Config;
 import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -18,6 +19,7 @@ public class AnnihilatorBlockEntity extends OnShipDirectinonalBlockEntity {
     public void annihilate(){
         if(level.isClientSide)return;
         if(!isOnServerShip())return;
+        if(!Config.EnableAnnihilator)return;
         DeferralExecutor.executeLater(
                 () -> {
                     ServerShip ship = getServerShipOn();

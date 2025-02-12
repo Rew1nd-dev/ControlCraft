@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.blocks.spatialAnchor;
 
 import com.verr1.vscontrolcraft.base.SimpleSettingScreen;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllBlocks;
@@ -29,10 +30,10 @@ public class SpatialScreen extends SimpleSettingScreen {
 
     @Override
     public void startWindow() {
-        addNumericFieldWithLabel("Distance", Util::tryParseDoubleFilter).setValue(String.format("%.4f", offset));
-        addNumericFieldWithLabel("Channel", Util::tryParseLongFilter).setValue(protocol + "");
-        addBooleanFieldWithLabel("isRunning").setSelected(isRunning);
-        addBooleanFieldWithLabel("isStatic").setSelected(isStatic);
+        addNumericFieldWithLabel(ExposedFieldType.OFFSET.getComponent(), Util::tryParseDoubleFilter).setValue(String.format("%.4f", offset));
+        addNumericFieldWithLabel(ExposedFieldType.PROTOCOL.getComponent(), Util::tryParseLongFilter).setValue(protocol + "");
+        addBooleanFieldWithLabel(ExposedFieldType.IS_RUNNING.getComponent()).setSelected(isRunning);
+        addBooleanFieldWithLabel(ExposedFieldType.IS_STATIC.getComponent()).setSelected(isStatic);
 
     }
 

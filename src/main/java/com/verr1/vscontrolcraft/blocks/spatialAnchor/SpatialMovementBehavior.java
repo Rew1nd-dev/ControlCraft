@@ -41,8 +41,8 @@ public class SpatialMovementBehavior implements MovementBehaviour {
         return VSMathUtils.getServerShipID(BlockPos.containing(p), level);
     }
 
-    public long getProtocol(){
-        return 0L;
+    public long getProtocol(MovementContext context){
+        return context.blockEntityData.getLong("protocol");
     }
 
     public String getDimensionID(ServerLevel level){
@@ -65,7 +65,7 @@ public class SpatialMovementBehavior implements MovementBehaviour {
                 getForward(context.state),
                 getServerShipID(context.position, (ServerLevel)context.world),
                 getDimensionID((ServerLevel) context.world),
-                getProtocol(),
+                getProtocol(context),
                 getOriginalBlockPos(context),
                 context.rotation,
                 context.position
@@ -80,6 +80,7 @@ public class SpatialMovementBehavior implements MovementBehaviour {
     @Override
     public void tick(MovementContext context) {
         if(context.world.isClientSide)return;
+        if(!isActive(context))return;
         activate(context);
     }
 }

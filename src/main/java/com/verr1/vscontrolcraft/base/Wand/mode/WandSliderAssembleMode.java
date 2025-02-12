@@ -4,6 +4,7 @@ import com.verr1.vscontrolcraft.base.Servo.ICanBruteDirectionalConnect;
 import com.verr1.vscontrolcraft.base.Wand.IWandMode;
 import com.verr1.vscontrolcraft.base.Wand.WandSelection;
 import com.verr1.vscontrolcraft.base.Wand.mode.base.WandAbstractTripleSelectionMode;
+import com.verr1.vscontrolcraft.base.Wand.render.WandModesType;
 import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import com.verr1.vscontrolcraft.blocks.revoluteJoint.DirectionalAssemblePacket;
 import com.verr1.vscontrolcraft.blocks.slider.SliderControllerBlock;
@@ -110,19 +111,7 @@ public class WandSliderAssembleMode extends WandAbstractTripleSelectionMode {
 
     @Override
     public String tickCallBackInfo() {
-        if(state == State.TO_SELECT_X){
-            return "please select joint motor";
-        }
-        if(state == State.TO_SELECT_Y){
-            return "select the face you want to face towards motor face (RED)";
-        }
-        if(state == State.TO_SELECT_Z){
-            return "select the face whose direction is to set parallel with rotation direction (YELLOW)";
-        }
-        if(state == State.TO_CONFIRM){
-            return "right click to confirm assembly";
-        }
-        return "";
+        return WandModesType.SLIDER.tickCallBackInfo(state).getString();
     }
 
     @Override

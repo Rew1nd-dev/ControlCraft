@@ -30,6 +30,7 @@ import com.verr1.vscontrolcraft.blocks.recevier.ReceiverBlock;
 import com.verr1.vscontrolcraft.blocks.transmitter.TransmitterBlock;
 import com.verr1.vscontrolcraft.blocks.propeller.PropellerBlock;
 import com.verr1.vscontrolcraft.blocks.propellerController.PropellerControllerBlock;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.material.MapColor;
 
 
@@ -87,6 +88,7 @@ public class AllBlocks {
             )
             .item()
             .transform(customItemModel())
+            .lang("Peripheral Proxy")
             .register();
 
 
@@ -99,6 +101,7 @@ public class AllBlocks {
             )
             .item()
             .transform(customItemModel())
+            .lang("Peripheral Interface")
             .register();
 
     public static final BlockEntry<WingControllerBlock> WING_CONTROLLER_BLOCK = REGISTRATE
@@ -110,6 +113,7 @@ public class AllBlocks {
             )
             .item()
             .transform(customItemModel())
+            .lang("Flap Bearing")
             .register();
 
     public static final BlockEntry<SpinalyzerBlock> SPINALYZER_BLOCK = REGISTRATE
@@ -142,7 +146,9 @@ public class AllBlocks {
                     BlockStateGen.directionalBlockProvider(true)
             )
             .item()
+            .properties(p -> p.rarity(Rarity.RARE))
             .transform(customItemModel())
+            .lang("Servo Motor")
             .register();
 
     public static final BlockEntry<MagnetBlock> MAGNET_BLOCK = REGISTRATE
@@ -154,6 +160,7 @@ public class AllBlocks {
             )
             .item()
             .transform(customItemModel())
+            .lang("Magnet")
             .register();
 
     public static final BlockEntry<JointMotorBlock> JOINT_MOTOR_BLOCK = REGISTRATE
@@ -164,7 +171,9 @@ public class AllBlocks {
                     BlockStateGen.directionalAxisBlockProvider()
             )
             .item()
+            .properties(p -> p.rarity(Rarity.RARE))
             .transform(customItemModel())
+            .lang("Joint Motor")
             .register();
 
     public static final BlockEntry<SphericalHingeBlock> SPHERE_HINGE_BLOCK = REGISTRATE
@@ -176,6 +185,7 @@ public class AllBlocks {
             )
             .item()
             .transform(customItemModel())
+            .lang("Spherical Hinge")
             .register();
 
     public static final BlockEntry<RevoluteJointBlock> REVOLUTE_JOINT_BLOCK = REGISTRATE
@@ -187,6 +197,7 @@ public class AllBlocks {
             )
             .item()
             .transform(customItemModel())
+            .lang("Revolute Hinge")
             .register();
 
     public static final BlockEntry<PivotJointBlock> PIVOT_JOINT_BLOCK = REGISTRATE
@@ -198,6 +209,7 @@ public class AllBlocks {
             )
             .item()
             .transform(customItemModel())
+            .lang("Pivot Hinge")
             .register();
 
     public static final BlockEntry<SliderControllerBlock> SLIDER_CONTROLLER_BLOCK = REGISTRATE
@@ -208,7 +220,9 @@ public class AllBlocks {
                     BlockStateGen.directionalBlockProvider(true)
             )
             .item()
+            .properties(p -> p.rarity(Rarity.EPIC))
             .transform(customItemModel())
+            .lang("Physical Piston")
             .register();
 
     public static final BlockEntry<AnchorBlock> ANCHOR_BLOCK = REGISTRATE
@@ -219,7 +233,9 @@ public class AllBlocks {
             )
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .item()
+            .properties(p -> p.rarity(Rarity.EPIC))
             .transform(customItemModel())
+            .lang("Gravitational Anchor")
             .register();
 
     public static final BlockEntry<AnnihilatorBlock> ANNIHILATOR_BLOCK = REGISTRATE
@@ -231,6 +247,7 @@ public class AllBlocks {
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .item()
             .transform(customItemModel())
+            .lang("Forget-Me-Not")
             .register();
 
     public static final BlockEntry<JetBlock> JET_BLOCK = REGISTRATE
@@ -242,6 +259,7 @@ public class AllBlocks {
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .item()
             .transform(customItemModel())
+            .lang("Jet Engine")
             .register();
 
     public static final BlockEntry<JetRudderBlock> JET_RUDDER_BLOCK = REGISTRATE
@@ -253,6 +271,7 @@ public class AllBlocks {
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .item()
             .transform(customItemModel())
+            .lang("Jet Rudder")
             .register();
 
     public static final BlockEntry<SpatialAnchorBlock> SPATIAL_ANCHOR_BLOCK = REGISTRATE
@@ -264,7 +283,9 @@ public class AllBlocks {
             .onRegister(movementBehaviour(new SpatialMovementBehavior()))
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .item()
+            .properties(p -> p.rarity(Rarity.EPIC))
             .transform(customItemModel())
+            .lang("Spatial Anchor")
             .register();
 
     public static final BlockEntry<TerminalBlock> TERMINAL_BLOCK = REGISTRATE
@@ -276,6 +297,7 @@ public class AllBlocks {
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .item()
             .transform(customItemModel())
+            .lang("Wireless Redstone Terminal")
             .register();
 
     public static void register(){

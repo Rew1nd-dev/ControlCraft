@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.base.UltraTerminal;
 
+import net.minecraft.nbt.CompoundTag;
 import org.joml.Vector2d;
 
 import java.util.function.Consumer;
@@ -25,6 +26,24 @@ public class ExposedFieldWrapper {
         this.field = field;
         this.min_max = new Vector2d(0, 1);
         this.type = type;
+    }
+
+    public ExposedFieldWrapper withSuggestedRange(double min, double max){
+        min_max = new Vector2d(min, max);
+        return this;
+    }
+
+    public CompoundTag serialize(){
+        CompoundTag tag = new CompoundTag();
+        tag.putDouble("min", min_max.x);
+        tag.putDouble("max", min_max.y);
+        tag.putString("type", type.name());
+        return tag;
+    }
+
+    public void deserialize(CompoundTag tag){
+        min_max = new Vector2d(tag.getDouble("min"), tag.getDouble("max"));
+        type = ExposedFieldType.valueOf(tag.getString("type"));
     }
 
 

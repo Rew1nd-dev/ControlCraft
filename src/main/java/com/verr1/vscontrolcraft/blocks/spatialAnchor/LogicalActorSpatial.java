@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.blocks.spatialAnchor;
 
+import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
@@ -34,6 +35,9 @@ public record LogicalActorSpatial(
         return true;
     }
 
+
+
+
     @Override
     public Quaterniondc qBase() {
         Quaterniondc q_ship = VSMathUtils.getQuaternion(new LevelPos(pos, level));
@@ -42,8 +46,24 @@ public record LogicalActorSpatial(
         Vector3dc ry = wrapper.apply(new Vector3d(0, 1, 0));
         Vector3dc rz = wrapper.apply(new Vector3d(0, 0, 1));
         Matrix3d a2s = new Matrix3d().setColumn(0, rx).setColumn(1, ry).setColumn(2, rz);
+        /*
+         *   Known Issue:
+         *   m2q function calculates the extra rotation which caused by rotating contraptions, It returns the same quaternion
+         *   of the same rotation matrix
+         *
+         *   However, In Valkyrie-Skies physics system, a ship rotating by a given axis may have 2 different quaternion even of a
+         *   SAME pose, when rotated by 360 degrees, the quaternion will become negative of the previous round
+         *
+         *   This will cause dynamic spatial anchors do unnecessary extra rotation when trying to align with anchors on a contraption
+         *   In Some Angles
+         *
+         *   I won't try to fix this, so try not to use spatial anchors on rotating contraption,
+         *   unless you don't mind the extra rotation :)
+         *
+         * */
         Quaterniondc q_extra = VSMathUtils.m2q(a2s.transpose());
-        return q_ship.mul(q_extra, new Quaterniond());
+        // ControlCraft.LOGGER.info("q_extra: " + q_extra);
+        return q_extra.mul(q_ship, new Quaterniond());
     }
 
 

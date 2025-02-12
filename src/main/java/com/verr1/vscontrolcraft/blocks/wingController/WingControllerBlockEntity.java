@@ -327,14 +327,14 @@ public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity imp
     public static class WingControllerScrollValueBehavior extends ScrollValueBehaviour{
 
         public WingControllerScrollValueBehavior(SmartBlockEntity be) {
-            super(Lang.text("Rotational Angle").component(), be, new WingControllerValueBox());
+            super(Components.translatable(ControlCraft.MODID + ".screen.labels.field.angle"), be, new WingControllerValueBox());
         }
 
         @Override
         public ValueSettingsBoard createBoard(Player player, BlockHitResult hitResult) {
             ImmutableList<Component> rows = ImmutableList.of(Components.literal("\u27f3")
                             .withStyle(ChatFormatting.BOLD),
-                    Components.literal("\u27f2")
+                    Components.literal("⟲")
                             .withStyle(ChatFormatting.BOLD));
             return new ValueSettingsBoard(label, 180, 45, rows, new ValueSettingsFormatter(this::formatValue));
         }

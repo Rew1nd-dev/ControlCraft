@@ -2,12 +2,14 @@ package com.verr1.vscontrolcraft.base.Wand.mode;
 
 import com.jozufozu.flywheel.util.Color;
 import com.verr1.vscontrolcraft.base.Hinge.packets.HingeBruteConnectPacket;
+import com.verr1.vscontrolcraft.base.Wand.ClientWand;
 import com.verr1.vscontrolcraft.base.Wand.WandSelection;
 import com.verr1.vscontrolcraft.base.Wand.mode.base.WandAbstractDualSelectionMode;
 import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlockEntity;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -67,7 +69,7 @@ public class WandHingeConnectionMode extends WandAbstractDualSelectionMode {
     public void tick() {
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
-
+        if(!ClientWand.isClientWandInHand())return;
         if(WandRenderer.lookingAt() instanceof RevoluteJointBlockEntity rvl){
             WandRenderer.drawOutline(rvl.getBlockPos(), rvl.getJointDirection(), Color.RED.getRGB(), "rvl_joint_dir");
         }

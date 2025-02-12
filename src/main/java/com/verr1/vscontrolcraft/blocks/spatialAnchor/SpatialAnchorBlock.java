@@ -3,6 +3,7 @@ package com.verr1.vscontrolcraft.blocks.spatialAnchor;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
+import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlockEntity;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.core.BlockPos;
@@ -11,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -50,7 +52,15 @@ public class SpatialAnchorBlock extends DirectionalAxisKineticBlock implements
         return false;
     }
 
-
+    @Override
+    public InteractionResult onWrenched(BlockState state, UseOnContext context) {
+        if(context.getClickedFace() != state.getValue(FACING))return super.onWrenched(state, context);
+        if(state.getValue(FLIPPED)){
+            super.onWrenched(state, context);
+        }
+        withBlockEntityDo(context.getLevel(), context.getClickedPos(), SpatialAnchorBlockEntity::flip);
+        return InteractionResult.PASS;
+    }
 
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,

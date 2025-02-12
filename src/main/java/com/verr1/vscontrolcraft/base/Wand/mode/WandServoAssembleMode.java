@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.base.Wand.mode;
 
 import com.verr1.vscontrolcraft.base.Wand.mode.base.WandAbstractDualSelectionMode;
+import com.verr1.vscontrolcraft.base.Wand.render.WandModesType;
 import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorBlockEntity;
 import com.verr1.vscontrolcraft.blocks.servoMotor.SimpleAssemblePacket;
@@ -71,16 +72,7 @@ public class WandServoAssembleMode extends WandAbstractDualSelectionMode {
 
     @Override
     public String tickCallBackInfo() {
-        if(state == State.TO_SELECT_X){
-            return "please select servo motor";
-        }
-        if(state == State.TO_SELECT_Y){
-            return "select the face you want to face towards motor face (RED)";
-        }
-        if(state == State.TO_CONFIRM){
-            return "right click to confirm assembly";
-        }
-        return "";
+        return WandModesType.SERVO.tickCallBackInfo(state).getString();
     }
 
     @Override

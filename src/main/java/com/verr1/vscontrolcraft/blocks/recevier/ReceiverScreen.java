@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.blocks.recevier;
 
 import com.verr1.vscontrolcraft.base.SimpleSettingScreen;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllBlocks;
@@ -28,14 +29,19 @@ public class ReceiverScreen extends SimpleSettingScreen {
 
     @Override
     public void startWindow() {
-        addNumericFieldWithLabel("Type: ", (s) -> true).setValue(receivedType);
-        addNumericFieldWithLabel("Name:", (s) -> true).setValue(receivedName);
-        addNumericFieldWithLabel("Channel:", Util::tryParseLongFilter).setValue(receivedProtocol + "");
+        addNumericFieldWithLabel(ExposedFieldType.TYPE.getComponent(), (s) -> true).setValue(receivedType);
+        addNumericFieldWithLabel(ExposedFieldType.NAME.getComponent(), (s) -> true).setValue(receivedName);
+        addNumericFieldWithLabel(ExposedFieldType.PROTOCOL.getComponent(), Util::tryParseLongFilter).setValue(receivedProtocol + "");
 
         iFields.get(0).setEditable(false);
         iFields.get(0).setBordered(false);
     }
 
+    @Override
+    public void init() {
+        super.init();
+        redstoneSettings.visible = false;
+    }
 
     @Override
     public void tick(){

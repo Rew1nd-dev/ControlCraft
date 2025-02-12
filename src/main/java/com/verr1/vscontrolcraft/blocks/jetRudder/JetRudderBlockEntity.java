@@ -106,6 +106,19 @@ public class JetRudderBlockEntity extends OnShipDirectinonalBlockEntity implemen
 
     }
 
+    @Override
+    public void lazyTick() {
+        super.lazyTick();
+        checkDrivenJet();
+    }
+
+    public void checkDrivenJet(){
+        if(level.isClientSide)return;
+        BlockPos jetPos = getBlockPos().relative(getDirection().getOpposite());
+        if(!(level.getExistingBlockEntity(jetPos) instanceof JetBlockEntity jet)){
+            setAnimatedAngles(0, 0, 0);
+        }
+    }
 
 
     public void tickParticles(){
@@ -117,6 +130,8 @@ public class JetRudderBlockEntity extends OnShipDirectinonalBlockEntity implemen
 
         Vector3d p_wc = Util.Vec3toVector3d(getBlockPos().getCenter()).fma(0.5, getDirectionJOML());
         Vector3d v_wc = dir.mul(Util.clamp1(targetThrust * 1e-3) * 3, new Vector3d());
+
+        if(v_wc.lengthSquared() < 1e-2)return;
 
         Vector3d extraVelocity = new Vector3d();
 

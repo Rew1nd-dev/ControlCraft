@@ -2,12 +2,14 @@ package com.verr1.vscontrolcraft;
 
 import com.mojang.logging.LogUtils;
 import com.simibubi.create.foundation.data.CreateRegistrate;
+import com.simibubi.create.infrastructure.data.CreateDatagen;
 import com.verr1.vscontrolcraft.registry.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -79,6 +81,9 @@ public class ControlCraft
         AllPackets.registerPackets();
         AllMenuTypes.register();
 
+
+        modEventBus.addListener(EventPriority.LOWEST, ControlCraftDataGen::gatherData);
+
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ControlCraftClient::clientInit);
 
         MinecraftForge.EVENT_BUS.register(this);
@@ -112,6 +117,7 @@ public class ControlCraft
         AllPackets.registerPackets();
         AllMenuTypes.register();
 
+        modEventBus.addListener(EventPriority.LOWEST, ControlCraftDataGen::gatherData);
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ControlCraftClient::clientInit);
 
         MinecraftForge.EVENT_BUS.register(this);

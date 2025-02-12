@@ -53,7 +53,9 @@ public class PropellerBlock extends DirectionalBlock implements IBE<PropellerBlo
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
                                  BlockHitResult hit){
         if(worldIn.isClientSide)return InteractionResult.PASS;
-        withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
+        if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
+            withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
+        }
         return InteractionResult.PASS;
     }
 

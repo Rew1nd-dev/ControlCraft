@@ -2,8 +2,10 @@ package com.verr1.vscontrolcraft.base.Servo;
 
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
+import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.Constrain.ConstrainCenter;
 import com.verr1.vscontrolcraft.base.Constrain.DataStructure.ConstrainKey;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
@@ -18,14 +20,17 @@ import com.verr1.vscontrolcraft.compat.valkyrienskies.servo.ServoMotorForceInduc
 import com.verr1.vscontrolcraft.network.IPacketHandler;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
+import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -73,6 +78,16 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     public SynchronizedField<Double> controlTorque = new SynchronizedField<>(0.0);
 
     private boolean isLocked = false;
+
+    public void setOffset(double offset) {
+        this.offset = offset;
+    }
+
+    public double getOffset() {
+        return offset;
+    }
+
+    private double offset = 0;
 
     private final List<ExposedFieldWrapper> fields = List.of(
             new ExposedFieldWrapper(
@@ -380,7 +395,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 ownerShipID,
                 assemShipID,
                 1.0E-10,
-                new Vector3d(asmPos_Own).fma(1, ownDir),
+                new Vector3d(asmPos_Own).fma(1 + offset, ownDir),
                 new Vector3d(asmPos_Asm).fma(-1, asmDir), // This is the opposite with the case of assemble()
                 1.0E10,
                 0.0
@@ -391,7 +406,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 assemShipID,
                 1.0E-10,
                 new Vector3d(asmPos_Own).fma(-1, ownDir),
-                new Vector3d(asmPos_Asm).fma(1, asmDir), // This is the opposite with the case of assemble()
+                new Vector3d(asmPos_Asm).fma(1 + offset, asmDir), // This is the opposite with the case of assemble()
                 1.0E10,
                 0.0
         );
@@ -419,12 +434,12 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 attach_1,
                 shipWorldCore
         );
-
         ConstrainCenter.createOrReplaceNewConstrain(
                 new ConstrainKey(getBlockPos(), getDimensionID(), "attach_2", isGrounded, false, false),
                 attach_2,
                 shipWorldCore
         );
+
     }
 
     @Override
@@ -504,7 +519,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 ownerShipID,
                 assembledShipID,
                 1.0E-10,
-                new Vector3d(asmPos_Own).fma(1, direction),
+                new Vector3d(asmPos_Own).fma(1 + offset, direction),
                 new Vector3d(asmPos_Asm).fma(1, direction),
                 1.0E10,
                 0.0
@@ -515,7 +530,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 assembledShipID,
                 1.0E-10,
                 new Vector3d(asmPos_Own).fma(-1, direction),
-                new Vector3d(asmPos_Asm).fma(-1, direction),
+                new Vector3d(asmPos_Asm).fma(-(1 + offset), direction),
                 1.0E10,
                 0.0
         );
@@ -553,9 +568,9 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        Lang.text("Motor Statistic")
-                .style(GRAY)
-                .forGoggles(tooltip);
+        var c =  Components.translatable(ControlCraft.MODID, "title.tooltip.motor").withStyle(GRAY);
+
+        tooltip.add(c);
 
         float angle = (float) Math.toDegrees(animatedAngle);
 
@@ -563,8 +578,8 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 .text("°")
                 .style(ChatFormatting.AQUA)
                 .space()
-                .add(Lang.text("current degree")
-                        .style(ChatFormatting.DARK_GRAY))
+                .add(
+                        Components.translatable(ControlCraft.MODID, "generic.unit.degree").withStyle(GRAY))
                 .forGoggles(tooltip, 1);
         return true;
     }
@@ -596,9 +611,42 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         }
     }
 
+    @Override
+    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.SETTING){
+            double offset = packet.getDoubles().get(0);
+            setOffset(offset);
+        }
+    }
+
     public float getAnimatedAngle(float partialTick) {
         return animatedLerpedAngle.getValue(partialTick);
     }
+
+    @Override
+    protected void write(CompoundTag tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
+        if(clientPacket)return;
+        fields.forEach(e -> tag.put("field_" + e.type.name(), e.serialize()));
+        tag.putInt("exposedField", fields.indexOf(exposedField));
+        tag.put("controller", getControllerInfoHolder().serialize());
+
+    }
+
+    @Override
+    protected void read(CompoundTag tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        if(clientPacket)return;
+
+        fields.forEach(f -> f.deserialize(tag.getCompound("field_" + f.type.name())));
+        try{
+            exposedField = fields.get(tag.getInt("exposed_field"));
+        }catch (IndexOutOfBoundsException e){
+            exposedField = fields.get(0);
+        }
+        getControllerInfoHolder().deserialize(tag.getCompound("controller"));
+    }
+
 }
 
 

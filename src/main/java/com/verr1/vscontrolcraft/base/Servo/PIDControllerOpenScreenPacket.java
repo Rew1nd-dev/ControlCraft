@@ -66,7 +66,7 @@ public class PIDControllerOpenScreenPacket extends SimplePacketBase {
 
             if(pos == null)return;
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                ScreenOpener.open(new PIDControllerScreen(pos, p, i, d, value, target, type));
+                ScreenOpener.open(new PIDControllerScreen(pos, p, i, d, value, target));
             });
 
         });

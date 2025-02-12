@@ -4,8 +4,10 @@ import com.verr1.vscontrolcraft.base.Hinge.packets.DestroyConstrainPacket;
 import com.verr1.vscontrolcraft.base.Wand.IWandMode;
 import com.verr1.vscontrolcraft.base.Wand.WandSelection;
 import com.verr1.vscontrolcraft.base.Wand.mode.base.WandAbstractMultipleSelectionMode;
+import com.verr1.vscontrolcraft.base.Wand.render.WandModesType;
 import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import com.verr1.vscontrolcraft.registry.AllPackets;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -48,6 +50,6 @@ public class WandDestroyConstrainMode extends WandAbstractMultipleSelectionMode 
 
     @Override
     public String tickCallBackInfo() {
-        return "right click to destroy constrain";
-    }
+        return WandModesType.DESTROY.tickCallBackInfo(state).toString();
+    }  //"right click to destroy constrain"
 }

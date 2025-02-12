@@ -3,7 +3,10 @@ package com.verr1.vscontrolcraft.blocks.terminal;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.gui.menu.AbstractSimiContainerScreen;
 import com.simibubi.create.foundation.gui.widget.IconButton;
+import com.simibubi.create.foundation.gui.widget.Label;
 import com.simibubi.create.foundation.utility.Components;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
+import com.verr1.vscontrolcraft.registry.AllGuiLabels;
 import com.verr1.vscontrolcraft.registry.AllVSCCGuiTextures;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
@@ -71,13 +74,13 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
                 i,
                 row_data.get(i).min_max().x(),
                 row_data.get(i).min_max().y(),
-                row_data.get(i).name(),
+                row_data.get(i).type(),
                 row_data.get(i).isBoolean()
             );
         }
         layout.setX(leftPos + 8 + 40);
         layout.setY(topPos + 8 + 4);
-        layout.rowSpacing(8).columnSpacing(3);
+        layout.rowSpacing(8).columnSpacing(6);
         layout.arrangeElements();
         /*
         confirmButton = new IconButton(x + background.width + 160, y + background.height - 20, AllIcons.I_CONFIRM);
@@ -130,33 +133,23 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
         AllPackets.getChannel().sendToServer(packet);
     }
 
-    public void initRow(int i, double row_min, double row_max, String row_name, boolean isBoolean){
+    public void initRow(int i, double row_min, double row_max, ExposedFieldType row_type, boolean isBoolean){
 
         int len_y = 10;
         int input_len_x = 30;
         int title_len_x = 45;
-        int min_max_len_x = 20;
+        int min_max_len_x = 30;
 
-        int color_label = new Color(250, 250, 90).getRGB();
+        int color_label = new Color(44, 101, 122, 255).getRGB();
 
 
 
-        var name = new EditBox(font, 0, 0, title_len_x, len_y, Components.literal(""));
-        name.setTextColor(-1);
-        name.setTextColorUneditable(color_label);
-        name.setBordered(false);
-        name.setEditable(false);
-        name.setMaxLength(title_len_x);
-        name.setValue(row_name);
+        var name = new Label(0, 0, row_type.getComponent()).colored(color_label);
+        name.text = row_type.getComponent();
 
-        var minTitle = new EditBox(font, 0, 0, min_max_len_x, len_y, Components.literal(""));
-        minTitle.setTextColor(-1);
-        minTitle.setTextColorUneditable(color_label);
-        minTitle.setBordered(false);
-        minTitle.setEditable(false);
-        minTitle.setMaxLength(10);
-        minTitle.setValue("min");
-        minTitle.setFilter(Util::tryParseDoubleFilter);
+        var minTitle = new Label(0, 0, AllGuiLabels.minLabel).colored(color_label);
+        minTitle.text = AllGuiLabels.minLabel;
+
 
         var minField = new EditBox(font, 0, 0, input_len_x, len_y, Components.literal(""));
         minField.setTextColor(-1);
@@ -167,13 +160,8 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
         minField.setValue(isBoolean ? "0" : row_min + "");
         minField.setFilter(Util::tryParseDoubleFilter);
 
-        var maxTitle = new EditBox(font, 0, 0, min_max_len_x, len_y, Components.literal(""));
-        maxTitle.setTextColor(-1);
-        maxTitle.setTextColorUneditable(color_label);
-        maxTitle.setBordered(false);
-        maxTitle.setEditable(false);
-        maxTitle.setMaxLength(10);
-        maxTitle.setValue("max");
+        var maxTitle = new Label(0, 0, AllGuiLabels.maxLabel).colored(color_label);
+        maxTitle.text = AllGuiLabels.maxLabel;
 
 
 
@@ -189,6 +177,12 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
 
         var toggleField = new SmallCheckbox(0, 0, 10, 10, Components.literal(""), row_data.get(i).enabled());
 
+        if(row_type.isBoolean()){
+            minField.visible = false;
+            maxField.visible = false;
+            minTitle.visible = false;
+            maxTitle.visible = false;
+        }
 
         minFields.add(minField);
         maxFields.add(maxField);
@@ -202,7 +196,7 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
         layout.addChild(maxField, i, 4);
         layout.addChild(toggleField, i, 5);
 
-        if(row_name.equals("empty"))return;
+        if(row_type.equals(ExposedFieldType.NONE))return;
         addRenderableWidget(minField);
         addRenderableWidget(maxField);
         addRenderableWidget(name);

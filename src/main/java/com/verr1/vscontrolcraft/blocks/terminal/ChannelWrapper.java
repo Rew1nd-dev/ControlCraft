@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.blocks.terminal;
 
+import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
 import com.verr1.vscontrolcraft.registry.AllBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -31,7 +32,7 @@ public class ChannelWrapper implements ItemLike {
         row_data.clear();
         channels.stream().map(e -> new TerminalRowData(
                 e.isListening(),
-                e.getField().field.name(),
+                e.getField().type,
                 e.getField().field.value(),
                 e.getMinMax(),
                 e.isBoolean()
@@ -45,7 +46,7 @@ public class ChannelWrapper implements ItemLike {
         buffer.writeUtf(title);
         for(int i = 0; i < rows; i++){
             buffer.writeBoolean(row_data.get(i).enabled());
-            buffer.writeUtf(row_data.get(i).name());
+            buffer.writeEnum(row_data.get(i).type());
 
             buffer.writeDouble(row_data.get(i).value());
             buffer.writeDouble(row_data.get(i).min_max().x());
@@ -66,7 +67,7 @@ public class ChannelWrapper implements ItemLike {
         for(int i = 0; i < rows; i++){
             var rowData = new TerminalRowData(
                     buf.readBoolean(),
-                    buf.readUtf(),
+                    buf.readEnum(ExposedFieldType.class),
                     buf.readDouble(),
                     new Vector2d(buf.readDouble(), buf.readDouble()),
                     buf.readBoolean()
@@ -80,6 +81,15 @@ public class ChannelWrapper implements ItemLike {
         inventoryTag.put("items", invNbt);
     }
 
+    public CompoundTag saveToTag(){
+        CompoundTag tag = new CompoundTag();
+        tag.put("inv", inventoryTag.getCompound("items"));
+        return tag;
+    }
+
+    public void loadFromTag(CompoundTag tag){
+        serialize(tag.getCompound("inv"));
+    }
 
     public BlockPos getPos() {
         return pos;

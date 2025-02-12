@@ -4,6 +4,7 @@ import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
+import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SpinalyzerPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.spnialyzer.LogicalSensor;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.spnialyzer.SpinalyzerSensor;
@@ -27,7 +28,7 @@ import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import java.util.List;
 
-public class SpinalyzerBlockEntity extends SmartBlockEntity {
+public class SpinalyzerBlockEntity extends OnShipDirectinonalBlockEntity {
     /* TODO:
     *   1. Rewrite getRelativeAngle(), using rotation matrix and reference axis
     *   2. Add checkIfPair Api to peripheral
@@ -60,16 +61,13 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
     }
 
     public Matrix3d getRotationMatrix_wc2sc(){
-        ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos((ServerLevel) level, getBlockPos());
-        Matrix3d base_wc2sc = ship == null ? getRotationMatrix_World_wc2sc() : getRotationMatrix_Ship_wc2sc(ship);
-        Matrix3d extra_sc2pc = getRotationMatrixOfPlacement_sc2pc();
-        return new Matrix3d(base_wc2sc).mul(extra_sc2pc);
+        if(!isOnServerShip())return new Matrix3d();
+        return physics.read().s2wTransform().get3x3(new Matrix3d());
     }
 
     public Quaterniondc getQuaternion(){
-        ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos((ServerLevel) level, getBlockPos());
-        if(ship == null)return getQuaternion_World_wc2sc();
-        return getQuaternion_Ship_wc2sc(ship);
+        if(!isOnServerShip())return new Quaterniond();
+        return physics.read().quaternion();
     }
 
     public Matrix3d getRelativeSourceTransform(){
@@ -101,26 +99,6 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
         return 0;
     }
 
-    private Quaterniondc getQuaternion_World_wc2sc(){
-        return new Quaterniond(); // Identity Quaternion
-    }
-
-    private Quaterniondc getQuaternion_Ship_wc2sc(@NotNull ServerShip ship){
-        return ship.getTransform().getShipToWorldRotation();
-    }
-
-    private Matrix3d getRotationMatrix_World_wc2sc(){
-        return new Matrix3d(); // Identity Matrix
-    }
-
-    private Matrix3d getRotationMatrix_Ship_wc2sc(@NotNull ServerShip ship){
-        return ship.getTransform().getWorldToShip().get3x3(new Matrix3d());
-    }
-
-
-    public Matrix3d getRotationMatrixOfPlacement_sc2pc(){
-        return new Matrix3d();
-    }
 
     public void syncAttachedSensor(){
         if(level.isClientSide) return;
@@ -131,10 +109,6 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
     }
 
 
-    @Override
-    public void destroy(){
-        super.destroy();
-    }
 
 
     @Override
@@ -143,8 +117,4 @@ public class SpinalyzerBlockEntity extends SmartBlockEntity {
         syncAttachedSensor();
     }
 
-    @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-
-    }
 }

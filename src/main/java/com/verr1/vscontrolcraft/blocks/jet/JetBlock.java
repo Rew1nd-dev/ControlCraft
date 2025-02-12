@@ -3,6 +3,7 @@ package com.verr1.vscontrolcraft.blocks.jet;
 import com.simibubi.create.foundation.block.IBE;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -54,7 +55,9 @@ public class JetBlock extends DirectionalBlock implements IBE<JetBlockEntity> {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getClickedFace());
+        Direction face = context.getClickedFace();
+        if(context.getPlayer() != null && context.getPlayer().isShiftKeyDown())face = face.getOpposite();
+        return defaultBlockState().setValue(FACING, face);
     }
 
     @Override

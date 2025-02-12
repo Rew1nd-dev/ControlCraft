@@ -1,6 +1,8 @@
 package com.verr1.vscontrolcraft.base.Servo;
 
+import com.verr1.vscontrolcraft.utils.InputChecker;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
+import net.minecraft.nbt.CompoundTag;
 
 public class PIDControllerInfoHolder {
     private double curr_err = 0;
@@ -49,31 +51,29 @@ public class PIDControllerInfoHolder {
     }
 
     public PIDControllerInfoHolder setParameter(double p, double i, double d) {
-        this.p = p;
-        this.d = d;
-        this.i = i;
+        setP(p);
+        setI(i);
+        setD(d);
         return this;
     }
 
     public PIDControllerInfoHolder setP(double p){
-        this.p = p;
+        this.p = InputChecker.clampPIDInput(p);
         return this;
     }
 
     public PIDControllerInfoHolder setI(double i){
-        this.i = i;
+        this.i = InputChecker.clampPIDInput(i);
         return this;
     }
 
     public PIDControllerInfoHolder setD(double d){
-        this.d = d;
+        this.d = InputChecker.clampPIDInput(d);
         return this;
     }
 
     public PIDControllerInfoHolder setParameter(PID param) {
-        p = param.p();
-        i = param.i();
-        d = param.d();
+        setParameter(param.p(), param.i(), param.d());
         return this;
     }
 
@@ -87,5 +87,22 @@ public class PIDControllerInfoHolder {
     }
 
     public double getValue(){return curr;}
+
+
+    public CompoundTag serialize(){
+        CompoundTag tag = new CompoundTag();
+        tag.putDouble("p", p);
+        tag.putDouble("i", i);
+        tag.putDouble("d", d);
+        tag.putDouble("target", target);
+        return tag;
+    }
+
+    public void deserialize(CompoundTag tag){
+        p = tag.getDouble("p");
+        i = tag.getDouble("i");
+        d = tag.getDouble("d");
+        target = tag.getDouble("target");
+    }
 
 }

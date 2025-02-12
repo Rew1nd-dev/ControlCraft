@@ -14,6 +14,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -79,7 +80,7 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
     private void setChannelField(List<ExposedFieldWrapper> fields){
         for(int i = 0; i < min(fields.size(), channels.size()); i++){
             channels.get(i).setField(fields.get(i));
-            if(fields.get(i).field.widgetType() == WidgetType.TOGGLE)channels.get(i).setBoolean(true);
+            channels.get(i).setBoolean(fields.get(i).type.isBoolean());
         }
         for(int i = min(fields.size(), channels.size()); i < channels.size(); i++){
             channels.get(i).setField(ExposedFieldWrapper.EMPTY);
@@ -103,15 +104,17 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
     }
 
     public void syncAttachedDevice(){
+        if(level.isClientSide)return;
         BlockEntity be = level.getExistingBlockEntity(getBlockPos().relative(getDirection().getOpposite()));
         if(!(be instanceof ITerminalDevice device))return;
         setChannelField(device.fields());
+        // setMinMax(device.fields().stream().map(e -> e.min_max).toList());
     }
 
     @Override
     public void tick() {
         super.tick();
-        if(level.isClientSide)return;
+
         syncAttachedDevice();
     }
 
@@ -125,16 +128,25 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
         return device.name();
     }
 
+    public void deviceChanged(){
+        BlockEntity be = level.getExistingBlockEntity(getBlockPos().relative(getDirection().getOpposite()));
+        if(be == null)return;
+        be.setChanged();
+    }
+
     public void setMinMax(List<Vector2d> min_max){
         for(int i = 0; i < min(min_max.size(), this.channels.size()); i++){
             channels.get(i).setMinMax(min_max.get(i));
         }
+        setChanged();
+        deviceChanged();
     }
 
     public void setEnabled(List<Boolean> enabled){
         for(int i = 0; i < min(enabled.size(), this.channels.size()); i++){
             channels.get(i).setEnabled(enabled.get(i));
         }
+        setChanged();
     }
 
     public void setFrequency(){
@@ -143,6 +155,7 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
             newKeys.add(toFrequency(wrapper, i));
         }
         updateKeys(newKeys);
+        setChanged();
     }
 
 
@@ -152,6 +165,21 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
         addToNetwork();
     }
 
+    @Override
+    protected void write(CompoundTag compound, boolean clientPacket) {
+        super.write(compound, clientPacket);
+        if(clientPacket)return;
+        channels.forEach(e -> compound.put("channel_" + channels.indexOf(e), e.serialize()));
+        compound.put("wrapper", wrapper.saveToTag());
+    }
+
+    @Override
+    protected void read(CompoundTag compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
+        if(clientPacket)return;
+        channels.forEach(e -> e.deserialize(compound.getCompound("channel_" + channels.indexOf(e))));
+        wrapper.loadFromTag(compound.getCompound("wrapper"));
+    }
 
     public void openScreen(Player player){
         wrapper.overrideData(getChannels(), getBlockPos(), getAttachedDeviceName());
@@ -208,7 +236,7 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
             this.enabled = enabled;
         }
 
-        private boolean enabled = true;
+        private boolean enabled = false;
 
         public TerminalChannel(Couple<RedstoneLinkNetworkHandler.Frequency> key, ExposedFieldWrapper attachedField, boolean isBoolean) {
             this.key = key;
@@ -267,6 +295,22 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
         public BlockPos getLocation() {
             return getBlockPos();
         }
+
+        public CompoundTag serialize(){
+            CompoundTag tag = new CompoundTag();
+            tag.put("key", key.serializeEach(e -> e.getStack().serializeNBT()));
+            tag.putBoolean("isBoolean", isBoolean);
+            tag.putBoolean("enabled", enabled);
+            return tag;
+        }
+
+        public void deserialize(CompoundTag tag){
+            key = Couple.deserializeEach(tag.getList("key", 10), e -> RedstoneLinkNetworkHandler.Frequency.of(ItemStack.of(e)));
+            isBoolean = tag.getBoolean("isBoolean");
+            enabled = tag.getBoolean("enabled");
+
+        }
+
     }
 
 }

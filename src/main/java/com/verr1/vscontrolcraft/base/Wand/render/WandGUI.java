@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.base.Wand.render;
 
+import com.jozufozu.flywheel.util.Color;
 import com.simibubi.create.AllKeys;
 import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.contraptions.elevator.ElevatorControlsHandler;
@@ -10,6 +11,7 @@ import com.simibubi.create.content.schematics.client.ToolSelectionScreen;
 import com.simibubi.create.content.trains.TrainHUD;
 import com.verr1.vscontrolcraft.ControlCraftClient;
 import com.verr1.vscontrolcraft.base.Wand.ClientWand;
+import com.verr1.vscontrolcraft.blocks.revoluteJoint.RevoluteJointBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraftforge.client.event.InputEvent;
@@ -62,13 +64,20 @@ public class WandGUI implements IGuiOverlay {
         if (Minecraft.getInstance().options.hideGui)
             return;
         if (ClientWand.isClientWandInHand()){
-            this.overlay.renderOn(graphics, activeHotbarSlot);
+            // this.overlay.renderOn(graphics, activeHotbarSlot);
             selectionScreen.renderPassive(graphics, partialTicks);
         }
 
     }
 
     public void tick(){
+        // simply put this thing here, I am a bit lazy
+        if(ClientWand.isWrenchInHand()){
+            if(WandRenderer.lookingAt() instanceof RevoluteJointBlockEntity rvl){
+                WandRenderer.drawOutline(rvl.getBlockPos(), rvl.getJointDirection(), Color.RED.getRGB(), "rvl_joint_dir");
+            }
+        }
+
         if(!ClientWand.isClientWandInHand())return;
         selectionScreen.update();
     }

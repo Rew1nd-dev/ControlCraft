@@ -80,6 +80,8 @@ public class ControlCraftClientEvents {
             event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "wand", ControlCraftClient.ClientWandHandler);
 
         }
+
+
     }
 
 

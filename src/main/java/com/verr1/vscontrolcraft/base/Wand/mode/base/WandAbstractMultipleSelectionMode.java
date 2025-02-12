@@ -10,7 +10,7 @@ public abstract class WandAbstractMultipleSelectionMode implements IWandMode {
     private final int lazyTickRate = 50;
     private int lazyTick = 0;
 
-    protected enum State{
+    public enum State{
         TO_SELECT_X,
         TO_SELECT_Y,
         TO_SELECT_Z,

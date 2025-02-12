@@ -9,6 +9,7 @@ import com.simibubi.create.foundation.gui.widget.SelectionScrollInput;
 import com.verr1.vscontrolcraft.base.SimpleSettingScreen;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
+import com.verr1.vscontrolcraft.registry.AllGuiLabels;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.registry.AllVSCCGuiTextures;
 import com.verr1.vscontrolcraft.utils.Util;
@@ -30,7 +31,7 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
 
     private final AllVSCCGuiTextures background = AllVSCCGuiTextures.SIMPLE_BACKGROUND_HALF;
 
-    private List<ExposedFieldMessage> availableFields = new ArrayList<>();
+    private final List<ExposedFieldMessage> availableFields;
     private final ExposedFieldType currentField;
     private final BlockPos pos;
 
@@ -41,7 +42,7 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
     private EditBox minField;
     private EditBox maxField;
 
-    private GridLayout layout = new GridLayout();
+    private final GridLayout layout = new GridLayout();
 
     public ExposedFieldSettingScreen(BlockPos pos, List<ExposedFieldMessage> availableFields, ExposedFieldType currentField) {
         this.pos = pos;
@@ -67,14 +68,14 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
                 )
                 .calling(i -> {
                     var currentSelection = availableFields.get(fieldSelector.getState());
-                    fieldLabel.text = Component.literal(currentSelection.type().name());
+                    fieldLabel.text = currentSelection.type().getComponent();
                     maxField.setValue(String.format("%.2f", currentSelection.max()));
                     minField.setValue(String.format("%.2f", currentSelection.min()));
                 });
 
-        minLabel = new Label(0,0, Component.literal("min"));
-        maxLabel = new Label(0,0, Component.literal("max"));
-        fieldLabel = new Label(0,0, Component.literal("Field"));
+        minLabel = new Label(0,0, AllGuiLabels.minLabel);
+        maxLabel = new Label(0,0, AllGuiLabels.maxLabel);
+        fieldLabel = new Label(0,0, AllGuiLabels.fieldLabel);
 
 
         minField = new EditBox(font, 0, 0, 55, 10, Component.empty());
@@ -83,14 +84,14 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
         var currentSelection = availableFields.get(fieldSelector.getState());
         maxField.setValue(String.format("%.2f", currentSelection.max()));
         minField.setValue(String.format("%.2f", currentSelection.min()));
-        fieldLabel.text = Component.literal(currentSelection.type().name());
+        fieldLabel.text = currentSelection.type().getComponent();
 
         maxField.setEditable(true);
         minField.setEditable(true);
 
         // fieldLabel.text = Component.literal("field");
-        minLabel.text = Component.literal("min");
-        maxLabel.text = Component.literal("max");
+        minLabel.text = AllGuiLabels.minLabel;
+        maxLabel.text = AllGuiLabels.maxLabel;
 
 
 

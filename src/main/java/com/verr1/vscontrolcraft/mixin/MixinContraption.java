@@ -1,15 +1,18 @@
 package com.verr1.vscontrolcraft.mixin;
 
 
+import com.simibubi.create.content.contraptions.AssemblyException;
 import com.simibubi.create.content.contraptions.Contraption;
 import com.simibubi.create.content.fluids.tank.FluidTankBlockEntity;
 import com.simibubi.create.content.logistics.vault.ItemVaultBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialAnchorBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,10 +37,12 @@ public abstract class MixinContraption {
 
         // just don't remove the x, y, z tags, I really need it
 
-        if(!(blockEntity instanceof SpatialAnchorBlockEntity)){
+        if(!(blockEntity instanceof SpatialAnchorBlockEntity spatial)){
             nbt.remove("x");
             nbt.remove("y");
             nbt.remove("z");
+        }else{
+            nbt.putLong("protocol", spatial.getProtocol());
         }
 
         if ((blockEntity instanceof FluidTankBlockEntity || blockEntity instanceof ItemVaultBlockEntity)

@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.blocks.spatialAnchor;
 
+import com.verr1.vscontrolcraft.utils.InputChecker;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
@@ -27,31 +28,8 @@ public class SpatialScheduleInfoHolder {
     protected double pq = 25;
     protected double dq = 8;
 
-    public double getI() {
-        return i;
-    }
-
-    public void setI(double i) {
-        this.i = i;
-    }
-
-    public double getDp() {
-        return dp;
-    }
-
-    public void setDp(double dp) {
-        this.dp = dp;
-    }
-
-    public double getPp() {
-        return pp;
-    }
-
-    public void setPp(double pp) {
-        this.pp = pp;
-    }
-
-    protected double i = 0;
+    protected double ip = 0;
+    protected double iq = 0;
 
     protected double mass;
     protected double inertia;
@@ -61,20 +39,15 @@ public class SpatialScheduleInfoHolder {
     // assuming task run at physics thread
     protected double ts = 0.01667;
 
-    protected double MAX_INTEGRAL = 10;
+    protected double MAX_INTEGRAL_P = 10;
+    protected double MAX_INTEGRAL_Q = 10;
 
-    public SpatialScheduleInfoHolder withPID(double p, double i, double d, double MAX_INTEGRAL){
-        this.pp = p;
-        this.i = i;
-        this.dp = d;
-        this.MAX_INTEGRAL = MAX_INTEGRAL;
-        return this;
-    }
+
 
     public Vector3dc calcControlForce(){
         Vector3dc accel_p = new Vector3d(p_err).mul(pp);
         Vector3dc accel_d = new Vector3d(p_err).sub(p_err_prev, new Vector3d()).mul(dp / ts);
-        Vector3dc accel_i = new Vector3d(0, p_int.y(), 0).mul(i);
+        Vector3dc accel_i = new Vector3d(0, p_int.y(), 0).mul(ip);
         Vector3dc force_pid = new Vector3d(accel_p).add(accel_d).add(accel_i).add(new Vector3d(0, 10, 0)).mul(mass * Math.pow(scale, 3));
         return force_pid;
     }
@@ -103,7 +76,7 @@ public class SpatialScheduleInfoHolder {
         p_err = new Vector3d(p_tar).sub(p_curr, new Vector3d());
         q_err = new Quaterniond(q_tar).mul(new Quaterniond(q_curr).conjugate());
 
-        p_int = VSMathUtils.clamp(p_int.add(new Vector3d(p_err).mul(ts), new Vector3d()), MAX_INTEGRAL);
+        p_int = VSMathUtils.clamp(p_int.add(new Vector3d(p_err).mul(ts), new Vector3d()), MAX_INTEGRAL_P);
 
     }
 
@@ -114,4 +87,71 @@ public class SpatialScheduleInfoHolder {
         this.p_curr = p_tar;
     }
 
+    public SpatialScheduleInfoHolder setPq(double pq) {
+        this.pq = InputChecker.clampPIDInput(pq);
+        return this;
+    }
+
+    public SpatialScheduleInfoHolder setDq(double dq) {
+        this.dq = InputChecker.clampPIDInput(dq);
+        return this;
+    }
+
+    public SpatialScheduleInfoHolder setIq(double iq) {
+        this.iq = InputChecker.clampPIDInput(iq);
+        return this;
+    }
+
+    public SpatialScheduleInfoHolder setMAX_INTEGRAL_P(double MAX_INTEGRAL_P) {
+        this.MAX_INTEGRAL_P = MAX_INTEGRAL_P;
+        return this;
+    }
+
+    public SpatialScheduleInfoHolder setMAX_INTEGRAL_Q(double MAX_INTEGRAL_Q) {
+        this.MAX_INTEGRAL_Q = MAX_INTEGRAL_Q;
+        return this;
+    }
+
+    public double getIp() {
+        return ip;
+    }
+
+    public SpatialScheduleInfoHolder setIp(double ip) {
+        this.ip = InputChecker.clampPIDInput(ip);
+        return this;
+    }
+
+    public double getDp() {
+        return dp;
+    }
+
+    public SpatialScheduleInfoHolder setDp(double dp) {
+        this.dp = InputChecker.clampPIDInput(dp);
+        return this;
+    }
+
+    public double getPp() {
+        return pp;
+    }
+
+    public SpatialScheduleInfoHolder setPp(double pp) {
+        this.pp = InputChecker.clampPIDInput(pp);
+        return this;
+    }
+
+    public SpatialScheduleInfoHolder withQPID(double p, double i, double d, double MAX_INTEGRAL){
+        setPq(p);
+        setIq(i);
+        setDq(d);
+        this.MAX_INTEGRAL_Q = MAX_INTEGRAL;
+        return this;
+    }
+
+    public SpatialScheduleInfoHolder withPPID(double p, double i, double d, double MAX_INTEGRAL){
+        setPp(p);
+        setIp(i);
+        setDp(d);
+        this.MAX_INTEGRAL_P = MAX_INTEGRAL;
+        return this;
+    }
 }

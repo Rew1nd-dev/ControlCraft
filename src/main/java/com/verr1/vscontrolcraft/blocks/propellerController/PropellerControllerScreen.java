@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.blocks.propellerController;
 
 import com.verr1.vscontrolcraft.base.SimpleSettingScreen;
+import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllBlocks;
@@ -21,9 +22,11 @@ public class PropellerControllerScreen extends SimpleSettingScreen {
 
     @Override
     public void startWindow() {
-        addNumericFieldWithLabel("Speed", Util::tryParseDoubleFilter)
+        addNumericFieldWithLabel(ExposedFieldType.SPEED.getComponent(), Util::tryParseDoubleFilter)
                 .setValue(String.format("%.2f", speed)); // iFields[0]
     }
+
+
 
     @Override
     public void register() {

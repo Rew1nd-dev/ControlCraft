@@ -13,7 +13,7 @@ public record ConstrainKey(BlockPos pos, String dimension, String name, boolean 
     public boolean equals(Object o) {
         if(!(o instanceof ConstrainKey key))return false;
 
-        // only pos, dimension and name matters
+        // only pos, dimension and type matters
 
         return  key.pos.equals(pos) &&
                 key.dimension.equals(dimension) &&
@@ -23,7 +23,7 @@ public record ConstrainKey(BlockPos pos, String dimension, String name, boolean 
     public CompoundTag serialize() {
         CompoundTag tag = new CompoundTag();
         tag.putLong("pos", pos.asLong());
-        tag.putString("name", name);
+        tag.putString("type", name);
         tag.putString("level", dimension);
         tag.putBoolean("ship_1_isGround", ship_1_isGround);
         tag.putBoolean("ship_2_isGround", ship_2_isGround);
@@ -34,7 +34,7 @@ public record ConstrainKey(BlockPos pos, String dimension, String name, boolean 
     public static ConstrainKey deserialize(CompoundTag tag) {
         var pos = BlockPos.of(tag.getLong("pos"));
         var level = tag.getString("level");
-        var name = tag.getString("name");
+        var name = tag.getString("type");
         var ship_1_isGround = tag.getBoolean("ship_1_isGround");
         var ship_2_isGround = tag.getBoolean("ship_2_isGround");
         var temp = tag.getBoolean("temp");
