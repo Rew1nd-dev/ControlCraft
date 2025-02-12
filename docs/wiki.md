@@ -2,7 +2,7 @@
 ## Blocks:
 ### ChunkLoader:
 
-![img.png](img.png)
+- ![img.png](img.png)
 
 - **简述:** 
   - 放置于VS船上，自动地强加载周围区块的方块
@@ -13,11 +13,11 @@
 
 ### Propeller Controller & Propeller：
 - Propeller Controller：
-![img_1.png](img_1.png)
+- ![img_1.png](img_1.png)
 - Propeller：
-![img_2.png](img_2.png)
+- ![img_2.png](img_2.png)
 - 结合使用：
-![img_3.png](img_3.png)
+- ![img_3.png](img_3.png)
 - **简述:**
   - 将Propeller放置于Propeller Controller之上以发挥作用，其实际作用为一个带反扭矩的螺旋桨推进器
 - **Propeller Controller 控制面板**
