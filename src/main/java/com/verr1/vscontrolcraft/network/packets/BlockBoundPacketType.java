@@ -4,6 +4,7 @@ public enum BlockBoundPacketType {
     OPEN_SCREEN,
     OPEN_REDSTONE_SCREEN,
     SETTING,
+    TOGGLE,
     REDSTONE_SETTING,
     SYNC_ANIMATION,
 

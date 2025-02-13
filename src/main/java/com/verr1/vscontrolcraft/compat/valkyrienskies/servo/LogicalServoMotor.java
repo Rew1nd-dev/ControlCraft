@@ -10,6 +10,7 @@ public record LogicalServoMotor(
         Direction servDir,
         Direction compDir,
         boolean angleOrSpeed,
+        boolean shouldCounter,
         double torque
 ) {
 

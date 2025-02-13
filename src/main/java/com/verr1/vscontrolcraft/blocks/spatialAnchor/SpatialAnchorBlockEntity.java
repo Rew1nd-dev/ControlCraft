@@ -6,7 +6,6 @@ import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.base.Servo.ICanBruteDirectionalConnect;
 import com.verr1.vscontrolcraft.base.UltraTerminal.*;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
-import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.PropellerControllerPeripheral;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SpatialAnchorPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.spatial.LogicalSpatial;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.spatial.SpatialForceInducer;
@@ -342,7 +341,7 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
     }
 
     @Override
-    public void setExposedField(ExposedFieldType type, double min, double max) {
+    public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
         switch (type){
             case OFFSET -> exposedField = fields.get(0);
             case IS_RUNNING -> exposedField = fields.get(1);

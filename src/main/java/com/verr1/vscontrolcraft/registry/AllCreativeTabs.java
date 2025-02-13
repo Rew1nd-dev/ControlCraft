@@ -21,7 +21,7 @@ public class AllCreativeTabs {
             () -> CreativeModeTab.builder()
                     .title(Components.translatable("itemGroup."+ ControlCraft.MODID +".main"))
                     .withTabsBefore(ResourceLocation.of("create:palettes", ':'))
-                    .icon(() -> new ItemStack(Items.LEVER))
+                    .icon(AllBlocks.SPATIAL_ANCHOR_BLOCK::asStack)
                     .displayItems((params, output) -> {
                         List<ItemStack> items = ControlCraft.REGISTRATE.getAll(Registries.ITEM)
                                 .stream()

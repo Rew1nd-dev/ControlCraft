@@ -37,7 +37,8 @@ public class ExposedFieldRequestPacket extends SimplePacketBase {
                         .map(e -> new ExposedFieldMessage(
                                     e.type,
                                     e.min_max.x,
-                                    e.min_max.y
+                                    e.min_max.y,
+                                    e.directionOptional
                                 )
                         )
                         .toList();

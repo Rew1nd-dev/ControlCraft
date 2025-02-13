@@ -16,7 +16,6 @@ import com.verr1.vscontrolcraft.base.Servo.PID;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerInfoHolder;
 import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
 import com.verr1.vscontrolcraft.base.UltraTerminal.*;
-import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorScreen;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SliderControllerPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.slider.LogicalSlider;
@@ -24,7 +23,6 @@ import com.verr1.vscontrolcraft.compat.valkyrienskies.slider.SliderForceInducer;
 import com.verr1.vscontrolcraft.network.IPacketHandler;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
-import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
@@ -133,7 +131,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
     }
 
     @Override
-    public void setExposedField(ExposedFieldType type, double min, double max) {
+    public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
         switch (type){
             case FORCE -> exposedField = fields.get(0);
             case TARGET -> exposedField = fields.get(1);

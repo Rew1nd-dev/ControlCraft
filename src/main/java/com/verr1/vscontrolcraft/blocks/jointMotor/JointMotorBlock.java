@@ -10,6 +10,7 @@ import com.verr1.vscontrolcraft.base.Servo.PIDControllerOpenScreenPacket;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerType;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
+import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.valkyrienskies.core.impl.shadow.F;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -42,20 +44,6 @@ public class JointMotorBlock extends DirectionalAxisKineticBlock implements
         super(p_49795_);
     }
 
-
-    protected void displayScreen(AbstractServoMotor entity, Player player){
-
-        double t = entity.getControllerInfoHolder().getTarget();
-        double v = entity.getControllerInfoHolder().getValue();
-        PID pidParams = entity.getControllerInfoHolder().getPIDParams();
-
-        AllPackets.sendToPlayer(
-                new PIDControllerOpenScreenPacket(pidParams, v, t, entity.getBlockPos(), PIDControllerType.JOINT),
-                ((ServerPlayer)player)
-        );
-
-    }
-
     @Override
     public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
                                 boolean isMoving)  {
@@ -70,7 +58,8 @@ public class JointMotorBlock extends DirectionalAxisKineticBlock implements
 
     @Override
     public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
-        return false;
+
+        return face.getAxis() == Util.getVerticalDirection(state).getAxis() || face == state.getValue(FACING).getOpposite();
     }
 
     @Override
@@ -80,7 +69,7 @@ public class JointMotorBlock extends DirectionalAxisKineticBlock implements
         if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty() && player.isShiftKeyDown()) {
             withBlockEntityDo(worldIn, pos, JointMotorBlockEntity::setAssembleNextTick);
         }else if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
-            withBlockEntityDo(worldIn, pos, be -> this.displayScreen(be, player));
+            withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
         }
         return InteractionResult.PASS;
     }

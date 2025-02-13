@@ -25,7 +25,6 @@ import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.WingControllerPerip
 import com.verr1.vscontrolcraft.network.IPacketHandler;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
-import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -33,12 +32,10 @@ import dan200.computercraft.shared.Capabilities;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -54,7 +51,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 
 public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity implements
         IBearingBlockEntity, ITerminalDevice, IPacketHandler
@@ -301,7 +297,7 @@ public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity imp
     }
 
     @Override
-    public void setExposedField(ExposedFieldType type, double min, double max) {
+    public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
         if (type == ExposedFieldType.ANGLE) {
             fields.get(0).min_max.x = min;
             fields.get(0).min_max.y = max;

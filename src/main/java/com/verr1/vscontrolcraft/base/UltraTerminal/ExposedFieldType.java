@@ -39,6 +39,11 @@ public enum ExposedFieldType {
     TYPE,
     VALUE,
 
+    MODE_ANGULAR,
+    MODE_SPEED,
+
+    MODE_CHEAT,
+
     THRUST_RATIO,
     TORQUE_RATIO;
 

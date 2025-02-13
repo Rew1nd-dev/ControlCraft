@@ -163,6 +163,24 @@ public class VSMathUtils {
     // useful when they are connected by motors
     public static double get_dyc2xc(@Nullable Ship ship_x, @Nullable Ship ship_y, Vector3dc w_x, Vector3dc w_y, Direction d_x, Direction d_y){
         Matrix3dc m_wc2xc = get_wc2sc(ship_x);
+        return get_dyc2xc(m_wc2xc, w_x, w_y, d_x, d_y);
+        /*
+        Vector3dc w_y2x_wc = w_y.sub(w_x, new Vector3d());
+        Vector3dc w_y2x_xc = m_wc2xc.transform(w_y2x_wc, new Vector3d());
+
+        int sign = (d_x == Direction.DOWN || d_x == Direction.WEST || d_x == Direction.NORTH) ? 1 : -1;
+        double w_y2x =
+                switch (d_x.getAxis()){
+                    case X -> w_y2x_xc.x() * sign;
+                    case Y -> w_y2x_xc.y() * sign;
+                    case Z -> w_y2x_xc.z() * sign;
+                };
+
+        return w_y2x;
+        * */
+    }
+
+    public static double get_dyc2xc(@Nullable Matrix3dc m_wc2xc, Vector3dc w_x, Vector3dc w_y, Direction d_x, Direction d_y){
         Vector3dc w_y2x_wc = w_y.sub(w_x, new Vector3d());
         Vector3dc w_y2x_xc = m_wc2xc.transform(w_y2x_wc, new Vector3d());
 

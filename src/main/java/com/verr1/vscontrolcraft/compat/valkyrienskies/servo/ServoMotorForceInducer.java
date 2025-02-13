@@ -53,8 +53,10 @@ public class ServoMotorForceInducer extends AbstractExpirableForceInducer {
 
         servo.getControllerInfoHolder().overrideError(metric);
 
+        //
         compShip.getImpl().applyInvariantTorque(controlTorque_wc);
-        servShip.getImpl().applyInvariantTorque(controlTorque_wc.mul(-1, new Vector3d()));
+        if(property.shouldCounter())
+            servShip.getImpl().applyInvariantTorque(controlTorque_wc.mul(-1, new Vector3d()));
     }
 
     public void writePhysics(BlockPos servoPos, PhysShipWrapper servoShip, PhysShipWrapper assemShip, LogicalServoMotor property){

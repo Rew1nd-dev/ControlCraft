@@ -37,7 +37,6 @@ import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.List;
-import java.util.Objects;
 
 public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntity implements
         ITerminalDevice, IPacketHandler
@@ -172,7 +171,7 @@ public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntit
     }
 
     @Override
-    public void setExposedField(ExposedFieldType type, double min, double max) {
+    public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
         if (type == ExposedFieldType.SPEED) {
             exposedField = fields.get(0);
         }

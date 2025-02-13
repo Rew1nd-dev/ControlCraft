@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.base.UltraTerminal;
 
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import org.joml.Vector2d;
 
@@ -13,6 +14,7 @@ public class ExposedFieldWrapper {
     public NumericField field;
     public Vector2d min_max;
     public ExposedFieldType type;
+    public ExposedFieldDirection directionOptional = ExposedFieldDirection.NONE;
 
 
     public ExposedFieldWrapper(Supplier<Double> value, Consumer<Double> callback, String name, WidgetType widgetType, ExposedFieldType type){
@@ -21,6 +23,13 @@ public class ExposedFieldWrapper {
         this.type = type;
     }
 
+    public void withMcDirection(Direction direction){
+        directionOptional = ExposedFieldDirection.convert(direction);
+    }
+
+    public void withDirection(ExposedFieldDirection direction){
+        directionOptional = direction;
+    }
 
     public ExposedFieldWrapper(NumericField field, ExposedFieldType type){
         this.field = field;

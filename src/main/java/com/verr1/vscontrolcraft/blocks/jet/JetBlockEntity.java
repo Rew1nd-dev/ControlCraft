@@ -87,7 +87,7 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
     }
 
     @Override
-    public void setExposedField(ExposedFieldType type, double min, double max) {
+    public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
         switch (type){
             case THRUST -> exposedField = fields.get(0);
             case HORIZONTAL_TILT -> exposedField = fields.get(1);

@@ -130,7 +130,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity implements
         if(level.isClientSide)return;
         if(Objects.equals(newKey.Name(), ""))return;
         networkKey = NetworkManager.registerAndGetKey(newKey, getBlockPos());
-        sendData();
+        setChanged();
     }
 
     @Override

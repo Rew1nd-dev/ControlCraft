@@ -31,4 +31,13 @@ public class AllGuiLabels {
     public static final Component fieldLabel = Component
             .translatable(ControlCraft.MODID + ".screen.labels.field");
 
+    public static final Component onLabel = Component
+            .translatable(ControlCraft.MODID + ".screen.labels.on");
+
+    public static final Component offLabel = Component
+            .translatable(ControlCraft.MODID + ".screen.labels.off");
+
+    public static final Component directionLabel = Component
+            .translatable(ControlCraft.MODID + ".screen.labels.dir");
+
 }

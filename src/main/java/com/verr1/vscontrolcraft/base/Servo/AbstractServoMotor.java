@@ -26,7 +26,6 @@ import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
-import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -77,7 +76,19 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     public SynchronizedField<ShipPhysics> asmPhysics = new SynchronizedField<>(ShipPhysics.EMPTY);
     public SynchronizedField<Double> controlTorque = new SynchronizedField<>(0.0);
 
+    private boolean isAdjustingAngle = false;
+
+    private final PID defaultAngularModeParams = new PID(24, 0, 14);
+    private final PID defaultAngularSpeedModeParams = new PID(10, 0, 0);
+
+    private final PIDControllerInfoHolder servoController = new PIDControllerInfoHolder().setParameter(defaultAngularSpeedModeParams);
+
+
     private boolean isLocked = false;
+
+
+
+    private boolean cheatMode = false;
 
     public void setOffset(double offset) {
         this.offset = offset;
@@ -155,14 +166,14 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         return isAdjustingAngle;
     }
 
+    public boolean isCheatMode() {
+        return cheatMode;
+    }
 
+    public void setCheatMode(boolean cheatMode) {
+        this.cheatMode = cheatMode;
+    }
 
-    private boolean isAdjustingAngle = false;
-
-    private final PID defaultAngularModeParams = new PID(24, 0, 14);
-    private final PID defaultAngularSpeedModeParams = new PID(10, 0, 0);
-
-    private final PIDControllerInfoHolder servoController = new PIDControllerInfoHolder().setParameter(defaultAngularSpeedModeParams);
 
 
     @Override
@@ -194,17 +205,20 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     }
 
     @Override
-    public void setExposedField(ExposedFieldType type, double min, double max) {
-        switch (type){
-            case D -> exposedField = fields.get(4);
-            case I -> exposedField = fields.get(3);
-            case P -> exposedField = fields.get(2);
-            case TARGET -> exposedField = fields.get(1);
-            case TORQUE -> exposedField = fields.get(0);
-            case IS_LOCKED -> exposedField = fields.get(5);
-            case NONE -> exposedField = ExposedFieldWrapper.EMPTY;
-        }
-        exposedField.min_max = new Vector2d(min, max);
+    public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
+        ExposedFieldWrapper field =
+                switch (type){
+                    case D -> fields.get(4);
+                    case I -> fields.get(3);
+                    case P -> fields.get(2);
+                    case TARGET -> fields.get(1);
+                    case TORQUE -> fields.get(0);
+                    case IS_LOCKED -> fields.get(5);
+                    default -> null;
+                };
+        if(field == null)return;
+        field.min_max = new Vector2d(min, max);
+        field.directionOptional = openTo;
     }
 
     @Override
@@ -238,6 +252,16 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         Matrix3dc asm = asmPhysics.read().rotationMatrix().transpose(new Matrix3d());
         if(getCompanionShipDirection() == null)return 0;
         return VSMathUtils.get_yc2xc(own, asm, getServoDirection(), getCompanionShipDirection());
+    }
+
+    public double getServoAngularSpeed(){
+        if(!hasCompanionShip())return 0;
+        Matrix3dc own = ownPhysics.read().rotationMatrix().transpose(new Matrix3d()); //wc2sc
+        Matrix3dc asm = asmPhysics.read().rotationMatrix().transpose(new Matrix3d());
+        Vector3dc w_own = ownPhysics.read().omega();
+        Vector3dc w_asm = asmPhysics.read().omega();
+        if(getCompanionShipDirection() == null)return 0;
+        return VSMathUtils.get_dyc2xc(own, w_own, w_asm,  getServoDirection(), getCompanionShipDirection());
     }
 
 
@@ -291,6 +315,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 getServoDirection(),
                 getCompanionShipDirection(),
                 isAdjustingAngle,
+                !isCheatMode(),
                 getOutputTorque()
         );
     }

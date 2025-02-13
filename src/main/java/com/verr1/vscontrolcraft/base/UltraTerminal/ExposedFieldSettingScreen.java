@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.valkyrienskies.core.impl.shadow.S;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.stream.IntStream;
@@ -36,9 +37,13 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
     private final BlockPos pos;
 
     private SelectionScrollInput fieldSelector;
+    private SelectionScrollInput directionSelector;
+
     private Label minLabel;
     private Label maxLabel;
     private Label fieldLabel;
+    private Label directionLabel;
+    private Label directionValueLabel;
     private EditBox minField;
     private EditBox maxField;
 
@@ -69,17 +74,32 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
                 .calling(i -> {
                     var currentSelection = availableFields.get(fieldSelector.getState());
                     fieldLabel.text = currentSelection.type().getComponent();
+                    directionLabel.text = currentSelection.openTo().getComponent();
                     maxField.setValue(String.format("%.2f", currentSelection.max()));
                     minField.setValue(String.format("%.2f", currentSelection.min()));
                 });
 
+        directionSelector = new SelectionScrollInput(0, 0, 10, 10);
+
+        directionSelector.forOptions(
+                Arrays.stream(ExposedFieldDirection.values())
+                        .map(d -> Component.literal(d.name()))
+                        .toList()
+        ).withRange(0, ExposedFieldDirection.values().length).calling(
+            i -> directionLabel.text = ExposedFieldDirection.convert(i).getComponent()
+        );
+
+
+
+
         minLabel = new Label(0,0, AllGuiLabels.minLabel);
         maxLabel = new Label(0,0, AllGuiLabels.maxLabel);
         fieldLabel = new Label(0,0, AllGuiLabels.fieldLabel);
+        directionLabel = new Label(0, 0, Component.literal("maxLen"));
 
 
-        minField = new EditBox(font, 0, 0, 55, 10, Component.empty());
-        maxField = new EditBox(font, 0, 0, 55, 10, Component.empty());
+        minField = new EditBox(font, 0, 0, 40, 10, Component.empty());
+        maxField = new EditBox(font, 0, 0, 40, 10, Component.empty());
 
         var currentSelection = availableFields.get(fieldSelector.getState());
         maxField.setValue(String.format("%.2f", currentSelection.max()));
@@ -101,15 +121,21 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
 
         maxField.setFilter(Util::tryParseDoubleFilter);
         layout.addChild(fieldLabel, 0, 0);
+        layout.addChild(directionLabel, 1, 0);
         layout.addChild(fieldSelector, 4, 0);
+        layout.addChild(directionSelector, 1, 1);
 
 
         layout.addChild(minLabel, 2, 0);
         layout.addChild(minField, 2, 1);
         layout.addChild(maxLabel, 3, 0);
         layout.addChild(maxField, 3, 1);
+        layout.rowSpacing(2);
+        fieldSelector.onChanged(); // update the direction label
 
         addRenderableWidget(fieldSelector);
+        addRenderableWidget(directionSelector);
+        addRenderableWidget(directionLabel);
         addRenderableWidget(fieldLabel);
         addRenderableWidget(minLabel);
         addRenderableWidget(minField);
@@ -129,7 +155,8 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
                         pos,
                         availableFields.get(fieldSelector.getState()).type(),
                         Util.tryParseDouble(minField.getValue()),
-                        Util.tryParseDouble(maxField.getValue())
+                        Util.tryParseDouble(maxField.getValue()),
+                        ExposedFieldDirection.convert(directionSelector.getState())
                 )
         );
     }
@@ -148,6 +175,7 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
     protected void renderWindow(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         background.render(graphics, guiLeft, guiTop);
         AllIcons.I_REFRESH.render(graphics, fieldSelector.getX(), fieldSelector.getY());
+        AllVSCCGuiTextures.SMALL_BUTTON_GREEN.render(graphics, directionSelector.getX(), directionSelector.getY());
         boolean shouldRender = !availableFields.get(fieldSelector.getState()).type().isBoolean();
         minField.active = shouldRender;
         maxField.active = shouldRender;

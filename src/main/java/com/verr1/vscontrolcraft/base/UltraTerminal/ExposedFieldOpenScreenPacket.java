@@ -36,7 +36,8 @@ public class ExposedFieldOpenScreenPacket extends SimplePacketBase {
                     new ExposedFieldMessage(
                             buffer.readEnum(ExposedFieldType.class),
                             buffer.readDouble(),
-                            buffer.readDouble()
+                            buffer.readDouble(),
+                            buffer.readEnum(ExposedFieldDirection.class)
                     )
             );
         }
@@ -51,6 +52,7 @@ public class ExposedFieldOpenScreenPacket extends SimplePacketBase {
             buffer.writeEnum(field.type());
             buffer.writeDouble(field.min());
             buffer.writeDouble(field.max());
+            buffer.writeEnum(field.openTo());
         }
         buffer.writeEnum(currentField);
         buffer.writeBlockPos(pos);

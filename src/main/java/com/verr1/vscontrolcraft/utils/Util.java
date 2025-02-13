@@ -1,6 +1,8 @@
 package com.verr1.vscontrolcraft.utils;
 
+import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.foundation.utility.Pair;
+import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.state.BlockState;
@@ -42,6 +44,20 @@ public class Util {
             return list.get(index);
         }
         return 0;
+    }
+
+    public static Direction getVerticalDirection(BlockState state){
+        if(!state.hasProperty(BlockStateProperties.FACING) ||
+                !state.hasProperty(DirectionalAxisKineticBlock.AXIS_ALONG_FIRST_COORDINATE))return Direction.UP;
+
+        Direction facing = state.getValue(BlockStateProperties.FACING);
+        Boolean align = state.getValue(DirectionalAxisKineticBlock.AXIS_ALONG_FIRST_COORDINATE);
+        if(facing.getAxis() != Direction.Axis.X){
+            if(align)return Direction.EAST;
+            return facing.getAxis() == Direction.Axis.Y ? Direction.SOUTH : Direction.UP;
+        }
+        if(align)return Direction.UP;
+        return Direction.SOUTH;
     }
 
     public static double clamp1(double x){

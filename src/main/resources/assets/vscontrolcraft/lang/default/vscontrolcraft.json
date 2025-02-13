@@ -10,10 +10,13 @@
 
   "vscontrolcraft.screen.labels.confirm": "Confirm Settings",
     "vscontrolcraft.screen.labels.cycle": "Toggle Angular/Speed Mode",
-    "vscontrolcraft.screen.labels.target": "Target: ",
-    "vscontrolcraft.screen.labels.value": "Current: ",
-    "vscontrolcraft.screen.labels.min": "min: ",
-    "vscontrolcraft.screen.labels.max": "max: ",
+    "vscontrolcraft.screen.labels.target": "Target",
+    "vscontrolcraft.screen.labels.value": "Current",
+    "vscontrolcraft.screen.labels.min": "min",
+    "vscontrolcraft.screen.labels.max": "max",
+  "vscontrolcraft.screen.labels.on": "on",
+  "vscontrolcraft.screen.labels.off": "off",
+  "vscontrolcraft.screen.labels.dir": "dir",
 
   "vscontrolcraft.screen.labels.field": "Field",
   "vscontrolcraft.screen.labels.field.none" : "None",
@@ -42,6 +45,10 @@
   "vscontrolcraft.screen.labels.field.thrust_ratio": "F Ratio",
   "vscontrolcraft.screen.labels.field.torque_ratio": "T Ratio",
   "vscontrolcraft.screen.labels.field.value": "Current",
+  "vscontrolcraft.screen.labels.field.mode_angular": "Angle",
+  "vscontrolcraft.screen.labels.field.mode_speed": "Speed",
+  "vscontrolcraft.screen.labels.field.mode_cheat": "Cheat",
+
 
   "itemGroup.vscontrolcraft.main": "Control Craft",
 
