@@ -1,13 +1,10 @@
 package com.verr1.vscontrolcraft.base.UltraTerminal;
 
-import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
 public class ExposedFieldRequestPacket extends SimplePacketBase {
@@ -46,8 +43,7 @@ public class ExposedFieldRequestPacket extends SimplePacketBase {
                 AllPackets.sendToPlayer(
                         new ExposedFieldOpenScreenPacket(
                             availableFields,
-                            currentField,
-                            pos
+                                pos
                         ),
                         context.getSender()
                 );

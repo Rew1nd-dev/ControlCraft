@@ -1,12 +1,10 @@
 package com.verr1.vscontrolcraft.blocks.servoMotor;
 
-import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.gui.AllIcons;
 import com.simibubi.create.foundation.gui.widget.IconButton;
 import com.simibubi.create.foundation.gui.widget.Label;
 import com.simibubi.create.foundation.utility.Components;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerScreen;
-import com.verr1.vscontrolcraft.base.Servo.PIDControllerType;
 import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
@@ -18,6 +16,8 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+
+import java.awt.*;
 
 public class ServoMotorScreen extends PIDControllerScreen {
 
@@ -72,12 +72,13 @@ public class ServoMotorScreen extends PIDControllerScreen {
 
 
         Component onOff= isCheatMode ? AllGuiLabels.onLabel : AllGuiLabels.offLabel;
-        cField = new Label(0, 0, onOff);
+        cField = new Label(0, 0, onOff).colored((isCheatMode ? Color.RED : Color.GRAY).getRGB());;
         cField.text = onOff;
         addRenderableWidget(cField);
 
         toggleCheatMode = new IconButton(0, 0, AllIcons.I_ARM_FORCED_ROUND_ROBIN);
         toggleCheatMode.withCallback(this::toggleCheatMode);
+        toggleCheatMode.setToolTip(AllGuiLabels.cheatLabel);
         addRenderableWidget(toggleCheatMode);
 
 
@@ -109,7 +110,7 @@ public class ServoMotorScreen extends PIDControllerScreen {
     }
 
     public void toggleCheatMode(){
-        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.TOGGLE)
+        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.TOGGLE_0)
                 .build();
         AllPackets.getChannel().sendToServer(p);
         super.register();
@@ -118,7 +119,7 @@ public class ServoMotorScreen extends PIDControllerScreen {
 
     @Override
     public void register() {
-        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING)
+        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING_0)
                 .withDouble(Util.tryParseDouble(oField.getValue()))
                 .build();
         AllPackets.getChannel().sendToServer(p);

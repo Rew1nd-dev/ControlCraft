@@ -2,6 +2,7 @@ package com.verr1.vscontrolcraft.blocks.slider;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.gui.ScreenOpener;
+import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.vscontrolcraft.Config;
@@ -16,6 +17,7 @@ import com.verr1.vscontrolcraft.base.Servo.PID;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerInfoHolder;
 import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
 import com.verr1.vscontrolcraft.base.UltraTerminal.*;
+import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SliderControllerPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.slider.LogicalSlider;
@@ -85,7 +87,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
     private SliderControllerPeripheral peripheral;
     protected LazyOptional<IPeripheral> peripheralCap;
 
-    private List<ExposedFieldWrapper> fields = List.of(
+    private final List<ExposedFieldWrapper> fields = List.of(
             new ExposedFieldWrapper(
                     controlForce::read,
                     controlForce::write,
@@ -130,19 +132,23 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         return exposedField;
     }
 
-    @Override
+    /*
+    * @Override
     public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
-        switch (type){
-            case FORCE -> exposedField = fields.get(0);
-            case TARGET -> exposedField = fields.get(1);
-            case P -> exposedField = fields.get(2);
-            case I -> exposedField = fields.get(3);
-            case D -> exposedField = fields.get(4);
-        }
-
-        exposedField.min_max = new Vector2d(min, max);
-        setChanged();
+        var field =
+            switch (type){
+                case FORCE -> exposedField = fields.get(0);
+                case TARGET -> exposedField = fields.get(1);
+                case P -> exposedField = fields.get(2);
+                case I -> exposedField = fields.get(3);
+                case D -> exposedField = fields.get(4);
+                default -> null;
+            };
+        if(field == null)return;
+        field.min_max = new Vector2d(min, max);
+        field.directionOptional = openTo;
     }
+    * */
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -396,6 +402,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         super.lazyTick();
         if(level.isClientSide)return;
         syncCachedPos();
+        syncClient(getBlockPos(), level);
     }
 
 
@@ -437,6 +444,8 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         tickAnimation();
     }
 
+
+
     public void tickAnimation(){
         animatedDistance.chase(animatedTargetDistance, 0.5, LerpedFloat.Chaser.EXP);
         animatedDistance.tickChaser();
@@ -448,7 +457,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
 
     public void syncClient(){
         if(!level.isClientSide){
-            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_ANIMATION)
+            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_0)
                     .withDouble(getSlideDistance())
                     .build();
             AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
@@ -461,10 +470,11 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
 
 
-        Lang.text("Servo Statistic")
+        Lang.text("Piston Statistic")
                 .style(GRAY)
                 .forGoggles(tooltip);
 
@@ -474,11 +484,22 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
                 .text("m")
                 .style(ChatFormatting.AQUA)
                 .space()
-                .add(Lang.text("current distance")
-                        .style(ChatFormatting.DARK_GRAY))
                 .forGoggles(tooltip, 1);
+
+
+        Direction dir = WandRenderer.lookingAtFaceDirection();
+        if(dir == null)return true;
+        tooltip.add(Components.literal("Face " + dir + " Bounded:"));
+        fields().forEach(f -> {
+            if(!f.directionOptional.test(dir))return;
+            String info = f.type.getComponent().getString();
+            tooltip.add(Component.literal(info).withStyle(ChatFormatting.AQUA));
+        });
+
         return true;
+
     }
+
 
     public LogicalSlider getLogicalSlider() {
         if(level.isClientSide)return null;
@@ -516,7 +537,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
 
         PID pidParams = getControllerInfoHolder().getPIDParams();
 
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
                 .withDouble(t)
                 .withDouble(v)
                 .withDouble(pidParams.p())
@@ -531,7 +552,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN_0){
             double t = packet.getDoubles().get(0);
             double v = packet.getDoubles().get(1);
             double p = packet.getDoubles().get(2);
@@ -540,7 +561,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
                     ScreenOpener.open(new SliderScreen(getBlockPos(), p, i, d, v, t)));
         }
-        if(packet.getType() == BlockBoundPacketType.SYNC_ANIMATION){
+        if(packet.getType() == BlockBoundPacketType.SYNC_0){
             setAnimatedDistance(packet.getDoubles().get(0).floatValue());
         }
     }
@@ -569,4 +590,8 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         }
         getControllerInfoHolder().deserialize(tag.getCompound("controller"));
     }
+
+
+
+
 }

@@ -72,7 +72,7 @@ public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
     }
 
     public void displayScreen(ServerPlayer player){
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
                 .withDouble(airResistance)
                 .withDouble(extraGravity)
                 .build();
@@ -83,7 +83,7 @@ public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN_0){
             airResistance = packet.getDoubles().get(0);
             extraGravity = packet.getDoubles().get(1);
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
@@ -94,7 +94,7 @@ public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
 
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SETTING){
+        if(packet.getType() == BlockBoundPacketType.SETTING_0){
             airResistance = packet.getDoubles().get(0);
             extraGravity = packet.getDoubles().get(1);
         }

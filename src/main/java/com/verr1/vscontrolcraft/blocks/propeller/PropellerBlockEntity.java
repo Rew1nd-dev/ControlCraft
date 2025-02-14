@@ -7,9 +7,6 @@ import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.vscontrolcraft.base.ISyncable;
-import com.verr1.vscontrolcraft.base.UltraTerminal.ITerminalDevice;
-import com.verr1.vscontrolcraft.base.UltraTerminal.NumericField;
-import com.verr1.vscontrolcraft.base.UltraTerminal.WidgetType;
 import com.verr1.vscontrolcraft.network.IPacketHandler;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
@@ -19,10 +16,8 @@ import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
@@ -134,7 +129,7 @@ public class PropellerBlockEntity extends SmartBlockEntity implements
     @Override
     public void syncClient() {
         if(!level.isClientSide){
-            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_ANIMATION)
+            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_0)
                     .withDouble(rotationalSpeed)
                     .build();
             AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
@@ -161,7 +156,7 @@ public class PropellerBlockEntity extends SmartBlockEntity implements
 
 
     public void displayScreen(ServerPlayer player){
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
                 .withDouble(TorqueRatio)
                 .withDouble(ThrustRatio)
                 .build();
@@ -172,11 +167,11 @@ public class PropellerBlockEntity extends SmartBlockEntity implements
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SYNC_ANIMATION){
+        if(packet.getType() == BlockBoundPacketType.SYNC_0){
             double speed = packet.getDoubles().get(0);
             setVisualRotationalSpeed(speed);
         }
-        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN_0){
             double torque_ratio = packet.getDoubles().get(0);
             double thrust_ratio = packet.getDoubles().get(1);
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
@@ -187,7 +182,7 @@ public class PropellerBlockEntity extends SmartBlockEntity implements
 
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SETTING){
+        if(packet.getType() == BlockBoundPacketType.SETTING_0){
             double torque_ratio = packet.getDoubles().get(0);
             double thrust_ratio = packet.getDoubles().get(1);
             setProperty(torque_ratio, thrust_ratio, false);

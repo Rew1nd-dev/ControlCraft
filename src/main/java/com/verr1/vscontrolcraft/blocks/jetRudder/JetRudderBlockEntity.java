@@ -6,7 +6,6 @@ import com.verr1.vscontrolcraft.blocks.jet.JetBlockEntity;
 import com.verr1.vscontrolcraft.network.IPacketHandler;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
-import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
@@ -182,7 +181,7 @@ public class JetRudderBlockEntity extends OnShipDirectinonalBlockEntity implemen
 
     public void syncClient() {
         if(!level.isClientSide){
-            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_ANIMATION)
+            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_0)
                     .withDouble(targetHorizontalAngle)
                     .withDouble(targetVerticalAngle)
                     .withDouble(targetThrust)
@@ -205,7 +204,7 @@ public class JetRudderBlockEntity extends OnShipDirectinonalBlockEntity implemen
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SYNC_ANIMATION){
+        if(packet.getType() == BlockBoundPacketType.SYNC_0){
             double h = packet.getDoubles().get(0);
             double v = packet.getDoubles().get(1);
             double t = packet.getDoubles().get(2);

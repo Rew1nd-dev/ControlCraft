@@ -58,7 +58,14 @@ public class ServoMotorBlock extends DirectionalKineticBlock implements
     public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
                                 boolean isMoving)  {
         if(worldIn.isClientSide)return;
-        withBlockEntityDo(worldIn, pos, be -> be.getExposedField().apply(worldIn.getBestNeighborSignal(pos)));
+        Direction direction = Direction.fromDelta(
+                fromPos.getX() - pos.getX(),
+                fromPos.getY() - pos.getY(),
+                fromPos.getZ() - pos.getZ()
+        );
+        if(direction == null)return;
+        withBlockEntityDo(worldIn, pos, be -> be.accept(worldIn.getSignal(fromPos, direction.getOpposite()), direction));
+
     }
 
     @Override

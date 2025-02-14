@@ -1,10 +1,8 @@
 package com.verr1.vscontrolcraft.blocks.jointMotor;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
-import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
 import com.verr1.vscontrolcraft.base.Servo.PID;
-import com.verr1.vscontrolcraft.blocks.servoMotor.ServoMotorScreen;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
@@ -12,6 +10,7 @@ import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,17 +27,36 @@ public class JointMotorBlockEntity extends AbstractServoMotor
     private boolean assembleNextTick = false;
 
 
+
+    private boolean reverseCreateInput = false;
+
     public JointMotorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         lazyTickRate = 0;
     }
 
+    public boolean isReverseCreateInput() {
+        return reverseCreateInput;
+    }
+
+    public void setReverseCreateInput(boolean reversed){
+        reverseCreateInput = reversed;
+        setTargetFromCreate();
+        setChanged();
+    }
 
     @Override
     public void onSpeedChanged(float previousSpeed) {
         super.onSpeedChanged(previousSpeed);
+        setTargetFromCreate();
+    }
+
+    public void setTargetFromCreate(){
         double createInput2Omega = speed / 60 * 2 * Math.PI;
-        if(!isAdjustingAngle()) getControllerInfoHolder().setTarget(createInput2Omega);
+        double sign = reverseCreateInput ? -1 : 1;
+        if(!isAdjustingAngle()) {
+            getControllerInfoHolder().setTarget(createInput2Omega * sign);
+        }
     }
 
     public Direction getServoDirection(){
@@ -112,7 +130,7 @@ public class JointMotorBlockEntity extends AbstractServoMotor
         boolean c = isCheatMode();
         PID pidParams = getControllerInfoHolder().getPIDParams();
 
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
                 .withDouble(t)
                 .withDouble(v)
                 .withDouble(pidParams.p())
@@ -130,7 +148,7 @@ public class JointMotorBlockEntity extends AbstractServoMotor
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
         super.handleClient(context, packet);
-        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN_0){
             double t = packet.getDoubles().get(0);
             double v = packet.getDoubles().get(1);
             double p = packet.getDoubles().get(2);
@@ -146,8 +164,26 @@ public class JointMotorBlockEntity extends AbstractServoMotor
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
         super.handleServer(context, packet);
-        if(packet.getType() == BlockBoundPacketType.TOGGLE){
+        if(packet.getType() == BlockBoundPacketType.TOGGLE_0){
             setCheatMode(!isCheatMode());
         }
+        if(packet.getType() == BlockBoundPacketType.TOGGLE_1){
+            setReverseCreateInput(!isReverseCreateInput());
+        }
+    }
+
+    @Override
+    protected void read(CompoundTag tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        if(clientPacket)return;
+        tag.putBoolean("reverseCreate", reverseCreateInput);
+    }
+
+
+    @Override
+    protected void write(CompoundTag tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
+        if(clientPacket)return;
+        reverseCreateInput = tag.getBoolean("reverseCreate");
     }
 }

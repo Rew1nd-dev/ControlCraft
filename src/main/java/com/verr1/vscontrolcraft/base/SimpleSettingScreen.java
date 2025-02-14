@@ -7,6 +7,7 @@ import com.simibubi.create.foundation.gui.widget.IconButton;
 import com.simibubi.create.foundation.gui.widget.Label;
 import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldRequestPacket;
 import com.verr1.vscontrolcraft.blocks.terminal.SmallCheckbox;
+import com.verr1.vscontrolcraft.registry.AllGuiLabels;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.registry.AllVSCCGuiTextures;
 import net.minecraft.client.gui.GuiGraphics;
@@ -15,6 +16,7 @@ import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -115,11 +117,11 @@ public abstract class SimpleSettingScreen extends AbstractSimiScreen {
 
         // statLayout.addChild(register, iFields.size(), 0);
 
-        register.setToolTip(Component.literal("set Params"));
+        register.setToolTip(AllGuiLabels.confirmLabel);
         register.setY(guiTop + windowHeight - 12 - 22);
         register.setX(guiLeft + 4);
 
-        redstoneSettings.setToolTip(Component.literal("redstone interface setting"));
+        redstoneSettings.setToolTip(AllGuiLabels.redstoneLabel);
         redstoneSettings.setY(guiTop + windowHeight - 12 - 22);
         redstoneSettings.setX(guiLeft + 4 + 20);
 
@@ -131,7 +133,7 @@ public abstract class SimpleSettingScreen extends AbstractSimiScreen {
 
     public abstract void register();
 
-    public abstract BlockPos getPos();
+    public abstract @NotNull BlockPos getPos();
 
     public void redstoneSetting(){
         AllPackets.getChannel().sendToServer(

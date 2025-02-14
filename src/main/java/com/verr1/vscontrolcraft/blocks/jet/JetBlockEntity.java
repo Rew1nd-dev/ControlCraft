@@ -1,10 +1,15 @@
 package com.verr1.vscontrolcraft.blocks.jet;
 
+import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.gui.ScreenOpener;
+import com.simibubi.create.foundation.utility.Components;
+import com.simibubi.create.foundation.utility.Lang;
+import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.base.UltraTerminal.*;
+import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import com.verr1.vscontrolcraft.blocks.jetRudder.JetRudderBlockEntity;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.JetPeripheral;
@@ -18,9 +23,11 @@ import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -33,15 +40,16 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2d;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.ServerShip;
 
 import java.util.List;
 
+import static net.minecraft.ChatFormatting.GRAY;
+
 public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
-        ITerminalDevice, IPacketHandler
+        ITerminalDevice, IPacketHandler, IHaveGoggleInformation
 {
 
     public SynchronizedField<Double> horizontalAngle = new SynchronizedField<>(0.0);
@@ -62,21 +70,21 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
                     "thrust",
                     WidgetType.SLIDE,
                     ExposedFieldType.THRUST
-            ),
+            ).withSuggestedRange(0, 10000),
             new ExposedFieldWrapper(
                     horizontalAngle::read,
                     horizontalAngle::write,
                     "horizontal",
                     WidgetType.SLIDE,
                     ExposedFieldType.HORIZONTAL_TILT
-            ),
+            ).withSuggestedRange(-Math.PI / 2, Math.PI / 2),
             new ExposedFieldWrapper(
                     verticalAngle::read,
                     verticalAngle::write,
                     "vertical",
                     WidgetType.SLIDE,
                     ExposedFieldType.VERTICAL_TILT
-            )
+            ).withSuggestedRange(-Math.PI / 2, Math.PI / 2)
     );
 
     private ExposedFieldWrapper exposedField = fields.get(0);
@@ -86,16 +94,23 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
         return exposedField;
     }
 
+
+    /*
     @Override
     public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
+        ExposedFieldWrapper field =
         switch (type){
             case THRUST -> exposedField = fields.get(0);
             case HORIZONTAL_TILT -> exposedField = fields.get(1);
             case VERTICAL_TILT -> exposedField = fields.get(2);
-        }
-
-        exposedField.min_max = new Vector2d(min, max);
+            default -> null;
+        };
+        if(field == null)return;
+        field.min_max = new Vector2d(min, max);
+        field.directionOptional = openTo;
     }
+    * */
+
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -202,7 +217,12 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
         syncAttachedInducer();
     }
 
-
+    @Override
+    public void lazyTick() {
+        super.lazyTick();
+        if(level.isClientSide)return;
+        syncClient(getBlockPos(), level);
+    }
 
     public JetBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -222,7 +242,7 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
         double h = horizontalAngle.read();
         double v = verticalAngle.read();
         double t = thrust.read();
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
                 .withDouble(h)
                 .withDouble(v)
                 .withDouble(t)
@@ -234,7 +254,7 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN_0){
             double h = packet.getDoubles().get(0);
             double v = packet.getDoubles().get(1);
             double t = packet.getDoubles().get(2);
@@ -246,7 +266,7 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
 
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SETTING){
+        if(packet.getType() == BlockBoundPacketType.SETTING_0){
             double t = packet.getDoubles().get(0);
             double h = packet.getDoubles().get(1);
             double v = packet.getDoubles().get(2);
@@ -278,4 +298,19 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
         }
     }
 
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+
+        Direction dir = WandRenderer.lookingAtFaceDirection();
+        if(dir == null)return true;
+        tooltip.add(Components.literal("    Face " + dir + " Bounded:"));
+        fields().forEach(f -> {
+            if(!f.directionOptional.test(dir))return;
+            String info = f.type.getComponent().getString();
+            tooltip.add(Component.literal(info).withStyle(ChatFormatting.AQUA));
+        });
+
+        return true;
+    }
 }

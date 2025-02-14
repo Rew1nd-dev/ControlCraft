@@ -3,8 +3,6 @@ package com.verr1.vscontrolcraft.blocks.servoMotor;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
 import com.verr1.vscontrolcraft.base.Servo.PID;
-import com.verr1.vscontrolcraft.base.Servo.PIDControllerOpenScreenPacket;
-import com.verr1.vscontrolcraft.base.Servo.PIDControllerType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
@@ -12,9 +10,7 @@ import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
@@ -99,7 +95,7 @@ public class ServoMotorBlockEntity extends AbstractServoMotor{
         boolean c = isCheatMode();
         PID pidParams = getControllerInfoHolder().getPIDParams();
 
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
                 .withDouble(t)
                 .withDouble(v)
                 .withDouble(pidParams.p())
@@ -118,7 +114,7 @@ public class ServoMotorBlockEntity extends AbstractServoMotor{
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
         super.handleClient(context, packet);
-        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN_0){
             double t = packet.getDoubles().get(0);
             double v = packet.getDoubles().get(1);
             double p = packet.getDoubles().get(2);
@@ -135,7 +131,7 @@ public class ServoMotorBlockEntity extends AbstractServoMotor{
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
         super.handleServer(context, packet);
-        if(packet.getType() == BlockBoundPacketType.TOGGLE){
+        if(packet.getType() == BlockBoundPacketType.TOGGLE_0){
             setCheatMode(!isCheatMode());
         }
     }

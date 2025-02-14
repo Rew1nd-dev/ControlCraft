@@ -4,6 +4,7 @@ import com.verr1.vscontrolcraft.base.Wand.render.WandModesType;
 import com.verr1.vscontrolcraft.registry.AllItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
@@ -112,5 +113,6 @@ public class ClientWand{
         if(Minecraft.getInstance().player == null)return false;
         return Minecraft.getInstance().player.getMainHandItem().is(com.simibubi.create.AllItems.WRENCH.asItem());
     }
+
 
 }

@@ -177,7 +177,7 @@
 - **Description:**
   - Servo motor, with multiple control methods including manual adjustment, redstone, CC input, and speed input. It has a built-in adjustable PID controller with speed and angle control modes, driving the rotation of the physical structure.
 - **Assembly:**
-  - Similar to the clockwork physical bearing, place a block above the bearing surface and right-click the bearing with an empty hand to physicalize the block.
+  - Similar to the clockwork physical bearing, place a block above the bearing surface and shift right-click the bearing with an empty hand to physicalize the block.
 - **Connection:**
   - In addition to manually assembling a load physical structure, the Servo Motor can connect to other physical structures to make them a load.
   - ![img_15.png](img_15.png)
@@ -198,7 +198,7 @@
   - I: The integral coefficient of the PID controller, used to eliminate steady-state errors. It may cause oscillation or slow down the response speed.
   - D: The damping coefficient of the PID controller, used to reduce oscillation, but it may slow down the response speed.
   - Offset: The offset of the Servo Motor's connection surface relative to the physical structure during the next assembly or connection.
-  - Mode switch button: Used to adjust the mode of the Servo Motor.
+  - Mode switch button: Used to adjust toggle angular/speed mode of the Servo Motor.
 - **Speed Input:**
   - In angular velocity mode, mechanical power rotation can be input through the bottom of the Servo Motor, making the rotation target value equal to the speed input value (-256 to 256).
 - **Disassembly:**
@@ -253,6 +253,14 @@
   - Strength: The strength of the magnet.
 - **Attraction**
   - The attraction of the magnet is inversely proportional to the square of the distance and directly proportional to the strength, with a coefficient of 1, i.e., Coulomb's law.
+- **Magnet Peripheral**
+  - ```lua
+    local p = peripheral.find("magnet")
+    
+    p.setStrength(-300)         -- set Magnet strength
+    local v = p.getStrength()   -- get Magnet strength
+    ```
+
 
 ### Joint Motor
 - ![img_20.png](img_20.png)

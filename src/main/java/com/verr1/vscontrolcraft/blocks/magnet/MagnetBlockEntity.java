@@ -21,7 +21,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
@@ -154,7 +153,7 @@ public class MagnetBlockEntity extends SmartBlockEntity implements
     }
 
     protected void displayScreen(ServerPlayer player){
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SETTING)
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SETTING_0)
                 .withDouble(getStrength())
                 .build();
         AllPackets.sendToPlayer(
@@ -167,7 +166,7 @@ public class MagnetBlockEntity extends SmartBlockEntity implements
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SETTING){
+        if(packet.getType() == BlockBoundPacketType.SETTING_0){
             double strength = packet.getDoubles().get(0);
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 ScreenOpener.open(new MagnetScreen(packet.getBoundPos(), strength));
@@ -177,7 +176,7 @@ public class MagnetBlockEntity extends SmartBlockEntity implements
 
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SETTING){
+        if(packet.getType() == BlockBoundPacketType.SETTING_0){
             double strength = packet.getDoubles().get(0);
             setStrength(strength);
         }

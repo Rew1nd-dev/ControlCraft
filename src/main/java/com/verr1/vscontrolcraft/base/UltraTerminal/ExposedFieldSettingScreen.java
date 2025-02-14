@@ -1,8 +1,10 @@
 package com.verr1.vscontrolcraft.base.UltraTerminal;
 
+import com.ibm.icu.impl.ICUNotifier;
 import com.simibubi.create.foundation.gui.AbstractSimiScreen;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.gui.AllIcons;
+import com.simibubi.create.foundation.gui.widget.IconButton;
 import com.simibubi.create.foundation.gui.widget.Label;
 import com.simibubi.create.foundation.gui.widget.ScrollInput;
 import com.simibubi.create.foundation.gui.widget.SelectionScrollInput;
@@ -33,7 +35,6 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
     private final AllVSCCGuiTextures background = AllVSCCGuiTextures.SIMPLE_BACKGROUND_HALF;
 
     private final List<ExposedFieldMessage> availableFields;
-    private final ExposedFieldType currentField;
     private final BlockPos pos;
 
     private SelectionScrollInput fieldSelector;
@@ -47,12 +48,16 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
     private EditBox minField;
     private EditBox maxField;
 
-    private final GridLayout layout = new GridLayout();
+    private IconButton confirm;
+    private IconButton reset;
 
-    public ExposedFieldSettingScreen(BlockPos pos, List<ExposedFieldMessage> availableFields, ExposedFieldType currentField) {
+    private final GridLayout layout = new GridLayout();
+    private final GridLayout buttonLayout = new GridLayout();
+
+    public ExposedFieldSettingScreen(BlockPos pos, List<ExposedFieldMessage> availableFields) {
         this.pos = pos;
         this.availableFields = availableFields;
-        this.currentField = currentField;
+
     }
 
     private void initWidgets(){
@@ -65,12 +70,7 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
                         .map(f -> Component.literal(f.type().name()))
                         .toList())
                 .withRange(0, availableFields.size())
-                .setState(
-                    IntStream.range(0, availableFields.size())
-                            .filter(i -> availableFields.get(i).type() == currentField)
-                            .findFirst()
-                            .orElse(0)
-                )
+                .setState(0)
                 .calling(i -> {
                     var currentSelection = availableFields.get(fieldSelector.getState());
                     fieldLabel.text = currentSelection.type().getComponent();
@@ -120,11 +120,28 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
 
 
         maxField.setFilter(Util::tryParseDoubleFilter);
+
+
+        confirm = new IconButton(0, 0, AllIcons.I_CONFIRM);
+        confirm.withCallback(this::confirm);
+        confirm.setToolTip(Component.literal("Confirm Face Settings"));
+        reset = new IconButton(0, 0, AllIcons.I_TRASH);
+        reset.setToolTip(Component.literal("Dump All Settings"));
+        reset.withCallback(this::reset);
+
         layout.addChild(fieldLabel, 0, 0);
         layout.addChild(directionLabel, 1, 0);
         layout.addChild(fieldSelector, 4, 0);
+
         layout.addChild(directionSelector, 1, 1);
 
+
+        buttonLayout.addChild(reset, 0, 1);
+        buttonLayout.addChild(confirm, 0, 0);
+        buttonLayout.columnSpacing(4);
+
+        layout.addChild(buttonLayout, 5, 0, 1, 2);
+        // layout.addChild(reset, 6, 0);
 
         layout.addChild(minLabel, 2, 0);
         layout.addChild(minField, 2, 1);
@@ -141,6 +158,8 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
         addRenderableWidget(minField);
         addRenderableWidget(maxLabel);
         addRenderableWidget(maxField);
+        addRenderableWidget(confirm);
+        addRenderableWidget(reset);
 
 
 
@@ -150,6 +169,17 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
     @Override
     public void onClose() {
         super.onClose();
+    }
+
+    public void reset(){
+        AllPackets.getChannel().sendToServer(
+                new ExposedFieldResetPacket(
+                        pos
+                )
+        );
+    }
+
+    public void confirm(){
         AllPackets.getChannel().sendToServer(
                 new ExposedFieldSettingsPacket(
                         pos,

@@ -105,4 +105,15 @@ public class WandRenderer {
         return null;
     }
 
+    public static Direction lookingAtFaceDirection(){
+        if(Minecraft.getInstance().player == null)return null;
+        HitResult hitResult = Minecraft.getInstance().player.pick(5, Minecraft.getInstance().getPartialTick(), false);
+
+        if(hitResult.getType() == HitResult.Type.BLOCK){
+            return ((BlockHitResult) hitResult).getDirection();
+        }
+        return null;
+    }
+
+
 }

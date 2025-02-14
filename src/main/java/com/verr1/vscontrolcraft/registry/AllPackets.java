@@ -4,9 +4,7 @@ import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.Hinge.packets.*;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerCycleModePacket;
-import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldOpenScreenPacket;
-import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldRequestPacket;
-import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldSettingsPacket;
+import com.verr1.vscontrolcraft.base.UltraTerminal.*;
 import com.verr1.vscontrolcraft.blocks.revoluteJoint.DirectionalAssemblePacket;
 import com.verr1.vscontrolcraft.blocks.servoMotor.SimpleAssemblePacket;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerOpenScreenPacket;
@@ -40,6 +38,7 @@ public enum AllPackets {
     // SPATIAL_SETTINGS(SpatialSettingsPacket.class, SpatialSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
     TERMINAL_SETTINGS(TerminalSettingsPacket.class, TerminalSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
     EXPOSED_FIELD_SETTINGS(ExposedFieldSettingsPacket.class, ExposedFieldSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    EXPOSED_FIELD_RESET(ExposedFieldResetPacket.class, ExposedFieldResetPacket::new, NetworkDirection.PLAY_TO_SERVER),
     // SPINALYZER_TARGET_SELECTION(SpinalyzerLinkPacket.class, SpinalyzerLinkPacket::new, NetworkDirection.PLAY_TO_SERVER),
     SERVOMOTOR_CONSTRAIN_ASSEMBLE(SimpleAssemblePacket.class, SimpleAssemblePacket::new, NetworkDirection.PLAY_TO_SERVER),
     JOINTMOTOR_CONSTRAIN_ASSEMBLE(DirectionalAssemblePacket.class, DirectionalAssemblePacket::new, NetworkDirection.PLAY_TO_SERVER),
@@ -56,6 +55,7 @@ public enum AllPackets {
     // RECEIVER_SCREEN_OPEN(ReceiverOpenScreenPacket.class, ReceiverOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     // PROPELLER_SCREEN_OPEN(PropellerOpenScreenPacket.class, PropellerOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     PID_SCREEN_OPEN(PIDControllerOpenScreenPacket.class, PIDControllerOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
+    EXPOSED_FIELD_SYNC_CLIENT(ExposedFieldSyncClientPacket.class, ExposedFieldSyncClientPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     // MAGNET_SCREEN_OPEN(MagnetOpenScreenPacket.class, MagnetOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     // ANCHOR_SCREEN_OPEN(AnchorOpenScreenPacket.class, AnchorOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     // SPATIAL_SCREEN_OPEN(SpatialOpenScreenPacket.class, SpatialOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),

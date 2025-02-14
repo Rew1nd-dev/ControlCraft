@@ -3,7 +3,6 @@ package com.verr1.vscontrolcraft.blocks.jointMotor;
 import com.simibubi.create.foundation.gui.AllIcons;
 import com.simibubi.create.foundation.gui.widget.IconButton;
 import com.simibubi.create.foundation.gui.widget.Label;
-import com.simibubi.create.foundation.utility.Components;
 import com.verr1.vscontrolcraft.base.Servo.PIDControllerScreen;
 import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
@@ -11,11 +10,11 @@ import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllBlocks;
 import com.verr1.vscontrolcraft.registry.AllGuiLabels;
 import com.verr1.vscontrolcraft.registry.AllPackets;
-import com.verr1.vscontrolcraft.utils.Util;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+
+import java.awt.*;
 
 public class JointMotorScreen extends PIDControllerScreen {
 
@@ -28,6 +27,7 @@ public class JointMotorScreen extends PIDControllerScreen {
     protected Label cLabel;
     protected Label cField;
     protected IconButton toggleCheatMode;
+    protected IconButton toggleReverse;
 
     public JointMotorScreen(
             BlockPos entityPos,
@@ -60,20 +60,35 @@ public class JointMotorScreen extends PIDControllerScreen {
 
         toggleCheatMode = new IconButton(0, 0, AllIcons.I_ARM_FORCED_ROUND_ROBIN);
         toggleCheatMode.withCallback(this::toggleCheatMode);
+        toggleCheatMode.setToolTip(AllGuiLabels.cheatLabel);
         addRenderableWidget(toggleCheatMode);
 
+
+        toggleReverse = new IconButton(0, 0, AllIcons.I_ARM_FORCED_ROUND_ROBIN);
+        toggleReverse.withCallback(this::setToggleReverse);
+        toggleReverse.setToolTip(Component.literal("Reverse Create Input"));
+        addRenderableWidget(toggleReverse);
+
         Component onOff= isCheatMode ? AllGuiLabels.onLabel : AllGuiLabels.offLabel;
-        cField = new Label(0, 0, onOff);
+        cField = new Label(0, 0, onOff).colored((isCheatMode ? Color.RED : Color.GRAY).getRGB());
         cField.text = onOff;
         addRenderableWidget(cField);
 
     }
 
     public void toggleCheatMode(){
-        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.TOGGLE)
+        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.TOGGLE_0)
                 .build();
         AllPackets.getChannel().sendToServer(p);
         super.register();
+        onClose();
+    }
+
+    public void setToggleReverse(){
+        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.TOGGLE_1)
+                .build();
+        AllPackets.getChannel().sendToServer(p);
+        // super.register();
         onClose();
     }
 
@@ -84,8 +99,10 @@ public class JointMotorScreen extends PIDControllerScreen {
         statisticsLayout.addChild(cLabel, 2, 0);
         statisticsLayout.addChild(cField, 2, 1);
         buttonLayout.addChild(toggleCheatMode, 0, 3);
+        buttonLayout.addChild(toggleReverse, 0, 4);
         controlValueLayout.rowSpacing(3);
         totalLayout.arrangeElements();
+
     }
 
     @Override

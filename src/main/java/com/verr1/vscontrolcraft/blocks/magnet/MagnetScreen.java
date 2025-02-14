@@ -40,8 +40,8 @@ public class MagnetScreen extends SimpleSettingScreen {
     }
 
     public void register() {
-        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING)
-                .withDouble(s)
+        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING_0)
+                .withDouble(Util.tryParseDouble(iFields.get(0).getValue()))
                 .build();
         AllPackets
                 .getChannel()

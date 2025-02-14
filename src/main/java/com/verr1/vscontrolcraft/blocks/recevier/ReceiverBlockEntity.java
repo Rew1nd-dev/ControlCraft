@@ -4,7 +4,6 @@ import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.vscontrolcraft.ControlCraft;
-import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
 import com.verr1.vscontrolcraft.blocks.transmitter.NetworkManager;
 import com.verr1.vscontrolcraft.network.IPacketHandler;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
@@ -26,7 +25,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
@@ -189,7 +187,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity implements
 
         PeripheralKey networkKey = getNetworkKey();
         String peripheralType = getAttachedPeripheralType();
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SETTING)
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SETTING_0)
                 .withLong(networkKey.Protocol())
                 .withUtf8(peripheralType)
                 .withUtf8(networkKey.Name())
@@ -205,7 +203,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity implements
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SETTING){
+        if(packet.getType() == BlockBoundPacketType.SETTING_0){
             String peripheralType = packet.getUtf8s().get(0);
             String name = packet.getUtf8s().get(1);
             Long protocol = packet.getLongs().get(0);
@@ -218,7 +216,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity implements
 
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SETTING){
+        if(packet.getType() == BlockBoundPacketType.SETTING_0){
             String name = packet.getUtf8s().get(0);
             Long protocol = packet.getLongs().get(0);
             resetNetworkRegistry(new PeripheralKey(name, protocol));

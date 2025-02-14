@@ -136,7 +136,7 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
     public void initRow(int i, double row_min, double row_max, ExposedFieldType row_type, boolean isBoolean){
 
         int len_y = 10;
-        int input_len_x = 30;
+        int input_len_x = 40;
         int title_len_x = 45;
         int min_max_len_x = 30;
 
@@ -157,7 +157,7 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
         minField.setBordered(!isBoolean);
         minField.setEditable(!isBoolean);
         minField.setMaxLength(10);
-        minField.setValue(isBoolean ? "0" : row_min + "");
+        minField.setValue(isBoolean ? "0" : String.format("%.2f", row_min));
         minField.setFilter(Util::tryParseDoubleFilter);
 
         var maxTitle = new Label(0, 0, AllGuiLabels.maxLabel).colored(color_label);
@@ -171,7 +171,7 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
         maxField.setBordered(!isBoolean);
         maxField.setEditable(!isBoolean);
         maxField.setMaxLength(10);
-        maxField.setValue(isBoolean ? "1" : row_max + "");
+        maxField.setValue(isBoolean ? "1" : String.format("%.2f", row_max));
         maxField.setFilter(Util::tryParseDoubleFilter);
 
 

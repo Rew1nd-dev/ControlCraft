@@ -1,10 +1,12 @@
 package com.verr1.vscontrolcraft.blocks.spatialAnchor;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
+import com.simibubi.create.foundation.utility.Components;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.base.Servo.ICanBruteDirectionalConnect;
 import com.verr1.vscontrolcraft.base.UltraTerminal.*;
+import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import com.verr1.vscontrolcraft.blocks.jointMotor.JointMotorBlock;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.SpatialAnchorPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.spatial.LogicalSpatial;
@@ -18,9 +20,11 @@ import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -63,7 +67,7 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
                     "offset",
                     WidgetType.SLIDE,
                     ExposedFieldType.OFFSET
-            ),
+            ).withSuggestedRange(0, 16),
             new ExposedFieldWrapper(
                     () -> (double) (isRunning() ? 1 : 0),
                     v -> setRunning(v > 0.5) ,
@@ -84,21 +88,21 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
                     "P",
                     WidgetType.SLIDE,
                     ExposedFieldType.P
-            ),
+            ).withSuggestedRange(2, 25),
             new ExposedFieldWrapper(
                     () -> this.getSchedule().getIp(),
                     v -> this.getSchedule().setIp(v),
                     "I",
                     WidgetType.SLIDE,
                     ExposedFieldType.I
-            ),
+            ).withSuggestedRange(0, 2),
             new ExposedFieldWrapper(
                     () -> this.getSchedule().getDp(),
                     v -> this.getSchedule().setDp(v),
                     "D",
                     WidgetType.SLIDE,
                     ExposedFieldType.D
-            )
+            ).withSuggestedRange(1, 18)
     );
 
     private ExposedFieldWrapper exposedField = fields.get(0);
@@ -340,6 +344,7 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
         return exposedField;
     }
 
+    /*
     @Override
     public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
         switch (type){
@@ -352,6 +357,14 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
         }
         exposedField.min_max = new Vector2d(min, max);
     }
+    * */
+
+    @Override
+    public void lazyTick() {
+        super.lazyTick();
+        if(level.isClientSide)return;
+        syncClient(getBlockPos(), level);
+    }
 
     @Override
     public String name() {
@@ -359,7 +372,7 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
     }
 
     public void syncClient(){
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_ANIMATION)
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_0)
                 .withBoolean(isRunning)
                 .withBoolean(isStatic)
                 .build();
@@ -384,7 +397,7 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
         long protocol = getProtocol();
         boolean isRunning = isRunning();
         boolean isStatic = isStatic();
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
                 .withDouble(offset)
                 .withLong(protocol)
                 .withBoolean(isRunning)
@@ -397,7 +410,7 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN_0){
             BlockPos pos = packet.getBoundPos();
             double offset = packet.getDoubles().get(0);
             long protocol = packet.getLongs().get(0);
@@ -407,7 +420,7 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
                     new SpatialScreen(pos, offset, protocol, isRunning, isStatic)
             ));
         }
-        if(packet.getType() == BlockBoundPacketType.SYNC_ANIMATION){
+        if(packet.getType() == BlockBoundPacketType.SYNC_0){
             isRunning = packet.getBooleans().get(0);
             isStatic = packet.getBooleans().get(1);
         }
@@ -416,7 +429,7 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
 
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SETTING){
+        if(packet.getType() == BlockBoundPacketType.SETTING_0){
             double offset = packet.getDoubles().get(0);
             long protocol = packet.getLongs().get(0);
             boolean isRunning = packet.getBooleans().get(0);
@@ -457,4 +470,22 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
         protocol = compound.getLong("protocol");
 
     }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+
+        Direction dir = WandRenderer.lookingAtFaceDirection();
+        // tooltip.add(Component.literal(""));
+        if(dir == null)return true;
+        tooltip.add(Components.literal("    Face " + dir + " Bounded:"));
+        fields().forEach(f -> {
+            if(!f.directionOptional.test(dir))return;
+            String info = f.type.getComponent().getString();
+            tooltip.add(Component.literal(info).withStyle(ChatFormatting.AQUA));
+        });
+
+        return true;
+    }
+
 }

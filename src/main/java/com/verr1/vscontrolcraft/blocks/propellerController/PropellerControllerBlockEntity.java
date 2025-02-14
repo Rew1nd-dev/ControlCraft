@@ -1,10 +1,12 @@
 package com.verr1.vscontrolcraft.blocks.propellerController;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
+import com.simibubi.create.foundation.utility.Components;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.base.UltraTerminal.*;
+import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.PropellerControllerPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.LogicalPropeller;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.propeller.PropellerForceInducer;
@@ -16,9 +18,11 @@ import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -31,7 +35,6 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2d;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -60,7 +63,7 @@ public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntit
                     "Speed",
                     WidgetType.SLIDE,
                     ExposedFieldType.SPEED
-            )
+            ).withSuggestedRange(0, 64)
     );
 
     @Override
@@ -91,6 +94,13 @@ public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntit
         if(level.isClientSide) return;
         syncAttachedPropeller();
         syncAttachedInducer();
+    }
+
+    @Override
+    public void lazyTick() {
+        super.lazyTick();
+        if(level.isClientSide)return;
+        syncClient(getBlockPos(), level);
     }
 
     public PropellerControllerBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
@@ -170,12 +180,33 @@ public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntit
         return exposedField;
     }
 
-    @Override
+
+    /*
     public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
+        ExposedFieldWrapper field = null;
         if (type == ExposedFieldType.SPEED) {
-            exposedField = fields.get(0);
+            field = fields.get(0);
         }
-        exposedField.min_max = new Vector2d(min, max);
+        if(field == null)return;
+        field.min_max = new Vector2d(min, max);
+        field.directionOptional = openTo;
+    }
+    * */
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+
+        Direction dir = WandRenderer.lookingAtFaceDirection();
+        if(dir == null)return true;
+        tooltip.add(Components.literal("    Face " + dir + " Bounded:"));
+        fields().forEach(f -> {
+            if(!f.directionOptional.test(dir))return;
+            String info = f.type.getComponent().getString();
+            tooltip.add(Component.literal(info).withStyle(ChatFormatting.AQUA));
+        });
+
+        return true;
     }
 
     @Override
@@ -184,7 +215,7 @@ public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntit
     }
 
     public void displayScreen(ServerPlayer player){
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN)
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
                 .withDouble(rotationalSpeed.read())
                 .build();
 
@@ -194,7 +225,7 @@ public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntit
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN){
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN_0){
             double speed = packet.getDoubles().get(0);
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 ScreenOpener.open(new PropellerControllerScreen(getBlockPos(), speed));
@@ -204,7 +235,7 @@ public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntit
 
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        if (packet.getType() == BlockBoundPacketType.SETTING) {
+        if (packet.getType() == BlockBoundPacketType.SETTING_0) {
             double speed = packet.getDoubles().get(0);
             setTargetSpeed(speed);
         }

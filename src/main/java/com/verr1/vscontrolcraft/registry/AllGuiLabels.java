@@ -40,4 +40,10 @@ public class AllGuiLabels {
     public static final Component directionLabel = Component
             .translatable(ControlCraft.MODID + ".screen.labels.dir");
 
+    public static final Component cheatLabel = Component
+            .translatable(ControlCraft.MODID + ".screen.labels.cheat");
+
+    public static final Component redstoneLabel = Component
+            .translatable(ControlCraft.MODID + ".screen.labels.redstone");
+
 }

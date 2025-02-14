@@ -34,7 +34,7 @@ public record LogicalSpatial(
 
     @Override
     public Vector3dc vPos(){
-        return VSMathUtils.getAbsolutePosition(pos, level, align);
+        return VSMathUtils.getAbsolutePosition(level, pos);
     }
 
 

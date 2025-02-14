@@ -45,7 +45,7 @@ public class SpatialScreen extends SimpleSettingScreen {
 
 
     public void register() {
-        var settingPacket = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING)
+        var settingPacket = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING_0)
                 .withDouble(Util.tryParseDouble(iFields.get(0).getValue()))
                 .withLong(Util.tryParseLong(iFields.get(1).getValue()))
                 .withBoolean(bFields.get(0).selected())

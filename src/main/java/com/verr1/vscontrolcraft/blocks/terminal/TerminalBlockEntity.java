@@ -219,7 +219,7 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
 
 
         private Couple<RedstoneLinkNetworkHandler.Frequency> key;
-        // private Vector2d min_max;
+        private Vector2d min_max;
         private ExposedFieldWrapper attachedField;
 
         public boolean isBoolean() {
@@ -232,6 +232,8 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
 
         private boolean isBoolean;
 
+        private int lastAppliedSignal = 0;
+
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
         }
@@ -240,7 +242,7 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
 
         public TerminalChannel(Couple<RedstoneLinkNetworkHandler.Frequency> key, ExposedFieldWrapper attachedField, boolean isBoolean) {
             this.key = key;
-            // this.min_max = min_max;
+            this.min_max = new Vector2d(0, 1);
             this.attachedField = attachedField;
             this.isBoolean = isBoolean;
         }
@@ -250,7 +252,8 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
         }
 
         public void setMinMax(Vector2d min_max){
-            this.attachedField.min_max = min_max;
+            // this.attachedField.min_max = min_max;
+            this.min_max = min_max;
         }
 
         public void setField(ExposedFieldWrapper field){
@@ -263,7 +266,8 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
 
 
         public Vector2d getMinMax(){
-            return attachedField.min_max;
+            // return attachedField.min_max;
+            return min_max;
         }
 
         @Override
@@ -272,8 +276,11 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
         }
 
         @Override
-        public void setReceivedStrength(int power) {
-            attachedField.apply(power);
+        public void setReceivedStrength(int signal) {
+            if(signal == lastAppliedSignal && signal == 0)return;
+            lastAppliedSignal = signal;
+            // attachedField.apply(power);
+            attachedField.field.apply(min_max.x + (min_max.y - min_max.x) * signal / 15);
         }
 
         @Override
@@ -301,6 +308,8 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
             tag.put("key", key.serializeEach(e -> e.getStack().serializeNBT()));
             tag.putBoolean("isBoolean", isBoolean);
             tag.putBoolean("enabled", enabled);
+            tag.putDouble("min", min_max.x);
+            tag.putDouble("max", min_max.y);
             return tag;
         }
 
@@ -308,7 +317,7 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
             key = Couple.deserializeEach(tag.getList("key", 10), e -> RedstoneLinkNetworkHandler.Frequency.of(ItemStack.of(e)));
             isBoolean = tag.getBoolean("isBoolean");
             enabled = tag.getBoolean("enabled");
-
+            min_max = new Vector2d(tag.getDouble("min"), tag.getDouble("max"));
         }
 
     }

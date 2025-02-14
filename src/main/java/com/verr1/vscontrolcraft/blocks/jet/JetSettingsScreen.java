@@ -38,7 +38,7 @@ public class JetSettingsScreen extends SimpleSettingScreen {
 
     @Override
     public void register() {
-        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING)
+        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING_0)
                 .withDouble(Util.tryParseDouble(iFields.get(0).getValue()))
                 .withDouble(Util.tryParseDouble(iFields.get(1).getValue()))
                 .withDouble(Util.tryParseDouble(iFields.get(2).getValue())) // t h v

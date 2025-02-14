@@ -10,9 +10,11 @@ import com.simibubi.create.content.contraptions.ControlledContraptionEntity;
 import com.simibubi.create.content.contraptions.bearing.BearingBlock;
 import com.simibubi.create.content.contraptions.bearing.BearingContraption;
 import com.simibubi.create.content.contraptions.bearing.IBearingBlockEntity;
+import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.*;
 import com.simibubi.create.foundation.blockEntity.behaviour.scrollValue.ScrollValueBehaviour;
+import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.utility.AngleHelper;
 import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Lang;
@@ -21,10 +23,12 @@ import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.base.UltraTerminal.*;
+import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.WingControllerPeripheral;
 import com.verr1.vscontrolcraft.network.IPacketHandler;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -32,8 +36,10 @@ import dan200.computercraft.shared.Capabilities;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -45,6 +51,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
@@ -53,7 +60,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity implements
-        IBearingBlockEntity, ITerminalDevice, IPacketHandler
+        IBearingBlockEntity, ITerminalDevice, IPacketHandler, IHaveGoggleInformation
 {
     protected ControlledContraptionEntity physicalWing;
     protected LerpedFloat clientAnimatedAngle = LerpedFloat.angular();
@@ -150,6 +157,7 @@ public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity imp
 
         if(!level.isClientSide){
             syncClient();
+            syncClient(getBlockPos(), level);
         }
     }
 
@@ -203,11 +211,13 @@ public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity imp
 
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-        tiltAngle = new WingControllerScrollValueBehavior(this)
+        /*
+        * tiltAngle = new WingControllerScrollValueBehavior(this)
                 .between(-180, 180)
                 .withCallback(this::setAngle);
         tiltAngle.setValue(0);
         behaviours.add(tiltAngle);
+        * */
     }
 
     @Override
@@ -279,7 +289,7 @@ public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity imp
 
     public void syncClient(){
         if(!level.isClientSide){
-            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_ANIMATION)
+            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_0)
                     .withDouble(angle)
                     .build();
             AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
@@ -296,6 +306,31 @@ public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity imp
         return exposedField;
     }
 
+    protected void displayScreen(ServerPlayer player){
+        double angle = getAngle();
+
+        var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
+                .withDouble(angle)
+                .build();
+
+        AllPackets.sendToPlayer(p, player);
+    }
+
+    @Override
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        Direction dir = WandRenderer.lookingAtFaceDirection();
+        if(dir == null)return true;
+        tooltip.add(Components.literal("    Face " + dir + " Bounded:"));
+        fields().forEach(f -> {
+            if(!f.directionOptional.test(dir))return;
+            String info = f.type.getComponent().getString();
+            tooltip.add(Component.literal(info).withStyle(ChatFormatting.AQUA));
+        });
+
+        return true;
+    }
+
+    /*
     @Override
     public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
         if (type == ExposedFieldType.ANGLE) {
@@ -304,6 +339,9 @@ public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity imp
         }
         exposedField = fields.get(0);
     }
+    * */
+
+
 
     @Override
     public String name() {
@@ -313,14 +351,49 @@ public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity imp
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SYNC_ANIMATION){
+        if(packet.getType() == BlockBoundPacketType.SYNC_0){
+            double angle = packet.getDoubles().get(0);
+            setAngle((float)angle);
+        }
+        if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN_0){
+            double angle = packet.getDoubles().get(0);
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ScreenOpener.open(new WingControllerScreen(packet.getBoundPos(), angle)));
+        }
+    }
+
+    @Override
+    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
+        if(packet.getType() == BlockBoundPacketType.SETTING_0){
             double angle = packet.getDoubles().get(0);
             setAngle((float)angle);
         }
     }
 
+    @Override
+    protected void write(CompoundTag compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
+        if(clientPacket)return;
+        fields.forEach(e -> compound.put("field_" + e.type.name(), e.serialize()));
+    }
 
-    public static class WingControllerScrollValueBehavior extends ScrollValueBehaviour{
+    @Override
+    protected void read(CompoundTag compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
+        if(clientPacket)return;
+        fields.forEach(e -> e.deserialize(compound.getCompound("field_" + e.type.name())));
+        try{
+            exposedField = fields.get(compound.getInt("exposed_field"));
+        }catch (IndexOutOfBoundsException e){
+            exposedField = fields.get(0);
+        }
+
+
+    }
+}
+
+
+/*
+* public static class WingControllerScrollValueBehavior extends ScrollValueBehaviour{
 
         public WingControllerScrollValueBehavior(SmartBlockEntity be) {
             super(Components.translatable(ControlCraft.MODID + ".screen.labels.field.angle"), be, new WingControllerValueBox());
@@ -398,4 +471,4 @@ public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity imp
             return true;
         }
     }
-}
+* */

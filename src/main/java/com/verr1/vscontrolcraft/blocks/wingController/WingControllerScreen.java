@@ -1,4 +1,4 @@
-package com.verr1.vscontrolcraft.blocks.propellerController;
+package com.verr1.vscontrolcraft.blocks.wingController;
 
 import com.verr1.vscontrolcraft.base.SimpleSettingScreen;
 import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
@@ -8,34 +8,33 @@ import com.verr1.vscontrolcraft.registry.AllBlocks;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class PropellerControllerScreen extends SimpleSettingScreen {
+public class WingControllerScreen extends SimpleSettingScreen {
+    private final double angle;
     private final BlockPos pos;
-    private final double speed;
 
-    public PropellerControllerScreen(BlockPos pos, double speed) {
+    public WingControllerScreen(BlockPos pos, double angle) {
+        this.angle = angle;
         this.pos = pos;
-        this.speed = speed;
     }
+
 
     @Override
     public void startWindow() {
-        addNumericFieldWithLabel(ExposedFieldType.SPEED.getComponent(), Util::tryParseDoubleFilter)
-                .setValue(String.format("%.2f", speed)); // iFields[0]
+        addNumericFieldWithLabel(Component.translatable("vscontrolcraft.screen.labels.field.angle_inDeg"), Util::tryParseDoubleFilter)
+                .setValue(String.format("%.2f", angle));
     }
-
-
 
     @Override
     public void register() {
-
         var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING_0)
                 .withDouble(Util.tryParseDouble(iFields.get(0).getValue()))
                 .build();
-
         AllPackets.getChannel().sendToServer(p);
+        onClose();
     }
 
     @Override
@@ -45,6 +44,6 @@ public class PropellerControllerScreen extends SimpleSettingScreen {
 
     @Override
     protected @Nullable ItemStack renderedStack() {
-        return AllBlocks.PROPELLER_CONTROLLER.asStack();
+        return AllBlocks.WING_CONTROLLER_BLOCK.asStack();
     }
 }

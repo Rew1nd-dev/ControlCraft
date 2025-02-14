@@ -8,6 +8,7 @@ import com.simibubi.create.foundation.block.IBE;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -53,8 +54,12 @@ public class WingControllerBlock extends BearingBlock implements
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
                                  BlockHitResult hit) {
-        if(hit.getDirection() != state.getValue(WingControllerBlock.FACING))
-            return InteractionResult.PASS;
+        if(hit.getDirection() != state.getValue(WingControllerBlock.FACING)){
+            if(worldIn.isClientSide)return InteractionResult.SUCCESS;
+            withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
+            return InteractionResult.SUCCESS;
+        }
+
         if (!player.mayBuild())
             return InteractionResult.FAIL;
         if (player.isShiftKeyDown())

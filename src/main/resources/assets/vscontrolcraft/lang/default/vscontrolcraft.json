@@ -17,6 +17,8 @@
   "vscontrolcraft.screen.labels.on": "on",
   "vscontrolcraft.screen.labels.off": "off",
   "vscontrolcraft.screen.labels.dir": "dir",
+  "vscontrolcraft.screen.labels.cheat": "Toggle Cheat Mode",
+  "vscontrolcraft.screen.labels.redstone": "Redstone Interface Settings",
 
   "vscontrolcraft.screen.labels.field": "Field",
   "vscontrolcraft.screen.labels.field.none" : "None",
@@ -24,7 +26,8 @@
   "vscontrolcraft.screen.labels.field.i" : "I",
   "vscontrolcraft.screen.labels.field.d" : "D",
   "vscontrolcraft.screen.labels.field.target" : "Target",
-  "vscontrolcraft.screen.labels.field.angle" : "Angle",
+  "vscontrolcraft.screen.labels.field.angle" : "Radian",
+  "vscontrolcraft.screen.labels.field.angle_inDeg" : "Degree",
   "vscontrolcraft.screen.labels.field.horizontal_tilt": "Horizontal",
   "vscontrolcraft.screen.labels.field.vertical_tilt": "Vertical",
   "vscontrolcraft.screen.labels.field.speed" : "Speed",

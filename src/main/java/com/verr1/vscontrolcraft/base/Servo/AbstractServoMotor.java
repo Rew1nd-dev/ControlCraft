@@ -13,6 +13,7 @@ import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.base.Hinge.interfaces.IConstrainHolder;
 import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
 import com.verr1.vscontrolcraft.base.UltraTerminal.*;
+import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import com.verr1.vscontrolcraft.blocks.spinalyzer.ShipPhysics;
 import com.verr1.vscontrolcraft.compat.cctweaked.peripherals.ServoMotorPeripheral;
 import com.verr1.vscontrolcraft.compat.valkyrienskies.servo.LogicalServoMotor;
@@ -92,6 +93,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
 
     public void setOffset(double offset) {
         this.offset = offset;
+        setChanged();
     }
 
     public double getOffset() {
@@ -107,35 +109,35 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                     "Torque",
                     WidgetType.SLIDE,
                     ExposedFieldType.TORQUE
-            ),
+            ).withSuggestedRange(0, 1000),
             new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getTarget(),
-                    t -> this.getControllerInfoHolder().setTarget(t),
+                    t -> this.getControllerInfoHolder().setTarget(isAdjustingAngle ? VSMathUtils.clamp(t, Math.PI) : t),
                     "target",
                     WidgetType.SLIDE,
                     ExposedFieldType.TARGET
-            ),
+            ).withSuggestedRange(0, Math.PI / 2),
             new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getPIDParams().p(),
                     p -> this.getControllerInfoHolder().setP(p),
                     "P",
                     WidgetType.SLIDE,
                     ExposedFieldType.P
-            ),
+            ).withSuggestedRange(2, 36),
             new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getPIDParams().i(),
                     i -> this.getControllerInfoHolder().setI(i),
                     "I",
                     WidgetType.SLIDE,
                     ExposedFieldType.I
-            ),
+            ).withSuggestedRange(0, 2),
             new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getPIDParams().d(),
                     d -> this.getControllerInfoHolder().setD(d),
                     "D",
                     WidgetType.SLIDE,
                     ExposedFieldType.D
-            ),
+            ).withSuggestedRange(0, 18),
             new ExposedFieldWrapper(
                     () -> (isLocked ? 1.0 : 0.0),
                     (d) -> {
@@ -172,6 +174,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
 
     public void setCheatMode(boolean cheatMode) {
         this.cheatMode = cheatMode;
+        setChanged();
     }
 
 
@@ -366,6 +369,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 VSGameUtilsKt.getShipObjectWorld((ServerLevel) level)
         );
         isLocked = true;
+        setChanged();
 
     }
 
@@ -381,6 +385,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         * */
         ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "fixed", !isOnServerShip(), false, false));
         isLocked = false;
+        setChanged();
     }
 
 
@@ -581,6 +586,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         super.lazyTick();
         if(level.isClientSide)return;
         constrainAlive();
+        syncClient(getBlockPos(), level);
     }
 
     public void setStartingAngleOfCompanionShip(){
@@ -592,10 +598,11 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        var c =  Components.translatable(ControlCraft.MODID, "title.tooltip.motor").withStyle(GRAY);
+        var c =  Components.translatable(ControlCraft.MODID + ".title.tooltip.motor").withStyle(GRAY).getString();
 
-        tooltip.add(c);
+        tooltip.add(Component.literal("    " + c));
 
         float angle = (float) Math.toDegrees(animatedAngle);
 
@@ -603,15 +610,23 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 .text("°")
                 .style(ChatFormatting.AQUA)
                 .space()
-                .add(
-                        Components.translatable(ControlCraft.MODID, "generic.unit.degree").withStyle(GRAY))
                 .forGoggles(tooltip, 1);
+
+        Direction dir = WandRenderer.lookingAtFaceDirection();
+        if(dir == null)return true;
+        tooltip.add(Components.literal("Face " + dir + " Bounded:"));
+        fields().forEach(f -> {
+            if(!f.directionOptional.test(dir))return;
+            String info = f.type.getComponent().getString();
+            tooltip.add(Component.literal(info).withStyle(ChatFormatting.AQUA));
+        });
+
         return true;
     }
 
     public void syncClient(){
         if(!level.isClientSide){
-            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_ANIMATION)
+            var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.SYNC_0)
                     .withDouble(getServoAngle())
                     .build();
             AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
@@ -630,7 +645,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SYNC_ANIMATION){
+        if(packet.getType() == BlockBoundPacketType.SYNC_0){
             double angle = packet.getDoubles().get(0);
             setAnimatedAngle(angle);
         }
@@ -638,7 +653,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
 
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        if(packet.getType() == BlockBoundPacketType.SETTING){
+        if(packet.getType() == BlockBoundPacketType.SETTING_0){
             double offset = packet.getDoubles().get(0);
             setOffset(offset);
         }
@@ -655,7 +670,10 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         fields.forEach(e -> tag.put("field_" + e.type.name(), e.serialize()));
         tag.putInt("exposedField", fields.indexOf(exposedField));
         tag.put("controller", getControllerInfoHolder().serialize());
-
+        tag.putBoolean("cheatMode", isCheatMode());
+        tag.putBoolean("isLocked", isLocked);
+        tag.putBoolean("angleMode", isAdjustingAngle);
+        tag.putDouble("offset", offset);
     }
 
     @Override
@@ -670,7 +688,13 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
             exposedField = fields.get(0);
         }
         getControllerInfoHolder().deserialize(tag.getCompound("controller"));
+        cheatMode = tag.getBoolean("cheatMode");
+        isLocked = tag.getBoolean("isLocked");
+        isAdjustingAngle = tag.getBoolean("angleMode");
+        offset = tag.getDouble("offset");
     }
+
+
 
 }
 

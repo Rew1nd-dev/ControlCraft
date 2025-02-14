@@ -49,7 +49,7 @@ public class ReceiverScreen extends SimpleSettingScreen {
     }
 
     public void register() {
-        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING)
+        var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING_0)
                 .withUtf8(iFields.get(1).getValue())
                 .withLong(Util.tryParseLong(iFields.get(2).getValue()))
                 .build();

@@ -17,6 +17,7 @@ import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.LayoutSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -124,7 +125,7 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         // buttonLayout.defaultChildLayoutSetting().alignHorizontallyCenter().paddingLeft(13);
         totalLayout.addChild(statisticsLayout, 0, 1);
         totalLayout.addChild(controlValueLayout, 0, 0);
-        totalLayout.addChild(buttonLayout, 2, 0);
+        totalLayout.addChild(buttonLayout, 2, 0, 1, 2);
 
         totalLayout.rowSpacing(2).columnSpacing(12);
 
@@ -209,6 +210,7 @@ public class PIDControllerScreen extends AbstractSimiScreen {
 
         redstoneSettings = new IconButton(0, 0, AllIcons.I_ACTIVE);
         redstoneSettings.withCallback(this::redstoneSetting);
+        redstoneSettings.setToolTip(redstoneLabel);
         addRenderableWidget(redstoneSettings);
 
 
