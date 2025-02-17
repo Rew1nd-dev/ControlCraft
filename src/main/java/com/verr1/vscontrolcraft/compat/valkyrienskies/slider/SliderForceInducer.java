@@ -29,7 +29,10 @@ public class SliderForceInducer extends AbstractExpirableForceInducer {
         }
         return obj;
     }
-
+    /*
+    *
+    *
+    * */
     public void slideControlAndWritePhysics(BlockPos servoPos, PhysShipWrapper ownShip, PhysShipWrapper cmpShip, LogicalSlider property){
         BlockEntity be = property.level().getExistingBlockEntity(servoPos);
         if(!(be instanceof SliderControllerBlockEntity slider))return;
@@ -59,6 +62,11 @@ public class SliderForceInducer extends AbstractExpirableForceInducer {
             case Z -> sign * sub_sc.z();
         };
 
+
+        double metric = property.isAdjustingPosition() ?
+                distance :
+                VSMathUtils.get_dy2x_sc(ownShip, cmpShip, property.slideDir());
+
         double extra = property.force();
         double mass = cmp_sp.mass();
         double scale = slider.getControllerInfoHolder().calculateControlValueScaleLinear();
@@ -68,7 +76,7 @@ public class SliderForceInducer extends AbstractExpirableForceInducer {
         double scale_m = cmpShip.getImpl().getTransform().getShipToWorldScaling().get(id);
         double mass_scale_ratio = Math.pow(scale_m, 3);
 
-        slider.getControllerInfoHolder().overrideError(distance);
+        slider.getControllerInfoHolder().overrideError(metric);
         Vector3dc dirJOML = Util.Vec3itoVector3d(property.slideDir().getNormal());
         Vector3dc dirJOML_wc = own_s2w.transformDirection(new Vector3d(dirJOML));
         double cos = dirJOML_wc.angleCos(new Vector3d(0, 1, 0));
@@ -79,7 +87,7 @@ public class SliderForceInducer extends AbstractExpirableForceInducer {
         Vector3dc cmp_r = new Vector3d(cmp_local_pos).sub(cmpShip.getImpl().getTransform().getPositionInShip());
 
         cmpShip.getImpl().applyInvariantForceToPos(controlForce_wc.mul( 1, new Vector3d()), cmp_r);
-        ownShip.getImpl().applyInvariantForceToPos(controlForce_wc.mul(-1, new Vector3d()), own_r);
+        if(property.shouldCounter())ownShip.getImpl().applyInvariantForceToPos(controlForce_wc.mul(-1, new Vector3d()), own_r);
 
 
         slider.ownPhysics.write(own_sp);

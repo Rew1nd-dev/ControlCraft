@@ -13,6 +13,7 @@ public enum ExposedFieldType {
     TARGET,
 
     ANGLE,
+    DEGREE,
     HORIZONTAL_TILT,
     VERTICAL_TILT,
     SPEED,
@@ -40,6 +41,7 @@ public enum ExposedFieldType {
     VALUE,
 
     MODE_ANGULAR,
+    MODE_POSITION,
     MODE_SPEED,
 
     MODE_CHEAT,

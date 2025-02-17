@@ -57,14 +57,6 @@ public class ServoMotorBlockEntity extends AbstractServoMotor{
         assembleNextTick = true;
     }
 
-
-    @Override
-    public void onSpeedChanged(float previousSpeed) {
-        super.onSpeedChanged(previousSpeed);
-        double createInput2Omega = speed / 60 * 2 * Math.PI;
-        if(!isAdjustingAngle()) getControllerInfoHolder().setTarget(createInput2Omega);
-    }
-
     @Override
     public void tick() {
         super.tick();
@@ -74,6 +66,9 @@ public class ServoMotorBlockEntity extends AbstractServoMotor{
         }
 
         syncCompanionAttachInducer();
+
+
+
         if(level.isClientSide){
             tickAnimation();
         }
@@ -93,6 +88,7 @@ public class ServoMotorBlockEntity extends AbstractServoMotor{
         double o = getOffset();
         boolean m = isAdjustingAngle();
         boolean c = isCheatMode();
+        boolean l = isLocked();
         PID pidParams = getControllerInfoHolder().getPIDParams();
 
         var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
@@ -104,6 +100,7 @@ public class ServoMotorBlockEntity extends AbstractServoMotor{
                 .withDouble(o)
                 .withBoolean(m)
                 .withBoolean(c)
+                .withBoolean(l)
                 .build();
 
         AllPackets.sendToPlayer(p, player);
@@ -123,17 +120,11 @@ public class ServoMotorBlockEntity extends AbstractServoMotor{
             double o = packet.getDoubles().get(5);
             boolean m = packet.getBooleans().get(0);
             boolean c = packet.getBooleans().get(1);
+            boolean l = packet.getBooleans().get(2);
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    ScreenOpener.open(new ServoMotorScreen(getBlockPos(), p, i, d, v, t, o, m, c)));
+                    ScreenOpener.open(new ServoMotorScreen(getBlockPos(), p, i, d, v, t, o, m, c, l)));
         }
     }
 
-    @Override
-    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        super.handleServer(context, packet);
-        if(packet.getType() == BlockBoundPacketType.TOGGLE_0){
-            setCheatMode(!isCheatMode());
-        }
-    }
 
 }

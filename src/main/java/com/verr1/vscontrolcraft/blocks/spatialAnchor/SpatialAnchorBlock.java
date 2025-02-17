@@ -50,6 +50,7 @@ public class SpatialAnchorBlock extends DirectionalAxisKineticBlock implements
                 fromPos.getZ() - pos.getZ()
         );
         if(direction == null)return;
+        int signal = worldIn.getControlInputSignal(fromPos, direction.getOpposite(), false); // direct input
         withBlockEntityDo(worldIn, pos, be -> be.accept(worldIn.getSignal(fromPos, direction.getOpposite()), direction));
 
     }

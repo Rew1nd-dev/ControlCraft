@@ -125,7 +125,7 @@ public class PIDControllerScreen extends AbstractSimiScreen {
         // buttonLayout.defaultChildLayoutSetting().alignHorizontallyCenter().paddingLeft(13);
         totalLayout.addChild(statisticsLayout, 0, 1);
         totalLayout.addChild(controlValueLayout, 0, 0);
-        totalLayout.addChild(buttonLayout, 2, 0, 1, 2);
+        totalLayout.addChild(buttonLayout, 2, 0, 1, 3);
 
         totalLayout.rowSpacing(2).columnSpacing(12);
 

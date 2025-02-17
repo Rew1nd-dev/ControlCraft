@@ -1,7 +1,6 @@
 package com.verr1.vscontrolcraft.blocks.magnet;
 
 import com.simibubi.create.foundation.block.IBE;
-import com.verr1.vscontrolcraft.deprecated.MagnetOpenScreenPacket;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.core.BlockPos;
@@ -32,12 +31,6 @@ public class MagnetBlock extends DirectionalBlock implements IBE<MagnetBlockEnti
         return defaultBlockState().setValue(FACING, context.getClickedFace());
     }
 
-    protected void displayScreen(MagnetBlockEntity entity, Player player){
-        AllPackets.sendToPlayer(
-                new MagnetOpenScreenPacket(entity.getBlockPos(), entity.getStrength()),
-                ((ServerPlayer)player)
-        );
-    }
 
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,

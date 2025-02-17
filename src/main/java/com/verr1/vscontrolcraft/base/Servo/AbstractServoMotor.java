@@ -77,13 +77,23 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     public SynchronizedField<ShipPhysics> asmPhysics = new SynchronizedField<>(ShipPhysics.EMPTY);
     public SynchronizedField<Double> controlTorque = new SynchronizedField<>(0.0);
 
+
+
     private boolean isAdjustingAngle = false;
+
+    private double offset = 0;
+
+    private boolean softLockMode = false;
 
     private final PID defaultAngularModeParams = new PID(24, 0, 14);
     private final PID defaultAngularSpeedModeParams = new PID(10, 0, 0);
 
     private final PIDControllerInfoHolder servoController = new PIDControllerInfoHolder().setParameter(defaultAngularSpeedModeParams);
 
+
+    public boolean isLocked() {
+        return isLocked;
+    }
 
     private boolean isLocked = false;
 
@@ -100,7 +110,18 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         return offset;
     }
 
-    private double offset = 0;
+
+
+    public boolean isSoftLockMode() {
+        return softLockMode;
+    }
+
+    public void setSoftLockMode(boolean softLockMode) {
+        this.softLockMode = softLockMode;
+        if(softLockMode && Math.abs(speed) < 1e-3)tryLock();
+        else tryUnlock();
+        setChanged();
+    }
 
     private final List<ExposedFieldWrapper> fields = List.of(
             new ExposedFieldWrapper(
@@ -141,8 +162,8 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
             new ExposedFieldWrapper(
                     () -> (isLocked ? 1.0 : 0.0),
                     (d) -> {
-                        if(d > 0.5 && !isLocked)lock();
-                        else if(isLocked)unlock();
+                        if(d > 0.5)tryLock();
+                        else if(d < 0.5)tryUnlock();
                     },
                     "Locked",
                     WidgetType.SLIDE,
@@ -152,7 +173,17 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
 
     private ExposedFieldWrapper exposedField = fields.get(5); // isLocked
 
+    private boolean reverseCreateInput = false;
 
+    public boolean isReverseCreateInput() {
+        return reverseCreateInput;
+    }
+
+    public void setReverseCreateInput(boolean reversed){
+        reverseCreateInput = reversed;
+        updateTargetFromCreate();
+        setChanged();
+    }
 
     @Override
     public List<ExposedFieldWrapper> fields() {
@@ -177,7 +208,30 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         setChanged();
     }
 
+    @Override
+    public void onSpeedChanged(float previousSpeed) {
+        super.onSpeedChanged(previousSpeed);
+        updateTargetFromCreate();
+        softLockCheck();
+    }
 
+    public void softLockCheck(){
+        if(isSoftLockMode() && Math.abs(speed) < 1e-3)tryLock();
+        else if(isSoftLockMode() && !isAdjustingAngle() && Math.abs(getControllerInfoHolder().getTarget()) < 1e-3)tryLock();
+        else tryUnlock();
+    }
+
+    public void updateTargetFromCreate(){
+        double createInput2Omega = speed / 60 * 2 * Math.PI;
+        double sign = reverseCreateInput ? -1 : 1;
+        if(!isAdjustingAngle()) {
+            getControllerInfoHolder().setTarget(createInput2Omega * sign);
+        }else{
+            double currentTarget = getControllerInfoHolder().getTarget();
+            double newTarget = Util.radianReset(currentTarget + createInput2Omega * 0.05 * sign);
+            getControllerInfoHolder().setTarget(newTarget);
+        }
+    }
 
     @Override
     public PIDControllerInfoHolder getControllerInfoHolder(){
@@ -323,6 +377,13 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         );
     }
 
+    public void tryLock(){
+        if(!isLocked)lock();
+    }
+
+    public void tryUnlock(){
+        if(isLocked)unlock();
+    }
 
     public void lock(){
         if(level.isClientSide)return;
@@ -333,10 +394,10 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 .mul(new Quaterniond(new AxisAngle4d(Math.toRadians(90.0), 0.0, 0.0, 1.0)), new Quaterniond())
                 .normalize();
 
-        double dumbFix = getServoDirection().getAxisDirection() == Direction.AxisDirection.POSITIVE ? Math.PI / 2 : -Math.PI / 2;
+        double dumbFix = VSMathUtils.getDumbFixOfLockMode(getServoDirection(), getCompanionShipDirection());
 
         Quaterniondc hingeQuaternion_Cmp = new Quaterniond()
-                .rotateAxis(dumbFix + getServoAngle(), getServoDirectionJOML())  // dumb fixing
+                .rotateAxis(dumbFix - getServoAngle(), getCompanionShipDirectionJOML())  // dumbFix +  dumb fixing getServoDirectionJOML()
                 .mul(VSMathUtils.getQuaternionOfPlacement(getCompanionShipDirection().getOpposite()))
                 .mul(new Quaterniond(new AxisAngle4d(Math.toRadians(90.0), 0.0, 0.0, 1.0)), new Quaterniond())
                 .normalize();
@@ -582,6 +643,13 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     }
 
     @Override
+    public void tick() {
+        super.tick();
+        if(isAdjustingAngle())updateTargetFromCreate();
+        // softLockCheck();
+    }
+
+    @Override
     public void lazyTick() {
         super.lazyTick();
         if(level.isClientSide)return;
@@ -657,6 +725,15 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
             double offset = packet.getDoubles().get(0);
             setOffset(offset);
         }
+        if(packet.getType() == BlockBoundPacketType.TOGGLE_0){
+            setCheatMode(!isCheatMode());
+        }
+        if(packet.getType() == BlockBoundPacketType.TOGGLE_1){
+            setReverseCreateInput(!isReverseCreateInput());
+        }
+        if(packet.getType() == BlockBoundPacketType.TOGGLE_2){
+            setSoftLockMode(!isSoftLockMode());
+        }
     }
 
     public float getAnimatedAngle(float partialTick) {
@@ -674,6 +751,8 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         tag.putBoolean("isLocked", isLocked);
         tag.putBoolean("angleMode", isAdjustingAngle);
         tag.putDouble("offset", offset);
+        tag.putBoolean("reverseCreate", reverseCreateInput);
+        tag.putBoolean("softLockMode", softLockMode);
     }
 
     @Override
@@ -692,6 +771,12 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         isLocked = tag.getBoolean("isLocked");
         isAdjustingAngle = tag.getBoolean("angleMode");
         offset = tag.getDouble("offset");
+        reverseCreateInput = tag.getBoolean("reverseCreate");
+        softLockMode = tag.getBoolean("softLockMode");
+
+        if(!isAdjustingAngle){
+            getControllerInfoHolder().setTarget(0);
+        }
     }
 
 

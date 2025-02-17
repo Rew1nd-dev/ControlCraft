@@ -24,7 +24,7 @@ public class WingControllerScreen extends SimpleSettingScreen {
 
     @Override
     public void startWindow() {
-        addNumericFieldWithLabel(Component.translatable("vscontrolcraft.screen.labels.field.angle_inDeg"), Util::tryParseDoubleFilter)
+        addNumericFieldWithLabel(Component.translatable("vscontrolcraft.screen.labels.field.degree"), Util::tryParseDoubleFilter)
                 .setValue(String.format("%.2f", angle));
     }
 

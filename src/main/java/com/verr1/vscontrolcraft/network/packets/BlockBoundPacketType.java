@@ -6,6 +6,7 @@ public enum BlockBoundPacketType {
     SETTING_0,
     TOGGLE_0,
     TOGGLE_1,
+    TOGGLE_2,
     SETTING_1,
     SYNC_0,  // usually for animation
     SYNC_1,

@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.base.Servo;
 
 import com.simibubi.create.foundation.networking.SimplePacketBase;
+import com.verr1.vscontrolcraft.blocks.slider.SliderControllerBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -28,6 +29,9 @@ public class PIDControllerCycleModePacket extends SimplePacketBase {
             BlockEntity be = context.getSender().level().getBlockEntity(pos);
             if(be instanceof AbstractServoMotor servo){
                 servo.toggleMode();
+            }
+            if(be instanceof SliderControllerBlockEntity slider){
+                slider.setMode(!slider.isAdjustingPosition());
             }
         });
         return true;

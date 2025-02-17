@@ -1,7 +1,6 @@
 package com.verr1.vscontrolcraft.blocks.anchor;
 
 import com.simibubi.create.foundation.block.IBE;
-import com.verr1.vscontrolcraft.deprecated.AnchorOpenScreenPacket;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import net.minecraft.core.BlockPos;

@@ -1,11 +1,14 @@
 package com.verr1.vscontrolcraft.base;
 
+import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
@@ -35,6 +38,10 @@ public class ShipConnectorBlockEntity extends OnShipDirectinonalBlockEntity {
     public void setCompanionShipDirection(Direction direction){
         if(direction == null)return;
         this.companionShipDirection = direction;
+    }
+
+    public Vector3d getCompanionShipDirectionJOML(){
+        return Util.Vec3itoVector3d(getCompanionShipDirection().getNormal());
     }
 
     public Direction getCompanionShipDirection(){

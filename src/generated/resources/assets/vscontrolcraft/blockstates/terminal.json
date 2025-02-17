@@ -1,27 +1,53 @@
 {
   "variants": {
-    "facing=down": {
+    "facing=down,half=false": {
       "model": "vscontrolcraft:block/terminal/block",
       "x": 180
     },
-    "facing=east": {
+    "facing=down,half=true": {
+      "model": "vscontrolcraft:block/terminal/block",
+      "x": 180
+    },
+    "facing=east,half=false": {
       "model": "vscontrolcraft:block/terminal/block",
       "x": 90,
       "y": 90
     },
-    "facing=north": {
+    "facing=east,half=true": {
+      "model": "vscontrolcraft:block/terminal/block",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,half=false": {
       "model": "vscontrolcraft:block/terminal/block",
       "x": 90
     },
-    "facing=south": {
+    "facing=north,half=true": {
+      "model": "vscontrolcraft:block/terminal/block",
+      "x": 90
+    },
+    "facing=south,half=false": {
       "model": "vscontrolcraft:block/terminal/block",
       "x": 90,
       "y": 180
     },
-    "facing=up": {
+    "facing=south,half=true": {
+      "model": "vscontrolcraft:block/terminal/block",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,half=false": {
       "model": "vscontrolcraft:block/terminal/block"
     },
-    "facing=west": {
+    "facing=up,half=true": {
+      "model": "vscontrolcraft:block/terminal/block"
+    },
+    "facing=west,half=false": {
+      "model": "vscontrolcraft:block/terminal/block",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,half=true": {
       "model": "vscontrolcraft:block/terminal/block",
       "x": 90,
       "y": 270

@@ -8,6 +8,7 @@ public record TerminalRowData(
         ExposedFieldType type,
         double value,
         Vector2d min_max,
-        boolean isBoolean
+        boolean isBoolean,
+        boolean isReverse
 ) {
 }

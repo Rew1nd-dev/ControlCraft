@@ -5,6 +5,7 @@ import com.simibubi.create.foundation.gui.menu.AbstractSimiContainerScreen;
 import com.simibubi.create.foundation.gui.widget.IconButton;
 import com.simibubi.create.foundation.gui.widget.Label;
 import com.simibubi.create.foundation.utility.Components;
+import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
 import com.verr1.vscontrolcraft.registry.AllGuiLabels;
 import com.verr1.vscontrolcraft.registry.AllVSCCGuiTextures;
@@ -19,6 +20,7 @@ import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2d;
 
+import javax.naming.ldap.Control;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,11 +38,16 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
 
     private final int rows;
 
+    private final int exposedIndex;
+
     private final List<TerminalRowData> row_data = new ArrayList<>();
 
     private final List<EditBox> minFields = new ArrayList<>();
     private final List<EditBox> maxFields = new ArrayList<>();
+    private final List<SmallCheckbox> isReversedFields = new ArrayList<>();
     private final List<SmallCheckbox> toggleFields = new ArrayList<>();
+
+    private final List<SmallCheckbox> selectAsOutputButtons = new ArrayList<>();
 
     private final GridLayout layout = new GridLayout();
 
@@ -50,7 +57,7 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
 
     public TerminalScreen(TerminalMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-
+        this.exposedIndex = menu.contentHolder.getExposedIndex();
         this.pos = menu.contentHolder.getPos();
         this.title = menu.contentHolder.getTitle();
         this.row_data.addAll(menu.contentHolder.getRow_data());
@@ -82,15 +89,6 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
         layout.setY(topPos + 8 + 4);
         layout.rowSpacing(8).columnSpacing(6);
         layout.arrangeElements();
-        /*
-        confirmButton = new IconButton(x + background.width + 160, y + background.height - 20, AllIcons.I_CONFIRM);
-        confirmButton.withCallback(() -> {
-            confirm();
-            onClose();
-        });
-
-        addRenderableWidget(confirmButton);
-        * */
 
     }
 
@@ -125,18 +123,26 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
                                     Util.tryParseDouble(minFields.get(i).getValue()),
                                     Util.tryParseDouble(maxFields.get(i).getValue())
                             ),
-                            toggleFields.get(i).selected()
+                            toggleFields.get(i).selected(),
+                            isReversedFields.get(i).selected()
                     )
             );
         }
-        TerminalSettingsPacket packet = new TerminalSettingsPacket(newSettings, pos);
+        TerminalSettingsPacket packet = new TerminalSettingsPacket(newSettings, pos, getExposedIndex());
         AllPackets.getChannel().sendToServer(packet);
+    }
+
+    public int getExposedIndex(){
+        for(int i = 0; i < selectAsOutputButtons.size(); i++){
+            if(selectAsOutputButtons.get(i).selected())return i;
+        }
+        return -1;
     }
 
     public void initRow(int i, double row_min, double row_max, ExposedFieldType row_type, boolean isBoolean){
 
         int len_y = 10;
-        int input_len_x = 40;
+        int input_len_x = 30;
         int title_len_x = 45;
         int min_max_len_x = 30;
 
@@ -175,26 +181,47 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
         maxField.setFilter(Util::tryParseDoubleFilter);
 
 
-        var toggleField = new SmallCheckbox(0, 0, 10, 10, Components.literal(""), row_data.get(i).enabled());
+        var toggleField = new SmallCheckbox(0, 0, 10, 10, Components.translatable(ControlCraft.MODID + ".tooltip.enable_channel"), row_data.get(i).enabled());
+
+        var toggleReverse = new SmallCheckbox(0, 0, 10, 10, Components.translatable(ControlCraft.MODID + ".tooltip.reverse_redstone"), row_data.get(i).isReverse());
+
+        var select = new SmallCheckbox(0, 0, 10, 10, Components.translatable(ControlCraft.MODID + ".tooltip.as_redstone_input"), i == exposedIndex).withCallback(
+                (self) -> {
+                    for(int j = 0; j < selectAsOutputButtons.size(); j++){
+                        if(j == i)break;
+                        selectAsOutputButtons.get(j).setSelected(false);
+                    }
+                    return false;
+                }
+        );
 
         if(row_type.isBoolean()){
             minField.visible = false;
             maxField.visible = false;
             minTitle.visible = false;
             maxTitle.visible = false;
+        }else{
+            toggleReverse.visible = false;
         }
 
         minFields.add(minField);
         maxFields.add(maxField);
         toggleFields.add(toggleField);
+        isReversedFields.add(toggleReverse);
+        selectAsOutputButtons.add(select);
         // I need min max field, so don't return early
 
         layout.addChild(name, i, 0);
+
         layout.addChild(minTitle, i, 1);
         layout.addChild(minField, i, 2);
         layout.addChild(maxTitle, i, 3);
         layout.addChild(maxField, i, 4);
+
+        layout.addChild(toggleReverse, i, 1);
+
         layout.addChild(toggleField, i, 5);
+        layout.addChild(select, i, 6);
 
         if(row_type.equals(ExposedFieldType.NONE))return;
         addRenderableWidget(minField);
@@ -203,6 +230,8 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
         addRenderableWidget(minTitle);
         addRenderableWidget(maxTitle);
         addRenderableWidget(toggleField);
+        addRenderableWidget(toggleReverse);
+        addRenderableWidget(select);
     }
 
     private void renderFrequencySlot(GuiGraphics graphics){

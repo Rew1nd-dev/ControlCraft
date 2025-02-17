@@ -28,7 +28,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 
 import static com.verr1.vscontrolcraft.registry.AllShapes.HALF_BOX_BASE;
 
@@ -80,8 +82,10 @@ public class ServoMotorBlock extends DirectionalKineticBlock implements
         return InteractionResult.PASS;
     }
 
+
+
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+    public @NotNull VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
         return HALF_BOX_BASE.get(state.getValue(FACING));
     }
 

@@ -3,6 +3,7 @@ package com.verr1.vscontrolcraft.blocks.terminal;
 import com.simibubi.create.content.redstone.link.IRedstoneLinkable;
 import com.simibubi.create.content.redstone.link.RedstoneLinkNetworkHandler;
 import com.simibubi.create.foundation.utility.Couple;
+import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.base.UltraTerminal.*;
 import com.verr1.vscontrolcraft.registry.AllMenuTypes;
@@ -39,6 +40,10 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
     );
 
 
+
+
+    private int exposedChannel = -1;
+
     private final ArrayList<TerminalChannel> channels = new ArrayList<>(
             List.of(
                     new TerminalChannel(EMPTY_FREQUENCY , ExposedFieldWrapper.EMPTY, false),
@@ -52,6 +57,14 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
 
     private final ChannelWrapper wrapper = new ChannelWrapper();
 
+    public void accept(int directSignal){
+        if(!(exposedChannel < channels.size() && exposedChannel >= 0))return;
+        channels.get(exposedChannel).setReceivedStrength(directSignal);
+    }
+
+    public void setExposedChannel(int exposedChannel) {
+        this.exposedChannel = exposedChannel;
+    }
 
     private void clearChannelField(){
         channels.forEach(e -> e.setField(ExposedFieldWrapper.EMPTY));
@@ -86,6 +99,8 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
             channels.get(i).setField(ExposedFieldWrapper.EMPTY);
         }
     }
+
+
 
     public TerminalBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -142,6 +157,14 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
         deviceChanged();
     }
 
+    public void setReversed(List<Boolean> row_reversed){
+        for(int i = 0; i < min(row_reversed.size(), channels.size()); i++){
+            channels.get(i).setReversed(row_reversed.get(i));
+        }
+        setChanged();
+        deviceChanged();
+    }
+
     public void setEnabled(List<Boolean> enabled){
         for(int i = 0; i < min(enabled.size(), this.channels.size()); i++){
             channels.get(i).setEnabled(enabled.get(i));
@@ -171,6 +194,7 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
         if(clientPacket)return;
         channels.forEach(e -> compound.put("channel_" + channels.indexOf(e), e.serialize()));
         compound.put("wrapper", wrapper.saveToTag());
+        compound.putInt("exposedChannel", exposedChannel);
     }
 
     @Override
@@ -179,10 +203,11 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
         if(clientPacket)return;
         channels.forEach(e -> e.deserialize(compound.getCompound("channel_" + channels.indexOf(e))));
         wrapper.loadFromTag(compound.getCompound("wrapper"));
+        exposedChannel = compound.getInt("exposedChannel");
     }
 
     public void openScreen(Player player){
-        wrapper.overrideData(getChannels(), getBlockPos(), getAttachedDeviceName());
+        wrapper.overrideData(getChannels(), getBlockPos(), getAttachedDeviceName(), exposedChannel);
         NetworkHooks.openScreen((ServerPlayer) player, this, wrapper::write);
     }
 
@@ -215,12 +240,25 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
         );
     }
 
+
+
+
     public class TerminalChannel implements IRedstoneLinkable {
 
 
         private Couple<RedstoneLinkNetworkHandler.Frequency> key;
         private Vector2d min_max;
         private ExposedFieldWrapper attachedField;
+
+        public boolean isReversed() {
+            return isReversed;
+        }
+
+        public void setReversed(boolean reversed) {
+            isReversed = reversed;
+        }
+
+        private boolean isReversed;
 
         public boolean isBoolean() {
             return isBoolean;
@@ -277,9 +315,10 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
 
         @Override
         public void setReceivedStrength(int signal) {
-            if(signal == lastAppliedSignal && signal == 0)return;
+            if(signal == lastAppliedSignal)return;  // && signal == 0
             lastAppliedSignal = signal;
             // attachedField.apply(power);
+            if(isReversed && isBoolean)signal = 15 - signal;
             attachedField.field.apply(min_max.x + (min_max.y - min_max.x) * signal / 15);
         }
 
@@ -310,14 +349,21 @@ public class TerminalBlockEntity extends OnShipDirectinonalBlockEntity implement
             tag.putBoolean("enabled", enabled);
             tag.putDouble("min", min_max.x);
             tag.putDouble("max", min_max.y);
+            tag.putBoolean("isReversed", isReversed);
             return tag;
         }
 
         public void deserialize(CompoundTag tag){
-            key = Couple.deserializeEach(tag.getList("key", 10), e -> RedstoneLinkNetworkHandler.Frequency.of(ItemStack.of(e)));
-            isBoolean = tag.getBoolean("isBoolean");
-            enabled = tag.getBoolean("enabled");
-            min_max = new Vector2d(tag.getDouble("min"), tag.getDouble("max"));
+            try{
+                key = Couple.deserializeEach(tag.getList("key", 10), e -> RedstoneLinkNetworkHandler.Frequency.of(ItemStack.of(e)));
+                isBoolean = tag.getBoolean("isBoolean");
+                enabled = tag.getBoolean("enabled");
+                min_max = new Vector2d(tag.getDouble("min"), tag.getDouble("max"));
+                isReversed = tag.getBoolean("isReversed");
+            }catch (Exception e){
+                ControlCraft.LOGGER.info("Some Channel Didn't Get Properly Deserialized");
+            }
+
         }
 
     }

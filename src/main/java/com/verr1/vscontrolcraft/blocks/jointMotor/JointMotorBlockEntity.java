@@ -28,36 +28,16 @@ public class JointMotorBlockEntity extends AbstractServoMotor
 
 
 
-    private boolean reverseCreateInput = false;
+
 
     public JointMotorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         lazyTickRate = 0;
     }
 
-    public boolean isReverseCreateInput() {
-        return reverseCreateInput;
-    }
 
-    public void setReverseCreateInput(boolean reversed){
-        reverseCreateInput = reversed;
-        setTargetFromCreate();
-        setChanged();
-    }
 
-    @Override
-    public void onSpeedChanged(float previousSpeed) {
-        super.onSpeedChanged(previousSpeed);
-        setTargetFromCreate();
-    }
 
-    public void setTargetFromCreate(){
-        double createInput2Omega = speed / 60 * 2 * Math.PI;
-        double sign = reverseCreateInput ? -1 : 1;
-        if(!isAdjustingAngle()) {
-            getControllerInfoHolder().setTarget(createInput2Omega * sign);
-        }
-    }
 
     public Direction getServoDirection(){
 
@@ -107,6 +87,8 @@ public class JointMotorBlockEntity extends AbstractServoMotor
             assembleNextTick = false;
         }
 
+
+
         syncCompanionAttachInducer();
         if(level.isClientSide){
             tickAnimation();
@@ -129,7 +111,7 @@ public class JointMotorBlockEntity extends AbstractServoMotor
         boolean m = isAdjustingAngle();
         boolean c = isCheatMode();
         PID pidParams = getControllerInfoHolder().getPIDParams();
-
+        boolean l = isLocked();
         var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
                 .withDouble(t)
                 .withDouble(v)
@@ -138,6 +120,7 @@ public class JointMotorBlockEntity extends AbstractServoMotor
                 .withDouble(pidParams.d())
                 .withBoolean(m)
                 .withBoolean(c)
+                .withBoolean(l)
                 .build();
 
         AllPackets.sendToPlayer(p, player);
@@ -156,34 +139,13 @@ public class JointMotorBlockEntity extends AbstractServoMotor
             double d = packet.getDoubles().get(4);
             boolean m = packet.getBooleans().get(0);
             boolean c = packet.getBooleans().get(1);
+            boolean l = packet.getBooleans().get(2);
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    ScreenOpener.open(new JointMotorScreen(getBlockPos(), p, i, d, v, t, m, c)));
+                    ScreenOpener.open(new JointMotorScreen(getBlockPos(), p, i, d, v, t, m, c, l)));
         }
     }
 
-    @Override
-    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        super.handleServer(context, packet);
-        if(packet.getType() == BlockBoundPacketType.TOGGLE_0){
-            setCheatMode(!isCheatMode());
-        }
-        if(packet.getType() == BlockBoundPacketType.TOGGLE_1){
-            setReverseCreateInput(!isReverseCreateInput());
-        }
-    }
-
-    @Override
-    protected void read(CompoundTag tag, boolean clientPacket) {
-        super.read(tag, clientPacket);
-        if(clientPacket)return;
-        tag.putBoolean("reverseCreate", reverseCreateInput);
-    }
 
 
-    @Override
-    protected void write(CompoundTag tag, boolean clientPacket) {
-        super.write(tag, clientPacket);
-        if(clientPacket)return;
-        reverseCreateInput = tag.getBoolean("reverseCreate");
-    }
+
 }

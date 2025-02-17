@@ -2,8 +2,8 @@
 ## Blocks:
 ### ChunkLoader:
 
-- ![img.png](img.png)
 
+![chunk_loader_block.png](chunk_loader_block.png)
 - **简述:** 
   - 放置于VS船上，自动地强加载周围区块的方块
 - **详情:** 
@@ -13,25 +13,26 @@
 
 ### Propeller Controller & Propeller：
 - Propeller Controller：
-- ![img_1.png](img_1.png)
+- ![propeller_controller_block.png](propeller_controller_block.png)
 - Propeller：
-- ![img_2.png](img_2.png)
+- ![propeller_block.png](propeller_block.png)
 - 结合使用：
-- ![img_3.png](img_3.png)
+- ![propeller_multiblock.png](propeller_multiblock.png)
 - **简述:**
   - 将Propeller放置于Propeller Controller之上以发挥作用，其实际作用为一个带反扭矩的螺旋桨推进器
 - **Propeller Controller 控制面板**
-  - ![img_4.png](img_4.png)
+  - ![propeller_controller_panel.png](propeller_controller_panel.png)
   - Speed: 输入转速以调整螺旋桨的转速，默认情况下没有限制
 - **Propeller 控制面板**
-  - ![img_5.png](img_5.png)
+  - ![propeller_panel.png](propeller_panel.png)
   - T Ratio: 螺旋桨旋转时对物理结构的反扭矩系数
   - F Ratio：螺旋桨的升力系数
 - **作用力：**
   - 方向：正转速，正扭矩系数，正作用力系数输入时，螺旋桨选择方向为顺时针，产生的反扭距使得物理结构往逆时针方向旋转，作用力方向朝上
   - 大小：转速乘以系数
 - **Propeller Controller 红石接口**
-  - ![img_6.png](img_6.png)
+  - ![propeller_controller_redstone.png](propeller_controller_redstone.png)
+  - 方向：使用第二行图标(NONE右侧)可以设置该属性绑定的方块面输入，当该面更新时，接收红石信号
   - Speed: 当接入红石信号时，使得转速在min max之间等间隔取值，0时取min，15时取max
 - **Propeller Controller CC外设**
 - ```lua
@@ -44,17 +45,17 @@
   
 ### Peripheral Proxy & Peripheral Interface
 - Peripheral Proxy 
-- ![img_7.png](img_7.png)
+- ![proxy_block.png](proxy_block.png)
 - Peripheral Interface
-- ![img_8.png](img_8.png)
+- ![interface_block.png](interface_block.png)
 - **简述:**
   - 将Proxy贴在CC电脑上，Interface贴在CC外设上，可以通过Proxy远程调用Interface所贴的外设
 - **Peripheral Interface 控制面板：**
 
   - 未贴在外设上：
-  - ![img_9.png](img_9.png)
+  - ![interface_panel_notattached.png](interface_panel_notattached.png)
   - 贴在外设上，以Propeller Controller为例：
-  - ![img_10.png](img_10.png)
+  - ![interface_panel_attached.png](interface_panel_attached.png)
 
   - 面板第一行Type为该外设ID，Name初始为null，表示未命名，Channel默认为0
 
@@ -101,11 +102,17 @@
     ```
     
 ### Flap Bearing
-- ![img_11.png](img_11.png)
+- ![flap_bearing_block.png](flap_bearing_block.png)
 - **简述:**
-  - 襟翼轴承，可以通过侧面滑条调整角度，通过CC外设调整角度，目前尚无法用红石调整角度，现在它被红石激活时角度会调整为1°（未完工）
+  - 襟翼轴承，功能类似ClockWork，但是可以通过cc外设控制，也可以通过红石控制
 - **组装**
-  - 使用方法类似clockwork襟翼轴承，激活时空手右键顶面（没有滑条，且与动态结构相连的那一面）进行组装
+  - 使用方法类似clockwork襟翼轴承，激活时空手右键顶面（与动态结构相连的那一面）进行组装
+- **控制面板**
+  - ![img.png](flap_bearing_panel.png)
+  - Degree: 襟翼的偏转角度
+- **红石接口**
+  - 方向：使用第二行图标(NONE右侧)可以设置该属性绑定的方块面输入，当该面更新时，接收红石信号
+  - Degree: 可设置偏转角度为红石输入控制的属性
 - **CC外设**
   - ```lua
     local p = peripheral.find("WingController")
@@ -116,7 +123,7 @@
   - 改变角度时，其flap动态结构只是看起来有个调整过程，但是其角度实际是立马设为目标角度的
 
 ### Spinalyzer
--![img_12.png](img_12.png)
+- ![spinalyzer_block.png](spinalyzer_block.png)
 - **简述:**
   - 物理姿态分析仪，通过CC外设可以获取当前物理结构的物理姿态
 - **CC外设**
@@ -169,20 +176,20 @@
   - 关于如何在物理刻下运行CC，请参考其他章节
 
 ### Camera
--![img_13.png](img_13.png)
+- ![camera_block.png](camera_block.png)
 - **简述:**
   - 相机，目前只是个改变玩家视角的小玩具，在物理结构上使用时会根据物理结构的旋转改变玩家视角
   - 使用相机视角时，你依然可以操控你自己
 
 ### Sevo Motor
-- ![img_14.png](img_14.png)
+- ![servo_block.png](servo_block.png)
 - **简述:**
   - 伺服电机，拥有手调，红石，CC输入，转速输入的多种控制方式，内置可调的PID控制器，调速，调角两种控制模式，带动物理结构旋转
 - **组装**
   - 使用时类似clockwork物理轴承，在轴承面上方放置方块，shift+空手右键轴承以将该方块物理化
 - **连接**
   - 除了手动组装产生负载物理结构，Servo Motor可以连接其他物理结构使其成为负载
-  - ![img_15.png](img_15.png)
+  - ![servo_assemble.png](servo_assemble.png)
     - 将工具枪调至Servo模式 
     - 使用工具枪右键Servo Motor，可以看见红框，其表示Servo Motor的连接面
     - 使用工具枪右键其他物理结构的方块面，可以看见黄框，其表示连接后贴合红色连接面的方块面
@@ -192,23 +199,38 @@
       面之间距离超过1格，则不会添加约束
       - 可以通过其他mod的重力枪手动将两个面靠近，使得连接能够完成
 - **锁定**
-  - **默认状态**下，通入大于7.5的红石信号，Servo Motor将会锁定负载结构，使其无法旋转
+  - 在红石接口GUI中，将锁定属性绑定到某些面的红石信号输入下，通入大于7.5的红石信号，Servo Motor将会锁定负载结构，使其无法旋转
+
 - **控制面板**
-  - ![img_16.png](img_16.png)
+  - ![servo_panel.png](servo_panel.png)
   - Target: 目标值，角速度模式时，为目标角速度(rad/s), 角度模式时，为目标角度(rad), 角度模式下输入范围为-pi - pi
   - current: 当前值，角速度时为当前伺服角速度，角度模式时为当前伺服角度
   - p: PID控制器的比例系数，p越高，调整越快，但是可能引起更大的震荡
   - i: PID控制器积分系数，用于消除稳态误差，可能引起震荡，或是减慢响应速度
   - d: PID控制器的阻尼系数，用于减小震荡，但是可能减慢响应速度
   - offset: 下一次组装或连接物理结构时，Servo Motor的连接面相对于物理结构的偏移量
-  - 转换模式按钮: 用于调整Servo Motor的角度/角速度模式
+  - 转换角度/角速度模式按钮: 用于调整Servo Motor的角度/角速度模式
+  - 转换作弊模式: 用以开启作弊模式
+  - 反转转速输入: 使得通入转速时产生的旋转反相
+  - 软锁定模式: 切换软锁定模式
+- **角速度模式**
+  - 通过控制面板可以观察当前的模式(Angle/Speed), 角速度模式下，Target为目标角速度，如果Servo底端接入了转速，则Target会自动设置为输入转速(rpm换算所得的rad/s)
+- **角度模式**
+  - 通过控制面板可以观察当前的模式(Angle/Speed), 角度模式下，Target为目标角度，有效范围-pi~pi, 如果如果Servo底端接入了转速，则Target会自动按照转速变化，使得负载按照输入转速旋转
+- **作弊模式**
+  - 此模式打开时，控制负载旋转不会产生反作用力/力矩
 - **转速输入**
   - 角速度模式下，通过Servo Motor的底部可以接入机械动力的旋转，使得旋转目标值等于转速输入值(-256 ~ 256)
+  - 角度模式下，该旋转将自动改变Target(目标角度)的值，使得Servo Motor按照转速旋转
+- **软锁定模式**
+  - 角速度模式下，当Target值小于1e-3时，Servo Motor将自动锁定
+  - 在角度模式下，当转速输入变为0时，也会自动锁定
 - **拆卸**
   - 使用工具枪的Destory模式右键轴承，将会断开连接
 - **红石接口**
-  - ![img_17.png](img_17.png)
-  - 可以选择6个域作为红石信号的控制量
+  - ![servo_redstone.png](servo_redstone.png)
+  - 方向: 将该属性绑定至特定方块面的红石输入上
+  - 可以选择6个属性作为红石信号的控制量
     - torque: 使用红石控制输出力矩, 根据红石信号强度在min, max间线性变化
     - Target: 使用红石控制目标值，和控制面板的Target含义相同, 根据红石信号强度在min, max间线性变化
     - p: 使用红石控制PID控制器的比例系数，根据红石信号强度在min, max间线性变化
@@ -244,17 +266,17 @@
     ```
 - **注意事项**
   - 负数的PID输入可能导致震荡，在config中可以设置将负数输入取绝对值
-  - 由于游戏中的PID控制本质上是离散的，过高的d也会导致震荡，在角速度模式时，建议d设为0，在角度模式时，建议不要超过20
+  - 由于游戏中的PID控制本质上是离散的，过高的d也会导致震荡，在角速度模式时，建议i,d设为0，在角度模式时，建议不要超过20
   - 由于servo motor只能获取直接连接的物理结构质量，当该负载物理结构通过约束连接其他物理结构时，可能会使得控制表现下降，可以酌情提高p值，i值
   - 请不要使用扳手改变带着负载的Servo Motor的朝向，这会使得它不能正常工作，如果不小心改变了，调整回去后依然可以正常运行
 
 
 ### Magnet
--![img_18.png](img_18.png)
+- ![magnet_block.png](magnet_block.png)
 - **简述:**
   - 磁铁，可以设置强度，视作一个电荷，强度的符号即表示正负电荷强度
 - **控制面板**
-  - ![img_19.png](img_19.png)
+  - ![magnet_panel.png](magnet_panel.png)
   - Strength: 磁铁的强度
 - **吸引力**
   - 磁铁的吸引力与距离的平方成反比，与强度成正比，系数为1，即库仑力公式
@@ -267,14 +289,14 @@
     ```
 
 ### Joint Motor
--![img_20.png](img_20.png)
+- ![joint_block.png](joint_block.png)
 - **简述:**
-  - 关节电机，除了旋转方向不同，无法调节offset，没有转速输入外，与Servo Motor几乎一致，具体参考Servo Motor章节
+  - 关节电机，除了旋转方向不同，无法调节offset，与Servo Motor几乎一致，具体参考Servo Motor章节
 - **朝向**
-  - ![img_21.png](img_21.png)
+  - ![joint_orientation.png](joint_orientation.png)
   - Joint Motor可以朝向6个面，在每个面上可以设置平行和垂直两种取向，使用扳手调节朝向
 - **连接**
-  - ![img_24.png](img_24.png)
+  - ![joint_assemble.png](joint_assemble.png)
   - 使用工具枪进行连接
     - 工具枪调至Joint模式
     - 右键Joint Motor，出现红黄两个面
@@ -288,13 +310,13 @@
 
 
 ### Spherical Hinge
--![img_22.png](img_22.png)
+- ![spherical_hinge_block.png](spherical_hinge_block.png)
 - **简述:**
   - 球形铰链，可以使得两个物理结构通过球铰链相连
 - **高度**
   - 通过扳手右键可以调整球铰链的高度，注意对已连接的铰链调整高度不能立刻生效，需要重新连接
 - **连接**
-  - ![img_23.png](img_23.png)
+  - ![spherical_hinge_assemble.png](spherical_hinge_assemble.png)
   - 使用工具枪连接铰链
     - 工具枪调至Hinge模式
     - 右键球铰链A，出现绿色面，表示连接面（将会保存约束信息）
@@ -308,37 +330,37 @@
   - 理论上可以将多个铰链连接在同一点，但是需要正确选择每次连接的铰链为**没有保存约束信息**的铰链，否则可能之前的连接会断开，因此并不建议这么做
 
 ### Revolute Hinge
-- ![img_25.png](img_25.png)
+- ![revolute_hinge_block.png](revolute_hinge_block.png)
 - **简述**
   - 柱铰链，使两个物理结构通过柱铰链相连
 - **高度**
   - 内容与球铰链相同
 - **连接** 
-  - ![img_26.png](img_26.png)
+  - ![revolute_hinge_sided.png](revolute_hinge_sided.png)
   - 手持工具枪调至Hinge模式，或手持扳手时，可以看见柱铰链方块侧面出现红色框，该框代表朝向
   - 使用工具枪进行连接，步骤和球铰链相同
   - 注意：
-    - ![img_27.png](img_27.png)
+    - ![revolute_hinge_connected.png](revolute_hinge_connected.png)
     - 连接完成后，两个柱铰链的红色框面将会面向同一方向
 - **朝向**
   - 使用扳手shift+右键可以改变红色面的朝向
 
 ### Pivot Hinge
-- ![img_28.png](img_28.png)
+- ![pivot_hinge.png](pivot_hinge.png)
 - **简述**
-  - ![img_29.png](img_29.png)
+  - ![pivot_hinge_connected.png](pivot_hinge_connected.png)
   - 扭转铰链，使得两个物理结构通过扭转铰链相连，功能和使用方式类似球铰链，只不过旋转轴为垂直向上
   
 
 ### Physical Piston
-- ![img_30.png](img_30.png)
+- ![physical_piston_block.png](physical_piston_block.png)
 - **简述**
   - 可以连接物理结构的活塞，可以视为一个可调刚度，可调平衡位置的弹簧
 - **组装**
   - 在活塞顶端放置方块，shift+右键活塞可以将该方块组装成物理结构并由活塞带动
 - **连接**
   - 使用工具枪进行连接
-    - ![img_31.png](img_31.png)
+    - ![physical_piston_assemble.png](physical_piston_assemble.png)
     - 右键活塞，出现红色面，黄色面
     - 右键待连接的物理结构，点击面出现红框（A）
     - 右键待连接的物理结构的另一处，点击面出现黄框（B）
@@ -351,14 +373,30 @@
       - 面A和面B在选择时须相互垂直，否则将无法选择面B
       - 面B可以位于其他方块上（甚至其他船，但这么做没有意义），仅仅作为方向指示
 - **控制面板**
-  - ![img_32.png](img_32.png)
-  - Target: 目标距离值，表示被控件相对活塞的目标位置，可以视为活塞的平衡位置
-  - current: 当前距离值，表示被控件相对活塞的实际位置
+  - ![physical_piston_panel.png](physical_piston_panel.png)
+  - Target: 目标距离/速度值，表示被控件相对活塞的目标位置/目标速度，可以视为活塞的平衡位置/推动速度
+  - current: 当前距离/速度值，表示被控件相对活塞的实际位置/实际速度
   - p: PID控制器的比例系数，p越高，调整越快，但是可能引起更大的震荡
   - i: PID控制器积分系数，用于消除稳态误差，可能引起震荡，或是减慢响应速度
   - d: PID控制器的阻尼系数，用于减小震荡，但是可能减慢响应速度 
+  - 转换位置/速度模式按钮: 用于调整活塞的位置/速度模式
+  - 转换作弊模式: 用以开启作弊模式
+  - 软锁定模式: 切换软锁定模式
+- **速度模式**
+  - 通过控制面板可以观察当前的模式(Position/Speed), 速度模式下，Target为目标速度，如果活塞底端接入了转速，则Target会自动设置为输入转速(rpm换算所得的m/s)
+- **位置模式**
+  - 通过控制面板可以观察当前的模式(Position/Speed), 位置模式下，Target为目标位置, 如果如果活塞底端接入了转速，则Target会自动按照转速变化，使得负载按照输入转速前进(rpm换算所得的m/s)
+- **作弊模式**
+  - 此模式打开时，控制负载旋转不会产生反作用力/力矩
+- **转速输入**
+  - 速度模式下，通过活塞的底部可以接入机械动力的旋转
+  - 位置模式下，该旋转将自动改变Target(目标角度)的值
+- **软锁定模式**
+  - 速度模式下，当Target值小于1e-3时，活塞将自动锁定
+  - 在位置模式下，当转速输入变为0时，也会自动锁定
 - **红石接口**
-  - ![img_33.png](img_33.png)
+  - ![physical_piston_redstone.png](physical_piston_redstone.png)
+  - 方向: 将该属性绑定至特定方块面的红石输入上
   - Force:表示红石信号将控制输出力，使得其在min,max之间线性变化
   - Target:表示红石信号将控制目标距离，使得其在min,max之间线性变化
   - P,I,D:同上
@@ -388,11 +426,11 @@
       ```
       
 ### Gravitational Anchor
-- ![img_37.png](img_37.png)
+- ![gravitational_anchor_block.png](gravitational_anchor_block.png)
 - **简述**
   - 用于对所在物理结构施加空气阻力，额外重力（或抵消重力）的方块
 - **控制面板**
-  - ![img_36.png](img_36.png)
+  - ![gravitational_anchor_panel.png](gravitational_anchor_panel.png)
   - Air Resistance: 空气阻力系数
   - Extra Gravity: 附加g值
 - **作用力**
@@ -401,24 +439,25 @@
   - 额外重力: g' * mass, 作用方向朝下
 
 ### Forget-Me-Not（勿忘我）
--![img_38.png](img_38.png)
+- ![annihilator_block.png](annihilator_block.png)
 - **简述**
   - 红石激活后3秒将会删除所在的物理结构
   - 默认不启用，可以在config中开启
 
 
 ### Jet Engine & Jet Rudder
-- ![img_39.png](img_39.png)
+- ![jet&jet_rudder.png](jet%26jet_rudder.png)
 - **简述**
   - 矢量喷气发动机
 - **Jet Engine的控制面板**
-  - ![img_40.png](img_40.png)
+  - ![jet_panel.png](jet_panel.png)
   - Thrust:推力大小
   - Horizontal:水平方向上的燃气舵偏转角度，有效范围-pi/2 ~ pi/2
   - Vertical:垂直方向上的燃气舵偏转角度，有效范围-pi/2 ~ pi/2
   - 注意：调整角度后燃气舵会有偏转动画，但是动画上观察最多偏转45°
 - **Jet Engine的红石接口**
-  - ![img_41.png](img_41.png)
+  - ![jet_redstone.png](jet_redstone.png)
+  - 方向: 将该属性绑定至特定方块面的红石输入上
   - Thrust:选定后红石信号将控制Thrust大小在min,max间线性变化
   - Horizontal Tilt:选定后红石信号将控制水平偏转角度大小在min,max间线性变化
   - Vertical Tilt:选定后红石信号将控制垂直偏转角度大小在min,max间线性变化
@@ -432,7 +471,7 @@
     
 
 ### Spatial Anchor
-- ![img_42.png](img_42.png)
+- ![spatial_anchor_block.png](spatial_anchor_block.png)
 - **简述**
   - 空间锚，一种自动对齐装置，可以使物理结构与机械动力动态结构，或是其他物理结构对齐
 - **状态**
@@ -443,24 +482,25 @@
 - **对齐**
   - 当Anchor开始尝试对齐时，所在物理结构会自动飞行，调整至目标位置，姿态，使得动态和静态的Anchor能够对齐
   - 对齐时，两个Anchor的面将相对，底座指向相同方向
-  - ![img_44.png](img_44.png)
+  - ![spatial_anchor_aligning.png](spatial_anchor_aligning.png)
   - 静态Anchor只是作为动态Anchor的目标姿态的提供者，它并不会受到反作用力，即便这个过程表现得像磁铁
   - 动态Anchor只会寻找相同Channel下的其他静态Anchor作为自己的目标
   - 寻找目标时最远可以接受32格外的静态Anchor作为目标，可以在Config中调整距离限制
 - **控制面板**
-  - ![img_43.png](img_43.png)
+  - ![spatial_anchor_panel.png](spatial_anchor_panel.png)
   - Offset:对齐后两个Anchor间相距的距离，只有动态Anchor调整这个值有效果
   - Channel:该Anchor所在频道
   - Is Running: 控制该Anchor是否是运行状态，红色为停用状态
   - Is Static: 控制该Anchor是否是静态得，红色为动态
 - **红石接口**
-  - ![img_45.png](img_45.png)
+  - ![spatial_anchor_redstone.png](spatial_anchor_redstone.png)
+  - 方向: 将该属性绑定至特定方块面的红石输入上
   - offset:含义与上文相同
   - is_running, is_static: 调整控制域为这两个时，接收到大于7.5的红石信号后将会使得对应域为true，否则为false
   - P,I,D:对齐时飞控的内置PID控制器的pid参数值
 - **位于动态结构**
   - 当一个Anchor位于机械动力的动态结构上时，其默认为一个静态的启用Anchor，可以通过动态结构控制器开关，其频道会保留
-  - ![img_46.png](img_46.png)
+  - ![spatial_anchor_contraption.png](spatial_anchor_contraption.png)
 - **Spatial Anchor的CC外设**
   - ```lua
     p = peripheral.find("spatial")
@@ -473,12 +513,17 @@
     ```
     
 ### Wireless Redstone Terminal
-- ![img_47.png](img_47.png)
+- ![terminal_block.png](terminal_block.png)
 - **简述**
   - 红石接口的无线版本，拥有至多6个无线红石频道，贴在拥有红石接口的机器上时，将会接受对应频道的红石信号，改变该频道该机器的对应属性值
 - **控制面板**
+  - ![img.png](terminal_panel.png)
   - 以贴在Servo Motor为例：
   - 左侧栏为频道频率编辑栏，使用方式与机械动力无线红石相同
   - 右侧为该机械(Servo Motor)提供的可供红石控制的属性，布尔值属性无法更改min max
-  - 最右侧按钮用于控制该频道是否开启
+  - 右侧倒数第二列按钮用于控制该频道是否开启
+  - 最右侧按钮用于选择哪些频道同时可以接收terminal方块直连的红石信号
+  - 布尔属性名称右侧的按钮用于切换是否反相，相当于内置非门
   - 具体到每一个机械有哪些可控属性，请参考各自的**红石接口**栏目
+- **扳手**
+  - 使用扳手shift+右键terminal可以改变它的碰撞箱，便于在上面贴拉杆

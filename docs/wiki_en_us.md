@@ -2,7 +2,7 @@
 ## Blocks:
 ### ChunkLoader:
 
-- ![img.png](img.png)
+- ![img.png](flap_bearing_panel.png)
 
 - **Description:**
   - Placed on a VS ship, it automatically force-loads the surrounding chunks.

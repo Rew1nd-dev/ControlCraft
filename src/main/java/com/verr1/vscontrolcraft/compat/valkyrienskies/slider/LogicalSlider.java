@@ -16,6 +16,8 @@ public record LogicalSlider(
         Direction slideDir,
         Vector3dc localPos_Own,
         Vector3dc localPos_Cmp,
-        double force
+        double force,
+        boolean isAdjustingPosition,
+        boolean shouldCounter
 ) {
 }

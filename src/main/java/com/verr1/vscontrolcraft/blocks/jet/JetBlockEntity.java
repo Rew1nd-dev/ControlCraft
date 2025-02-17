@@ -178,7 +178,7 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
         double h = canVectorize ? horizontalAngle.read() : 0;
         double v = canVectorize ? verticalAngle.read() : 0;
 
-        Vector3d dir = getThrustDir(h, v,basis_h, basis_v, basis_t);
+        Vector3d dir = getThrustDir(h, v, basis_h, basis_v, basis_t);
 
         double t = thrust.read();
 

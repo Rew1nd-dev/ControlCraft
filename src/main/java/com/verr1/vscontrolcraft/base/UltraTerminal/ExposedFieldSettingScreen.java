@@ -8,7 +8,10 @@ import com.simibubi.create.foundation.gui.widget.IconButton;
 import com.simibubi.create.foundation.gui.widget.Label;
 import com.simibubi.create.foundation.gui.widget.ScrollInput;
 import com.simibubi.create.foundation.gui.widget.SelectionScrollInput;
+import com.simibubi.create.foundation.utility.Components;
+import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.SimpleSettingScreen;
+import com.verr1.vscontrolcraft.blocks.terminal.SmallCheckbox;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllGuiLabels;
@@ -51,8 +54,12 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
     private IconButton confirm;
     private IconButton reset;
 
+
+
     private final GridLayout layout = new GridLayout();
     private final GridLayout buttonLayout = new GridLayout();
+    private final GridLayout fieldSelectLayout = new GridLayout();
+    private final GridLayout directionSelectLayout = new GridLayout();
 
     public ExposedFieldSettingScreen(BlockPos pos, List<ExposedFieldMessage> availableFields) {
         this.pos = pos;
@@ -61,23 +68,9 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
     }
 
     private void initWidgets(){
-        fieldSelector = new SelectionScrollInput(0, 0, 16, 16);
+        fieldSelector = new SelectionScrollInput(0, 0, 10, 10);
 
-        fieldSelector
-                .forOptions(
-                    availableFields
-                        .stream()
-                        .map(f -> Component.literal(f.type().name()))
-                        .toList())
-                .withRange(0, availableFields.size())
-                .setState(0)
-                .calling(i -> {
-                    var currentSelection = availableFields.get(fieldSelector.getState());
-                    fieldLabel.text = currentSelection.type().getComponent();
-                    directionLabel.text = currentSelection.openTo().getComponent();
-                    maxField.setValue(String.format("%.2f", currentSelection.max()));
-                    minField.setValue(String.format("%.2f", currentSelection.min()));
-                });
+
 
         directionSelector = new SelectionScrollInput(0, 0, 10, 10);
 
@@ -89,13 +82,28 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
             i -> directionLabel.text = ExposedFieldDirection.convert(i).getComponent()
         );
 
-
+        fieldSelector
+                .forOptions(
+                        availableFields
+                                .stream()
+                                .map(f -> Component.literal(f.type().name()))
+                                .toList())
+                .withRange(0, availableFields.size())
+                .setState(0)
+                .calling(i -> {
+                    var currentSelection = availableFields.get(fieldSelector.getState());
+                    fieldLabel.text = currentSelection.type().getComponent();
+                    directionSelector.setState(currentSelection.openTo().ordinal());
+                    directionSelector.onChanged();
+                    maxField.setValue(String.format("%.2f", currentSelection.max()));
+                    minField.setValue(String.format("%.2f", currentSelection.min()));
+                });
 
 
         minLabel = new Label(0,0, AllGuiLabels.minLabel);
         maxLabel = new Label(0,0, AllGuiLabels.maxLabel);
-        fieldLabel = new Label(0,0, AllGuiLabels.fieldLabel);
-        directionLabel = new Label(0, 0, Component.literal("maxLen"));
+        fieldLabel = new Label(0,0, Component.literal("LLLLLLLL"));
+        directionLabel = new Label(0, 0, Component.literal("LLLLLLLL"));
 
 
         minField = new EditBox(font, 0, 0, 40, 10, Component.empty());
@@ -115,7 +123,6 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
 
 
 
-
         minField.setFilter(Util::tryParseDoubleFilter);
 
 
@@ -124,16 +131,19 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
 
         confirm = new IconButton(0, 0, AllIcons.I_CONFIRM);
         confirm.withCallback(this::confirm);
-        confirm.setToolTip(Component.literal("Confirm Face Settings"));
+        confirm.setToolTip(Components.translatable(ControlCraft.MODID + ".tooltip.confirm_face_settings"));
         reset = new IconButton(0, 0, AllIcons.I_TRASH);
-        reset.setToolTip(Component.literal("Dump All Settings"));
+        reset.setToolTip(Components.translatable(ControlCraft.MODID + ".tooltip.dump_all_settings"));
         reset.withCallback(this::reset);
 
-        layout.addChild(fieldLabel, 0, 0);
-        layout.addChild(directionLabel, 1, 0);
-        layout.addChild(fieldSelector, 4, 0);
+        fieldSelectLayout.addChild(fieldLabel, 0, 0);
+        fieldSelectLayout.addChild(fieldSelector, 0, 1);
 
-        layout.addChild(directionSelector, 1, 1);
+        directionSelectLayout.addChild(directionSelector, 0, 1);
+        directionSelectLayout.addChild(directionLabel, 0, 0);
+
+        layout.addChild(fieldSelectLayout, 0, 0, 1, 2);
+        layout.addChild(directionSelectLayout, 1, 0, 1, 2);
 
 
         buttonLayout.addChild(reset, 0, 1);
@@ -148,6 +158,8 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
         layout.addChild(maxLabel, 3, 0);
         layout.addChild(maxField, 3, 1);
         layout.rowSpacing(2);
+
+
         fieldSelector.onChanged(); // update the direction label
 
         addRenderableWidget(fieldSelector);
@@ -165,6 +177,7 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
 
         // fieldSelector.getState()
     }
+
 
     @Override
     public void onClose() {
@@ -204,7 +217,7 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
     @Override
     protected void renderWindow(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         background.render(graphics, guiLeft, guiTop);
-        AllIcons.I_REFRESH.render(graphics, fieldSelector.getX(), fieldSelector.getY());
+        AllVSCCGuiTextures.SMALL_BUTTON_GREEN.render(graphics, fieldSelector.getX(), fieldSelector.getY());
         AllVSCCGuiTextures.SMALL_BUTTON_GREEN.render(graphics, directionSelector.getX(), directionSelector.getY());
         boolean shouldRender = !availableFields.get(fieldSelector.getState()).type().isBoolean();
         minField.active = shouldRender;

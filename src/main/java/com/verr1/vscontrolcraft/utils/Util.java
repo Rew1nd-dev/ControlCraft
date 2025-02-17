@@ -39,6 +39,26 @@ public class Util {
         return angle;
     }
 
+    public static double angleReset(double angle){
+        while(angle > 180){
+            angle -= 360;
+        }
+        while(angle < -180){
+            angle += 360;
+        }
+        return angle;
+    }
+
+    public static double radianReset(double radian){
+        while(radian > Math.PI){
+            radian -= 2 * Math.PI;
+        }
+        while(radian < -Math.PI){
+            radian += 2 * Math.PI;
+        }
+        return radian;
+    }
+
     public double getDouble(List<Double> list, int index){
         if(index < list.size()){
             return list.get(index);

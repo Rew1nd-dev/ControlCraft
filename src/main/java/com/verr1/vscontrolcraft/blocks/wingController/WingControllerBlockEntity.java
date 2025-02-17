@@ -80,7 +80,7 @@ public class WingControllerBlockEntity extends OnShipDirectinonalBlockEntity imp
                     v -> setAngle(v.floatValue()),
                     "Angle °",
                     WidgetType.SLIDE,
-                    ExposedFieldType.ANGLE
+                    ExposedFieldType.DEGREE
             )
     );
 

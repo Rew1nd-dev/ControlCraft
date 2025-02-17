@@ -13,6 +13,11 @@ import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
+
 
 @OnlyIn(Dist.CLIENT)
 public class SmallCheckbox extends AbstractButton {
@@ -24,6 +29,8 @@ public class SmallCheckbox extends AbstractButton {
     private boolean selected;
     private final boolean showLabel;
 
+    private Function<SmallCheckbox, Boolean> callback = (s)->{return false;};
+
     public SmallCheckbox(int p_93826_, int p_93827_, int p_93828_, int p_93829_, Component p_93830_, boolean p_93831_) {
         this(p_93826_, p_93827_, p_93828_, p_93829_, p_93830_, p_93831_, true);
     }
@@ -34,9 +41,14 @@ public class SmallCheckbox extends AbstractButton {
         this.showLabel = p_93839_;
     }
 
-
+    public SmallCheckbox withCallback(Function<SmallCheckbox, Boolean> callback){
+        this.callback = callback;
+        return this;
+    }
 
     public void onPress() {
+        boolean cancel = callback.apply(this);
+        if(cancel)return;
         this.selected = !this.selected;
     }
 
@@ -60,7 +72,7 @@ public class SmallCheckbox extends AbstractButton {
 
     }
 
-    public void renderWidget(GuiGraphics graphics, int p_282925_, int p_282705_, float p_282612_) {
+    public void renderWidget(GuiGraphics graphics, int p_282925_, int mouse_x, float mouse_y) {
         Minecraft minecraft = Minecraft.getInstance();
         RenderSystem.enableDepthTest();
         Font font = minecraft.font;
@@ -74,8 +86,10 @@ public class SmallCheckbox extends AbstractButton {
 
         // graphics.blit(TEXTURE_ON, this.getX(), this.getY(), this.isFocused() ? 20.0F : 0.0F, this.selected ? 20.0F : 0.0F, 20, this.height, 64, 64);
         graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-        if (this.showLabel) {
-            graphics.drawString(font, this.getMessage(), this.getX() + 24, this.getY() + (this.height - 8) / 2, 14737632 | Mth.ceil(this.alpha * 255.0F) << 24);
+
+        if (this.showLabel && isHovered && !getMessage().getString().isEmpty()) {
+            // graphics.drawString(font, this.getMessage(), this.getX() + 24, this.getY() + (this.height - 8) / 2, 14737632 | Mth.ceil(this.alpha * 255.0F) << 24);
+            graphics.renderComponentTooltip(font, List.of(this.getMessage()), p_282925_, mouse_x);
         }
 
     }

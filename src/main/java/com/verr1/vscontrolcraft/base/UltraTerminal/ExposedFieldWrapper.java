@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.base.UltraTerminal;
 
+import com.verr1.vscontrolcraft.ControlCraft;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import org.joml.Vector2d;
@@ -15,7 +16,7 @@ public class ExposedFieldWrapper {
 
     public NumericField field;
     public Vector2d min_max;
-    public Vector2dc suggestedMinMax;
+    public Vector2dc suggestedMinMax = new Vector2d(0, 1);
     public ExposedFieldType type;
     public ExposedFieldDirection directionOptional = ExposedFieldDirection.NONE;
 
@@ -58,9 +59,14 @@ public class ExposedFieldWrapper {
     }
 
     public void deserialize(CompoundTag tag){
-        min_max = new Vector2d(tag.getDouble("min"), tag.getDouble("max"));
-        type = ExposedFieldType.valueOf(tag.getString("type"));
-        directionOptional = ExposedFieldDirection.valueOf(tag.getString("direction"));
+        try{
+            min_max = new Vector2d(tag.getDouble("min"), tag.getDouble("max"));
+            type = ExposedFieldType.valueOf(tag.getString("type"));
+            directionOptional = ExposedFieldDirection.valueOf(tag.getString("direction"));
+        }catch (Exception e){
+            ControlCraft.LOGGER.info("Some Field didn't get properly deserialized");
+        }
+
     }
 
 

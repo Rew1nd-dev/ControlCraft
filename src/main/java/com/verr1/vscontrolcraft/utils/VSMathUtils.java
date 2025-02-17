@@ -14,11 +14,14 @@ import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.core.impl.game.ships.PhysInertia;
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld;
+import org.valkyrienskies.core.impl.shadow.A;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.physics_api.PoseVel;
 
 import javax.annotation.Nullable;
 import java.lang.Math;
+import java.util.ArrayList;
+import java.util.List;
 
 //XC2YC:  [X, Y, Z]: X: the X unit basis in YC coordinate represented by XC coordinate unit vector basis,
 //                      such that XC2YC * v_x(represented in XC coordinate) = v_y(represented in YC coordinate)
@@ -326,6 +329,46 @@ public class VSMathUtils {
         return get_yc2xc(wc2sc_x, wc2sc_y, xDir, yDir);
     }
 
+
+    public static double get_y2x(Ship ship_x, Ship ship_y, Vector3dc loc_sc_x, Vector3dc loc_sc_y, Direction direction){
+        Matrix4dc s2w_x = ship_x.getTransform().getShipToWorld();
+        Matrix4dc w2s_x = ship_x.getTransform().getWorldToShip();
+        Matrix4dc s2w_y = ship_y.getTransform().getShipToWorld();
+
+        Vector3dc x_wc = s2w_x.transformPosition(loc_sc_x, new Vector3d());
+        Vector3dc y_wc = s2w_y.transformPosition(loc_sc_y, new Vector3d());
+        Vector3dc sub_sc = w2s_x
+                .transformDirection(
+                        y_wc.sub(x_wc, new Vector3d()), new Vector3d()
+                );
+
+
+        double sign = direction.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1 : -1;
+        double distance = switch (direction.getAxis()){
+            case X -> sign * sub_sc.x();
+            case Y -> sign * sub_sc.y();
+            case Z -> sign * sub_sc.z();
+        };
+        return distance;
+    }
+
+    public static double get_dy2x_sc(Ship ship_x, Ship ship_y, Direction direction){
+        Matrix4dc w2s_x = ship_x.getTransform().getWorldToShip();
+
+        Vector3dc vx_wc = ship_x.getVelocity();
+        Vector3dc vy_wc = ship_y.getVelocity();
+        Vector3dc sub_sc = w2s_x.transformDirection(
+                vy_wc.sub(vx_wc, new Vector3d())
+        );
+        double sign = direction.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1 : -1;
+        double velocity = switch (direction.getAxis()){
+            case X -> sign * sub_sc.x();
+            case Y -> sign * sub_sc.y();
+            case Z -> sign * sub_sc.z();
+        };
+        return velocity;
+    }
+
     public static double radErrFix(double radErr){
         if(radErr > Math.PI){
             return radErr - 2 * Math.PI;
@@ -393,4 +436,27 @@ public class VSMathUtils {
         Matrix3d y2x = new Matrix3d(m_x.transpose()).mul(new Matrix3d(m_y));
         return m2q(y2x.transpose());
     }
+
+    // I just can not figure out a formula for constrain of lock mode
+    // Now I just list out all possibilities of 6 dir to 6 dir
+
+    static List<List<Integer>> table = List.of(
+            List.of(1, 3, 2, 0, 1, 1),  //down
+            List.of(1, 3, 2, 0, 1, 1),
+            List.of(0, 2, 1, 3, 0, 0),
+            List.of(0, 2, 1, 3, 0, 0),
+            List.of(3, 1, 0, 2, 3, 3),
+            List.of(1, 3, 2, 0, 1, 1)
+    );
+
+    static List<Double> fixes = List.of(0.0, Math.PI / 2, Math.PI, -Math.PI / 2);
+
+
+    public static double getDumbFixOfLockMode(Direction dir_x, Direction dir_y){
+        int i_x = dir_x.ordinal() % 6;
+        int i_y = dir_y.ordinal() % 6; // just for safety
+
+        return fixes.get(table.get(i_y).get(i_x));
+    }
+
 }

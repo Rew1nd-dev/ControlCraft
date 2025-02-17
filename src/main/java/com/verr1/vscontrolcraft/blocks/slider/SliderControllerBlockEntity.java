@@ -25,6 +25,7 @@ import com.verr1.vscontrolcraft.compat.valkyrienskies.slider.SliderForceInducer;
 import com.verr1.vscontrolcraft.network.IPacketHandler;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundClientPacket;
 import com.verr1.vscontrolcraft.network.packets.BlockBoundPacketType;
+import com.verr1.vscontrolcraft.network.packets.BlockBoundServerPacket;
 import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import com.verr1.vscontrolcraft.utils.VSMathUtils;
@@ -49,6 +50,7 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint;
 import org.valkyrienskies.core.apigame.constraints.VSFixedOrientationConstraint;
 import org.valkyrienskies.core.apigame.constraints.VSSlideConstraint;
 import org.valkyrienskies.core.impl.game.ships.ShipDataCommon;
@@ -59,6 +61,7 @@ import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.assembly.ShipAssemblyKt;
 
 import javax.annotation.Nullable;
+import java.lang.Math;
 import java.util.List;
 import java.util.Objects;
 
@@ -86,6 +89,127 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
 
     private SliderControllerPeripheral peripheral;
     protected LazyOptional<IPeripheral> peripheralCap;
+
+    private final PID defaultPositionModeParams = new PID(24, 0, 14);
+    private final PID defaultSpeedModeParams = new PID(10, 0, 0);
+
+
+    private boolean isCheatMode = false;
+    private boolean isLocked = false;
+    private boolean isAdjustingPosition = true;
+    private boolean isSoftLockMode = false;
+
+
+    public void setMode(boolean adjustingPosition) {
+        isAdjustingPosition = adjustingPosition;
+        if(isAdjustingPosition){
+            getControllerInfoHolder().setParameter(defaultPositionModeParams);
+        }else {
+            getControllerInfoHolder().setParameter(defaultSpeedModeParams);
+        }
+        setChanged();
+    }
+
+    public void setSoftLockMode(boolean softLockMode) {
+        isSoftLockMode = softLockMode;
+        setChanged();
+    }
+
+    public void setCheatMode(boolean cheatMode) {
+        isCheatMode = cheatMode;
+        setChanged();
+    }
+
+    public boolean isCheatMode() {
+        return isCheatMode;
+    }
+
+    public boolean isLocked() {
+        return isLocked;
+    }
+
+    public boolean isAdjustingPosition() {
+        return isAdjustingPosition;
+    }
+
+    public boolean isSoftLockMode() {
+        return isSoftLockMode;
+    }
+
+    public void lock(){
+        if(level.isClientSide)return;
+
+        Vector3dc cmpDir = getCompanionShipDirectionJOML();
+        Vector3dc sliDir = getDirectionJOML();
+
+        ServerShip assembledShip = getCompanionServerShip();
+
+        if(assembledShip == null)return;
+        long ownerShipID = getServerShipID();
+        long assemShipID = assembledShip.getId();
+
+        VSAttachmentConstraint fixed = new VSAttachmentConstraint(
+                ownerShipID,
+                assemShipID,
+                1.0E-10,
+                new Vector3d(getOwn_loc()).fma(getSlideDistance(), sliDir),
+                new Vector3d(getCmp_loc()), // This is the opposite with the case of assemble()
+                1.0E10,
+                0.0
+        );
+
+        ConstrainCenter.createOrReplaceNewConstrain(
+                new ConstrainKey(getBlockPos(), getDimensionID(), "fixed", !isOnServerShip(), false, false),
+                fixed,
+                VSGameUtilsKt.getShipObjectWorld((ServerLevel) level)
+        );
+        isLocked = true;
+        setChanged();
+
+    }
+
+    public void unlock(){
+        if(level.isClientSide)return;
+
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "fixed", !isOnServerShip(), false, false));
+        isLocked = false;
+        setChanged();
+    }
+
+    public void tryLock(){
+        if(isLocked)return;
+        lock();
+    }
+
+    public void tryUnlock(){
+        if(!isLocked)return;
+        unlock();
+    }
+
+    @Override
+    public void onSpeedChanged(float previousSpeed) {
+        super.onSpeedChanged(previousSpeed);
+        updateTargetFromCreate();
+        softLockCheck();
+        // getControllerInfoHolder().setP(speed);
+    }
+
+    public void softLockCheck(){
+        if(isSoftLockMode() && Math.abs(speed) < 1e-3)tryLock();
+        else if(isSoftLockMode() && !isAdjustingPosition() && Math.abs(getControllerInfoHolder().getTarget()) < 1e-3)tryLock();
+        else tryUnlock();
+    }
+
+    public void updateTargetFromCreate(){
+        double createInput2Omega = speed / 60 * 2 * Math.PI;
+        if(!isAdjustingPosition) {
+            getControllerInfoHolder().setTarget(createInput2Omega);
+        }else{
+            double currentTarget = getControllerInfoHolder().getTarget();
+            double newTarget = VSMathUtils.clamp(currentTarget + createInput2Omega * 0.05, Config.PhysicsMaxSlideDistance);
+            getControllerInfoHolder().setTarget(newTarget);
+        }
+    }
 
     private final List<ExposedFieldWrapper> fields = List.of(
             new ExposedFieldWrapper(
@@ -122,7 +246,17 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
                     "D",
                     WidgetType.SLIDE,
                     ExposedFieldType.D
-            ).withSuggestedRange(2, 10)
+            ).withSuggestedRange(2, 10),
+            new ExposedFieldWrapper(
+                    () -> (isLocked ? 1.0 : 0.0),
+                    (d) -> {
+                        if(d > 0.5)tryLock();
+                        else if(d < 0.5)tryUnlock();
+                    },
+                    "Locked",
+                    WidgetType.SLIDE,
+                    ExposedFieldType.IS_LOCKED
+            )
     );
 
     private ExposedFieldWrapper exposedField = fields.get(1);
@@ -236,11 +370,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
 
     }
 
-    @Override
-    public void onSpeedChanged(float previousSpeed) {
-        super.onSpeedChanged(previousSpeed);
-        // getControllerInfoHolder().setP(speed);
-    }
+
 
     @Override
     public Direction getAlign() {
@@ -403,6 +533,9 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         if(level.isClientSide)return;
         syncCachedPos();
         syncClient(getBlockPos(), level);
+
+
+
     }
 
 
@@ -440,8 +573,13 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         super.tick();
         syncClient();
         syncCompanionAttachInducer();
+
+        if(isAdjustingPosition)updateTargetFromCreate();
+        // softLockCheck();
+
         if(!level.isClientSide)return;
         tickAnimation();
+
     }
 
 
@@ -507,7 +645,6 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         if(ship == null)return null;
         Vector3dc own_loc = getOwn_loc();
         Vector3dc cmp_loc = getCmp_loc();
-        if(own_loc == null || cmp_loc == null)return null;
 
         return new LogicalSlider(
                 getServerShipID(),
@@ -516,7 +653,9 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
                 getDirection(),
                 own_loc,
                 cmp_loc,
-                getOutputForce()
+                getOutputForce(),
+                isAdjustingPosition(),
+                !isCheatMode()
         );
     }
 
@@ -535,6 +674,11 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         double t = getControllerInfoHolder().getTarget();
         double v = getControllerInfoHolder().getValue();
 
+        boolean m = isAdjustingPosition();
+        boolean l = isLocked();
+        boolean c = isCheatMode();
+
+
         PID pidParams = getControllerInfoHolder().getPIDParams();
 
         var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
@@ -543,6 +687,9 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
                 .withDouble(pidParams.p())
                 .withDouble(pidParams.i())
                 .withDouble(pidParams.d())
+                .withBoolean(m)
+                .withBoolean(l)
+                .withBoolean(c)
                 .build();
 
         AllPackets.sendToPlayer(p, player);
@@ -558,11 +705,25 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
             double p = packet.getDoubles().get(2);
             double i = packet.getDoubles().get(3);
             double d = packet.getDoubles().get(4);
+            boolean m = packet.getBooleans().get(0);
+            boolean l = packet.getBooleans().get(1);
+            boolean c = packet.getBooleans().get(2);
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    ScreenOpener.open(new SliderScreen(getBlockPos(), p, i, d, v, t)));
+                    ScreenOpener.open(new SliderScreen(getBlockPos(), p, i, d, v, t, m, l, c)));
         }
         if(packet.getType() == BlockBoundPacketType.SYNC_0){
             setAnimatedDistance(packet.getDoubles().get(0).floatValue());
+        }
+    }
+
+    @Override
+    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
+
+        if(packet.getType() == BlockBoundPacketType.TOGGLE_0){
+            setCheatMode(!isCheatMode());
+        }
+        if(packet.getType() == BlockBoundPacketType.TOGGLE_1){
+            setSoftLockMode(!isSoftLockMode());
         }
     }
 
@@ -574,6 +735,10 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         fields.forEach(e -> tag.put("field_" + e.type.name(), e.serialize()));
         tag.putInt("exposedField", fields.indexOf(exposedField));
         tag.put("controller", getControllerInfoHolder().serialize());
+        tag.putBoolean("cheatMode", isCheatMode());
+        tag.putBoolean("isLocked", isLocked);
+        tag.putBoolean("positionMode", isAdjustingPosition);
+        tag.putBoolean("softLockMode", isSoftLockMode);
 
     }
 
@@ -589,6 +754,15 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
             exposedField = fields.get(0);
         }
         getControllerInfoHolder().deserialize(tag.getCompound("controller"));
+        isCheatMode = tag.getBoolean("cheatMode");
+        isLocked = tag.getBoolean("isLocked");
+        isAdjustingPosition = tag.getBoolean("positionMode");
+        isSoftLockMode = tag.getBoolean("softLockMode");
+
+        if(!isAdjustingPosition){
+            getControllerInfoHolder().setTarget(0);
+        }
+
     }
 
 
