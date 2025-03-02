@@ -177,192 +177,192 @@
 
 ### Camera
 - ![camera_block.png](camera_block.png)
-  - **简述:**
-    - 摄像头，将玩家的视角固定在其中，之后玩家能够看见红框，这表示玩家视野指向的位置。
-    - 当玩家观察实体时，实体会发光
-    - 当玩家观察物理结构时，其AABB会被显示
-    - 使用摄像头的CC外设，实现你自己的雷达
-    - 使用相机视角时，你依然可以操控你自己
-  - **摄像头的CC外设**
-    - ```lua
-      local p = peripheral.find("camera")
+- **简述:**
+  - 摄像头，将玩家的视角固定在其中，之后玩家能够看见红框，这表示玩家视野指向的位置。
+  - 当玩家观察实体时，实体会发光
+  - 当玩家观察物理结构时，其AABB会被显示
+  - 使用摄像头的CC外设，实现你自己的雷达
+  - 使用相机视角时，你依然可以操控你自己
+- **摄像头的CC外设**
+  - ```lua
+    local p = peripheral.find("camera")
     
-      获取视线的旋转矩阵，相对于世界坐标系
-      p.getAbsViewTransform()
+    获取视线的旋转矩阵，相对于世界坐标系
+    p.getAbsViewTransform()
     
-      获取摄像头的世界坐标
-      p.getCameraPosition()
+    获取摄像头的世界坐标
+    p.getCameraPosition()
     
-      获取视线的矢量，在世界坐标系
-      p.getAbsViewForward()
+    获取视线的矢量，在世界坐标系
+    p.getAbsViewForward()
     
-      获取视线旋转矩阵，在船坐标系
-      p.getLocViewTransform()
+    获取视线旋转矩阵，在船坐标系
+    p.getLocViewTransform()
     
-      获取视线旋转矢量，在船坐标系
-      p.getLocViewForward()
+    获取视线旋转矢量，在船坐标系
+    p.getLocViewForward()
     
-      在摄像头的使用者的客户端显示一个框
-      x,y,z: 世界位置
-      direction: 框的朝向，可选UP, DOWN, WEST, EAST, NORTH, WEST，需要大写
-      color: 颜色的rgb
-      slot: 框的槽位id
-            槽位:
-                执行一次这个函数，生成的框会随时间消失，短时间执行两次这个函数
-                假如槽位相同，则前一个会立刻消失，如果槽位不同，则各自随时间消失
-      p.outlineToUser(
-              double x, double y, double z,
-              String direction,
-              int color,
-              String slot
-      )
+    在摄像头的使用者的客户端显示一个框
+    x,y,z: 世界位置
+    direction: 框的朝向，可选UP, DOWN, WEST, EAST, NORTH, WEST，需要大写
+    color: 颜色的rgb
+    slot: 框的槽位id
+          槽位:
+              执行一次这个函数，生成的框会随时间消失，短时间执行两次这个函数
+              假如槽位相同，则前一个会立刻消失，如果槽位不同，则各自随时间消失
+    p.outlineToUser(
+            double x, double y, double z,
+            String direction,
+            int color,
+            String slot
+    )
     
-      改变摄像头的视角，这在摄像头被玩家使用时也是起效的
-      p.forcePitchYaw(double pitch, double yaw)
+    改变摄像头的视角，这在摄像头被玩家使用时也是起效的
+    p.forcePitchYaw(double pitch, double yaw)
     
-      执行基于当前摄像头视角的射线**方块**检测，没有玩家使用时也可以
-      返回值:
-      检测成功：
-        {
-          hit: {x:double, y:double, z:double}
-          direction: String
-        }
-      检测失败: nil
-      p.clip()
+    执行基于当前摄像头视角的射线**方块**检测，没有玩家使用时也可以
+    返回值:
+    检测成功：
+      {
+        hit: {x:double, y:double, z:double}
+        direction: String
+      }
+    检测失败: nil
+    p.clip()
     
-      执行基于当前摄像头视角的射线**实体(活的)**检测，没有玩家使用时也可以
-      返回值:
-      检测成功:
-        {
-          hit: {x:double, y:double, z:double}
-          type: String
-          name: String
-        }
-      检测失败: nil
-      p.clipEntity()
+    执行基于当前摄像头视角的射线**实体(活的)**检测，没有玩家使用时也可以
+    返回值:
+    检测成功:
+      {
+        hit: {x:double, y:double, z:double}
+        type: String
+        name: String
+      }
+    检测失败: nil
+    p.clipEntity()
     
-      执行基于当前摄像头视角的射线**方块**检测，没有玩家使用时也可以，信息更全面
-      返回值:
-      检测成功:
-        {
-          hit: {x:double, y:double, z:double}
-          direction: String
-          onShip: Boolean
-          shipHitResult: {
-                            slug: String
-                            position: {x:double, y:double, z:double}
-                            velocity: {x:double, y:double, z:double}
-                            AABB: {
-                                    min: {x:double, y:double, z:double}  -- min角点坐标
-                                    max: {x:double, y:double, z:double}  -- max角点坐标
-                                  }
-                         }
-          -- 注意，如果没有检测到船，则shipHitResult为空表{}
-        }
-      检测失败: nil
-      p.clipBlockDetail()
+    执行基于当前摄像头视角的射线**方块**检测，没有玩家使用时也可以，信息更全面
+    返回值:
+    检测成功:
+      {
+        hit: {x:double, y:double, z:double}
+        direction: String
+        onShip: Boolean
+        shipHitResult: {
+                          slug: String
+                          position: {x:double, y:double, z:double}
+                          velocity: {x:double, y:double, z:double}
+                          AABB: {
+                                  min: {x:double, y:double, z:double}  -- min角点坐标
+                                  max: {x:double, y:double, z:double}  -- max角点坐标
+                                }
+                       }
+        -- 注意，如果没有检测到船，则shipHitResult为空表{}
+      }
+    检测失败: nil
+    p.clipBlockDetail()
       
-      执行基于当前摄像头视角的射线**实体**检测，没有玩家使用时也可以，信息更全面
-      返回值:
-        {
-          hit: {x:double, y:double, z:double}
-          type: String
-          name: String
-          position: {x:double, y:double, z:double}
-          velocity: {x:double, y:double, z:double}
-        }
-      p.clipEntityDetail()
+    执行基于当前摄像头视角的射线**实体**检测，没有玩家使用时也可以，信息更全面
+    返回值:
+      {
+        hit: {x:double, y:double, z:double}
+        type: String
+        name: String
+        position: {x:double, y:double, z:double}
+        velocity: {x:double, y:double, z:double}
+      }
+    p.clipEntityDetail()
       
-      执行基于当前摄像头视角的射线**物理结构**检测，没有玩家使用时也可以
-      返回值:
-      检测成功: 
-        {
-          hit: {x:double, y:double, z:double}
-          position: {x:double, y:double, z:double}
-          velocity: {x:double, y:double, z:double}
-          AABB: {
-                  min: {x:double, y:double, z:double}  -- min角点坐标
-                  max: {x:double, y:double, z:double}  -- max角点坐标
-                }
-        }
-      检测失败: nil
-      p.clipShipDetail()
+    执行基于当前摄像头视角的射线**物理结构**检测，没有玩家使用时也可以
+    返回值:
+    检测成功: 
+      {
+        hit: {x:double, y:double, z:double}
+        position: {x:double, y:double, z:double}
+        velocity: {x:double, y:double, z:double}
+        AABB: {
+                min: {x:double, y:double, z:double}  -- min角点坐标
+                max: {x:double, y:double, z:double}  -- max角点坐标
+              }
+      }
+    检测失败: nil
+    p.clipShipDetail()
         
-      执行基于当前摄像头视角的射线**玩家**检测，没有玩家使用时也可以
-      返回值:
-      检测成功: 
-        {
-          hit: {x:double, y:double, z:double}
-          type: String
-          name: String
-          position: {x:double, y:double, z:double}
-          velocity: {x:double, y:double, z:double}
-        }
-      检测失败: nil
-      p.clipPlayerDetail()
+    执行基于当前摄像头视角的射线**玩家**检测，没有玩家使用时也可以
+    返回值:
+    检测成功: 
+      {
+        hit: {x:double, y:double, z:double}
+        type: String
+        name: String
+        position: {x:double, y:double, z:double}
+        velocity: {x:double, y:double, z:double}
+      }
+    检测失败: nil
+    p.clipPlayerDetail()
         
-      返回值: 获取摄像头距离其射线与方块交点的位置之间的距离
-      p.getClipDistance()
+    返回值: 获取摄像头距离其射线与方块交点的位置之间的距离
+    p.getClipDistance()
         
-      设置俯仰角-90~90，有玩家时会失效，因为会被玩家的视角覆盖
-      p.setPitch(double degree)
+    设置俯仰角-90~90，有玩家时会失效，因为会被玩家的视角覆盖
+    p.setPitch(double degree)
         
-      设置偏航角-180~180，有玩家时会失效，因为会被玩家的视角覆盖
-      p.setYaw(double degree)
+    设置偏航角-180~180，有玩家时会失效，因为会被玩家的视角覆盖
+    p.setYaw(double degree)
         
-      获取俯仰角
-      p.getPitch()
+    获取俯仰角
+    p.getPitch()
         
-      获取偏航角
-      p.getYaw()
+    获取偏航角
+    p.getYaw()
         
-      设置视角对齐方块的摆放朝向，有玩家时也可以强制修改
-      p.reset()
+    设置视角对齐方块的摆放朝向，有玩家时也可以强制修改
+    p.reset()
         
-      设置射线检测最远距离，默认256
-      p.setClipRange(double range)
+    设置射线检测最远距离，默认256
+    p.setClipRange(double range)
           
-      进行一次对**物理结构**的射线检测，并保存结果至方块内部
-      p.clipNewShip()
+    进行一次对**物理结构**的射线检测，并保存结果至方块内部
+    p.clipNewShip()
           
-      进行一次对**玩家**的射线检测，并保存结果至方块内部
-      p.clipNewServerPlayer()
+    进行一次对**玩家**的射线检测，并保存结果至方块内部
+    p.clipNewServerPlayer()
           
-      进行一次对**实体(全部)**的射线检测，并保存结果至方块内部
-      p.clipNewEntity()
+    进行一次对**实体(全部)**的射线检测，并保存结果至方块内部
+    p.clipNewEntity()
           
-      进行一次对**方块**的射线检测，并保存结果至方块内部
-      p.clipNewBlock()
+    进行一次对**方块**的射线检测，并保存结果至方块内部
+    p.clipNewBlock()
           
-      获取上一次**物理结构**射线检测到的船**此刻**的信息，
-      **注意，除了hit不会更新，剩下项都是调用时最新的**
-      返回值: 结构和p.clipShip()相同的表 或 nil
-      p.latestShip()
+    获取上一次**物理结构**射线检测到的船**此刻**的信息，
+    **注意，除了hit不会更新，剩下项都是调用时最新的**
+    返回值: 结构和p.clipShip()相同的表 或 nil
+    p.latestShip()
         
-      获取上一次**实体**射线检测到的实体**此刻**的信息，
-      **注意，除了hit不会更新，剩下项都是调用时最新的**
-      返回值: 结构和p.clipEntity()相同的表 或 nil
-      p.latestEntity()
+    获取上一次**实体**射线检测到的实体**此刻**的信息，
+    **注意，除了hit不会更新，剩下项都是调用时最新的**
+    返回值: 结构和p.clipEntity()相同的表 或 nil
+    p.latestEntity()
           
-      获取上一次**玩家**射线检测到的玩家**此刻**的信息，
-      **注意，除了hit不会更新，剩下项都是调用时最新的**
-      返回值: 结构和p.clipPlayer()相同的表 或 nil
-      p.latestPlayer()
+    获取上一次**玩家**射线检测到的玩家**此刻**的信息，
+    **注意，除了hit不会更新，剩下项都是调用时最新的**
+    返回值: 结构和p.clipPlayer()相同的表 或 nil
+    p.latestPlayer()
 
-      获取上一次**方块**射线检测到的方块**此刻**的信息，
-      **注意，除了hit不会更新，剩下项都是调用时最新的**
-      返回值: 结构和p.clip()相同的表 或 nil
-      p.latestBlock()
+    获取上一次**方块**射线检测到的方块**此刻**的信息，
+    **注意，除了hit不会更新，剩下项都是调用时最新的**
+    返回值: 结构和p.clip()相同的表 或 nil
+    p.latestBlock()
           
-      执行一次从(x_0, y_0, z_0)到(x_1, y_1, z_1)的方块射线检测
-      返回值: 和p.clip()结构相同的表 或 nil
-      p.raycast(
-        double x_0, double y_0, double z_0,
-        double x_1, double y_1, double z_1
-      )
+    执行一次从(x_0, y_0, z_0)到(x_1, y_1, z_1)的方块射线检测
+    返回值: 和p.clip()结构相同的表 或 nil
+    p.raycast(
+      double x_0, double y_0, double z_0,
+      double x_1, double y_1, double z_1
+    )
           
       
-    ``` 
+  ``` 
 
 
 
