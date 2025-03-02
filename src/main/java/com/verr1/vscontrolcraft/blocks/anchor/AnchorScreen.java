@@ -16,12 +16,14 @@ public class AnchorScreen extends SimpleSettingScreen {
 
     private final double airResistance;
     private final double extraGravity;
+    private final double rotationalResistance;
     private final BlockPos pos;
 
-    public AnchorScreen(BlockPos entityPos, double airResistance, double extraGravity) {
+    public AnchorScreen(BlockPos entityPos, double airResistance, double extraGravity, double rotationalResistance) {
         pos = entityPos;
         this.airResistance = airResistance;
         this.extraGravity = extraGravity;
+        this.rotationalResistance = rotationalResistance;
     }
 
 
@@ -31,6 +33,8 @@ public class AnchorScreen extends SimpleSettingScreen {
                 .setValue(String.format("%.4f", airResistance)); // iFields[0]
         addNumericFieldWithLabel(ExposedFieldType.EXTRA_GRAVITY.getComponent(), Util::tryParseDoubleFilter)
                 .setValue(String.format("%.4f", extraGravity));    // iFields[1]
+        addNumericFieldWithLabel(ExposedFieldType.ROTATIONAL_RESISTANCE.getComponent(), Util::tryParseDoubleFilter)
+                .setValue(String.format("%.4f", rotationalResistance));
 
     }
 
@@ -44,6 +48,7 @@ public class AnchorScreen extends SimpleSettingScreen {
         var p = new BlockBoundServerPacket.builder(pos, BlockBoundPacketType.SETTING_0)
                 .withDouble(Util.tryParseDouble(iFields.get(0).getValue()))
                 .withDouble(Util.tryParseDouble(iFields.get(1).getValue()))
+                .withDouble(Util.tryParseDouble(iFields.get(2).getValue()))
                 .build();
         AllPackets
                 .getChannel()

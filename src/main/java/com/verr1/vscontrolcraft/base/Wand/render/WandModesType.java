@@ -21,6 +21,7 @@ public enum WandModesType {
     // FLIP,
     JOINT,
     DESTROY,
+    DESTROY_ALL,
     SLIDER;
 
 
@@ -37,19 +38,15 @@ public enum WandModesType {
         WandDestroyConstrainMode.createInstance();
         WandSliderAssembleMode.createInstance();
         WandAnchorConnect.createInstance();
+        WandDestroyAllConstrainMode.createInstance();
         modeOf.put(HINGE, WandHingeConnectionMode.instance);
         modeOf.put(DESTROY, WandDestroyConstrainMode.instance);
+        modeOf.put(DESTROY_ALL, WandDestroyAllConstrainMode.instance);
         modeOf.put(SERVO, WandServoAssembleMode.instance);
-        // modeOf.put(LEVEL, WandAdjustHingeLevelMode.instance);
-        // modeOf.put(FLIP, WandFlipRevoluteJointMode.instance);
         modeOf.put(JOINT, WandJointAssembleMode.instance);
         modeOf.put(SLIDER, WandSliderAssembleMode.instance);
-        //KeyPressEventBus.registerListener(ClientWand::OnWandRightClick);
     };
 
-    private WandModesType(String key){
-        this.langKey = key;
-    }
 
     private WandModesType(){
         this.langKey = name().toLowerCase();
@@ -74,7 +71,7 @@ public enum WandModesType {
     }
 
     public AllIcons getIcon(){
-        return new AllIcons(0, 0);
+        return AllIcons.I_TOOLBOX;
     }
 
     public static List<WandModesType> getAllTypes(){

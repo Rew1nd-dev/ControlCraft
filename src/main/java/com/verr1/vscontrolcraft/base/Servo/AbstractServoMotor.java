@@ -10,6 +10,8 @@ import com.verr1.vscontrolcraft.base.Constrain.ConstrainCenter;
 import com.verr1.vscontrolcraft.base.Constrain.DataStructure.ConstrainKey;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
+import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
+import com.verr1.vscontrolcraft.base.DeferralExecutor.QueryConditionRunnable;
 import com.verr1.vscontrolcraft.base.Hinge.interfaces.IConstrainHolder;
 import com.verr1.vscontrolcraft.base.ShipConnectorBlockEntity;
 import com.verr1.vscontrolcraft.base.UltraTerminal.*;
@@ -44,9 +46,7 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 import org.valkyrienskies.core.api.ships.ServerShip;
-import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint;
-import org.valkyrienskies.core.apigame.constraints.VSFixedOrientationConstraint;
-import org.valkyrienskies.core.apigame.constraints.VSHingeOrientationConstraint;
+import org.valkyrienskies.core.apigame.constraints.*;
 import org.valkyrienskies.core.impl.game.ships.ShipDataCommon;
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld;
 import org.valkyrienskies.core.impl.game.ships.ShipTransformImpl;
@@ -77,6 +77,8 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     public SynchronizedField<ShipPhysics> asmPhysics = new SynchronizedField<>(ShipPhysics.EMPTY);
     public SynchronizedField<Double> controlTorque = new SynchronizedField<>(0.0);
 
+    private Vector3dc cached_OwnLocPos = new Vector3d();
+    private Vector3dc cached_CmpLocPos = new Vector3d();
 
 
     private boolean isAdjustingAngle = false;
@@ -100,6 +102,22 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
 
 
     private boolean cheatMode = false;
+
+    public Vector3dc getCached_CmpLocPos() {return cached_CmpLocPos;}
+
+    public void setCached_CmpLocPos(Vector3dc cached_CmpLocPos) {this.cached_CmpLocPos = new Vector3d(cached_CmpLocPos);}
+
+    public Vector3dc getCached_OwnLocPos() {return cached_OwnLocPos;}
+
+    public void setCached_OwnLocPos(Vector3dc cached_OwnLocPos) {this.cached_OwnLocPos = new Vector3d(cached_OwnLocPos);}
+
+    public void updateCache(){
+        VSConstraint savedFix = ConstrainCenter.get(new ConstrainKey(getBlockPos(), getDimensionID(), "attach_1", !isOnServerShip(), false, false));
+        if(savedFix == null || savedFix.getConstraintType() != VSConstraintType.ATTACHMENT)return;
+        VSAttachmentConstraint fix = (VSAttachmentConstraint) savedFix;
+        setCached_CmpLocPos(fix.getLocalPos1());
+        setCached_OwnLocPos(fix.getLocalPos0());
+    }
 
     public void setOffset(double offset) {
         this.offset = offset;
@@ -139,6 +157,36 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                     ExposedFieldType.TARGET
             ).withSuggestedRange(0, Math.PI / 2),
             new ExposedFieldWrapper(
+                    () -> this.getControllerInfoHolder().getTarget(),
+                    t -> this.getControllerInfoHolder().setTarget(isAdjustingAngle ? VSMathUtils.clamp(t, Math.PI) : t),
+                    "target",
+                    WidgetType.SLIDE,
+                    ExposedFieldType.TARGET$1
+            ).withSuggestedRange(0, Math.PI / 2),
+            new ExposedFieldWrapper(
+                    () -> (isLocked ? 1.0 : 0.0),
+                    (d) -> {
+                        if(d > (double) 1 / 15)tryLock();
+                        else if(d < (double) 1 / 15)tryUnlock();
+                    },
+                    "Locked",
+                    WidgetType.SLIDE,
+                    ExposedFieldType.IS_LOCKED$1
+            ),
+            new ExposedFieldWrapper(
+                    () -> (isLocked ? 1.0 : 0.0),
+                    (d) -> {
+                        if(d > (double) 1 / 15)tryLock();
+                        else if(d < (double) 1 / 15)tryUnlock();
+                    },
+                    "Locked",
+                    WidgetType.SLIDE,
+                    ExposedFieldType.IS_LOCKED$2
+            )
+    );
+
+    /*
+    * new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getPIDParams().p(),
                     p -> this.getControllerInfoHolder().setP(p),
                     "P",
@@ -159,19 +207,10 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                     WidgetType.SLIDE,
                     ExposedFieldType.D
             ).withSuggestedRange(0, 18),
-            new ExposedFieldWrapper(
-                    () -> (isLocked ? 1.0 : 0.0),
-                    (d) -> {
-                        if(d > 0.5)tryLock();
-                        else if(d < 0.5)tryUnlock();
-                    },
-                    "Locked",
-                    WidgetType.SLIDE,
-                    ExposedFieldType.IS_LOCKED
-            )
-    );
+    *
+    * */
 
-    private ExposedFieldWrapper exposedField = fields.get(5); // isLocked
+    private ExposedFieldWrapper exposedField = fields.get(0); // isLocked
 
     private boolean reverseCreateInput = false;
 
@@ -259,23 +298,6 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
     @Override
     public ExposedFieldWrapper getExposedField() {
         return exposedField;
-    }
-
-    @Override
-    public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
-        ExposedFieldWrapper field =
-                switch (type){
-                    case D -> fields.get(4);
-                    case I -> fields.get(3);
-                    case P -> fields.get(2);
-                    case TARGET -> fields.get(1);
-                    case TORQUE -> fields.get(0);
-                    case IS_LOCKED -> fields.get(5);
-                    default -> null;
-                };
-        if(field == null)return;
-        field.min_max = new Vector2d(min, max);
-        field.directionOptional = openTo;
     }
 
     @Override
@@ -402,15 +424,34 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 .mul(new Quaterniond(new AxisAngle4d(Math.toRadians(90.0), 0.0, 0.0, 1.0)), new Quaterniond())
                 .normalize();
 
+        /*
+        VSFixedOrientationConstraint fixed_ = new VSFixedOrientationConstraint(
+                        getServerShipID(),
+                        getCompanionShipID(),
+                        1.0E-10,
+                        hingeQuaternion_Own,
+                        hingeQuaternion_Cmp,
+                        1.0E10
+                );
+        * */
 
-        VSFixedOrientationConstraint fixed = new VSFixedOrientationConstraint(
+
+
+        Vector3dc v_own = hingeQuaternion_Own.transform(new Vector3d(0, 1, 0));
+        Vector3dc v_cmp = hingeQuaternion_Cmp.transform(new Vector3d(0, 1, 0));
+
+        // In case the cache didn't reload correctly
+        // updateCache();
+        VSAttachmentConstraint fixed = new VSAttachmentConstraint(
                 getServerShipID(),
                 getCompanionShipID(),
                 1.0E-10,
-                hingeQuaternion_Own,
-                hingeQuaternion_Cmp,
-                1.0E10
+                getCached_OwnLocPos().add(v_own, new Vector3d()),
+                getCached_CmpLocPos().add(v_cmp, new Vector3d()),
+                1.0E10,
+                0.0
         );
+
         /*
         // Sometime this cause a pulse, I tried to fix it like this, but it didn't work
 
@@ -531,6 +572,9 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
                 shipWorldCore
         );
 
+        setCached_OwnLocPos(attach_1.getLocalPos0());
+        setCached_CmpLocPos(attach_1.getLocalPos1());
+
     }
 
     @Override
@@ -539,6 +583,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false, false));
         ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach_1", isGrounded, false, false));
         ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach_2", isGrounded, false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "fixed", !isOnServerShip(), false, false));
         clearCompanionShipInfo();
     }
 
@@ -661,6 +706,7 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         ServerShip asm = getCompanionServerShip();
         ServerShip own = getServerShipOn();
         if(asm == null)return;
+        if(!isAdjustingAngle())return;
         double startAngle = VSMathUtils.get_yc2xc(own, asm, getServoDirection(), getCompanionShipDirection());
         getControllerInfoHolder().setTarget(startAngle);
     }
@@ -777,9 +823,24 @@ public abstract class AbstractServoMotor extends ShipConnectorBlockEntity implem
         if(!isAdjustingAngle){
             getControllerInfoHolder().setTarget(0);
         }
+
+
+        DeferralExecutor.executeLater(new UpdateCacheWhenHasLevel());
     }
 
+    // When The Level Try to Reload This BlockEntity, The Level Might Be Null, And getDimensionID() Won't Return The Correct Value
+    private class UpdateCacheWhenHasLevel implements QueryConditionRunnable{
 
+        @Override
+        public boolean condition() {
+            return hasLevel();
+        }
+
+        @Override
+        public void run() {
+            updateCache();
+        }
+    }
 
 }
 

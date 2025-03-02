@@ -104,10 +104,10 @@ public class ModeSelectionScreen extends Screen {
             int width = minecraft.getWindow()
                     .getGuiScaledWidth();
             if (!focused)
-                graphics.drawCenteredString(minecraft.font, Component.translatable("wand.gui.scroll"), width / 2,
+                graphics.drawCenteredString(minecraft.font, Component.translatable("wand.gui.cycle").getString(), width / 2,
                         y - 10, 0xCCDDFF);
             else
-                graphics.drawCenteredString(minecraft.font, scrollToCycle, width / 2, y - 10, 0xCCDDFF);
+                graphics.drawCenteredString(minecraft.font, Component.translatable("wand.gui.cycle").getString(), width / 2, y - 10, 0xCCDDFF);
         } else {
             x += 65;
         }

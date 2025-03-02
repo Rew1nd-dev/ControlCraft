@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.base.Wand.mode;
 
+import com.verr1.vscontrolcraft.base.Hinge.packets.DestroyAllConstrainPacket;
 import com.verr1.vscontrolcraft.base.Hinge.packets.DestroyConstrainPacket;
 import com.verr1.vscontrolcraft.base.Wand.IWandMode;
 import com.verr1.vscontrolcraft.base.Wand.WandSelection;
@@ -7,23 +8,13 @@ import com.verr1.vscontrolcraft.base.Wand.mode.base.WandAbstractMultipleSelectio
 import com.verr1.vscontrolcraft.base.Wand.render.WandModesType;
 import com.verr1.vscontrolcraft.base.Wand.render.WandRenderer;
 import com.verr1.vscontrolcraft.registry.AllPackets;
-import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
+public class WandDestroyAllConstrainMode extends WandAbstractMultipleSelectionMode {
 
-@OnlyIn(value = Dist.CLIENT)
-public class WandDestroyConstrainMode extends WandAbstractMultipleSelectionMode {
-    public static final String ID = "destroy_constrain";
-
-    public static WandDestroyConstrainMode instance;
+    public static WandDestroyAllConstrainMode instance;
 
     public static void createInstance(){
-        instance = new WandDestroyConstrainMode();
-    }
-
-    private WandDestroyConstrainMode(){
-
+        instance = new WandDestroyAllConstrainMode();
     }
 
     @Override
@@ -33,14 +24,14 @@ public class WandDestroyConstrainMode extends WandAbstractMultipleSelectionMode 
 
     @Override
     public String getID() {
-        return ID;
+        return "destroy_all";
     }
 
     @Override
     public void onSelection(WandSelection selection) {
         AllPackets
                 .getChannel()
-                .sendToServer(new DestroyConstrainPacket(selection.pos()));
+                .sendToServer(new DestroyAllConstrainPacket(selection.pos()));
     }
 
 
@@ -52,4 +43,5 @@ public class WandDestroyConstrainMode extends WandAbstractMultipleSelectionMode 
     public String tickCallBackInfo() {
         return WandModesType.DESTROY.tickCallBackInfo(state).getString();
     }  //"right click to destroy constrain"
+
 }

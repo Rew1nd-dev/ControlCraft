@@ -4,8 +4,10 @@
   "mixins": [
     "MixinCCCommonHooks",
     "MixinContraption",
+    "MixinEntity",
     "MixinPhysicsTick",
-    "MixinSpeedController"
+    "MixinSpeedController",
+    "accessor.ShipObjectServerWorldAccessor"
   ],
   "package": "com.verr1.vscontrolcraft.mixin",
   "injectors": {

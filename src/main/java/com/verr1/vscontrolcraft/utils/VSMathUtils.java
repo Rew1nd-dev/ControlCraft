@@ -107,6 +107,11 @@ public class VSMathUtils {
         return ship;
     }
 
+    public static @Nullable Ship getShip(BlockPos pos, Level level){
+        Ship ship = VSGameUtilsKt.getShipObjectManagingPos(level, pos);
+        return ship;
+    }
+
 
     public static Quaterniondc getQuaternion(LevelPos pos){
         ServerShip xShip = VSGameUtilsKt.getShipObjectManagingPos(pos.level(), pos.pos());
@@ -134,8 +139,8 @@ public class VSMathUtils {
         return new Vector3d();
     }
 
-    public static Vector3d getAbsolutePosition(ServerLevel level, BlockPos pos){
-        ServerShip ship = getServerShip(pos, level);
+    public static Vector3d getAbsolutePosition(Level level, BlockPos pos){
+        Ship ship = getShip(pos, level);
         Vector3d p_sc = Util.Vec3toVector3d(pos.getCenter());
         if(ship == null)return p_sc;
         var p_wc = ship.getTransform().getShipToWorld().transformPosition(p_sc, new Vector3d());

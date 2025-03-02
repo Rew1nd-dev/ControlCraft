@@ -49,9 +49,22 @@ public class SliderControllerPeripheral extends AbstractAttachedPeripheral<Slide
     }
 
     @LuaFunction
-    public final void setTargetDistance(double target){
+    public final double getCurrentValue(){
+        return getTarget().getControllerInfoHolder().getValue();
+    }
+
+    @LuaFunction
+    public final double getTargetValue(){
+        return getTarget().getControllerInfoHolder().getTarget();
+    }
+
+    @LuaFunction
+    public final void setTargetValue(double target){
         getTarget().getControllerInfoHolder().setTarget(target);
     }
+
+
+
 
     @LuaFunction
     public final Map<String, Map<String, Object>> getPhysics(){
@@ -61,6 +74,21 @@ public class SliderControllerPeripheral extends AbstractAttachedPeripheral<Slide
                 "slider", own,
                 "companion", asm
         );
+    }
+
+    @LuaFunction
+    public final void lock(){
+        getTarget().tryLock();
+    }
+
+    @LuaFunction
+    public final void unlock(){
+        getTarget().tryUnlock();
+    }
+
+    @LuaFunction
+    public final boolean isLocked(){
+        return getTarget().isLocked();
     }
 
 }

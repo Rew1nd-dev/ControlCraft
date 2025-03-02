@@ -7,6 +7,7 @@ import com.verr1.vscontrolcraft.ControlCraft;
 public class AllPartialModels {
     public static final PartialModel
         NORMAL_PROPELLER = block("simple_propeller"),
+        NORMAL_PROPELLER_CENTER = block("simple_propeller_center"),
         SPINALYZR_AXES = block("spinalyzer_axes") ,
         SERVO_TOP = block("servo_top"),
         WING_CONTROLLER_TOP = block("wing_controller_top"),

@@ -41,8 +41,19 @@ public class AnchorForceInducer extends AbstractExpirableForceInducer {
         Vector3dc fAirResistance = velocity.mul(-logicalAnchor.airResistance() * physShip.getInertia().getShipMass(), new Vector3d());
         Vector3dc fExtraGravity = new Vector3d(0, -physShip.getInertia().getShipMass(), 0).mul(logicalAnchor.extraGravity());
 
+
+        double ts = 0.01667;
+        int id = physShip.getTransform().getShipToWorldScaling().minComponent();
+        double scale = physShip.getTransform().getShipToWorldScaling().get(id);
+        double inertia = physShip.getInertia().getMomentOfInertiaTensor().m00();
+
+        Vector3dc q_d = physShip.getPoseVel().getOmega();
+        Vector3dc accel_d = new Vector3d(q_d.x(), q_d.y(), q_d.z()).mul(-2 / ts).mul(logicalAnchor.rotationalResistance());
+        Vector3dc tRotationalResistance = new Vector3d(accel_d).mul(inertia * Math.pow(scale, 5));
+
         physShip.applyInvariantForce(fExtraGravity);
         physShip.applyInvariantForce(fAirResistance);
+        physShip.applyInvariantTorque(tRotationalResistance);
 
 
     }

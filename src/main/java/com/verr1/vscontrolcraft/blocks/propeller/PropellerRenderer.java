@@ -21,8 +21,16 @@ public class PropellerRenderer extends SafeBlockEntityRenderer<PropellerBlockEnt
     protected void renderSafe(PropellerBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource bufferSource, int light, int overlay) {
         float angle = be.angle.getValue(partialTicks);
         BlockState state = be.getBlockState();
+        boolean spinal_only = state.getValue(PropellerBlock.HAS_BLADES);
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
-        SuperByteBuffer propellerBuffer = CachedBufferer.partialFacing(AllPartialModels.NORMAL_PROPELLER, state);
+
+        SuperByteBuffer propellerBuffer = CachedBufferer
+                .partialFacing(
+                    spinal_only ?
+                            AllPartialModels.NORMAL_PROPELLER :
+                            AllPartialModels.NORMAL_PROPELLER_CENTER,
+                    state
+                );
 
         propellerBuffer.rotateCentered(state.getValue(BlockStateProperties.FACING), angle)
                 .light(LightTexture.FULL_BRIGHT)

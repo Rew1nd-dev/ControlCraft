@@ -32,6 +32,10 @@ public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
     private double extraGravity = 0;
 
 
+
+    private double rotationalResistance = 0;
+
+
     public AnchorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
@@ -52,6 +56,14 @@ public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
         return extraGravity;
     }
 
+    public double getRotationalResistance() {
+        return rotationalResistance;
+    }
+
+    public void setRotationalResistance(double rotationalResistance) {
+        this.rotationalResistance = rotationalResistance;
+    }
+
     @Override
     public void tick() {
         super.tick();
@@ -68,13 +80,14 @@ public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
     }
 
     public LogicalAnchor getLogicalAnchor() {
-        return new LogicalAnchor(airResistance, extraGravity);
+        return new LogicalAnchor(airResistance, extraGravity, rotationalResistance);
     }
 
     public void displayScreen(ServerPlayer player){
         var p = new BlockBoundClientPacket.builder(getBlockPos(), BlockBoundPacketType.OPEN_SCREEN_0)
                 .withDouble(airResistance)
                 .withDouble(extraGravity)
+                .withDouble(rotationalResistance)
                 .build();
 
         AllPackets.sendToPlayer(p, player);
@@ -84,10 +97,11 @@ public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
         if(packet.getType() == BlockBoundPacketType.OPEN_SCREEN_0){
-            airResistance = packet.getDoubles().get(0);
-            extraGravity = packet.getDoubles().get(1);
+            var a = packet.getDoubles().get(0);
+            var e = packet.getDoubles().get(1);
+            var r = packet.getDoubles().get(2);
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    ScreenOpener.open(new AnchorScreen(packet.getBoundPos(), airResistance, extraGravity)
+                    ScreenOpener.open(new AnchorScreen(packet.getBoundPos(), a, e, r)
             ));
         }
     }
@@ -97,6 +111,7 @@ public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
         if(packet.getType() == BlockBoundPacketType.SETTING_0){
             airResistance = packet.getDoubles().get(0);
             extraGravity = packet.getDoubles().get(1);
+            rotationalResistance = packet.getDoubles().get(2);
         }
     }
 
@@ -106,6 +121,7 @@ public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
         if(clientPacket)return;
         compound.putDouble("extra_gravity", extraGravity);
         compound.putDouble("air_resistance", airResistance);
+        compound.putDouble("rotational_resistance", rotationalResistance);
     }
 
     @Override
@@ -114,5 +130,6 @@ public class AnchorBlockEntity extends OnShipDirectinonalBlockEntity implements
         if(clientPacket)return;
         extraGravity = compound.getDouble("extra_gravity");
         airResistance = compound.getDouble("air_resistance");
+        rotationalResistance = compound.getDouble("rotational_resistance");
     }
 }

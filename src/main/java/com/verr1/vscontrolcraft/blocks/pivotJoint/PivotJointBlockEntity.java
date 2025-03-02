@@ -140,15 +140,23 @@ public class PivotJointBlockEntity extends ShipConnectorBlockEntity implements
 
     @Override
     public void destroyConstrain() {
+        boolean isGrounded = !isOnServerShip();
         // the last 2 element does need to be the same
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach", false, false, false));
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", false, false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "attach", isGrounded, false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false, false));
         clearCompanionShipInfo();
+    }
+
+    @Override
+    public void remove() {
+        super.remove();
+        destroy();
     }
 
     @Override
     public void destroy() {
         super.destroy();
+        if(level.isClientSide)return;
         destroyConstrain();
     }
 

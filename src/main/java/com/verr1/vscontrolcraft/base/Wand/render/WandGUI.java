@@ -24,13 +24,10 @@ import java.util.Vector;
 
 public class WandGUI implements IGuiOverlay {
 
-    private SchematicHotbarSlotOverlay overlay;
-    private ModeSelectionScreen selectionScreen;
-    private int activeHotbarSlot = 0;
+    private final ModeSelectionScreen selectionScreen;
 
 
     public WandGUI(){
-        overlay = new SchematicHotbarSlotOverlay();
         selectionScreen = new ModeSelectionScreen(WandModesType.getAllTypes(), ClientWand::setMode);
     }
 

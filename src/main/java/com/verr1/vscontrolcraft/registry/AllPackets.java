@@ -40,6 +40,7 @@ public enum AllPackets {
     EXPOSED_FIELD_SETTINGS(ExposedFieldSettingsPacket.class, ExposedFieldSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
     EXPOSED_FIELD_RESET(ExposedFieldResetPacket.class, ExposedFieldResetPacket::new, NetworkDirection.PLAY_TO_SERVER),
     // SPINALYZER_TARGET_SELECTION(SpinalyzerLinkPacket.class, SpinalyzerLinkPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    DESTROY_ALL_CONSTRAINT(DestroyAllConstrainPacket.class, DestroyAllConstrainPacket::new, NetworkDirection.PLAY_TO_SERVER),
     SERVOMOTOR_CONSTRAIN_ASSEMBLE(SimpleAssemblePacket.class, SimpleAssemblePacket::new, NetworkDirection.PLAY_TO_SERVER),
     JOINTMOTOR_CONSTRAIN_ASSEMBLE(DirectionalAssemblePacket.class, DirectionalAssemblePacket::new, NetworkDirection.PLAY_TO_SERVER),
     HINGE_BRUTE_CONNECTION(HingeBruteConnectPacket.class, HingeBruteConnectPacket::new, NetworkDirection.PLAY_TO_SERVER),

@@ -27,7 +27,7 @@ public class Config
     private static final ForgeConfigSpec.IntValue MAX_DISTANCE_SPATIAL_CAN_LINK = BUILDER
             .comment(
                     "  Defines How Long Can Running-Dynamic Spatial Can Find A Running-Static One As It's Target")
-            .defineInRange("Max Distance Spatial Can Link", 64, 1, 1024);
+            .defineInRange("Max Distance Spatial Can Link", 128, 1, 1024);
 
     private static final ForgeConfigSpec.IntValue CHUNK_LOADER_RADIUS = BUILDER
             .comment(

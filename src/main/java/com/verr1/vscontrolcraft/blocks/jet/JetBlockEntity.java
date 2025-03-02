@@ -3,8 +3,6 @@ package com.verr1.vscontrolcraft.blocks.jet;
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
-import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.SynchronizedField;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
@@ -46,8 +44,6 @@ import org.valkyrienskies.core.api.ships.ServerShip;
 
 import java.util.List;
 
-import static net.minecraft.ChatFormatting.GRAY;
-
 public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
         ITerminalDevice, IPacketHandler, IHaveGoggleInformation
 {
@@ -84,6 +80,20 @@ public class JetBlockEntity extends OnShipDirectinonalBlockEntity implements
                     "vertical",
                     WidgetType.SLIDE,
                     ExposedFieldType.VERTICAL_TILT
+            ).withSuggestedRange(-Math.PI / 2, Math.PI / 2),
+            new ExposedFieldWrapper(
+                    horizontalAngle::read,
+                    horizontalAngle::write,
+                    "horizontal",
+                    WidgetType.SLIDE,
+                    ExposedFieldType.HORIZONTAL_TILT$1
+            ).withSuggestedRange(-Math.PI / 2, Math.PI / 2),
+            new ExposedFieldWrapper(
+                    verticalAngle::read,
+                    verticalAngle::write,
+                    "vertical",
+                    WidgetType.SLIDE,
+                    ExposedFieldType.VERTICAL_TILT$1
             ).withSuggestedRange(-Math.PI / 2, Math.PI / 2)
     );
 

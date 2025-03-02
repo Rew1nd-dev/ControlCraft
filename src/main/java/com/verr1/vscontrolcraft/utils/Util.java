@@ -29,6 +29,10 @@ public class Util {
         return new Vector3d(vec3.getX(), vec3.getY(), vec3.getZ());
     }
 
+    public static Vec3 Vector3dToVec3(Vector3dc vec3){
+        return new Vec3(vec3.x(), vec3.y(), vec3.z());
+    }
+
     public static float angleReset(float angle){
         while(angle > 180){
             angle -= 360;
@@ -83,6 +87,11 @@ public class Util {
     public static double clamp1(double x){
         return Math.atan(x) / Math.PI * 0.5;
     }
+
+    public static double clampHalf(double x, double max){
+        return Math.min(max, Math.max(0, x));
+    }
+
 
     public static Matrix3d getRotationMatrix(BlockState state) {
         Direction facing = state.getValue(BlockStateProperties.FACING);

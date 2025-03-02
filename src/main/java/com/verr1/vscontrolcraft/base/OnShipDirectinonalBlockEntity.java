@@ -13,7 +13,10 @@ import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.core.api.ships.Ship;
+import org.valkyrienskies.core.apigame.world.ShipWorldCore;
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld;
+import org.valkyrienskies.core.impl.game.ships.ShipObjectWorld;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import javax.annotation.Nullable;
@@ -50,6 +53,10 @@ public class OnShipDirectinonalBlockEntity extends KineticBlockEntity {
         return ship;
     }
 
+    public @Nullable Ship getShipOn(){
+        return VSGameUtilsKt.getShipObjectManagingPos(level, getBlockPos());
+    }
+
     public Quaterniondc getSelfShipQuaternion(){
         Quaterniond q = new Quaterniond();
         Optional.ofNullable(getServerShipOn()).ifPresent((serverShip -> serverShip.getTransform().getShipToWorldRotation().get(q)));
@@ -57,6 +64,7 @@ public class OnShipDirectinonalBlockEntity extends KineticBlockEntity {
     }
 
     public String getDimensionID(){
+        if(level == null)return "";
         return VSGameUtilsKt.getDimensionId(level);
     }
 
@@ -66,5 +74,11 @@ public class OnShipDirectinonalBlockEntity extends KineticBlockEntity {
         String dimensionID = getDimensionID();
         ShipObjectServerWorld sosw = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
         return sosw.getDimensionToGroundBodyIdImmutable().get(dimensionID);
+    }
+
+    public long getShipID(){
+        Ship ship = getShipOn();
+        if(ship != null)return ship.getId();
+        return 0L;
     }
 }

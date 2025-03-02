@@ -2,6 +2,7 @@ package com.verr1.vscontrolcraft.blocks.spatialAnchor;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.utility.Components;
+import com.verr1.vscontrolcraft.Config;
 import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.base.Servo.ICanBruteDirectionalConnect;
@@ -54,7 +55,7 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
 
     private double anchorOffset = 1.0;
     private long protocol = 0;
-    private final int MAX_DISTANCE_SQRT_CAN_LINK = 32 * 32;
+    private final int MAX_DISTANCE_SQRT_CAN_LINK = Config.MaxDistanceSpatialCanLink * Config.MaxDistanceSpatialCanLink;
     private final SpatialScheduleInfoHolder schedule = new SpatialScheduleInfoHolder().withPPID(18, 3, 12, 10);
 
     private SpatialAnchorPeripheral peripheral;
@@ -70,14 +71,14 @@ public class SpatialAnchorBlockEntity extends OnShipDirectinonalBlockEntity impl
             ).withSuggestedRange(0, 16),
             new ExposedFieldWrapper(
                     () -> (double) (isRunning() ? 1 : 0),
-                    v -> setRunning(v > 0.5) ,
+                    v -> setRunning(v > (double) 1 / 15) ,
                     "running",
                     WidgetType.TOGGLE,
                     ExposedFieldType.IS_RUNNING
             ),
             new ExposedFieldWrapper(
                     () -> (double)(isStatic() ? 0 : 1),
-                    v -> setStatic(v > 0.5),
+                    v -> setStatic(v > (double) 1 / 15),
                     "dynamic",
                     WidgetType.TOGGLE,
                     ExposedFieldType.IS_STATIC

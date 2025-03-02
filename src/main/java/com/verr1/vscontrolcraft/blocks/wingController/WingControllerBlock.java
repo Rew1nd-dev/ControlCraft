@@ -1,10 +1,8 @@
 package com.verr1.vscontrolcraft.blocks.wingController;
 
-import com.simibubi.create.AllItems;
 import com.simibubi.create.content.contraptions.bearing.BearingBlock;
-import com.simibubi.create.content.equipment.wrench.IWrenchable;
-import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
+import com.verr1.vscontrolcraft.base.ISignalAcceptor;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,16 +15,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import static com.verr1.vscontrolcraft.registry.AllShapes.HALF_BOX_BASE;
-
 public class WingControllerBlock extends BearingBlock implements
-        IBE<WingControllerBlockEntity>
+        IBE<WingControllerBlockEntity>, ISignalAcceptor
 {
     public static final String ID = "wing_controller";
 
@@ -41,9 +36,8 @@ public class WingControllerBlock extends BearingBlock implements
 
     @Override
     public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
-                                boolean isMoving)  {
-        if(worldIn.isClientSide)return;
-        withBlockEntityDo(worldIn, pos, be -> be.getExposedField().apply(worldIn.getBestNeighborSignal(pos)));
+                                  boolean isMoving)  {
+        ISignalAcceptor.super.onNeighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
     }
 
     @Override

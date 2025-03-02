@@ -152,14 +152,8 @@ repositories {
         }
     }
 
-    maven{
-        url = "https://repo.essential.gg/repository/maven-public"
-    }
 
-    maven {
-        name = "CottonMC"
-        url = "https://server.bbkr.space/artifactory/libs-release"
-    }
+
 
     repositories {
         maven { url = "https://maven.bawnorton.com/releases" }

@@ -1,27 +1,53 @@
 {
   "variants": {
-    "facing=down": {
+    "facing=down,has_blades=false": {
       "model": "vscontrolcraft:block/propeller/block",
       "x": 180
     },
-    "facing=east": {
+    "facing=down,has_blades=true": {
+      "model": "vscontrolcraft:block/propeller/block",
+      "x": 180
+    },
+    "facing=east,has_blades=false": {
       "model": "vscontrolcraft:block/propeller/block",
       "x": 90,
       "y": 90
     },
-    "facing=north": {
+    "facing=east,has_blades=true": {
+      "model": "vscontrolcraft:block/propeller/block",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,has_blades=false": {
       "model": "vscontrolcraft:block/propeller/block",
       "x": 90
     },
-    "facing=south": {
+    "facing=north,has_blades=true": {
+      "model": "vscontrolcraft:block/propeller/block",
+      "x": 90
+    },
+    "facing=south,has_blades=false": {
       "model": "vscontrolcraft:block/propeller/block",
       "x": 90,
       "y": 180
     },
-    "facing=up": {
+    "facing=south,has_blades=true": {
+      "model": "vscontrolcraft:block/propeller/block",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,has_blades=false": {
       "model": "vscontrolcraft:block/propeller/block"
     },
-    "facing=west": {
+    "facing=up,has_blades=true": {
+      "model": "vscontrolcraft:block/propeller/block"
+    },
+    "facing=west,has_blades=false": {
+      "model": "vscontrolcraft:block/propeller/block",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,has_blades=true": {
       "model": "vscontrolcraft:block/propeller/block",
       "x": 90,
       "y": 270

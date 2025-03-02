@@ -63,6 +63,13 @@ public class PropellerControllerBlockEntity extends OnShipDirectinonalBlockEntit
                     "Speed",
                     WidgetType.SLIDE,
                     ExposedFieldType.SPEED
+            ).withSuggestedRange(0, 64),
+            new ExposedFieldWrapper(
+                    rotationalSpeed::read,
+                    rotationalSpeed::write,
+                    "Speed",
+                    WidgetType.SLIDE,
+                    ExposedFieldType.SPEED$1
             ).withSuggestedRange(0, 64)
     );
 

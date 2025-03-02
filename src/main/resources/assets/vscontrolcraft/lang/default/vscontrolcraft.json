@@ -38,6 +38,8 @@
   "vscontrolcraft.screen.labels.field.target" : "Target",
   "vscontrolcraft.screen.labels.field.angle" : "Radian",
   "vscontrolcraft.screen.labels.field.degree" : "Degree",
+  "vscontrolcraft.screen.labels.field.degree_1" : "Degree",
+  "vscontrolcraft.screen.labels.field.degree_2" : "Degree",
   "vscontrolcraft.screen.labels.field.horizontal_tilt": "Horizontal",
   "vscontrolcraft.screen.labels.field.vertical_tilt": "Vertical",
   "vscontrolcraft.screen.labels.field.speed" : "Speed",
@@ -48,10 +50,12 @@
   "vscontrolcraft.screen.labels.field.offset": "Offset",
   "vscontrolcraft.screen.labels.field.is_running": "Running",
   "vscontrolcraft.screen.labels.field.is_static": "Static",
+  "vscontrolcraft.screen.labels.field.is_sensor": "Sensor",
 
   "vscontrolcraft.screen.labels.field.strength": "Strength",
   "vscontrolcraft.screen.labels.field.air_resistance": "Air Resist",
   "vscontrolcraft.screen.labels.field.extra_gravity": "Extra G",
+  "vscontrolcraft.screen.labels.field.rotational_resistance": "Rot Damp",
   "vscontrolcraft.screen.labels.field.protocol": "Channel",
   "vscontrolcraft.screen.labels.field.name": "Name",
   "vscontrolcraft.screen.labels.field.type": "Type",
@@ -120,6 +124,11 @@
   "wand.mode.description.destroy.1": "right click to destroy constrain",
   "wand.mode.callback.to_select_x.destroy": "right click to destroy constrain",
 
-  "wand.gui.cycle" : "scroll to cycle"
+  "wand.mode.name.destroy_all": "Destroy All",
+  "wand.mode.description.lines.destroy_all": "1",
+  "wand.mode.description.destroy_all.1": "right click to destroy all constrain on this ship",
+  "wand.mode.callback.to_select_x.destroy_all": "right click to destroy all constrain on this ship",
+
+  "wand.gui.cycle" : "press [alt] + scroll to cycle"
 
 }

@@ -1,15 +1,10 @@
 package com.verr1.vscontrolcraft.blocks.jointMotor;
 
-import com.simibubi.create.AllItems;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
-import com.verr1.vscontrolcraft.base.Servo.AbstractServoMotor;
-import com.verr1.vscontrolcraft.base.Servo.PID;
-import com.verr1.vscontrolcraft.base.Servo.PIDControllerOpenScreenPacket;
-import com.verr1.vscontrolcraft.base.Servo.PIDControllerType;
+import com.verr1.vscontrolcraft.base.ISignalAcceptor;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
-import com.verr1.vscontrolcraft.registry.AllPackets;
 import com.verr1.vscontrolcraft.utils.Util;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
@@ -27,7 +22,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.valkyrienskies.core.impl.shadow.F;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -36,7 +30,7 @@ import static com.verr1.vscontrolcraft.registry.AllShapes.HALF_BOX_BASE;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class JointMotorBlock extends DirectionalAxisKineticBlock implements
-        IBE<JointMotorBlockEntity> , IWrenchable
+        IBE<JointMotorBlockEntity> , IWrenchable, ISignalAcceptor
 {
     public static final String ID = "joint";
 
@@ -46,16 +40,8 @@ public class JointMotorBlock extends DirectionalAxisKineticBlock implements
 
     @Override
     public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
-                                boolean isMoving)  {
-        if(worldIn.isClientSide)return;
-        Direction direction = Direction.fromDelta(
-                fromPos.getX() - pos.getX(),
-                fromPos.getY() - pos.getY(),
-                fromPos.getZ() - pos.getZ()
-        );
-        if(direction == null)return;
-        withBlockEntityDo(worldIn, pos, be -> be.accept(worldIn.getSignal(fromPos, direction.getOpposite()), direction));
-
+                                  boolean isMoving)  {
+        ISignalAcceptor.super.onNeighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
     }
 
     @Override

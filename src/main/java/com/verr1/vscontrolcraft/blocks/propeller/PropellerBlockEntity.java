@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.blocks.propeller;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.gui.ScreenOpener;
@@ -76,11 +77,13 @@ public class PropellerBlockEntity extends SmartBlockEntity implements
         rotationalSpeed = speed;
     }
 
+
+
     public void setProperty(double torqueRatio, double thrustRatio, boolean reverseTorque){
         this.TorqueRatio = torqueRatio;
         this.ThrustRatio = thrustRatio;
         this.ReverseTorque = reverseTorque;
-        sendData();
+        setChanged();
     }
 
 
@@ -115,6 +118,8 @@ public class PropellerBlockEntity extends SmartBlockEntity implements
         }
         super.write(tag, clientPacket);
     }
+
+
 
     @Override
     protected void read(CompoundTag tag, boolean clientPacket) {

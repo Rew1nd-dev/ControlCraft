@@ -227,6 +227,36 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
                     ExposedFieldType.TARGET
             ).withSuggestedRange(0, 15),
             new ExposedFieldWrapper(
+                    () -> this.getControllerInfoHolder().getTarget(),
+                    t -> this.getControllerInfoHolder().setTarget(t),
+                    "target",
+                    WidgetType.SLIDE,
+                    ExposedFieldType.TARGET$1
+            ).withSuggestedRange(0, 15),
+            new ExposedFieldWrapper(
+                    () -> (isLocked ? 1.0 : 0.0),
+                    (d) -> {
+                        if(d > (double) 1 / 15)tryLock();
+                        else if(d < (double) 1 / 15)tryUnlock();
+                    },
+                    "Locked",
+                    WidgetType.SLIDE,
+                    ExposedFieldType.IS_LOCKED$1
+            ),
+            new ExposedFieldWrapper(
+                    () -> (isLocked ? 1.0 : 0.0),
+                    (d) -> {
+                        if(d > (double) 1 / 15)tryLock();
+                        else if(d < (double) 1 / 15)tryUnlock();
+                    },
+                    "Locked",
+                    WidgetType.SLIDE,
+                    ExposedFieldType.IS_LOCKED$2
+            )
+    );
+
+    /*
+    new ExposedFieldWrapper(
                     () -> this.getControllerInfoHolder().getPIDParams().p(),
                     p -> this.getControllerInfoHolder().setP(p),
                     "P",
@@ -247,42 +277,15 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
                     WidgetType.SLIDE,
                     ExposedFieldType.D
             ).withSuggestedRange(2, 10),
-            new ExposedFieldWrapper(
-                    () -> (isLocked ? 1.0 : 0.0),
-                    (d) -> {
-                        if(d > 0.5)tryLock();
-                        else if(d < 0.5)tryUnlock();
-                    },
-                    "Locked",
-                    WidgetType.SLIDE,
-                    ExposedFieldType.IS_LOCKED
-            )
-    );
+    * */
 
-    private ExposedFieldWrapper exposedField = fields.get(1);
+    private ExposedFieldWrapper exposedField = fields.get(0);
 
     @Override
     public ExposedFieldWrapper getExposedField() {
         return exposedField;
     }
 
-    /*
-    * @Override
-    public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
-        var field =
-            switch (type){
-                case FORCE -> exposedField = fields.get(0);
-                case TARGET -> exposedField = fields.get(1);
-                case P -> exposedField = fields.get(2);
-                case I -> exposedField = fields.get(3);
-                case D -> exposedField = fields.get(4);
-                default -> null;
-            };
-        if(field == null)return;
-        field.min_max = new Vector2d(min, max);
-        field.directionOptional = openTo;
-    }
-    * */
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -352,7 +355,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         Vector3dc asmPos_Own = getAssembleBlockPosJOML();
         Vector3dc asmPos_Asm = Util.Vec3toVector3d(assemPos.getCenter());
 
-        VSSlideConstraint slideConstraint = new VSSlideConstraint(
+        VSSlideConstraint slideConstraint_1 = new VSSlideConstraint(
                 getServerShipID(),
                 assemShipID,
                 1.0E-10,
@@ -363,7 +366,21 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
                 MAX_SLIDE_DISTANCE
         );
 
-        recreateConstrains(hingeConstraint, slideConstraint);
+
+        Vector3dc dir_cmp = Util.Vec3itoVector3d(align.getOpposite().getNormal());
+
+        VSSlideConstraint slideConstraint_2 = new VSSlideConstraint(
+                getServerShipID(),
+                assemShipID,
+                1.0E-10,
+                asmPos_Own.fma(1, getDirectionJOML(), new Vector3d()),
+                asmPos_Asm.fma(1, dir_cmp, new Vector3d()),
+                1.0E10,
+                getDirectionJOML(),
+                MAX_SLIDE_DISTANCE
+        );
+
+        recreateConstrains(hingeConstraint, slideConstraint_1, slideConstraint_2);
         setCompanionShipID(assemShipID);
         setCompanionShipDirection(align);
         notifyUpdate();
@@ -438,19 +455,33 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         Vector3dc asmPos_Own = getAssembleBlockPosJOML();
         Vector3dc asmPos_Asm = assembledShip.getInertiaData().getCenterOfMassInShip().add(new Vector3d(0.5, 0.5, 0.5), new Vector3d());
 
-        VSSlideConstraint slideConstraint = new VSSlideConstraint(
+
+
+
+        VSSlideConstraint slideConstraint_1 = new VSSlideConstraint(
                 getServerShipID(),
                 assembledShipID,
-                1.0E-10,
+                1.0E-20,
                 asmPos_Own,
                 asmPos_Asm,
-                1.0E10,
+                1.0E20,
+                getDirectionJOML(),
+                MAX_SLIDE_DISTANCE
+        );
+
+        VSSlideConstraint slideConstraint_2 = new VSSlideConstraint(
+                getServerShipID(),
+                assembledShipID,
+                1.0E-20,
+                asmPos_Own.fma(1, getDirectionJOML(), new Vector3d()),
+                asmPos_Asm.fma(1, getDirectionJOML(), new Vector3d()),
+                1.0E20,
                 getDirectionJOML(),
                 MAX_SLIDE_DISTANCE
         );
 
 
-        recreateConstrains(fixedOrientationConstraint, slideConstraint);
+        recreateConstrains(fixedOrientationConstraint, slideConstraint_1, slideConstraint_2);
         setCompanionShipID(assembledShipID);
         setCompanionShipDirection(Direction.DOWN);
         notifyUpdate();
@@ -504,27 +535,37 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
 
     public void recreateConstrains(
             VSFixedOrientationConstraint hinge_0,
-            VSSlideConstraint slide
+            VSSlideConstraint slide_1,
+            VSSlideConstraint slide_2
     ) {
         var shipWorldCore = (ShipObjectServerWorld)VSGameUtilsKt.getShipObjectWorld((ServerLevel) level);
 
         boolean isGrounded = !isOnServerShip();
 
 
-         ConstrainCenter.createOrReplaceNewConstrain(
+        ConstrainCenter.createOrReplaceNewConstrain(
                 new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false, false),
                 hinge_0,
                 shipWorldCore
         );
 
+
         ConstrainCenter.createOrReplaceNewConstrain(
-                new ConstrainKey(getBlockPos(), getDimensionID(), "slide", isGrounded, false, false),
-                slide,
+                new ConstrainKey(getBlockPos(), getDimensionID(), "slide_1", isGrounded, false, false),
+                slide_1,
                 shipWorldCore
         );
 
-        cachedPos_Own.write(new Vector3d(slide.getLocalPos0()));
-        cachedPos_Cmp.write(new Vector3d(slide.getLocalPos1()));
+        ConstrainCenter.createOrReplaceNewConstrain(
+                new ConstrainKey(getBlockPos(), getDimensionID(), "slide_2", isGrounded, false, false),
+                slide_2,
+                shipWorldCore
+        );
+
+
+
+        cachedPos_Own.write(new Vector3d(slide_1.getLocalPos0()));
+        cachedPos_Cmp.write(new Vector3d(slide_1.getLocalPos1()));
     }
 
     @Override
@@ -540,7 +581,7 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
 
 
     public void syncCachedPos(){
-        VSSlideConstraint slide = (VSSlideConstraint)ConstrainCenter.get(new ConstrainKey(getBlockPos(), getDimensionID(), "slide", !isOnServerShip(), false, false));
+        VSSlideConstraint slide = (VSSlideConstraint)ConstrainCenter.get(new ConstrainKey(getBlockPos(), getDimensionID(), "slide_1", !isOnServerShip(), false, false));
         if(slide == null)return;
         cachedPos_Own.write(new Vector3d(slide.getLocalPos0()));
         cachedPos_Cmp.write(new Vector3d(slide.getLocalPos1()));
@@ -556,7 +597,9 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
     public void destroyConstrain(){
         boolean isGrounded = !isOnServerShip();
         ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false, false));
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "slide", isGrounded, false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "slide_1", isGrounded, false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "slide_2", isGrounded, false, false));
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "fixed", !isOnServerShip(), false, false));
         clearCompanionShipInfo();
     }
 

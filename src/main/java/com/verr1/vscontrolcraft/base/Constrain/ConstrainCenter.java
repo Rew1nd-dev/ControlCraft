@@ -5,16 +5,21 @@ import com.verr1.vscontrolcraft.base.Constrain.DataStructure.ConstrainKey;
 import com.verr1.vscontrolcraft.base.Constrain.DataStructure.ConstrainWithID;
 import com.verr1.vscontrolcraft.base.DeferralExecutor.DeferralExecutor;
 import com.verr1.vscontrolcraft.base.ExpirableData;
+import com.verr1.vscontrolcraft.mixin.accessor.ShipObjectServerWorldAccessor;
 import com.verr1.vscontrolcraft.utils.VSConstrainSerializeUtils;
+import com.verr1.vscontrolcraft.utils.VSMathUtils;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.apigame.constraints.*;
 import org.valkyrienskies.core.apigame.world.ServerShipWorldCore;
 import org.valkyrienskies.core.impl.hooks.VSEvents;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,6 +31,8 @@ public class ConstrainCenter {
     private static final HashMap<ConstrainKey, ExpirableData<ConstrainWithID>> cache = new HashMap<>();
 
     private static TrivialConstraintReloadExecutor constraintLoader;
+
+    // private static ShipObjectServerWorld CenterVSManager = null ;
 
     public static void onServerStaring(MinecraftServer server){
         cache.clear();
@@ -43,6 +50,7 @@ public class ConstrainCenter {
         VSEvents.INSTANCE.getShipLoadEvent().on(((shipLoadEvent, registeredHandler) -> {
             if(constraintLoader == null)return;
             // Execute All Recreating Constrain Tasks Shortly After Any Ship Being Reloaded
+
             DeferralExecutor.executeLater(() -> constraintLoader.onShipLoaded(shipLoadEvent.getShip().getId(), server), 4);
 
             registeredHandler.unregister();
@@ -50,6 +58,8 @@ public class ConstrainCenter {
 
 
     }
+
+
 
     public static void onServerStopping(MinecraftServer server){
         ConstrainSavedData storage = ConstrainSavedData.load(server);
@@ -98,7 +108,8 @@ public class ConstrainCenter {
     public static void createOrReplaceNewConstrain(ConstrainKey key, VSConstraint constrain, ServerShipWorldCore sswc){
         if(constrain == null)return;
         if(cache.containsKey(key)){
-            cache.get(key).forceExpire();
+            // cache.get(key).forceExpire();
+            sswc.removeConstraint(cache.get(key).data().ID());
         }
         if(key.ship_1_isGround()){
             constrain = VSConstrainSerializeUtils.convertGroundId(constrain, sswc, key.dimension(), true);
@@ -123,42 +134,22 @@ public class ConstrainCenter {
                         }
                 )
         );
-        /*
-        // a temp constrain will not be created, just for saving
-        if(!key.temp()){
-            Object id = sswc.createNewConstraint(constrain);
-            if(id == null)return;
-            cachePut(
-                    key,
-                    new ExpirableData<>(
-                            new ConstrainWithID(
-                                    constrain,
-                                    (int) id
-                            ),
-                            10,
-                            (data) -> {
-                                sswc.removeConstraint(data.ID());
-                                return null;
-                            }
-                    )
-            );
-        }else{
-            cachePut(
-                    key,
-                    new ExpirableData<>(
-                            new ConstrainWithID(
-                                    constrain,
-                                    -1
-                            ),
-                            10,
-                            (data) -> null
-                    )
-            );
-        }
-        * */
 
     }
 
+
+    public static void destroyAllConstrains(ServerLevel level, BlockPos pos){
+        try{
+            ServerShipWorldCore sswc = VSGameUtilsKt.getShipObjectWorld(level);
+            ShipObjectServerWorldAccessor accessor = ((ShipObjectServerWorldAccessor) sswc);
+            var constraints = accessor.controlCraft$getShipIdToConstraints();
+            ServerShip ship = VSMathUtils.getServerShip(pos, level);
+            if(ship == null)return;
+            new ArrayList<>(constraints.get(ship.getId())).forEach(sswc::removeConstraint);
+
+        }catch (Exception ignored){
+        }
+    }
 
 
     public static void cachePut( ConstrainKey key, ExpirableData<ConstrainWithID> data){
@@ -199,7 +190,7 @@ public class ConstrainCenter {
 
 
     private static void tickLife(){
-        //cache.forEach((key, data) -> data.tick());
+        // cache.forEach((key, data) -> data.tick());
         cache.entrySet().removeIf(entry -> entry.getValue().isExpired());
     }
 

@@ -64,7 +64,13 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
         notifyUpdate();
     }
 
+    @Override
+    public void remove() {
+        super.remove();
+        destroy();
+    }
 
+    @Override
     public void destroy() {
         super.destroy();
         if(level.isClientSide)return;
@@ -123,7 +129,8 @@ public class SphericalHingeBlockEntity extends ShipConnectorBlockEntity implemen
 
     @Override
     public void destroyConstrain() {
-        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", false, false, false));
+        boolean isGrounded = !isOnServerShip();
+        ConstrainCenter.remove(new ConstrainKey(getBlockPos(), getDimensionID(), "hinge", isGrounded, false, false));
         clearCompanionShipInfo();
     }
 

@@ -61,6 +61,11 @@ public class ServoMotorPeripheral extends AbstractAttachedPeripheral<AbstractSer
         return getTarget().getServoAngle();
     }
 
+    @LuaFunction
+    public final double getCurrentValue(){
+        return getTarget().getControllerInfoHolder().getValue();
+    }
+
 
     @LuaFunction
     public final List<List<Double>> getRelative(){
@@ -78,6 +83,21 @@ public class ServoMotorPeripheral extends AbstractAttachedPeripheral<AbstractSer
     @LuaFunction
     public final void setMode(boolean isAdjustingAngle){
         getTarget().setMode(isAdjustingAngle);
+    }
+
+    @LuaFunction
+    public final void lock(){
+        getTarget().tryLock();
+    }
+
+    @LuaFunction
+    public final void unlock(){
+        getTarget().tryUnlock();
+    }
+
+    @LuaFunction
+    public final boolean isLocked(){
+        return getTarget().isLocked();
     }
 
 }

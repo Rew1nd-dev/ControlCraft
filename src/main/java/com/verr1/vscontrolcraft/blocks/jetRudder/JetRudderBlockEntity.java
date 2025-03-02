@@ -141,7 +141,7 @@ public class JetRudderBlockEntity extends OnShipDirectinonalBlockEntity implemen
             Vector3d r_wc = ship.getTransform().getShipToWorld().transformDirection(r_sc);
             extraVelocity = ship.getOmega().cross(r_wc, new Vector3d()).add(ship.getVelocity());
         }
-        v_wc.add(extraVelocity.mul(0.07));
+        v_wc.add(extraVelocity.mul(0.05));
 
         addParticles(p_wc, v_wc);
 

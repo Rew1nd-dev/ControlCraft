@@ -1,64 +1,88 @@
 package com.verr1.vscontrolcraft.base.UltraTerminal;
 
-import com.simibubi.create.foundation.utility.Components;
 import com.verr1.vscontrolcraft.ControlCraft;
 import net.minecraft.network.chat.Component;
 
 public enum ExposedFieldType {
 
-    NONE,
-    P,
-    I,
-    D,
-    TARGET,
+    NONE(false),
+    P(false),
+    I(false),
+    D(false),
+    TARGET(false),
 
-    ANGLE,
-    DEGREE,
-    HORIZONTAL_TILT,
-    VERTICAL_TILT,
-    SPEED,
+    TARGET$1(false),
+    TARGET$2(false),
 
-    TORQUE,
-    FORCE,
-    THRUST,
+    ANGLE(false),
 
-    IS_LOCKED,
+    DEGREE(false),
+    DEGREE$1(false),
+    DEGREE$2(false),
 
-    OFFSET,
-    IS_RUNNING,
-    IS_STATIC,
+    HORIZONTAL_TILT(false),
+    VERTICAL_TILT(false),
 
+    HORIZONTAL_TILT$1(false),
+    VERTICAL_TILT$1(false),
+
+    SPEED(false),
+    SPEED$1(false),
+
+    TORQUE(false),
+    FORCE(false),
+    THRUST(false),
+
+    IS_LOCKED$1(true),
+    IS_LOCKED$2(true),
+
+    OFFSET(false),
+    IS_RUNNING(true),
+    IS_STATIC(true),
+
+    IS_SENSOR(true),
 
     // these are not exposed to the terminal
 
-    STRENGTH,
-    AIR_RESISTANCE,
-    EXTRA_GRAVITY,
+    STRENGTH(false),
+    AIR_RESISTANCE(false),
+    EXTRA_GRAVITY(false),
+    ROTATIONAL_RESISTANCE(false),
 
-    PROTOCOL,
-    NAME,
-    TYPE,
-    VALUE,
+    PROTOCOL(false),
+    NAME(false),
+    TYPE(false),
+    VALUE(false),
 
-    MODE_ANGULAR,
-    MODE_POSITION,
-    MODE_SPEED,
+    MODE_ANGULAR(false),
+    MODE_POSITION(false),
+    MODE_SPEED(false),
 
-    MODE_CHEAT,
+    MODE_CHEAT(false),
 
-    THRUST_RATIO,
-    TORQUE_RATIO;
+    THRUST_RATIO(false),
+    TORQUE_RATIO(false);
 
+    private boolean isBoolean = false;
 
+    ExposedFieldType(boolean isBoolean) {
+        this.isBoolean = isBoolean;
+    }
 
     public boolean isBoolean(){
-        return this == IS_LOCKED || this == IS_RUNNING || this == IS_STATIC;
+        return isBoolean;
     }
 
     public Component getComponent(){
+        String[] main_key = name().toLowerCase().split("\\$");
+        String main = Component
+                .translatable(ControlCraft.MODID + ".screen.labels.field." + main_key[0]).getString();
 
-        return Component
-                .translatable(ControlCraft.MODID + ".screen.labels.field." + name().toLowerCase());
+        if(main_key.length == 1)return Component.literal(main);
+
+        String combined = main; // + "_" + main_key[1]
+
+        return Component.literal(combined);
     }
 
 

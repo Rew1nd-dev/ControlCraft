@@ -78,7 +78,7 @@ public class ServoMotorScreen extends PIDControllerScreen {
         cLabel.text = ExposedFieldType.MODE_CHEAT.getComponent();
         addRenderableWidget(cLabel);
 
-        lLabel = new Label(0, 0, ExposedFieldType.IS_LOCKED.getComponent()).colored((isLocked ? Color.RED : Color.GREEN).getRGB());
+        lLabel = new Label(0, 0, ExposedFieldType.IS_LOCKED$1.getComponent()).colored((isLocked ? Color.RED : Color.GREEN).getRGB());
         lLabel.text = isLocked ?
                 Component.translatable(ControlCraft.MODID + ".screen.labels.locked") :
                 Component.translatable(ControlCraft.MODID + ".screen.labels.free");

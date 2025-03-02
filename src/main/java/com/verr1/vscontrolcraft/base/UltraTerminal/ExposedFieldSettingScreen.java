@@ -76,7 +76,7 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
 
         directionSelector.forOptions(
                 Arrays.stream(ExposedFieldDirection.values())
-                        .map(d -> Component.literal(d.name()))
+                        .map(d -> Component.literal(d.getComponent().getString()))
                         .toList()
         ).withRange(0, ExposedFieldDirection.values().length).calling(
             i -> directionLabel.text = ExposedFieldDirection.convert(i).getComponent()
@@ -219,7 +219,7 @@ public class ExposedFieldSettingScreen extends AbstractSimiScreen {
         background.render(graphics, guiLeft, guiTop);
         AllVSCCGuiTextures.SMALL_BUTTON_GREEN.render(graphics, fieldSelector.getX(), fieldSelector.getY());
         AllVSCCGuiTextures.SMALL_BUTTON_GREEN.render(graphics, directionSelector.getX(), directionSelector.getY());
-        boolean shouldRender = !availableFields.get(fieldSelector.getState()).type().isBoolean();
+        boolean shouldRender = !availableFields.get(Math.min(fieldSelector.getState(), availableFields.size())).type().isBoolean();
         minField.active = shouldRender;
         maxField.active = shouldRender;
         minLabel.active = shouldRender;

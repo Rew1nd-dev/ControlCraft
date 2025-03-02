@@ -1,6 +1,7 @@
 package com.verr1.vscontrolcraft.blocks.jet;
 
 import com.simibubi.create.foundation.block.IBE;
+import com.verr1.vscontrolcraft.base.ISignalAcceptor;
 import com.verr1.vscontrolcraft.registry.AllBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,7 +19,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class JetBlock extends DirectionalBlock implements IBE<JetBlockEntity> {
+public class JetBlock extends DirectionalBlock implements IBE<JetBlockEntity>, ISignalAcceptor {
 
     public static final String ID = "jet";
 
@@ -29,16 +30,8 @@ public class JetBlock extends DirectionalBlock implements IBE<JetBlockEntity> {
 
     @Override
     public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
-                                boolean isMoving)  {
-        if(worldIn.isClientSide)return;
-        Direction direction = Direction.fromDelta(
-                fromPos.getX() - pos.getX(),
-                fromPos.getY() - pos.getY(),
-                fromPos.getZ() - pos.getZ()
-        );
-        if(direction == null)return;
-        withBlockEntityDo(worldIn, pos, be -> be.accept(worldIn.getSignal(fromPos, direction.getOpposite()), direction));
-
+                                  boolean isMoving)  {
+        ISignalAcceptor.super.onNeighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
     }
 
 
