@@ -73,7 +73,10 @@
 
   "wand.gui.scroll": "Mode Selection",
 
-  "wand.mode.name.hinge": "Hinge",
+  "wand.mode.name.connect": "CONNECT",
+  "wand.mode.name.disconnect": "DISCONNECT",
+  "wand.mode.name.disconnect_all": "DISCONNECT_ALL",
+
   "wand.mode.description.lines.hinge": "3",
   "wand.mode.description.hinge.1": "1. select Hinge A (Stores The Constrain)",
   "wand.mode.description.hinge.2": "2. select Hinge B (Connect By A)",

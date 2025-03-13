@@ -1,105 +1,209 @@
 {
   "variants": {
-    "facing=down,hinge_level=base": {
+    "axis_along_first=false,facing=down,joint_level=base": {
       "model": "vscontrolcraft:block/sphere_hinge/base",
       "x": 180
     },
-    "facing=down,hinge_level=full": {
+    "axis_along_first=false,facing=down,joint_level=full": {
       "model": "vscontrolcraft:block/sphere_hinge/full",
       "x": 180
     },
-    "facing=down,hinge_level=half": {
+    "axis_along_first=false,facing=down,joint_level=half": {
       "model": "vscontrolcraft:block/sphere_hinge/half",
       "x": 180
     },
-    "facing=down,hinge_level=three_quarter": {
+    "axis_along_first=false,facing=down,joint_level=three_quarter": {
       "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
       "x": 180
     },
-    "facing=east,hinge_level=base": {
+    "axis_along_first=false,facing=east,joint_level=base": {
       "model": "vscontrolcraft:block/sphere_hinge/base",
       "x": 90,
       "y": 90
     },
-    "facing=east,hinge_level=full": {
+    "axis_along_first=false,facing=east,joint_level=full": {
       "model": "vscontrolcraft:block/sphere_hinge/full",
       "x": 90,
       "y": 90
     },
-    "facing=east,hinge_level=half": {
+    "axis_along_first=false,facing=east,joint_level=half": {
       "model": "vscontrolcraft:block/sphere_hinge/half",
       "x": 90,
       "y": 90
     },
-    "facing=east,hinge_level=three_quarter": {
+    "axis_along_first=false,facing=east,joint_level=three_quarter": {
       "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
       "x": 90,
       "y": 90
     },
-    "facing=north,hinge_level=base": {
+    "axis_along_first=false,facing=north,joint_level=base": {
       "model": "vscontrolcraft:block/sphere_hinge/base",
       "x": 90
     },
-    "facing=north,hinge_level=full": {
+    "axis_along_first=false,facing=north,joint_level=full": {
       "model": "vscontrolcraft:block/sphere_hinge/full",
       "x": 90
     },
-    "facing=north,hinge_level=half": {
+    "axis_along_first=false,facing=north,joint_level=half": {
       "model": "vscontrolcraft:block/sphere_hinge/half",
       "x": 90
     },
-    "facing=north,hinge_level=three_quarter": {
+    "axis_along_first=false,facing=north,joint_level=three_quarter": {
       "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
       "x": 90
     },
-    "facing=south,hinge_level=base": {
+    "axis_along_first=false,facing=south,joint_level=base": {
       "model": "vscontrolcraft:block/sphere_hinge/base",
       "x": 90,
       "y": 180
     },
-    "facing=south,hinge_level=full": {
+    "axis_along_first=false,facing=south,joint_level=full": {
       "model": "vscontrolcraft:block/sphere_hinge/full",
       "x": 90,
       "y": 180
     },
-    "facing=south,hinge_level=half": {
+    "axis_along_first=false,facing=south,joint_level=half": {
       "model": "vscontrolcraft:block/sphere_hinge/half",
       "x": 90,
       "y": 180
     },
-    "facing=south,hinge_level=three_quarter": {
+    "axis_along_first=false,facing=south,joint_level=three_quarter": {
       "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
       "x": 90,
       "y": 180
     },
-    "facing=up,hinge_level=base": {
+    "axis_along_first=false,facing=up,joint_level=base": {
       "model": "vscontrolcraft:block/sphere_hinge/base"
     },
-    "facing=up,hinge_level=full": {
+    "axis_along_first=false,facing=up,joint_level=full": {
       "model": "vscontrolcraft:block/sphere_hinge/full"
     },
-    "facing=up,hinge_level=half": {
+    "axis_along_first=false,facing=up,joint_level=half": {
       "model": "vscontrolcraft:block/sphere_hinge/half"
     },
-    "facing=up,hinge_level=three_quarter": {
+    "axis_along_first=false,facing=up,joint_level=three_quarter": {
       "model": "vscontrolcraft:block/sphere_hinge/three_quarter"
     },
-    "facing=west,hinge_level=base": {
+    "axis_along_first=false,facing=west,joint_level=base": {
       "model": "vscontrolcraft:block/sphere_hinge/base",
       "x": 90,
       "y": 270
     },
-    "facing=west,hinge_level=full": {
+    "axis_along_first=false,facing=west,joint_level=full": {
       "model": "vscontrolcraft:block/sphere_hinge/full",
       "x": 90,
       "y": 270
     },
-    "facing=west,hinge_level=half": {
+    "axis_along_first=false,facing=west,joint_level=half": {
       "model": "vscontrolcraft:block/sphere_hinge/half",
       "x": 90,
       "y": 270
     },
-    "facing=west,hinge_level=three_quarter": {
+    "axis_along_first=false,facing=west,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
+      "x": 90,
+      "y": 270
+    },
+    "axis_along_first=true,facing=down,joint_level=base": {
+      "model": "vscontrolcraft:block/sphere_hinge/base",
+      "x": 180
+    },
+    "axis_along_first=true,facing=down,joint_level=full": {
+      "model": "vscontrolcraft:block/sphere_hinge/full",
+      "x": 180
+    },
+    "axis_along_first=true,facing=down,joint_level=half": {
+      "model": "vscontrolcraft:block/sphere_hinge/half",
+      "x": 180
+    },
+    "axis_along_first=true,facing=down,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
+      "x": 180
+    },
+    "axis_along_first=true,facing=east,joint_level=base": {
+      "model": "vscontrolcraft:block/sphere_hinge/base",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=true,facing=east,joint_level=full": {
+      "model": "vscontrolcraft:block/sphere_hinge/full",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=true,facing=east,joint_level=half": {
+      "model": "vscontrolcraft:block/sphere_hinge/half",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=true,facing=east,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=true,facing=north,joint_level=base": {
+      "model": "vscontrolcraft:block/sphere_hinge/base",
+      "x": 90
+    },
+    "axis_along_first=true,facing=north,joint_level=full": {
+      "model": "vscontrolcraft:block/sphere_hinge/full",
+      "x": 90
+    },
+    "axis_along_first=true,facing=north,joint_level=half": {
+      "model": "vscontrolcraft:block/sphere_hinge/half",
+      "x": 90
+    },
+    "axis_along_first=true,facing=north,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
+      "x": 90
+    },
+    "axis_along_first=true,facing=south,joint_level=base": {
+      "model": "vscontrolcraft:block/sphere_hinge/base",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=true,facing=south,joint_level=full": {
+      "model": "vscontrolcraft:block/sphere_hinge/full",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=true,facing=south,joint_level=half": {
+      "model": "vscontrolcraft:block/sphere_hinge/half",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=true,facing=south,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=true,facing=up,joint_level=base": {
+      "model": "vscontrolcraft:block/sphere_hinge/base"
+    },
+    "axis_along_first=true,facing=up,joint_level=full": {
+      "model": "vscontrolcraft:block/sphere_hinge/full"
+    },
+    "axis_along_first=true,facing=up,joint_level=half": {
+      "model": "vscontrolcraft:block/sphere_hinge/half"
+    },
+    "axis_along_first=true,facing=up,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/sphere_hinge/three_quarter"
+    },
+    "axis_along_first=true,facing=west,joint_level=base": {
+      "model": "vscontrolcraft:block/sphere_hinge/base",
+      "x": 90,
+      "y": 270
+    },
+    "axis_along_first=true,facing=west,joint_level=full": {
+      "model": "vscontrolcraft:block/sphere_hinge/full",
+      "x": 90,
+      "y": 270
+    },
+    "axis_along_first=true,facing=west,joint_level=half": {
+      "model": "vscontrolcraft:block/sphere_hinge/half",
+      "x": 90,
+      "y": 270
+    },
+    "axis_along_first=true,facing=west,joint_level=three_quarter": {
       "model": "vscontrolcraft:block/sphere_hinge/three_quarter",
       "x": 90,
       "y": 270

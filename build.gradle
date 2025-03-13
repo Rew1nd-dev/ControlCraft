@@ -4,9 +4,12 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+
     id "org.jetbrains.kotlin.jvm" version "1.9.10"
     id "com.gradleup.shadow" version "8.3.0"
     id 'org.spongepowered.mixin' version '0.7.+'
+
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
 version = mod_version
@@ -26,7 +29,7 @@ println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty '
 minecraft {
 
     mappings channel: mapping_channel, version: mapping_version
-
+    // mappings channel: 'parchment', version: '2023.09.03-1.20.1'
     copyIdeResources = true
 
     // When true, this property will add the folder name of all declared run configurations to generated IDE run configurations.
@@ -59,7 +62,7 @@ minecraft {
 
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            args '-mixin.config=mixins.vscontrolcraft.json'
+            args '-mixin.config=mixins.controlcraft.json'
             // Recommended logging level for the console
             // You can set various levels here.
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
@@ -155,6 +158,7 @@ repositories {
 
 
 
+
     repositories {
         maven { url = "https://maven.bawnorton.com/releases" }
     }
@@ -163,8 +167,8 @@ repositories {
 }
 
 mixin {
-    add sourceSets.main, "mixins.vscontrolcraft.refmap.json"
-    config 'mixins.vscontrolcraft.json'
+    add sourceSets.main, "mixins.controlcraft.refmap.json"
+    config 'mixins.controlcraft.json'
 }
 
 dependencies {
@@ -182,20 +186,30 @@ dependencies {
     implementation "org.lwjgl:lwjgl-glfw:3.3.6"
     implementation "org.lwjgl:lwjgl-opengl:3.3.6"
 * */
-
+    // implementation fg.deobf("maven.modrinth:embeddium:0.3.18+mc1.20.1")
 
     // create dependencies
     implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }
     implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
     implementation fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}")
 
-    // vs2 dependencies
-    implementation fg.deobf("org.valkyrienskies:valkyrienskies-120-forge:${vs2_version}") { transitive = false }
 
-    compileOnly ("org.valkyrienskies.core:api:${vs_core_version}")
-    compileOnly ("org.valkyrienskies.core:api-game:${vs_core_version}")
-    compileOnly ("org.valkyrienskies.core:util:${vs_core_version}")
-    compileOnly ("org.valkyrienskies.core:impl:${vs_core_version}")
+    compileOnly("maven.modrinth:embeddium:${embeddium_version}")
+
+    // vs2 dependencies
+    // implementation fg.deobf("org.valkyrienskies:valkyrienskies-120-forge:${vs2_version}") { transitive = false }
+
+    // compileOnly ("org.valkyrienskies.core:api:${vs_core_version}")
+    // compileOnly ("org.valkyrienskies.core:api-game:${vs_core_version}")
+    // compileOnly ("org.valkyrienskies.core:util:${vs_core_version}")
+    // compileOnly ("org.valkyrienskies.core:impl:${vs_core_version}")
+    implementation fg.deobf("org.valkyrienskies.core:api:${vs2_core_version}")
+    // implementation fg.deobf("org.valkyrienskies:valkyrienskies-120-forge:${vs2_api_version}") { transitive = false }
+    // implementation fg.deobf("org.valkyrienskies.core:api:${vs2_core_version}") { transitive = false }
+    implementation fg.deobf("libs:valkyrienskies-1201:2.5.0")
+    implementation fg.deobf("libs:embeddium-1201:0.3.31")
+
+    implementation fg.deobf("libs:spark-1.10.53:forge")
 
     implementation "com.fasterxml.jackson.core:jackson-annotations:2.13.3"
     implementation "thedarkcolour:kotlinforforge:$forge_kotlin_version"
@@ -210,9 +224,6 @@ dependencies {
     implementation fg.deobf("curse.maven:cc-tweaked-282001:5379173")
 
     //
-    implementation fg.deobf("libs:peripheralium-forge:1.20.1-0.6.15")
-    implementation fg.deobf("libs:peripheralworks-forge-1.20.1:1.4.3")
-    implementation fg.deobf("maven.modrinth:create-clockwork:EvNWNIMY")
 
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
     implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.4.1")) {
@@ -230,6 +241,8 @@ dependencies {
     implementation(jarJar("com.bawnorton.mixinsquared:mixinsquared-forge:0.2.0-beta.6")) {
         jarJar.ranged(it, "[0.2.0-beta.6,)")
     }
+
+
 
     // implementation ("gg.essential:elementa-unstable-layoutdsl:$elementaVersion")
     // Add Elementa dependency. For the latest $elementaVersion, see the badge below this code snippet.
