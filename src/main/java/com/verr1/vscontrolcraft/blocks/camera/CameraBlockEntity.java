@@ -1,10 +1,13 @@
 package com.verr1.vscontrolcraft.blocks.camera;
 
+import com.mojang.authlib.GameProfile;
 import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.utility.Color;
 import com.simibubi.create.foundation.utility.Components;
+import com.verr1.vscontrolcraft.base.ChunkLoading.ChunkLoaderFakePlayer;
+import com.verr1.vscontrolcraft.base.DataStructure.LevelPos;
 import com.verr1.vscontrolcraft.base.DataStructure.ShipHitResult;
 import com.verr1.vscontrolcraft.base.OnShipDirectinonalBlockEntity;
 import com.verr1.vscontrolcraft.base.UltraTerminal.ExposedFieldType;
@@ -43,6 +46,8 @@ import net.minecraft.world.phys.*;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
@@ -52,19 +57,20 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 import org.valkyrienskies.core.api.ships.ClientShip;
 import org.valkyrienskies.core.api.ships.Ship;
+import org.valkyrienskies.core.impl.shadow.H;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import org.valkyrienskies.mod.common.world.RaycastUtilsKt;
 
 import java.lang.Math;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class CameraBlockEntity extends OnShipDirectinonalBlockEntity
         implements IPacketHandler, ITerminalDevice, IHaveGoggleInformation
 {
+
+
     public ShipHitResult latestShipHitResult = null;
     public EntityHitResult latestEntityHitResult = null;
     public EntityHitResult latestServerPlayerHitResult = null;
@@ -79,7 +85,6 @@ public class CameraBlockEntity extends OnShipDirectinonalBlockEntity
 
     private double clipRange = 256;
 
-    private String userUUID = "None";
 
     private boolean receivedSignalChanged = false;
     private int lastOutputSignal = 0;
@@ -129,12 +134,10 @@ public class CameraBlockEntity extends OnShipDirectinonalBlockEntity
     }
 
     public String getUserUUID() {
-        return userUUID;
+        if(level.isClientSide)return "";
+        return ServerCameraManager.getUser(new LevelPos(getBlockPos(), (ServerLevel)level)).getName().getString();
     }
 
-    public void setUserUUID(String userUUID) {
-        this.userUUID = userUUID;
-    }
 
     public void updateNeighbor(){
         if(level == null)return;
@@ -481,7 +484,7 @@ public class CameraBlockEntity extends OnShipDirectinonalBlockEntity
         ServerPlayer player = ((ServerLevel)level)
                 .players()
                 .stream()
-                .filter(p -> p.getName().getString().equals(userUUID))
+                .filter(p -> p.getUUID().equals(ServerCameraManager.getUser(new LevelPos(getBlockPos(), (ServerLevel) level)).getUUID()))
                 .findFirst()
                 .orElse(null);
         if(player == null)return;
@@ -512,6 +515,8 @@ public class CameraBlockEntity extends OnShipDirectinonalBlockEntity
         return ship.getTransform().getShipToWorldRotation();
     }
 
+
+
     @Override
     public void tick() {
         super.tick();
@@ -527,7 +532,6 @@ public class CameraBlockEntity extends OnShipDirectinonalBlockEntity
         }
         syncClient(getBlockPos(), level);
     }
-
 
 
     public Quaterniond getAbsViewTransform(){
@@ -575,10 +579,20 @@ public class CameraBlockEntity extends OnShipDirectinonalBlockEntity
             String uuid = packet.getUtf8s().get(0);
             setPitch(p);
             setYaw(y);
-            setUserUUID(uuid);
+
+            ServerPlayer user = context.getSender();
+            if(user == null)return;
+            ServerCameraManager.registerUser(new LevelPos(getBlockPos(), (ServerLevel) level), user);
+            fakePlayer.redirectConnection(user);
+
         }
         if(packet.getType() == BlockBoundPacketType.SETTING_1){
             setActiveDistanceSensor(packet.getBooleans().get(0));
+        }
+        if(packet.getType() == BlockBoundPacketType.EXTEND_0){
+            ServerCameraManager.remove(new LevelPos(getBlockPos(), (ServerLevel) level));
+            fakePlayer.redirectConnection();
+
         }
     }
 
@@ -657,6 +671,28 @@ public class CameraBlockEntity extends OnShipDirectinonalBlockEntity
         });
 
         return true;
+    }
+
+
+    GameProfile key;
+    ChunkLoaderFakePlayer fakePlayer;
+    @Override
+    public void initialize() {
+        super.initialize();
+        if(!(level instanceof ServerLevel lvl))return;
+        key = new GameProfile(UUID.randomUUID(), "testCameraFakePlayer");
+        fakePlayer = new ChunkLoaderFakePlayer(lvl, key, getBlockPos());
+        lvl.addNewPlayer(fakePlayer);
+        fakePlayer.moveTo(getBlockPos().getCenter());
+
+    }
+
+    @Override
+    public void remove() {
+        super.remove();
+        if(!(level instanceof ServerLevel lvl))return;
+        ServerCameraManager.remove(new LevelPos(getBlockPos(), (ServerLevel) level));
+        lvl.removePlayerImmediately(fakePlayer, Entity.RemovalReason.UNLOADED_WITH_PLAYER);
     }
 
     public record CameraDrawingContext(ServerPlayer player, Vec3 pos, Direction dir, String slot, int rgb) { }

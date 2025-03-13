@@ -51,20 +51,6 @@ public class SpatialScreen extends SimpleSettingScreen {
                 .withBoolean(bFields.get(0).selected())
                 .withBoolean(bFields.get(1).selected())
                 .build();
-        /*
-        AllPackets
-                .getChannel()
-                .sendToServer(
-                        new SpatialSettingsPacket(
-                                pos,
-                                Util.tryParseDouble(iFields.get(0).getValue()),
-                                Util.tryParseLong(iFields.get(1).getValue()),
-                                bFields.get(0).selected(),
-                                bFields.get(1).selected()
-                        )
-                );
-        * */
-
         AllPackets.getChannel().sendToServer(settingPacket);
 
         onClose();

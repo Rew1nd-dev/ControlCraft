@@ -10,6 +10,8 @@ import com.simibubi.create.content.trains.TrainHUD;
 import com.simibubi.create.content.trains.track.TrackPlacementOverlay;
 import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.ControlCraftClient;
+import com.verr1.vscontrolcraft.base.ChunkLoading.CameraClientChunkCacheExtension;
+import com.verr1.vscontrolcraft.base.ChunkLoading.CameraViewAreaExtension;
 import com.verr1.vscontrolcraft.base.ICameraAccessor;
 import com.verr1.vscontrolcraft.base.Wand.ClientWand;
 import com.verr1.vscontrolcraft.blocks.camera.CameraBlockEntity;
@@ -18,6 +20,7 @@ import com.verr1.vscontrolcraft.blocks.spinalyzer.SpinalyzerTargetHandler;
 import com.verr1.vscontrolcraft.registry.AllLang;
 import net.minecraft.client.Minecraft;
 import net.minecraft.data.DataProvider;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
@@ -25,6 +28,8 @@ import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.level.ChunkEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -60,6 +65,23 @@ public class ControlCraftClientEvents {
 
         boolean cancelled = ControlCraftClient.ClientWandHandler.onMouseScroll(delta);
         event.setCanceled(cancelled);
+    }
+
+    @SubscribeEvent
+    public static void onChunkUnload(ChunkEvent.Unload event) {
+        if (event.getLevel().isClientSide()) {
+            ChunkPos pos = event.getChunk().getPos();
+
+            CameraViewAreaExtension.onChunkUnload(pos.x, pos.z);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLevelUnload(LevelEvent.Unload event){
+        if(event.getLevel().isClientSide()){
+            CameraClientChunkCacheExtension.clear();
+            CameraViewAreaExtension.clear();
+        }
     }
 
     @SubscribeEvent

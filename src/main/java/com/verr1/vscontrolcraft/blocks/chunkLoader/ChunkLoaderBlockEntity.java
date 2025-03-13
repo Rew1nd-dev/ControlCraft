@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.blocks.chunkLoader;
 
+import com.mojang.authlib.GameProfile;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.verr1.vscontrolcraft.Config;
@@ -8,11 +9,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayerFactory;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkLoaderBlockEntity extends SmartBlockEntity {
@@ -94,6 +98,7 @@ public class ChunkLoaderBlockEntity extends SmartBlockEntity {
         disclaimedAllChunks();
         super.destroy();
     }
+
 
 
     @Override

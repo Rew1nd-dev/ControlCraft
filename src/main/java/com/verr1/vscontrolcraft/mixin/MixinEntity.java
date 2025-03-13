@@ -20,7 +20,6 @@ public abstract class MixinEntity implements EntityAccessor {
 
     @Shadow public abstract Vec3 position();
 
-    @Shadow public abstract void positionRider(Entity p_20312_);
 
     @Unique private int controlCraft$clientGlowingTick = 0;
 

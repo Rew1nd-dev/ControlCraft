@@ -7,17 +7,24 @@
     "MixinEntity",
     "MixinPhysicsTick",
     "MixinSpeedController",
-    "accessor.ShipObjectServerWorldAccessor"
+    "accessor.ShipObjectServerWorldAccessor",
+    "camera.MixinChunkMap",
+    "camera.MixinPlayerList",
+    "camera.MixinServerPlayer",
+    "camera.MixinTrackedEntity"
   ],
   "package": "com.verr1.vscontrolcraft.mixin",
   "injectors": {
     "defaultRequire": 1
   },
   "client": [
-    "MixinCamera",
-    "MixinGameRenderer",
-    "MixinMinecraft",
-    "MixinMouseHandler",
-    "MixinVSGameUtilsKt"
+    "MixinDebugRenderer",
+    "camera.MixinCamera",
+    "camera.MixinChunkCache$Storage",
+    "camera.MixinClientChunkCache",
+    "camera.MixinGameRenderer",
+    "camera.MixinLevelRenderer",
+    "camera.MixinViewArea",
+    "camera.MixinVSGameUtilsKt"
   ]
 }

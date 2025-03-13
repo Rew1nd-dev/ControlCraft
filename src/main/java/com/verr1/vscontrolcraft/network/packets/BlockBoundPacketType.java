@@ -11,5 +11,10 @@ public enum BlockBoundPacketType {
     SYNC_0,  // usually for animation
     SYNC_1,
 
+    EXTEND_0,
+    EXTEND_1,
+    EXTEND_2,
+    EXTEND_3,
+    EXTEND_4,
 
 }

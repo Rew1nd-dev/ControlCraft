@@ -13,9 +13,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class PropellerScreen extends SimpleSettingScreen {
 
-    private double thrust_ratio;
-    private double torque_ratio;
-    private BlockPos pos;
+    private final double thrust_ratio;
+    private final double torque_ratio;
+    private final BlockPos pos;
 
     public PropellerScreen(BlockPos entityPos, double thrust_ratio, double torque_ratio) {
         pos = entityPos;

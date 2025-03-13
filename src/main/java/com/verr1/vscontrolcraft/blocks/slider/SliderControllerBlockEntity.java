@@ -575,8 +575,6 @@ public class SliderControllerBlockEntity extends ShipConnectorBlockEntity implem
         syncCachedPos();
         syncClient(getBlockPos(), level);
 
-
-
     }
 
 

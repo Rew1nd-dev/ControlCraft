@@ -1,4 +1,4 @@
-package com.verr1.vscontrolcraft.mixin;
+package com.verr1.vscontrolcraft.mixin.camera;
 
 import com.verr1.vscontrolcraft.blocks.camera.LinkedCameraManager;
 import net.minecraft.client.player.LocalPlayer;

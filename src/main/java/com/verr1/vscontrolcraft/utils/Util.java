@@ -191,6 +191,13 @@ public class Util {
     }
 
 
+    public static boolean isInViewDistance(int centerX, int centerZ, int viewDistance, int x, int z) {
+        int xDistance = Math.max(0, Math.abs(x - centerX) - 1);
+        int zDistance = Math.max(0, Math.abs(z - centerZ) - 1);
+        int squareDistance = xDistance * xDistance + zDistance * zDistance;
+        int squareViewDistance = viewDistance * viewDistance;
 
+        return squareDistance < squareViewDistance;
+    }
 
 }

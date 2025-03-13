@@ -1,5 +1,6 @@
 package com.verr1.vscontrolcraft.events;
 
+import com.verr1.vscontrolcraft.ControlCraft;
 import com.verr1.vscontrolcraft.ControlCraftClient;
 import com.verr1.vscontrolcraft.Debug;
 import com.verr1.vscontrolcraft.base.Constrain.ConstrainCenter;
@@ -11,11 +12,14 @@ import com.verr1.vscontrolcraft.blocks.spatialAnchor.SpatialLinkManager;
 import com.verr1.vscontrolcraft.blocks.transmitter.NetworkManager;
 import com.verr1.vscontrolcraft.compat.cctweaked.alternates.ComputerCraftDelegation;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.level.ChunkWatchEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -47,6 +51,12 @@ public class ControlCraftEvents {
         ConstrainCenter.onServerStopping(event.getServer());
     }
 
+    @SubscribeEvent
+    public static void onFireChunkWatch(ChunkWatchEvent.Watch event){
+        if(event.getPlayer() instanceof FakePlayer)return;
+        ChunkPos p = event.getChunk().getPos();
+        ControlCraft.LOGGER.info("player fire chunk watch: " + p.x + " " + p.z);
+    }
 
 
 

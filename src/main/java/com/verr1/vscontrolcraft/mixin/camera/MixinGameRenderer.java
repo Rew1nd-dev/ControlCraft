@@ -1,4 +1,4 @@
-package com.verr1.vscontrolcraft.mixin;
+package com.verr1.vscontrolcraft.mixin.camera;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -19,7 +19,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 import org.valkyrienskies.core.api.ships.ClientShip;
-import org.valkyrienskies.mod.client.IVSCamera;
 
 import java.lang.Math;
 

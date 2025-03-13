@@ -4,9 +4,12 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+
     id "org.jetbrains.kotlin.jvm" version "1.9.10"
     id "com.gradleup.shadow" version "8.3.0"
     id 'org.spongepowered.mixin' version '0.7.+'
+
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
 version = mod_version
@@ -26,7 +29,7 @@ println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty '
 minecraft {
 
     mappings channel: mapping_channel, version: mapping_version
-
+    // mappings channel: 'parchment', version: '2023.09.03-1.20.1'
     copyIdeResources = true
 
     // When true, this property will add the folder name of all declared run configurations to generated IDE run configurations.
@@ -155,6 +158,7 @@ repositories {
 
 
 
+
     repositories {
         maven { url = "https://maven.bawnorton.com/releases" }
     }
@@ -182,7 +186,7 @@ dependencies {
     implementation "org.lwjgl:lwjgl-glfw:3.3.6"
     implementation "org.lwjgl:lwjgl-opengl:3.3.6"
 * */
-
+    // implementation fg.deobf("maven.modrinth:embeddium:0.3.18+mc1.20.1")
 
     // create dependencies
     implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }

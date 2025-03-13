@@ -19,7 +19,7 @@ import net.minecraft.core.Direction;
 
 public interface ICanBruteDirectionalConnect {
 
-    void bruteDirectionalConnectWith(BlockPos pos, Direction align, Direction forward);
+    void bruteDirectionalConnectWith(BlockPos pos, Direction forward, Direction align);
 
     Direction getAlign();
 

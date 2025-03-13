@@ -11,6 +11,7 @@ public class ControlCraftClient {
 
     public static final WandGUI ClientWandHandler = new WandGUI();
 
+
     public static void clientInit(){
         ControlCraft.LOGGER.info("Try CC Generic Block");
         BUFFER_CACHE.registerCompartment(CachedBufferer.CC_GENERIC_BLOCK);

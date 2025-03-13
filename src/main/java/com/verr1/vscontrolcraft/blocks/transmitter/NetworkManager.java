@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class NetworkManager {
     static Map<PeripheralKey, BlockPos> RegisteredPos = new ConcurrentHashMap<>();
-    static private Map<BlockPos, PeripheralKey> RegisteredKeys = new ConcurrentHashMap<>();
+    static private final Map<BlockPos, PeripheralKey> RegisteredKeys = new ConcurrentHashMap<>();
 
     static Map<BlockPos, Integer> keyLife = new ConcurrentHashMap<>(); //dealing with unknown miss-unregister issue
     static int TICKS_BEFORE_EXPIRED = 10;

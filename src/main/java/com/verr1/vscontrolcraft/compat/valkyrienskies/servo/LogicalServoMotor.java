@@ -3,6 +3,8 @@ package com.verr1.vscontrolcraft.compat.valkyrienskies.servo;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 
+import java.util.function.Consumer;
+
 public record LogicalServoMotor(
         long servShipID,
         long compShipID,
