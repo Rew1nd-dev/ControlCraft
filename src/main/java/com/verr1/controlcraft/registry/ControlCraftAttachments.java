@@ -1,13 +1,8 @@
 package com.verr1.controlcraft.registry;
 
-import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.*;
-import org.valkyrienskies.core.api.attachment.AttachmentHolder;
-import org.valkyrienskies.core.api.attachment.AttachmentRegistration;
-import org.valkyrienskies.core.api.event.RegisteredListener;
 import org.valkyrienskies.core.api.ships.ShipForcesInducer;
 import org.valkyrienskies.core.impl.hooks.VSEvents;
-import org.valkyrienskies.mod.api.ValkyrienSkies;
 
 import java.util.Arrays;
 
@@ -16,12 +11,15 @@ public enum ControlCraftAttachments {
 
 
     ANCHOR(AnchorForceInducer.class),
-    MOTOR(MotorForceInducer.class),
+    DYNAMIC_MOTOR(DynamicMotorForceInducer.class),
     OBSERVER(Observer.class),
     QUEUE_FORCE_INDUCER(QueueForceInducer.class),
-    SLIDER(SliderForceInducer.class),
+    SLIDER(DynamicSliderForceInducer.class),
     SPATIAL(SpatialForceInducer.class),
-    JET(JetForceInducer.class)
+    JET(JetForceInducer.class),
+    PROPELLER(PropellerForceInducer.class),
+    CAFFEINE(Caffeine.class),
+    KINEMATIC_MOTOR(KinematicMotorForceInducer.class),
 
     ;
     // I don't know where to register it, in constructor method will cause flw crash, idk
@@ -67,7 +65,7 @@ public enum ControlCraftAttachments {
         ValkyrienSkies.api().registerAttachment(QUEUE_FORCE_INDUCER);
         ValkyrienSkies.api().registerAttachment(SLIDER);
         isRegistered = true;
-        * */
+
         Arrays
             .stream(ControlCraftAttachments.values())
             .forEach(
@@ -77,31 +75,31 @@ public enum ControlCraftAttachments {
                                 .build()
                 )
             );
+
+        * */
+
         isRegistered = true;
     }
 
 
-    public static void onShipLoad(VSEvents.ShipLoadEvent shipLoadEvent, RegisteredListener listener) {
-        /*
+    public static void onShipLoad(VSEvents.ShipLoadEvent shipLoadEvent) {
         Observer.getOrCreate(shipLoadEvent.getShip());
-        AnchorForceInducer.getOrCreate(shipLoadEvent.getShip());
-        MotorForceInducer.getOrCreate(shipLoadEvent.getShip());
-        QueueForceInducer.getOrCreate(shipLoadEvent.getShip());
-        SliderForceInducer.getOrCreate(shipLoadEvent.getShip());
-        * */
+        /*
         Arrays
             .stream(ControlCraftAttachments.values())
             .forEach(
                 type -> {
                     try {
                         type.clazz
-                                .getMethod("getOrCreate", AttachmentHolder.class)
+                                .getMethod("getOrCreate", ServerShip.class)
                                 .invoke(null, shipLoadEvent.getShip());
                     } catch (Exception e) {
                         ControlCraft.LOGGER.info(e.toString());
                     }
                 }
             );
+        * */
+
     }
 
 

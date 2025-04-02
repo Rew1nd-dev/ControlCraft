@@ -2,9 +2,8 @@ package com.verr1.controlcraft.content.blocks.joints;
 
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
-import com.verr1.controlcraft.foundation.ServerBlockEntityGetter;
+import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.type.JointLevel;
-import com.verr1.controlcraft.utils.MinecraftUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -20,7 +19,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.valkyrienskies.core.impl.shadow.FL;
 
 import static com.verr1.controlcraft.registry.ControlCraftShapes.FLAT_BASE;
 
@@ -60,8 +58,8 @@ public class AbstractJointBlock extends DirectionalAxisKineticBlock implements I
     @Override
     public InteractionResult onWrenched(BlockState state, UseOnContext context) {
         if(!(context.getLevel() instanceof ServerLevel level))return InteractionResult.SUCCESS;
-        ServerBlockEntityGetter.INSTANCE
-                .getBlockEntityAt(level, context.getClickedPos(), AbstractJointBlockEntity.class)
+        BlockEntityGetter.INSTANCE
+                .getLevelBlockEntityAt(level, context.getClickedPos(), AbstractJointBlockEntity.class)
                 .ifPresent(AbstractJointBlockEntity::adjust);
         return InteractionResult.SUCCESS;
     }
@@ -73,8 +71,8 @@ public class AbstractJointBlock extends DirectionalAxisKineticBlock implements I
         if(state.getValue(FLIPPED)){
             super.onWrenched(state, context);
         }
-        ServerBlockEntityGetter.INSTANCE
-                .getBlockEntityAt((ServerLevel) context.getLevel(), context.getClickedPos(), RevoluteJointBlockEntity.class)
+        BlockEntityGetter.INSTANCE
+                .getLevelBlockEntityAt((ServerLevel) context.getLevel(), context.getClickedPos(), RevoluteJointBlockEntity.class)
                 .ifPresent(RevoluteJointBlockEntity::flip);
 
 

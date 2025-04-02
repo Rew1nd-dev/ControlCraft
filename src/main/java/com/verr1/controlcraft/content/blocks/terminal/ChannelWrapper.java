@@ -3,16 +3,14 @@ package com.verr1.controlcraft.content.blocks.terminal;
 
 import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.foundation.data.terminal.TerminalRowData;
-import com.verr1.controlcraft.foundation.type.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import com.verr1.controlcraft.registry.ControlCraftBlocks;
-import com.verr1.controlcraft.utils.SerializeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Vector2d;
 
 import java.util.ArrayList;
 import java.util.List;

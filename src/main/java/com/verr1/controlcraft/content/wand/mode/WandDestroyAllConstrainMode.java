@@ -1,10 +1,8 @@
 package com.verr1.controlcraft.content.wand.mode;
 
-import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.wand.mode.base.WandAbstractMultipleSelectionMode;
 import com.verr1.controlcraft.foundation.api.IWandMode;
 import com.verr1.controlcraft.foundation.data.WandSelection;
-import com.verr1.controlcraft.foundation.managers.ClientOutliner;
 import com.verr1.controlcraft.foundation.network.packets.GenericServerPacket;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
 import com.verr1.controlcraft.foundation.type.WandModesType;

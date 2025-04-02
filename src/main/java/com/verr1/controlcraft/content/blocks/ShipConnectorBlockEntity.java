@@ -2,10 +2,14 @@ package com.verr1.controlcraft.content.blocks;
 
 import com.verr1.controlcraft.content.valkyrienskies.attachments.Observer;
 import com.verr1.controlcraft.foundation.api.IConstraintHolder;
+import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.data.constraint.ConstraintKey;
 import com.verr1.controlcraft.foundation.data.ShipPhysics;
 import com.verr1.controlcraft.foundation.managers.ConstraintCenter;
+import com.verr1.controlcraft.foundation.type.Side;
+import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import com.verr1.controlcraft.utils.SerializeUtils;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -14,9 +18,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
+import org.valkyrienskies.core.api.ships.ClientShip;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
-import org.valkyrienskies.core.apigame.joints.VSJoint;
-import org.valkyrienskies.mod.api.ValkyrienSkies;
+import org.valkyrienskies.core.apigame.constraints.VSConstraint;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,23 +29,22 @@ import java.util.Optional;
 public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
         implements IConstraintHolder
 {
-
-
-
     private long companionShipID;
     private Direction companionShipDirection = Direction.UP;
     private final Map<String, ConstraintKey> registeredConstraintKeys = new HashMap<>();
 
+    public static final NetworkKey COMPANION = NetworkKey.create("companion");
+    public static final NetworkKey COMPANION_DIRECTION = NetworkKey.create("companion_direction");
 
     public ShipConnectorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getCompanionShipID, this::setCompanionShipID, SerializeUtils.LONG, "companion"), Side.SERVER);
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getCompanionShipID, this::setCompanionShipID, SerializeUtils.LONG, COMPANION), Side.SHARED);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(
                 () -> companionShipDirection.getSerializedName(),
                 name -> companionShipDirection = Direction.valueOf(name.toUpperCase()),
                 SerializeUtils.STRING,
-                "companion direction"
-        ), Side.SERVER);
+                COMPANION_DIRECTION
+        ), Side.SHARED);
     }
 
     public void registerConstraintKey(String id){
@@ -52,9 +55,14 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
         return registeredConstraintKeys.get(id);
     }
 
-    public void overrideConstraint(String id, VSJoint newConstraint){
+    public void overrideConstraint(String id, VSConstraint newConstraint){
         Optional.ofNullable(getConstraintKey(id))
                 .ifPresent(key -> ConstraintCenter.createOrReplaceNewConstrain(key, newConstraint));
+    }
+
+    public void updateConstraint(String id, VSConstraint newConstraint){
+        Optional.ofNullable(getConstraintKey(id))
+                .ifPresent(key -> ConstraintCenter.updateOrCreateConstraint(key, newConstraint));
     }
 
     public void removeConstraint(String id){
@@ -62,7 +70,7 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
                 .ifPresent(ConstraintCenter::removeConstraintIfPresent);
     }
 
-    public @Nullable VSJoint getConstraint(String id){
+    public @Nullable VSConstraint getConstraint(String id){
         return Optional.ofNullable(getConstraintKey(id))
                 .map(ConstraintCenter::get)
                 .orElse(null);
@@ -71,6 +79,8 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
 
     protected void setCompanionShipID(long companionShipID) {
         this.companionShipID = companionShipID;
+        if(level != null && level.isClientSide)return;
+        syncForAllPlayers(COMPANION);
     }
 
     protected long getCompanionShipID() {
@@ -86,11 +96,22 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
                 .orElse(null);
     }
 
-    public void setCompanionShipDirection(@NotNull Direction direction){
-        this.companionShipDirection = direction;
+    public @Nullable ClientShip getCompanionClientShip(){
+        if(!(level instanceof ClientLevel lvl))return null;
+
+        return Optional
+                .ofNullable(ValkyrienSkies.getShipWorld(lvl))
+                .map(shipWorld -> shipWorld.getLoadedShips().getById(companionShipID))
+                .orElse(null);
     }
 
-    public Vector3d getCompanionShipDirectionJOML(){
+    public void setCompanionShipDirection(@NotNull Direction direction){
+        this.companionShipDirection = direction;
+        if(level != null && level.isClientSide)return;
+        syncForAllPlayers(COMPANION_DIRECTION);
+    }
+
+    public Vector3d getCompanionShipAlignJOML(){
         return ValkyrienSkies.set(new Vector3d(), getCompanionShipAlign().getNormal());
     }
 
@@ -98,8 +119,8 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
         return companionShipDirection;
     }
 
-    public boolean hasCompanionShip(){
-        return getCompanionServerShip() != null;
+    public boolean noCompanionShip(){
+        return getCompanionServerShip() == null;
     }
 
 
@@ -120,15 +141,7 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
         }
     }
 
-    public @NotNull ShipPhysics readSelf(){
-        if(level != null && level.isClientSide)return ShipPhysics.EMPTY;
 
-        return Optional
-                .ofNullable(getLoadedServerShip())
-                .map(Observer::getOrCreate)
-                .map(Observer::read)
-                .orElse(ShipPhysics.EMPTY);
-    }
 
     public @NotNull ShipPhysics readComp(){
         if(level != null && level.isClientSide)return ShipPhysics.EMPTY;
@@ -137,7 +150,7 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
                 .ofNullable(getCompanionServerShip())
                 .map(Observer::getOrCreate)
                 .map(Observer::read)
-                .orElse(ShipPhysics.EMPTY);
+                .orElseGet(() -> ShipPhysics.of(getCompanionServerShip()));
     }
 
 }

@@ -3,14 +3,12 @@ package com.verr1.controlcraft.content.blocks.spatial;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.Config;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
+import com.verr1.controlcraft.foundation.api.*;
+import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.SpatialAnchorPeripheral;
-import com.verr1.controlcraft.content.gui.SpatialScreen;
-import com.verr1.controlcraft.content.valkyrienskies.attachments.MotorForceInducer;
+import com.verr1.controlcraft.content.gui.legacy.SpatialScreen;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.SpatialForceInducer;
-import com.verr1.controlcraft.foundation.api.IBruteConnectable;
-import com.verr1.controlcraft.foundation.api.IPacketHandler;
-import com.verr1.controlcraft.foundation.api.ISpatialTarget;
-import com.verr1.controlcraft.foundation.api.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
 import com.verr1.controlcraft.foundation.data.control.SpatialSchedule;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
@@ -19,8 +17,9 @@ import com.verr1.controlcraft.foundation.managers.SpatialLinkManager;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
 import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldSyncClientPacket;
-import com.verr1.controlcraft.foundation.type.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
+import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
 import com.verr1.controlcraft.utils.MinecraftUtils;
 import com.verr1.controlcraft.utils.SerializeUtils;
@@ -49,17 +48,21 @@ import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
-import org.valkyrienskies.mod.api.ValkyrienSkies;
 
 import java.util.List;
 import java.util.Optional;
 
 import static com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock.AXIS_ALONG_FIRST_COORDINATE;
 import static com.simibubi.create.content.kinetics.base.DirectionalKineticBlock.FACING;
+import static com.verr1.controlcraft.foundation.api.ISerializableSchedule.SCHEDULE;
 
 public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
-        IBruteConnectable, ITerminalDevice, IPacketHandler
+        IBruteConnectable, ITerminalDevice, IPacketHandler, IScheduleProvider
 {
+    public static NetworkKey IS_RUNNING = NetworkKey.create("is_running");
+    public static NetworkKey IS_STATIC = NetworkKey.create("is_static");
+    public static NetworkKey OFFSET = NetworkKey.create("offset");
+    public static NetworkKey PROTOCOL = NetworkKey.create("protocol");
 
     private boolean isRunning = false;
     private ISpatialTarget tracking = null;
@@ -69,7 +72,7 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
     private double anchorOffset = 2.0;
     private long protocol = 0;
     private final int MAX_DISTANCE_SQRT_CAN_LINK = Config.MaxDistanceSpatialCanLink * Config.MaxDistanceSpatialCanLink;
-    private final SpatialSchedule schedule = new SpatialSchedule().withPPID(18, 3, 12, 10);
+    private SpatialSchedule schedule = new SpatialSchedule().withPPID(18, 3, 12, 10);
 
     private SpatialAnchorPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
@@ -79,7 +82,7 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
                     this::getAnchorOffset,
                     this::setAnchorOffset,
                     "offset",
-                    ExposedFieldType.OFFSET
+                    ExposedFieldType.ANCHOR_OFFSET
             ).withSuggestedRange(0, 16),
             new ExposedFieldWrapper(
                     () -> (double) (isRunning() ? 1 : 0),
@@ -92,8 +95,11 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
                     v -> setStatic(v > (double) 1 / 15),
                     "dynamic",
                     ExposedFieldType.IS_STATIC
-            ),
-            new ExposedFieldWrapper(
+            )
+    );
+
+    /*
+    *             new ExposedFieldWrapper(
                     () -> this.getSchedule().getPp(),
                     v -> this.getSchedule().setPp(v),
                     "P",
@@ -111,13 +117,12 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
                     "D",
                     ExposedFieldType.D
             ).withSuggestedRange(1, 18)
-    );
-
-    private ExposedFieldWrapper exposedField = fields.get(0);
+    * */
 
     public SpatialSchedule getSchedule() {
         return schedule;
     }
+
 
     public boolean isRunning() {
         return isRunning;
@@ -133,7 +138,7 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
                 WorldBlockPos.of(level, getBlockPos()),
                 getAlign(),
                 getForward(),
-                getShipID(),
+                getShipOrGroundID(),
                 getDimensionID(),
                 shouldDrive(),
                 isStatic,
@@ -241,7 +246,7 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
         if(tracking == null)return false;
         if(tracking.pos() == getBlockPos())return false;
         if(!getDimensionID().equals(tracking.dimensionID()))return false;
-        if(tracking.shipID() == getShipID())return false;
+        if(tracking.shipID() == getShipOrGroundID())return false;
         if(tracking
                 .vPos()
                 .sub(VSGetterUtils.getAbsolutePosition(WorldBlockPos.of(level, getBlockPos())), new Vector3d())
@@ -299,7 +304,8 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
         trackNearestWhenRunning();
         syncAttachedInducer();
         updateSchedule();
-        syncClient();
+        syncForNear(IS_STATIC, IS_RUNNING);
+        // syncClient();
     }
 
     @Override
@@ -411,11 +417,12 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
                     new SpatialScreen(pos, offset, protocol, isRunning, isStatic)
             ));
         }
+        /*
         if(packet.getType() == RegisteredPacketType.SYNC_0){
             isRunning = packet.getBooleans().get(0);
             isStatic = packet.getBooleans().get(1);
         }
-
+        * */
     }
 
     @Override
@@ -432,18 +439,28 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
         }
     }
 
+
+
     public SpatialAnchorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> fields.forEach(f -> f.deserialize(tag.getCompound("field_" + f.type.name()))),
-                        tag -> fields.forEach(e -> tag.put("field_" + e.type.name(), e.serialize()))
+                        tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),
+                        tag -> tag.put("fields", ITerminalDevice.super.serialize()),
+                        FIELD
                 ),
-                Side.SERVER
+                Side.SHARED
         );
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::isRunning, this::setRunning, SerializeUtils.BOOLEAN, "is_running"), Side.SERVER);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::isStatic, this::setStatic, SerializeUtils.BOOLEAN, "is_static"), Side.SERVER);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getAnchorOffset, this::setAnchorOffset, SerializeUtils.DOUBLE, "offset"), Side.SERVER);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getProtocol, this::setProtocol, SerializeUtils.LONG, "protocol"), Side.SERVER);
+        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
+                        tag -> schedule.deserialize(tag.getCompound("schedule")),
+                        tag -> tag.put("schedule", schedule.serialize()),
+                        SCHEDULE
+                ),
+                Side.SHARED
+        );
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::isRunning, this::setRunning, SerializeUtils.BOOLEAN, IS_RUNNING), Side.SHARED);
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::isStatic, this::setStatic, SerializeUtils.BOOLEAN, IS_STATIC), Side.SHARED);
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getAnchorOffset, this::setAnchorOffset, SerializeUtils.DOUBLE, OFFSET), Side.SHARED);
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getProtocol, this::setProtocol, SerializeUtils.LONG, PROTOCOL), Side.SHARED);
     }
 
 

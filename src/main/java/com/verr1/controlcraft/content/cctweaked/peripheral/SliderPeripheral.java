@@ -1,16 +1,16 @@
 package com.verr1.controlcraft.content.cctweaked.peripheral;
 
-import com.verr1.controlcraft.content.blocks.slider.SliderBlockEntity;
+import com.verr1.controlcraft.content.blocks.slider.DynamicSliderBlockEntity;
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class SliderPeripheral extends AbstractAttachedPeripheral<SliderBlockEntity> {
+public class SliderPeripheral extends AbstractAttachedPeripheral<DynamicSliderBlockEntity> {
 
 
-    public SliderPeripheral(SliderBlockEntity slider) {
+    public SliderPeripheral(DynamicSliderBlockEntity slider) {
         super(slider);
     }
 
@@ -34,7 +34,7 @@ public class SliderPeripheral extends AbstractAttachedPeripheral<SliderBlockEnti
 
     @LuaFunction
     public final void setPID(double p, double i, double d){
-        getTarget().getController().setParameter(p, i, d);
+        getTarget().getController().setPID(p, i, d);
     }
 
     @LuaFunction

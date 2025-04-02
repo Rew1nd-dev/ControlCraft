@@ -2,6 +2,7 @@ package com.verr1.controlcraft.utils;
 
 
 
+import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -11,9 +12,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.joml.*;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
-
-import org.valkyrienskies.mod.api.ValkyrienSkies;
-import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 
 import javax.annotation.Nullable;
@@ -26,7 +24,7 @@ import java.util.List;
 public class VSMathUtils {
 
     // quaternion to rotate UP to facing
-    public static Quaterniondc getQuaternionOfPlacement(Direction facing){
+    public static Quaterniond getQuaternionOfPlacement(Direction facing){
         return switch (facing){
             case DOWN -> new Quaterniond(new AxisAngle4d(Math.PI, new Vector3d(1.0, 0.0, 0.0)));
             case NORTH -> (new Quaterniond(new AxisAngle4d(Math.PI, new Vector3d(0.0, 1.0, 0.0)))).mul((new Quaterniond(new AxisAngle4d(Math.PI / 2, (new Vector3d(1.0, 0.0, 0.0)))))).normalize();
@@ -39,7 +37,7 @@ public class VSMathUtils {
     // EAST: +x
     // SOUTH: +z
     // UP: +y
-    public static Quaterniondc getQuaternionToEast(Direction facing){
+    public static Quaterniond getQuaternionToEast(Direction facing){
         return switch (facing){
             case DOWN -> new Quaterniond(new AxisAngle4d(Math.PI / 2, new Vector3d(0.0, 0.0, 1.0)));
             case NORTH -> new Quaterniond(new AxisAngle4d(-Math.PI / 2, new Vector3d(0.0, 1.0, 0.0)));
@@ -48,6 +46,12 @@ public class VSMathUtils {
             case WEST -> new Quaterniond(new AxisAngle4d(Math.PI, new Vector3d(0.0, 1.0, 0.0)));
             case UP -> new Quaterniond(new AxisAngle4d(-Math.PI / 2, new Vector3d(0.0, 0.0, 1.0)));
         };
+    }
+
+    public static Quaterniond getQuaternionToEast_(Direction facing){
+        return new Quaterniond(getQuaternionOfPlacement(facing))
+                    .mul(new Quaterniond(new AxisAngle4d(Math.toRadians(90.0), 0.0, 0.0, 1.0)))
+                    .normalize();
     }
 
     // the rotation to make positive-x axis and positive-y axis align with aDir and bDir respectively
@@ -62,7 +66,7 @@ public class VSMathUtils {
         Vector3d zDirJOML = new Vector3d(xDirJOML).cross(yDirJOML);
 
         //sc2wc
-        return new Matrix3d().setRow(0, xDirJOML).setRow(1, yDirJOML).setRow(2, zDirJOML); // wc2sc since it is transposed
+        return new Matrix3d().setRow(0, xDirJOML).setRow(1, yDirJOML).setRow(2, zDirJOML).transpose(); // wc2sc since it is transposed
 
 
     }
@@ -318,8 +322,8 @@ public class VSMathUtils {
 
     public static Quaterniond rotationToAlign(Direction align_x, Direction forward_x, Direction align_y, Direction forward_y){
         if(!(isVertical(align_x, forward_x) && isVertical(align_y, forward_y)))return new Quaterniond();
-        Matrix3d m_x = getRotationMatrixOfPlacement(align_x.getOpposite(), forward_x);
-        Matrix3d m_y = getRotationMatrixOfPlacement(align_y, forward_y);
+        Matrix3d m_x = getRotationMatrixOfPlacement(align_x.getOpposite(), forward_x).transpose();
+        Matrix3d m_y = getRotationMatrixOfPlacement(align_y, forward_y).transpose();
         Matrix3d y2x = new Matrix3d(m_x.transpose()).mul(new Matrix3d(m_y));
         return m2q(y2x.transpose());
     }

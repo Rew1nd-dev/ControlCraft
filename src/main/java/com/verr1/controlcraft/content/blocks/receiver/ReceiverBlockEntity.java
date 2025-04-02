@@ -1,17 +1,19 @@
 package com.verr1.controlcraft.content.blocks.receiver;
 
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.ControlCraft;
+import com.verr1.controlcraft.content.blocks.OptionalSyncedBlockEntity;
 import com.verr1.controlcraft.content.blocks.transmitter.NetworkManager;
-import com.verr1.controlcraft.content.gui.ReceiverScreen;
+import com.verr1.controlcraft.content.gui.legacy.ReceiverScreen;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
+import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.data.PeripheralKey;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
+import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
+import com.verr1.controlcraft.utils.SerializeUtils;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
@@ -24,7 +26,6 @@ import dan200.computercraft.shared.computer.core.ServerContext;
 import dan200.computercraft.shared.platform.InvalidateCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -34,24 +35,29 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ReceiverBlockEntity extends SmartBlockEntity implements
+public class ReceiverBlockEntity extends OptionalSyncedBlockEntity implements
         IPacketHandler
 {
+    public static final NetworkKey PERIPHERAL = NetworkKey.create("peripheral");
+    public static final NetworkKey PERIPHERAL_TYPE = NetworkKey.create("peripheral_type");
+
+
 
     private IPeripheral attachedPeripheral;
     private final Map<String, PeripheralMethod> methods = new HashMap<>();
+
+
     private PeripheralKey networkKey = PeripheralKey.NULL;
+
+    private String attachedViewType = "";
 
     private final ConcurrentLinkedQueue<Runnable> syncedTasks = new ConcurrentLinkedQueue<>();
 
     public MethodResult callPeripheral(IComputerAccess access, ILuaContext context, String methodName, IArguments args) throws LuaException {
-        if(level.isClientSide)return MethodResult.of(null, "You Are Calling This On The Client Side, Nothing Returned");
+        if(level == null || level.isClientSide)return MethodResult.of(null, "You Are Calling This On The Client Side, Nothing Returned");
         if(attachedPeripheral == null) return MethodResult.of(null, "Receiver Called, But No Peripheral Attached");
         if(!methods.containsKey(methodName))return MethodResult.of(null, "Receiver Called, But Method Not Found");
         if(access == null)return MethodResult.of(null, "Receiver Called, But No Access Provided");
@@ -59,7 +65,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity implements
     }
 
     public MethodResult callPeripheralAsync(IComputerAccess access, ILuaContext context, String methodName, IArguments args){
-        if(level.isClientSide)return MethodResult.of(null, "You Are Calling This On The Client Side, Nothing Returned");
+        if(level == null || level.isClientSide)return MethodResult.of(null, "You Are Calling This On The Client Side, Nothing Returned");
         if(attachedPeripheral == null) return MethodResult.of(null, "Receiver Called, But No Peripheral Attached");
         if(!methods.containsKey(methodName))return MethodResult.of(null, "Receiver Called, But Method Not Found");
         if(access == null)return MethodResult.of(null, "Receiver Called, But No Access Provided");
@@ -83,8 +89,12 @@ public class ReceiverBlockEntity extends SmartBlockEntity implements
         }
     }
 
+    public String getClientViewType(){
+        return attachedViewType;
+    }
+
     public String getAttachedPeripheralType(){
-        if(level.isClientSide)return "You Are Calling This On The Client Side, Nothing Returned";
+        if(level == null || level.isClientSide)return "You Are Calling This On The Client Side, Nothing Returned";
         if(attachedPeripheral == null)return "Not Attached";
         return attachedPeripheral.getType();
     }
@@ -112,6 +122,7 @@ public class ReceiverBlockEntity extends SmartBlockEntity implements
                 new InvalidPeripheralCallBack()
         );
         attachedPeripheral = peripheral;
+        attachedViewType = Optional.ofNullable(peripheral).map(IPeripheral::getType).orElse("Not Attached");
         if(attachedPeripheral == null)return;
         methods.putAll(ServerContext.get(((ServerLevel) level).getServer()).peripheralMethods().getSelfMethods(peripheral));
     }
@@ -121,68 +132,79 @@ public class ReceiverBlockEntity extends SmartBlockEntity implements
         return PeripheralKey.NULL;
     }
 
+    public PeripheralKey getClientViewKey(){
+        if(level == null || !level.isClientSide)return PeripheralKey.NULL;
+        return networkKey;
+    }
+
+    public void setClientViewKey(PeripheralKey key){
+        if(level == null || !level.isClientSide)return;
+        networkKey = key;
+    }
+
     public boolean registered(){
         return NetworkManager.isRegistered(getBlockPos());
     }
 
+    public void dispatchKey(PeripheralKey key){
+        if(level == null)return;
+        if (level.isClientSide)setClientViewKey(key);
+        else resetNetworkRegistry(key);
+    }
+
     public void resetNetworkRegistry(PeripheralKey newKey){
         if(level == null)return;
-        if(level.isClientSide)return;
+        if(level.isClientSide) {
+            return;
+        }
         if(Objects.equals(newKey.Name(), ""))return;
         networkKey = NetworkManager.registerAndGetKey(newKey, getBlockPos());
         setChanged();
     }
 
     @Override
-    public void tick(){
-        super.tick();
-        if(level.isClientSide)return;
+    public void tickServer(){
         NetworkManager.activate(getBlockPos());
+    }
+
+    @Override
+    public void tickCommon() {
+        super.tickCommon();
         executeAll();
     }
 
     @Override
-    public void lazyTick() {
-        super.lazyTick();
+    public void lazyTickServer() {
         updateAttachedPeripheral();
+        syncForNear(PERIPHERAL, PERIPHERAL_TYPE);
     }
 
     public ReceiverBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
+                tag -> enqueueTask(()-> dispatchKey(PeripheralKey.deserialize(tag.getCompound("peripheral_key")))),
+                tag -> tag.put("peripheral_key", networkKey.serialize()),
+                PERIPHERAL
+            ),
+                Side.SHARED
+        );
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(
+                () -> attachedViewType,
+                t -> attachedViewType = t,
+                SerializeUtils.STRING,
+                PERIPHERAL_TYPE
+            ),
+                Side.RUNTIME_SHARED
+        );
     }
 
     @Override
-    public void destroy(){
-        super.destroy();
-        if(level.isClientSide)return;
+    public void remove(){
+        super.remove();
+        if(level == null || level.isClientSide)return;
         NetworkManager.UnregisterWirelessPeripheral(networkKey);
     }
 
-    @Override
-    protected void write(CompoundTag tag, boolean clientPacket) {
-        super.write(tag, clientPacket);
-        if(!clientPacket){
-            tag.putLong("protocol", networkKey.Protocol());
-            tag.putString("type", networkKey.Name());
-        }
-
-    }
-
-
-    @Override
-    protected void read(CompoundTag tag, boolean clientPacket) {
-        super.read(tag, clientPacket);
-        if(!clientPacket){
-            long protocol = tag.getLong("protocol");
-            String name = tag.getString("type");
-            syncedTasks.add(()-> resetNetworkRegistry(new PeripheralKey(name, protocol)));
-        }
-    }
-
-    @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-
-    }
 
 
     protected void displayScreen(ServerPlayer player){

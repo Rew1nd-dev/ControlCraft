@@ -1,12 +1,16 @@
 package com.verr1.controlcraft.utils;
 
+import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.data.constraint.ConnectContext;
+import com.verr1.controlcraft.foundation.network.SyncLock;
+import com.verr1.controlcraft.foundation.vsapi.VSJointPose;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
-import org.valkyrienskies.core.apigame.joints.*;
+import org.valkyrienskies.core.apigame.constraints.*;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -22,77 +26,6 @@ public class SerializeUtils {
     public static Serializer<Boolean> BOOLEAN = of(SerializeUtils::ofBoolean, tag -> tag.getBoolean("value"));
     public static Serializer<String> STRING = of(SerializeUtils::ofString, tag -> tag.getString("value"));
 
-    public static Serializer<VSJointMaxForceTorque> MAX_FORCE_TORQUE = of(
-            max -> {
-                CompoundTag tag = new CompoundTag();
-                tag.put("max_force", FLOAT.serializeNullable(max.getMaxForce()));
-                tag.put("max_torque", FLOAT.serializeNullable(max.getMaxTorque()));
-                return tag;
-            },
-            tag -> {
-                Float force = FLOAT.deserializeNullable(tag.getCompound("max_force"));
-                Float torque = FLOAT.deserializeNullable(tag.getCompound("max_torque"));
-                if(force == null || torque == null){
-                    return null;
-                }
-                return new VSJointMaxForceTorque(force, torque);
-            }
-    );
-
-    public static Serializer<VSD6Joint.AngularLimitPair> ANGULAR_LIMIT_PAIR = of(
-            pair -> {
-                CompoundTag tag = new CompoundTag();
-                tag.put("min", FLOAT.serialize(pair.getLowerLimit()));
-                tag.put("max", FLOAT.serialize(pair.getUpperLimit()));
-                tag.put("restitution", FLOAT.serializeNullable(pair.getRestitution()));
-                tag.put("bounce_threshold", FLOAT.serializeNullable(pair.getBounceThreshold()));
-                tag.put("stiffness", FLOAT.serializeNullable(pair.getStiffness()));
-                tag.put("damping", FLOAT.serializeNullable(pair.getDamping()));
-                return tag;
-            },
-            tag -> new VSD6Joint.AngularLimitPair(
-                    FLOAT.deserialize(tag.getCompound("min")),
-                    FLOAT.deserialize(tag.getCompound("max")),
-                    FLOAT.deserializeNullable(tag.getCompound("restitution")),
-                    FLOAT.deserializeNullable(tag.getCompound("bounce_threshold")),
-                    FLOAT.deserializeNullable(tag.getCompound("stiffness")),
-                    FLOAT.deserializeNullable(tag.getCompound("damping"))
-            )
-    );
-
-    public static Serializer<VSD6Joint.LinearLimitPair> LINEAR_LIMIT_PAIR = of(
-            pair -> {
-                CompoundTag tag = new CompoundTag();
-                tag.put("min", FLOAT.serialize(pair.getLowerLimit()));
-                tag.put("max", FLOAT.serialize(pair.getUpperLimit()));
-                tag.put("restitution", FLOAT.serializeNullable(pair.getRestitution()));
-                tag.put("bounce_threshold", FLOAT.serializeNullable(pair.getBounceThreshold()));
-                tag.put("stiffness", FLOAT.serializeNullable(pair.getStiffness()));
-                tag.put("damping", FLOAT.serializeNullable(pair.getDamping()));
-                return tag;
-            },
-            tag -> new VSD6Joint.LinearLimitPair(
-                    FLOAT.deserialize(tag.getCompound("min")),
-                    FLOAT.deserialize(tag.getCompound("max")),
-                    FLOAT.deserializeNullable(tag.getCompound("restitution")),
-                    FLOAT.deserializeNullable(tag.getCompound("bounce_threshold")),
-                    FLOAT.deserializeNullable(tag.getCompound("stiffness")),
-                    FLOAT.deserializeNullable(tag.getCompound("damping"))
-            )
-    );
-
-    public static Serializer<VSRevoluteJoint.VSRevoluteDriveVelocity> REVOLUTE_DRIVE_VELOCITY = of(
-            drive -> {
-                CompoundTag tag = new CompoundTag();
-                tag.put("velocity", FLOAT.serialize(drive.getVelocity()));
-                tag.put("auto_wake", BOOLEAN.serialize(drive.getAutoWake()));
-                return tag;
-            },
-            tag -> new VSRevoluteJoint.VSRevoluteDriveVelocity(
-                    FLOAT.deserialize(tag.getCompound("velocity")),
-                    BOOLEAN.deserialize(tag.getCompound("auto_wake"))
-            )
-    );
 
     public static Serializer<Vector3dc> VECTOR3D = of(
             vec -> {
@@ -115,126 +48,137 @@ public class SerializeUtils {
             },
             tag -> new Quaterniond(tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"), tag.getDouble("w"))
     );
+
     public static Serializer<VSJointPose> JOINT_POSE = of(
             pose -> {
                 CompoundTag tag = new CompoundTag();
-                tag.put("position", VECTOR3D.serialize(pose.getPos()));
-                tag.put("rotation", QUATERNION4D.serialize(pose.getRot()));
+                tag.put("p", VECTOR3D.serialize(pose.getPos()));
+                tag.put("q", QUATERNION4D.serialize(pose.getRot()));
                 return tag;
             },
             tag -> new VSJointPose(
-                    VECTOR3D.deserialize(tag.getCompound("position")),
-                    QUATERNION4D.deserialize(tag.getCompound("rotation"))
-            )
+                    VECTOR3D.deserialize(tag.getCompound("p")),
+                    QUATERNION4D.deserialize(tag.getCompound("q")))
     );
 
-    public static Serializer<VSJoint> JOINT = of(
+    public static Serializer<ConnectContext> CONNECT_CONTEXT = of(
+            context -> {
+                CompoundTag tag = new CompoundTag();
+                tag.put("self", JOINT_POSE.serialize(context.self()));
+                tag.put("comp", JOINT_POSE.serialize(context.comp()));
+                tag.put("dirty", BOOLEAN.serialize(context.isDirty()));
+                return tag;
+            },
+            tag -> new ConnectContext(
+                    JOINT_POSE.deserialize(tag.getCompound("self")),
+                    JOINT_POSE.deserialize(tag.getCompound("comp")),
+                    BOOLEAN.deserialize(tag.getCompound("dirty"))
+                )
+            );
+
+
+    public static Serializer<VSConstraint> CONSTRAINT = of(
             joint -> {
                 CompoundTag tag = new CompoundTag();
-                tag.put("ship_id_0", LONG.serialize(Optional.ofNullable(joint.getShipId0()).orElse(-1L)));
-                tag.put("ship_id_1", LONG.serialize(Optional.ofNullable(joint.getShipId1()).orElse(-1L)));
-                tag.put("pose_0", JOINT_POSE.serialize(joint.getPose0()));
-                tag.put("pose_1", JOINT_POSE.serialize(joint.getPose1()));
-
+                tag.put("ship_id_0", LONG.serialize(Optional.of(joint.getShipId0()).orElse(-1L)));
+                tag.put("ship_id_1", LONG.serialize(Optional.of(joint.getShipId1()).orElse(-1L)));
+                tag.put("compliance", DOUBLE.serialize(joint.getCompliance()));
                 return tag;
             },
             tag -> null
     );
 
-    public static Serializer<VSFixedJoint> FIXED_JOINT = of(
+    public static Serializer<VSAttachmentConstraint> ATTACH = of(
             joint -> {
                 CompoundTag tag = new CompoundTag();
-                tag.put("joint", JOINT.serialize(joint));
-                tag.put("max_force_torque", MAX_FORCE_TORQUE.serializeNullable(joint.getMaxForceTorque()));
+                tag.put("joint", CONSTRAINT.serialize(joint));
+                tag.put("p_0", VECTOR3D.serialize(joint.getLocalPos0()));
+                tag.put("p_1", VECTOR3D.serialize(joint.getLocalPos1()));
+                tag.put("m_f", DOUBLE.serialize(joint.getMaxForce()));
+                tag.put("d", DOUBLE.serialize(joint.getFixedDistance()));
                 return tag;
             },
             tag -> {
                 CompoundTag commonJoint = tag.getCompound("joint");
-                return new VSFixedJoint(
+                return new VSAttachmentConstraint(
                         LONG.deserialize(commonJoint.getCompound("ship_id_0")),
-                        JOINT_POSE.deserialize(commonJoint.getCompound("joint").getCompound("pose_0")),
-                        LONG.deserialize(commonJoint.getCompound("joint").getCompound("ship_id_1")),
-                        JOINT_POSE.deserialize(commonJoint.getCompound("joint").getCompound("pose_1")),
-                        MAX_FORCE_TORQUE.deserializeNullable(tag.getCompound("max_force_torque"))
+                        LONG.deserialize(commonJoint.getCompound("ship_id_1")),
+                        DOUBLE.deserialize(commonJoint.getCompound("compliance")),
+                        VECTOR3D.deserialize(tag.getCompound("p_0")),
+                        VECTOR3D.deserialize(tag.getCompound("p_1")),
+                        DOUBLE.deserialize(tag.getCompound("m_f")),
+                        DOUBLE.deserialize(tag.getCompound("d"))
                 );
             }
     );
 
-    public static Serializer<VSPrismaticJoint> PRISMATIC_JOINT = of(
+    public static Serializer<VSHingeOrientationConstraint> ORIENT = of(
+
             joint -> {
                 CompoundTag tag = new CompoundTag();
-                tag.put("joint", JOINT.serialize(joint));
-                tag.put("max_force_torque", MAX_FORCE_TORQUE.serializeNullable(joint.getMaxForceTorque()));
-                tag.put("linear_limit_pair", LINEAR_LIMIT_PAIR.serializeNullable(joint.getLinearLimitPair()));
+                tag.put("joint", CONSTRAINT.serialize(joint));
+                tag.put("q_0", QUATERNION4D.serialize(joint.getLocalRot0()));
+                tag.put("q_1", QUATERNION4D.serialize(joint.getLocalRot1()));
+                tag.put("m_t", DOUBLE.serialize(joint.getMaxTorque()));
                 return tag;
             },
             tag -> {
                 CompoundTag commonJoint = tag.getCompound("joint");
-                return new VSPrismaticJoint(
+                return new VSHingeOrientationConstraint(
                         LONG.deserialize(commonJoint.getCompound("ship_id_0")),
-                        JOINT_POSE.deserialize(commonJoint.getCompound("pose_0")),
                         LONG.deserialize(commonJoint.getCompound("ship_id_1")),
-                        JOINT_POSE.deserialize(commonJoint.getCompound("pose_1")),
-                        MAX_FORCE_TORQUE.deserializeNullable(tag.getCompound("max_force_torque")),
-                        LINEAR_LIMIT_PAIR.deserializeNullable(tag.getCompound("linear_limit_pair"))
+                        DOUBLE.deserialize(commonJoint.getCompound("compliance")),
+                        QUATERNION4D.deserialize(tag.getCompound("q_0")),
+                        QUATERNION4D.deserialize(tag.getCompound("q_1")),
+                        DOUBLE.deserialize(tag.getCompound("m_t"))
                 );
             }
     );
 
-    public static Serializer<VSDistanceJoint> DISTANCE_JOINT = of(
+    public static Serializer<VSFixedOrientationConstraint> FIXED_ORIENT = of(
             joint -> {
                 CompoundTag tag = new CompoundTag();
-                tag.put("joint", JOINT.serialize(joint));
-                tag.put("max_force_torque", MAX_FORCE_TORQUE.serializeNullable(joint.getMaxForceTorque()));
-                tag.put("min", FLOAT.serializeNullable(joint.getMinDistance()));
-                tag.put("max", FLOAT.serializeNullable(joint.getMinDistance()));
-                tag.put("tolerance", FLOAT.serializeNullable(joint.getTolerance()));
-                tag.put("stiffness", FLOAT.serializeNullable(joint.getStiffness()));
-                tag.put("damping", FLOAT.serializeNullable(joint.getDamping()));
+                tag.put("joint", CONSTRAINT.serialize(joint));
+                tag.put("q_0", QUATERNION4D.serialize(joint.getLocalRot0()));
+                tag.put("q_1", QUATERNION4D.serialize(joint.getLocalRot1()));
+                tag.put("m_t", DOUBLE.serialize(joint.getMaxTorque()));
                 return tag;
             },
             tag -> {
                 CompoundTag commonJoint = tag.getCompound("joint");
-                return new VSDistanceJoint(
+                return new VSFixedOrientationConstraint(
                         LONG.deserialize(commonJoint.getCompound("ship_id_0")),
-                        JOINT_POSE.deserialize(commonJoint.getCompound("pose_0")),
                         LONG.deserialize(commonJoint.getCompound("ship_id_1")),
-                        JOINT_POSE.deserialize(commonJoint.getCompound("pose_1")),
-                        MAX_FORCE_TORQUE.deserializeNullable(tag.getCompound("max_force_torque")),
-                        FLOAT.deserialize(tag.getCompound("min")),
-                        FLOAT.deserialize(tag.getCompound("max")),
-                        FLOAT.deserializeNullable(tag.getCompound("tolerance")),
-                        FLOAT.deserializeNullable(tag.getCompound("stiffness")),
-                        FLOAT.deserializeNullable(tag.getCompound("damping"))
+                        DOUBLE.deserialize(commonJoint.getCompound("compliance")),
+                        QUATERNION4D.deserialize(tag.getCompound("q_0")),
+                        QUATERNION4D.deserialize(tag.getCompound("q_1")),
+                        DOUBLE.deserialize(tag.getCompound("m_t"))
                 );
             }
     );
 
-    public static Serializer<VSRevoluteJoint> REVOLUTE_JOINT = of(
+    public static Serializer<VSSlideConstraint> SLIDE = of(
             joint -> {
                 CompoundTag tag = new CompoundTag();
-                tag.put("joint", JOINT.serialize(joint));
-                tag.put("max_force_torque", MAX_FORCE_TORQUE.serializeNullable(joint.getMaxForceTorque()));
-                tag.put("angular_limit_pair", ANGULAR_LIMIT_PAIR.serializeNullable(joint.getAngularLimitPair()));
-                tag.put("drive_velocity", REVOLUTE_DRIVE_VELOCITY.serializeNullable(joint.getDriveVelocity()));
-                tag.put("drive_force_limit", FLOAT.serializeNullable(joint.getDriveForceLimit()));
-                tag.put("drive_gear_ratio", FLOAT.serializeNullable(joint.getDriveGearRatio()));
-                tag.put("drive_free_spin", BOOLEAN.serializeNullable(joint.getDriveFreeSpin()));
+                tag.put("joint", CONSTRAINT.serialize(joint));
+                tag.put("p_0", VECTOR3D.serialize(joint.getLocalPos0()));
+                tag.put("p_1", VECTOR3D.serialize(joint.getLocalPos1()));
+                tag.put("m_f", DOUBLE.serialize(joint.getMaxForce()));
+                tag.put("axis", VECTOR3D.serialize(joint.getLocalSlideAxis0()));
+                tag.put("m_d", DOUBLE.serialize(joint.getMaxDistBetweenPoints()));
                 return tag;
             },
             tag -> {
                 CompoundTag commonJoint = tag.getCompound("joint");
-                return new VSRevoluteJoint(
+                return new VSSlideConstraint(
                         LONG.deserialize(commonJoint.getCompound("ship_id_0")),
-                        JOINT_POSE.deserialize(commonJoint.getCompound("pose_0")),
                         LONG.deserialize(commonJoint.getCompound("ship_id_1")),
-                        JOINT_POSE.deserialize(commonJoint.getCompound("pose_1")),
-                        MAX_FORCE_TORQUE.deserializeNullable(tag.getCompound("max_force_torque")),
-                        ANGULAR_LIMIT_PAIR.deserializeNullable(tag.getCompound("angular_limit_pair")),
-                        REVOLUTE_DRIVE_VELOCITY.deserializeNullable(tag.getCompound("drive_velocity")),
-                        FLOAT.deserializeNullable(tag.getCompound("drive_force_limit")),
-                        FLOAT.deserializeNullable(tag.getCompound("drive_gear_ratio")),
-                        BOOLEAN.deserializeNullable(tag.getCompound("drive_free_spin"))
+                        DOUBLE.deserialize(commonJoint.getCompound("compliance")),
+                        VECTOR3D.deserialize(tag.getCompound("p_0")),
+                        VECTOR3D.deserialize(tag.getCompound("p_1")),
+                        DOUBLE.deserialize(tag.getCompound("m_f")),
+                        VECTOR3D.deserialize(tag.getCompound("axis")),
+                        DOUBLE.deserialize(tag.getCompound("m_d"))
                 );
             }
     );
@@ -308,13 +252,74 @@ public class SerializeUtils {
         @NotNull T deserialize(CompoundTag tag);
     }
 
-    public static class ReadWriter<T>{
-        Supplier<T> supplier;
-        Consumer<T> consumer;
-        Serializer<T> serializer;
-        String key;
+    public static class LockableReadWriter<T>{
+        public SyncLock readLock = new SyncLock();
+        private final ReadWriter<T> readWriter;
 
-        public static <T> ReadWriter<T> of(Supplier<T> supplier, Consumer<T> consumer, Serializer<T> serializer, String key){
+        public LockableReadWriter(ReadWriter<T> readWriter){
+            this.readWriter = readWriter;
+        }
+
+        public void readAndUpdateWithKey(CompoundTag tag){
+            if(readLock.isLocked())return;
+            readLock.update();
+            readWriter.onReadWithKey(tag);
+        }
+
+        public void readAndUpdateDefault(CompoundTag tag){
+            if(readLock.isLocked())return;
+            readLock.update();
+            readWriter.onReadDefault(tag);
+        }
+
+        public void writeDefault(CompoundTag tag){
+            // if(readLock.isLocked())return;
+            // readLock.update();
+            readWriter.onWriteDefault(tag);
+        }
+
+
+    }
+
+    public static class LockableReadWriteExecutor{
+        public SyncLock readLock = new SyncLock();
+        private final ReadWriteExecutor readWriteExecutor;
+
+        public LockableReadWriteExecutor(ReadWriteExecutor readWriteExecutor){
+            this.readWriteExecutor = readWriteExecutor;
+        }
+
+        public void readAndUpdateWithKey(CompoundTag tag){
+            if(readLock.isLocked())return;
+            readLock.update();
+            readWriteExecutor.onReadWithKey(tag);
+        }
+
+        public void readAndUpdateDefault(CompoundTag tag){
+            if(readLock.isLocked())return;
+            readLock.update();
+            readWriteExecutor.onReadDefault(tag);
+        }
+
+        public void writeWithKey(CompoundTag tag){
+            // if(lock.isLocked())return;
+            readWriteExecutor.onWriteWithKey(tag);
+        }
+
+        public void writeDefault(CompoundTag tag){
+            // if(lock.isLocked())return;
+            readWriteExecutor.onWriteDefault(tag);
+        }
+    }
+
+
+    public static class ReadWriter<T>{
+        private Supplier<T> supplier;
+        private Consumer<T> consumer;
+        private Serializer<T> serializer;
+        private NetworkKey key;
+
+        public static <T> ReadWriter<T> of(Supplier<T> supplier, Consumer<T> consumer, Serializer<T> serializer, NetworkKey key){
             ReadWriter<T> rw = new ReadWriter<>();
             rw.supplier = supplier;
             rw.consumer = consumer;
@@ -323,33 +328,64 @@ public class SerializeUtils {
             return rw;
         }
 
-        public void onRead(CompoundTag tag){
-            consumer.accept(serializer.deserialize(tag.getCompound(key)));
+
+        public NetworkKey getKey() {
+            return key;
+        }
+
+        public void onReadWithKey(CompoundTag tag){
+            if(!tag.contains(key.getSerializedName()))return;
+            consumer.accept(serializer.deserialize(tag.getCompound(key.getSerializedName())));
+        }
+
+        public void onReadDefault(CompoundTag tag){
+            // if(!tag.contains(key))return;
+            consumer.accept(serializer.deserialize(tag.getCompound(key.getSerializedName())));
         }
  
-        public void onWrite(CompoundTag tag){
-            tag.put(key, serializer.serialize(supplier.get()));
+        public void onWriteDefault(CompoundTag tag){
+            tag.put(key.getSerializedName(), serializer.serialize(supplier.get()));
         }
+
 
     }
 
     public static class ReadWriteExecutor{
         Consumer<CompoundTag> onRead;
         Consumer<CompoundTag> onWrite;
+        NetworkKey key;
 
-        public static ReadWriteExecutor of(Consumer<CompoundTag> onRead, Consumer<CompoundTag> onWrite){
+
+        public NetworkKey getKey() {
+            return key;
+        }
+
+
+        public static ReadWriteExecutor of(Consumer<CompoundTag> onRead, Consumer<CompoundTag> onWrite, NetworkKey key){
             ReadWriteExecutor rw = new ReadWriteExecutor();
             rw.onRead = onRead;
             rw.onWrite = onWrite;
+            rw.key = key;
             return rw;
         }
 
-        public void onRead(CompoundTag t){
+        public void onReadWithKey(CompoundTag t){
+            if(!t.contains(key.getSerializedName()))return;
+            onRead.accept(t.getCompound(key.getSerializedName()));
+        }
+
+        public void onReadDefault(CompoundTag t){
             onRead.accept(t);
         }
 
-        public void onWrite(CompoundTag t){
+        public void onWriteDefault(CompoundTag t){
             onWrite.accept(t);
+        }
+
+        public void onWriteWithKey(CompoundTag t){
+            CompoundTag tag = new CompoundTag();
+            onWrite.accept(tag);
+            t.put(key.getSerializedName(), tag);
         }
     }
 

@@ -17,7 +17,7 @@ public class DefaultDeferralRunnable implements DeferralRunnable {
     }
 
     @Override
-    public void tickDown() {
+    public void tick() {
         ticks--;
     }
 

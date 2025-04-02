@@ -1,10 +1,11 @@
 package com.verr1.controlcraft.foundation.network.handler;
 
+import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.ControlCraftServer;
-import com.verr1.controlcraft.content.blocks.motor.AbstractMotorBlockEntity;
-import com.verr1.controlcraft.content.blocks.slider.SliderBlockEntity;
-import com.verr1.controlcraft.foundation.ServerBlockEntityGetter;
+import com.verr1.controlcraft.content.blocks.motor.AbstractDynamicMotor;
+import com.verr1.controlcraft.content.blocks.slider.DynamicSliderBlockEntity;
+import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.api.IBruteConnectable;
 import com.verr1.controlcraft.foundation.api.IConstraintHolder;
 import com.verr1.controlcraft.foundation.api.IControllerProvider;
@@ -48,7 +49,7 @@ public class ServerGenericPacketHandler {
 
          Optional
             .ofNullable(context.getSender())
-            .map(e -> ServerBlockEntityGetter.INSTANCE.getBlockEntityAt(e.serverLevel(), basePos, IBruteConnectable.class))
+            .map(e -> BlockEntityGetter.INSTANCE.getLevelBlockEntityAt(e.serverLevel(), basePos, IBruteConnectable.class))
             .map(Optional::orElseThrow)
             .ifPresent(b -> b.bruteDirectionalConnectWith(slavePos, slaveAlign, slaveForward));
     }
@@ -65,7 +66,7 @@ public class ServerGenericPacketHandler {
             Runnable expiredTask =
                     () -> Optional
                             .ofNullable(context.getSender())
-                            .map(e -> ServerBlockEntityGetter.INSTANCE.getBlockEntityAt(e.serverLevel(), basePos, IBruteConnectable.class))
+                            .map(e -> BlockEntityGetter.INSTANCE.getLevelBlockEntityAt(e.serverLevel(), basePos, IBruteConnectable.class))
                             .map(Optional::orElseThrow)
                             .ifPresent(b -> b.bruteDirectionalConnectWith(slavePos, slaveAlign, slaveForward));
 
@@ -74,7 +75,7 @@ public class ServerGenericPacketHandler {
                     .map(ServerPlayer::serverLevel)
                     .map(level -> new FaceAlignmentSchedule
                                         .builder(basePos, baseAlign, slavePos, slaveAlign, level)
-                                        .withGivenYForward(baseForward)
+                                        .withGivenXForward(baseForward)
                                         .withGivenYForward(slaveForward)
                                         .withTimeBeforeExpired(0)
                                         .withOnExpiredTask(expiredTask)
@@ -96,7 +97,7 @@ public class ServerGenericPacketHandler {
     public static void handleDestroyConstraints(GenericServerPacket packet, NetworkEvent.Context context){
         BlockPos pos = BlockPos.of(packet.getLongs().get(0));
         Optional
-                .ofNullable(context.getSender()).map(e -> ServerBlockEntityGetter.INSTANCE.getBlockEntityAt(e.serverLevel(), pos, IConstraintHolder.class))
+                .ofNullable(context.getSender()).map(e -> BlockEntityGetter.INSTANCE.getLevelBlockEntityAt(e.serverLevel(), pos, IConstraintHolder.class))
                 .map(Optional::orElseThrow)
                 .ifPresent(IConstraintHolder::destroyConstraints);
     }
@@ -105,15 +106,15 @@ public class ServerGenericPacketHandler {
         BlockPos pos = BlockPos.of(packet.getLongs().get(0));
         Optional
                 .ofNullable(context.getSender()).map(e -> e.level().getExistingBlockEntity(pos))
-                .filter(AbstractMotorBlockEntity.class::isInstance)
-                .map(AbstractMotorBlockEntity.class::cast)
-                .ifPresent(AbstractMotorBlockEntity::toggleMode);
+                .filter(AbstractDynamicMotor.class::isInstance)
+                .map(AbstractDynamicMotor.class::cast)
+                .ifPresent(AbstractDynamicMotor::toggleMode);
 
         Optional
                 .ofNullable(context.getSender()).map(e -> e.level().getExistingBlockEntity(pos))
-                .filter(SliderBlockEntity.class::isInstance)
-                .map(SliderBlockEntity.class::cast)
-                .ifPresent(SliderBlockEntity::toggleMode);
+                .filter(DynamicSliderBlockEntity.class::isInstance)
+                .map(DynamicSliderBlockEntity.class::cast)
+                .ifPresent(DynamicSliderBlockEntity::toggleMode);
     }
 
     public static void handleControllerSettings(GenericServerPacket packet, NetworkEvent.Context context){
@@ -124,9 +125,9 @@ public class ServerGenericPacketHandler {
         double value = packet.getDoubles().get(3);
         Optional
                 .ofNullable(context.getSender())
-                .map(e -> ServerBlockEntityGetter.INSTANCE.getBlockEntityAt(e.serverLevel(), pos, IControllerProvider.class))
+                .map(e -> BlockEntityGetter.INSTANCE.getLevelBlockEntityAt(e.serverLevel(), pos, IControllerProvider.class))
                 .map(Optional::orElseThrow)
-                .ifPresent(c -> c.getController().setParameter(p, i, d).setTarget(value));
+                .ifPresent(c -> c.getController().setPID(p, i, d).setTarget(value));
     }
 
     public static void handleResetExposedFields(GenericServerPacket packet, NetworkEvent.Context context){
@@ -135,6 +136,10 @@ public class ServerGenericPacketHandler {
         if(be instanceof ITerminalDevice device){
             device.reset();
         }
+        if(be instanceof SmartBlockEntity){
+            be.setChanged();
+        }
+
     }
 
     public static void handleRequestExposedFields(GenericServerPacket packet, NetworkEvent.Context context) {

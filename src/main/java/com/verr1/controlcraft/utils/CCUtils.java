@@ -3,10 +3,13 @@ package com.verr1.controlcraft.utils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.verr1.controlcraft.foundation.data.ShipHitResult;
+import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
+import com.verr1.controlcraft.mixinducks.IEntityDuck;
 import dan200.computercraft.shared.computer.core.ServerComputer;
 import dan200.computercraft.shared.computer.core.ServerContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -14,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.*;
 import org.joml.primitives.AABBic;
 import org.valkyrienskies.core.api.ships.Ship;
-import org.valkyrienskies.mod.api.ValkyrienSkies;
+
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import java.util.List;
@@ -93,11 +96,9 @@ public class CCUtils {
     }
 
     public static Vec3 getEntityVelocity(Entity entity){
-        /*
-        * if(entity instanceof EntityAccessor ea){
+        if(entity instanceof IEntityDuck ea){
             return ea.controlCraft$velocityObserver();
         }
-        * */
         return Vec3.ZERO;
     }
 
@@ -108,6 +109,16 @@ public class CCUtils {
                 "name", hitResult.getEntity().getName().getString(),
                 "velocity", dumpVec3(ValkyrienSkies.set(new Vector3d(), getEntityVelocity(hitResult.getEntity()))),
                 "position", dumpVec3(ValkyrienSkies.set(new Vector3d(), hitResult.getEntity().position()))
+        );
+    }
+
+    public static Map<String, Object> parse(Entity entity){
+        return Map.of(
+                "type", entity.getType().toString(),
+                "name", entity.getName().getString(),
+                "health", entity instanceof LivingEntity lv ? lv.getHealth() : 0,
+                "velocity", dumpVec3(ValkyrienSkies.set(new Vector3d(), getEntityVelocity(entity))),
+                "position", dumpVec3(ValkyrienSkies.set(new Vector3d(), entity.position()))
         );
     }
 

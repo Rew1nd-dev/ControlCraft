@@ -1,19 +1,16 @@
 package com.verr1.controlcraft.content.valkyrienskies.attachments;
 
-import com.verr1.controlcraft.content.blocks.slider.SliderBlockEntity;
 import com.verr1.controlcraft.content.blocks.spatial.SpatialAnchorBlockEntity;
 import com.verr1.controlcraft.content.valkyrienskies.controls.InducerControls;
-import com.verr1.controlcraft.foundation.ServerBlockEntityGetter;
-import com.verr1.controlcraft.foundation.data.logical.LogicalSlider;
+import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.data.logical.LogicalSpatial;
+import com.verr1.controlcraft.foundation.vsapi.PhysShipWrapper;
 import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.NotNull;
-import org.valkyrienskies.core.api.attachment.AttachmentHolder;
-import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import org.valkyrienskies.core.api.ships.PhysShip;
+import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.ShipForcesInducer;
-
-import java.util.Optional;
+import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
 
 public final class SpatialForceInducer extends AbstractExpirableForceInducer implements ShipForcesInducer {
     @Override
@@ -28,12 +25,12 @@ public final class SpatialForceInducer extends AbstractExpirableForceInducer imp
     }
 
 
-    public static SpatialForceInducer getOrCreate(AttachmentHolder ship){
+    public static SpatialForceInducer getOrCreate(ServerShip ship){
         //return ship.getOrPutAttachment(AnchorForceInducer.class, AnchorForceInducer::new);
         var obj = ship.getAttachment(SpatialForceInducer.class);
         if(obj == null){
             obj = new SpatialForceInducer();
-            ship.setAttachment(obj);
+            ship.saveAttachment(SpatialForceInducer.class, obj);
         }
         return obj;
 
@@ -50,13 +47,13 @@ public final class SpatialForceInducer extends AbstractExpirableForceInducer imp
         getLives()
                 .forEach(
                         (pos, live) ->
-                                ServerBlockEntityGetter
+                                BlockEntityGetter
                                         .INSTANCE
                                         .getBlockEntityAt(pos.globalPos(), SpatialAnchorBlockEntity.class)
                                         .map(SpatialAnchorBlockEntity::getLogicalSpatial)
                                         .filter(LogicalSpatial::shouldDrive)
                                         .ifPresent(
-                                                logical -> InducerControls.spatialTickControls(logical, physShip)
+                                                logical -> InducerControls.spatialTickControls(logical, new PhysShipWrapper((PhysShipImpl) physShip))
                                         )
                 );
     }

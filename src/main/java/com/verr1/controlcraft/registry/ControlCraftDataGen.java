@@ -5,21 +5,39 @@ import com.google.gson.JsonObject;
 import com.simibubi.create.foundation.utility.FilesHelper;
 import com.tterrag.registrate.providers.ProviderType;
 import com.verr1.controlcraft.ControlCraft;
+import com.verr1.controlcraft.foundation.type.descriptive.*;
 import net.minecraftforge.data.event.GatherDataEvent;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class ControlCraftDataGen {
+
+    private static final HashMap<String, String> EXTRA_DESCRIPTIONS = new HashMap<>();
+
 
     public static void gatherData(GatherDataEvent event) {
 
 
         ControlCraft.REGISTRATE.addDataGenerator(ProviderType.LANG, provider -> {
             BiConsumer<String, String> langConsumer = provider::add;
-            provideDefaultLang(langConsumer);
+            // provideDefaultLang(langConsumer);
+            provideExtra(langConsumer);
         });
 
+    }
+
+    public static void registerExtraDescriptions(String key, String value){
+        EXTRA_DESCRIPTIONS.put(key, value);
+    }
+
+    public static void provideExtra(BiConsumer<String, String> consumer){
+        for (Map.Entry<String, String> entry : EXTRA_DESCRIPTIONS.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            consumer.accept(key, value);
+        }
     }
 
     private static void provideDefaultLang(BiConsumer<String, String> consumer) {
@@ -34,6 +52,17 @@ public class ControlCraftDataGen {
             String value = entry.getValue().getAsString();
             consumer.accept(key, value);
         }
+    }
+
+    public static void registerEnumDescriptions(){
+        CheatMode.register();
+        WandGUIModesType.register();
+        LockMode.register();
+        ExposedFieldType.register();
+        ExposedFieldDirection.register();
+        MiscDescription.register();
+        UIContents.register();
+        TargetMode.register();
     }
 
 }

@@ -8,10 +8,11 @@ import com.simibubi.create.foundation.gui.widget.Label;
 import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.ControlCraft;
+import com.verr1.controlcraft.content.gui.v1.widgets.SmallCheckbox;
 import com.verr1.controlcraft.foundation.data.terminal.TerminalRowData;
 import com.verr1.controlcraft.foundation.data.terminal.TerminalRowSetting;
 import com.verr1.controlcraft.foundation.network.packets.specific.TerminalSettingsPacket;
-import com.verr1.controlcraft.foundation.type.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import com.verr1.controlcraft.registry.ControlCraftGuiLabels;
 import com.verr1.controlcraft.registry.ControlCraftGuiTextures;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
@@ -23,7 +24,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Vector2d;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -153,8 +153,8 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
 
 
 
-        var name = new com.simibubi.create.foundation.gui.widget.Label(0, 0, row_type.getComponent()).colored(color_label);
-        name.text = row_type.getComponent();
+        var name = new com.simibubi.create.foundation.gui.widget.Label(0, 0, row_type.asComponent()).colored(color_label);
+        name.text = row_type.asComponent();
 
         var minTitle = new com.simibubi.create.foundation.gui.widget.Label(0, 0, ControlCraftGuiLabels.minLabel).colored(color_label);
         minTitle.text = ControlCraftGuiLabels.minLabel;

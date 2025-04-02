@@ -2,7 +2,9 @@ package com.verr1.controlcraft.content.blocks.jet;
 
 
 import com.simibubi.create.foundation.block.IBE;
+import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.ControlCraft;
+import com.verr1.controlcraft.content.gui.v1.factory.GenericUIFactory;
 import com.verr1.controlcraft.foundation.api.ISignalAcceptor;
 import com.verr1.controlcraft.registry.ControlCraftBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -19,6 +21,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 public class JetBlock extends DirectionalBlock implements IBE<JetBlockEntity>, ISignalAcceptor {
@@ -27,6 +31,12 @@ public class JetBlock extends DirectionalBlock implements IBE<JetBlockEntity>, I
 
     public JetBlock(Properties p_52591_) {
         super(p_52591_);
+    }
+
+
+    @OnlyIn(Dist.CLIENT)
+    public void displayScreen(BlockPos p){
+        ScreenOpener.open(GenericUIFactory.createJetScreen(p));
     }
 
 
@@ -40,9 +50,13 @@ public class JetBlock extends DirectionalBlock implements IBE<JetBlockEntity>, I
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
                                  BlockHitResult hit){
-        if(worldIn.isClientSide)return InteractionResult.PASS;
-        if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
-            withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer)player));
+        if(     worldIn.isClientSide
+                && handIn == InteractionHand.MAIN_HAND
+                && player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()
+                && !player.isShiftKeyDown()
+        ){
+            displayScreen(pos);
+            return InteractionResult.SUCCESS;
         }
 
         return InteractionResult.PASS;

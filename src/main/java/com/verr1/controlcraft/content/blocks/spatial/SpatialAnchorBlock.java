@@ -3,15 +3,15 @@ package com.verr1.controlcraft.content.blocks.spatial;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
+import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
+import com.verr1.controlcraft.content.gui.v1.factory.GenericUIFactory;
 import com.verr1.controlcraft.foundation.api.ISignalAcceptor;
 import com.verr1.controlcraft.registry.ControlCraftBlockEntities;
-import com.verr1.controlcraft.registry.ControlCraftBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -24,6 +24,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.generators.ModelFile;
 
 import java.util.function.BiFunction;
@@ -46,6 +48,11 @@ public class SpatialAnchorBlock extends DirectionalAxisKineticBlock implements
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(FLIPPED);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    protected void displayScreen(BlockPos pos){
+        ScreenOpener.open(GenericUIFactory.createSpatialAnchorScreen(pos));
     }
 
     @Override
@@ -72,9 +79,13 @@ public class SpatialAnchorBlock extends DirectionalAxisKineticBlock implements
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
                                  BlockHitResult hit){
-        if(worldIn.isClientSide)return InteractionResult.PASS;
-        if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
-            withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
+        if(     worldIn.isClientSide
+                && handIn == InteractionHand.MAIN_HAND
+                && player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()
+                && !player.isShiftKeyDown()
+        ) {
+            displayScreen(pos);
+            return InteractionResult.PASS;
         }
 
         return InteractionResult.PASS;

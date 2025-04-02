@@ -5,8 +5,10 @@ import com.simibubi.create.content.redstone.link.RedstoneLinkNetworkHandler;
 import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
+import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.gui.TerminalMenu;
-import com.verr1.controlcraft.foundation.ServerBlockEntityGetter;
+import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.registry.ControlCraftMenuTypes;
@@ -28,11 +30,9 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2d;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.simibubi.create.Create.REDSTONE_LINK_NETWORK_HANDLER;
 import static java.lang.Math.min;
@@ -44,6 +44,10 @@ public class TerminalBlockEntity extends OnShipBlockEntity implements
             RedstoneLinkNetworkHandler.Frequency.EMPTY,
             RedstoneLinkNetworkHandler.Frequency.EMPTY
     );
+
+    public static final NetworkKey EXPOSED_CHANNEL = NetworkKey.create("exposed_channel");
+    public static final NetworkKey CHANNEL = NetworkKey.create("channel");
+    public static final NetworkKey WRAPPER = NetworkKey.create("wrapper");
 
     private int exposedChannel = -1;
 
@@ -110,12 +114,12 @@ public class TerminalBlockEntity extends OnShipBlockEntity implements
     @Override
     public void lazyTick() {
         super.lazyTick();
-        if(level.isClientSide)return;
+        if(level == null || level.isClientSide)return;
         // updateKeys(channels.stream().map(TerminalChannel::getNetworkKey).toList());
     }
 
     public void syncAttachedDevice(){
-        if(level.isClientSide)return;
+        if(level == null || level.isClientSide)return;
         BlockEntity be = level.getExistingBlockEntity(getBlockPos().relative(getDirection().getOpposite()));
         if(!(be instanceof ITerminalDevice device))return;
         setChannelField(device.fields());
@@ -135,14 +139,14 @@ public class TerminalBlockEntity extends OnShipBlockEntity implements
     public String getAttachedDeviceName(){
         if(level == null || level.isClientSide)return "Should Not Called On Client";
 
-        return ServerBlockEntityGetter.INSTANCE
-                .getBlockEntityAt((ServerLevel) level, getBlockPos().relative(getDirection().getOpposite()), ITerminalDevice.class)
+        return BlockEntityGetter
+                .getLevelBlockEntityAt(level, getBlockPos().relative(getDirection().getOpposite()), ITerminalDevice.class)
                 .map(ITerminalDevice::name).orElse("Not Attached");
     }
 
     public void deviceChanged(){
-        ServerBlockEntityGetter.INSTANCE
-                .getBlockEntityAt((ServerLevel) level, getBlockPos().relative(getDirection().getOpposite()), BlockEntity.class)
+        BlockEntityGetter
+                .getLevelBlockEntityAt(level, getBlockPos().relative(getDirection().getOpposite()), BlockEntity.class)
                 .ifPresent(BlockEntity::setChanged);
     }
 
@@ -191,21 +195,21 @@ public class TerminalBlockEntity extends OnShipBlockEntity implements
                     () -> exposedChannel,
                     i -> exposedChannel = i,
                     SerializeUtils.INT,
-                    "exposedChannel"
+                    EXPOSED_CHANNEL
                 ),
-                Side.SERVER
+                Side.SERVER_ONLY
         );
         registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
                 tag -> channels.forEach(e -> e.deserialize(tag.getCompound("channel_" + channels.indexOf(e)))),
-                tag -> channels.forEach(e -> tag.put("channel_" + channels.indexOf(e), e.serialize()))
-            ),
-            Side.SERVER
+                tag -> channels.forEach(e -> tag.put("channel_" + channels.indexOf(e), e.serialize())),
+                        CHANNEL),
+            Side.SERVER_ONLY
         );
         registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
                         tag -> wrapper.loadFromTag(tag.getCompound("wrapper")),
-                        tag -> tag.put("wrapper", wrapper.saveToTag())
-                ),
-                Side.SERVER
+                        tag -> tag.put("wrapper", wrapper.saveToTag()),
+                        WRAPPER),
+                Side.SERVER_ONLY
         );
 
     }

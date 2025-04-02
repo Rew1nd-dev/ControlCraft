@@ -103,8 +103,8 @@ public class ShipQPNavigationSchedule implements IntervalRunnable {
     public Vector3dc calcControlTorque(){
 
         Quaterniondc q_d = new Quaterniond(q_err).conjugate().mul(q_err_prev);
-
-        Vector3dc accel_p = new Vector3d(q_err.x(), q_err.y(), q_err.z()).mul(p);
+        double sign = q_err.w() > 0 ? 1 : -1;
+        Vector3dc accel_p = new Vector3d(q_err.x(), q_err.y(), q_err.z()).mul(sign * p);
         Vector3dc accel_d = new Vector3d(q_d.x(), q_d.y(), q_d.z()).mul(-2 / ts).mul(d);
 
         Vector3dc torque_pd = new Vector3d(accel_p).add(accel_d).mul(inertia * Math.pow(scale, 5));

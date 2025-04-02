@@ -1,7 +1,7 @@
 package com.verr1.controlcraft.content.wand.mode;
 
-import com.verr1.controlcraft.content.blocks.motor.RevoluteMotorBlockEntity;
 import com.verr1.controlcraft.content.wand.mode.base.WandAbstractDualSelectionMode;
+import com.verr1.controlcraft.foundation.api.IBruteConnectable;
 import com.verr1.controlcraft.foundation.data.WandSelection;
 import com.verr1.controlcraft.foundation.managers.ClientOutliner;
 import com.verr1.controlcraft.foundation.network.packets.GenericServerPacket;
@@ -45,7 +45,7 @@ public class WandServoAssembleMode extends WandAbstractDualSelectionMode {
     public void onSelection(WandSelection selection) {
         if(state == State.TO_SELECT_X){
             BlockEntity be = Minecraft.getInstance().player.level().getExistingBlockEntity(selection.pos());
-            if(!(be instanceof RevoluteMotorBlockEntity))return;
+            if(!(be instanceof IBruteConnectable))return;
         }
         if(state == State.TO_SELECT_Y){
             if(selection.pos().equals(x.pos()))return;
@@ -59,9 +59,9 @@ public class WandServoAssembleMode extends WandAbstractDualSelectionMode {
         if (player == null) return;
         if(x == WandSelection.NULL)return;
         BlockEntity be = Minecraft.getInstance().player.level().getExistingBlockEntity(x.pos());
-        if(!(be instanceof RevoluteMotorBlockEntity servo))return;
+        if(!(be instanceof IBruteConnectable servo))return;
 
-        Direction face = servo.getServoDirection();
+        Direction face = servo.getAlign();
 
         ClientOutliner.drawOutline(x.pos(), face, Color.RED.getRGB(), "source");
 
@@ -78,11 +78,11 @@ public class WandServoAssembleMode extends WandAbstractDualSelectionMode {
     protected void sendPacket(WandSelection x, WandSelection y) {
         var p = new GenericServerPacket.builder(RegisteredPacketType.CONNECT)
                 .withLong(x.pos().asLong())
-                .withLong(x.face().ordinal())
                 .withLong(MinecraftUtils.getVerticalDirectionSimple(x.face()).ordinal())
+                .withLong(x.face().ordinal())
                 .withLong(y.pos().asLong())
-                .withLong(y.face().ordinal())
                 .withLong(MinecraftUtils.getVerticalDirectionSimple(y.face()).ordinal())
+                .withLong(y.face().ordinal())
                 .build();
 
         ControlCraftPackets.getChannel().sendToServer(p);

@@ -2,7 +2,7 @@ package com.verr1.controlcraft.foundation.data;
 
 public class SynchronizedField<T> {
     T data;
-    Object lock = new Object();
+    final Object lock = new Object();
 
     public SynchronizedField(T data){
         this.data = data;

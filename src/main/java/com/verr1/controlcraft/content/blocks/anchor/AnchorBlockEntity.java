@@ -1,7 +1,10 @@
 package com.verr1.controlcraft.content.blocks.anchor;
 
+
 import com.simibubi.create.foundation.gui.ScreenOpener;
-import com.verr1.controlcraft.content.gui.AnchorScreen;
+import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.type.Side;
+import com.verr1.controlcraft.content.gui.legacy.AnchorScreen;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.AnchorForceInducer;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
@@ -27,21 +30,77 @@ public class AnchorBlockEntity extends OnShipBlockEntity
     implements IPacketHandler
 {
 
+    public static NetworkKey AIR_RESISTANCE = NetworkKey.create("air_resistance");
+    public static NetworkKey EXTRA_GRAVITY = NetworkKey.create("extra_gravity");
+    public static NetworkKey ROTATIONAL_RESISTANCE = NetworkKey.create("rotational_resistance");
+    public static NetworkKey RESISTANCE_AT_POS =  NetworkKey.create("air_resistance_at_pos");
+    public static NetworkKey GRAVITY_AT_POS =  NetworkKey.create("extra_gravity_at_pos");
+
+    public double getAirResistance() {
+        return airResistance;
+    }
+
+    public void setAirResistance(double airResistance) {
+        this.airResistance = airResistance;
+    }
+
+    public double getExtraGravity() {
+        return extraGravity;
+    }
+
+    public void setExtraGravity(double extraGravity) {
+        this.extraGravity = extraGravity;
+    }
+
+    public double getRotationalResistance() {
+        return rotationalResistance;
+    }
+
+    public void setRotationalResistance(double rotationalResistance) {
+        this.rotationalResistance = rotationalResistance;
+    }
+
     public double airResistance = 0;
     public double extraGravity = 0;
     public double rotationalResistance = 0;
+    public boolean airResistanceAtPos = false;
+
+    public boolean isExtraGravityAtPos() {
+        return extraGravityAtPos;
+    }
+
+    public void setExtraGravityAtPos(boolean extraGravityAtPos) {
+        this.extraGravityAtPos = extraGravityAtPos;
+    }
+
+    public boolean isAirResistanceAtPos() {
+        return airResistanceAtPos;
+    }
+
+    public void setAirResistanceAtPos(boolean airResistanceAtPos) {
+        this.airResistanceAtPos = airResistanceAtPos;
+    }
+
+    public boolean extraGravityAtPos = false;
 
     public AnchorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         registerFieldReadWriter(
-                SerializeUtils.ReadWriter.of(() -> airResistance, a -> airResistance = a, SerializeUtils.DOUBLE, "airResistance"), Side.SERVER
+                SerializeUtils.ReadWriter.of(this::getAirResistance, this::setAirResistance, SerializeUtils.DOUBLE, AIR_RESISTANCE), Side.SHARED
         );
         registerFieldReadWriter(
-                SerializeUtils.ReadWriter.of(() -> extraGravity, a -> extraGravity = a, SerializeUtils.DOUBLE, "extraGravity"), Side.SERVER
+                SerializeUtils.ReadWriter.of(this::getExtraGravity, this::setExtraGravity, SerializeUtils.DOUBLE, EXTRA_GRAVITY), Side.SHARED
         );
         registerFieldReadWriter(
-                SerializeUtils.ReadWriter.of(() -> rotationalResistance, a -> rotationalResistance = a, SerializeUtils.DOUBLE, "rotationalResistance"), Side.SERVER
+                SerializeUtils.ReadWriter.of(this::getRotationalResistance, this::setExtraGravity, SerializeUtils.DOUBLE, ROTATIONAL_RESISTANCE), Side.SHARED
         );
+        registerFieldReadWriter(
+                SerializeUtils.ReadWriter.of(this::isAirResistanceAtPos, this::setAirResistanceAtPos, SerializeUtils.BOOLEAN, RESISTANCE_AT_POS), Side.SHARED
+        );
+        registerFieldReadWriter(
+                SerializeUtils.ReadWriter.of(this::isExtraGravityAtPos, this::setExtraGravityAtPos, SerializeUtils.BOOLEAN, GRAVITY_AT_POS), Side.SHARED
+        );
+
     }
 
     @Override
@@ -75,8 +134,10 @@ public class AnchorBlockEntity extends OnShipBlockEntity
             var e = packet.getDoubles().get(1);
             var r = packet.getDoubles().get(2);
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    ScreenOpener.open(new AnchorScreen(packet.getBoundPos(), a, e, r)
-            ));
+                    ScreenOpener.open(new AnchorScreen(packet.getBoundPos(), a, e, r))
+                    // ScreenOpener.open(new ExampleGui())
+                    // Minecraft.getInstance().setScreen(new ScreenUIRenderer(new ExampleDynamic()))
+            );
         }
     }
 
@@ -90,7 +151,14 @@ public class AnchorBlockEntity extends OnShipBlockEntity
     }
 
     public LogicalAnchor getLogicalAnchor() {
-        return new LogicalAnchor(airResistance, extraGravity, rotationalResistance);
+        return new LogicalAnchor(
+                airResistance,
+                extraGravity,
+                rotationalResistance,
+                WorldBlockPos.of(level, getBlockPos()),
+                isAirResistanceAtPos(),
+                isExtraGravityAtPos()
+        );
     }
 
 

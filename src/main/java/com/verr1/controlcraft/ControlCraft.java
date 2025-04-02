@@ -19,6 +19,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.joml.Random;
 import org.slf4j.Logger;
 
 
@@ -58,7 +61,7 @@ public class ControlCraft
 {
 
     public static final String MODID = "vscontrolcraft";
-
+    public static final Random RANDOM_GENERATOR = new Random();
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final CreateRegistrate REGISTRATE = CreateRegistrate.create(ControlCraft.MODID);
 
@@ -80,9 +83,12 @@ public class ControlCraft
         ControlCraftPackets.registerPackets();
         ControlCraftItems.register();
         ControlCraftMenuTypes.register();
+        ControlCraftDataGen.registerEnumDescriptions();
 
 
-
+        Configurator.setLevel("org.valkryienskies.core.impl.networking", Level.ERROR);
+        Configurator.setLevel("org.valkryienskies.core.networking", Level.ERROR);
+        Configurator.setLevel("org.valkryienskies.physics.networking", Level.ERROR);
 
         modEventBus.addListener(EventPriority.LOWEST, ControlCraftDataGen::gatherData);
         // modEventBus.addListener((e) -> ControlCraftAttachments.register());
@@ -120,6 +126,7 @@ public class ControlCraft
         ControlCraftPackets.registerPackets();
         ControlCraftItems.register();
         ControlCraftMenuTypes.register();
+        ControlCraftDataGen.registerEnumDescriptions();
         // ControlCraftAttachments.register();
 
         // AttachmentRegistry.register();
@@ -128,6 +135,10 @@ public class ControlCraft
         modEventBus.addListener(EventPriority.LOWEST, ControlCraftDataGen::gatherData);
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ControlCraftClient::clientInit);
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ControlCraftServer::serverInit);
+
+        Configurator.setLevel("org.valkryienskies.core.impl.networking", Level.ERROR);
+        Configurator.setLevel("org.valkryienskies.core.networking", Level.ERROR);
+        Configurator.setLevel("org.valkryienskies.physics.networking", Level.ERROR);
 
         MinecraftForge.EVENT_BUS.register(this);
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);

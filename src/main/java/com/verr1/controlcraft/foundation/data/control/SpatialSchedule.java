@@ -1,16 +1,17 @@
 package com.verr1.controlcraft.foundation.data.control;
 
-
+import com.verr1.controlcraft.foundation.api.ISerializableSchedule;
+import com.verr1.controlcraft.foundation.vsapi.PhysShipWrapper;
 import com.verr1.controlcraft.utils.InputChecker;
 import com.verr1.controlcraft.utils.VSMathUtils;
+import net.minecraft.nbt.CompoundTag;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
-import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import org.valkyrienskies.core.api.ships.PhysShip;
 
-public class SpatialSchedule {
+public class SpatialSchedule implements ISerializableSchedule {
     protected Quaterniondc q_tar = new Quaterniond();
     protected Vector3dc p_tar = new Vector3d();
 
@@ -56,13 +57,14 @@ public class SpatialSchedule {
 
     public Vector3dc calcControlTorque(){
         Quaterniondc q_d = new Quaterniond(q_err).conjugate().mul(q_err_prev);
-        Vector3dc accel_p = new Vector3d(q_err.x(), q_err.y(), q_err.z()).mul(pq);
+        double sign = q_err.w() < 0 ? -1 : 1;
+        Vector3dc accel_p = new Vector3d(q_err.x(), q_err.y(), q_err.z()).mul(sign * pq);
         Vector3dc accel_d = new Vector3d(q_d.x(), q_d.y(), q_d.z()).mul(-2 / ts).mul(dq);
         Vector3dc torque_pd = new Vector3d(accel_p).add(accel_d).mul(inertia * Math.pow(scale, 5));
         return torque_pd;
     }
 
-    public void overridePhysics(PhysShip ship){
+    public void overridePhysics(PhysShipWrapper ship){
         mass = ship.getMass();
         inertia = ship.getMomentOfInertia().m00();
 
@@ -156,4 +158,30 @@ public class SpatialSchedule {
         this.MAX_INTEGRAL_P = MAX_INTEGRAL;
         return this;
     }
+
+    @Override
+    public PID QPID() {
+        return new PID(pq, iq, dq);
+    }
+
+    @Override
+    public PID PPID() {
+        return new PID(pp, ip, dp);
+    }
+
+    @Override
+    public void QPID(PID pid) {
+        setPq(pid.p());
+        setIq(pid.i());
+        setDq(pid.d());
+    }
+
+    @Override
+    public void PPID(PID pid) {
+        setPp(pid.p());
+        setIp(pid.i());
+        setDp(pid.d());
+    }
+
+
 }

@@ -5,7 +5,7 @@ import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.blocks.terminal.TerminalBlockEntity;
-import com.verr1.controlcraft.foundation.ServerBlockEntityGetter;
+import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.data.terminal.TerminalRowSetting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -64,7 +64,7 @@ public class TerminalSettingsPacket extends SimplePacketBase {
                 Optional
                     .ofNullable(context.getSender())
                     .map(ServerPlayer::serverLevel)
-                    .flatMap(level -> ServerBlockEntityGetter.INSTANCE.getBlockEntityAt(level, pos, TerminalBlockEntity.class))
+                    .flatMap(level -> BlockEntityGetter.INSTANCE.getLevelBlockEntityAt(level, pos, TerminalBlockEntity.class))
                     .ifPresent(terminal -> {
                                 terminal.setMinMax(row_min_max);
                                 terminal.setEnabled(row_enabled);

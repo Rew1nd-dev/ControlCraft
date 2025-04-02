@@ -3,6 +3,7 @@ package com.verr1.controlcraft.utils;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
+import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
@@ -14,8 +15,7 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
-import org.valkyrienskies.mod.api.ValkyrienSkies;
-import org.valkyrienskies.mod.common.VSGameUtilsKt;
+import org.valkyrienskies.core.apigame.world.ServerShipWorldCore;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -45,11 +45,11 @@ public class VSGetterUtils {
 
 
     public static Quaterniondc getQuaternion(WorldBlockPos pos){
-        return getShip(pos).map(ship -> ship.getTransform().getRotation()).orElse(new Quaterniond());
+        return getShip(pos).map(ship -> ship.getTransform().getShipToWorldRotation()).orElse(new Quaterniond());
     }
 
-    public static Vector3dc getAbsolutePosition(WorldBlockPos pos){
-        Vector3d worldPos = ValkyrienSkies.set(new Vector3d(), pos.pos().getCenter());
+    public static Vector3d getAbsolutePosition(WorldBlockPos pos){
+        Vector3d worldPos = ValkyrienSkies.toJOML(pos.pos().getCenter());
         return getShip(pos)
                 .map(ship -> ship
                         .getShipToWorld()
@@ -57,7 +57,7 @@ public class VSGetterUtils {
                 ).orElse(worldPos);
     }
 
-    public static Vector3dc getAbsoluteFacePosition(WorldBlockPos pos, Direction face){
+    public static Vector3d getAbsoluteFacePosition(WorldBlockPos pos, Direction face){
         Vector3d dir = ValkyrienSkies.set(new Vector3d(), face.getNormal());
         Vector3d worldPos = ValkyrienSkies.set(new Vector3d(), pos.pos()).fma(0.5, dir);
         return getShip(pos)
@@ -70,6 +70,13 @@ public class VSGetterUtils {
     public static boolean isOnSameShip(WorldBlockPos pos1, WorldBlockPos pos2){
         return getShip(pos1).map(ship -> ship.getId() == getShip(pos2).map(Ship::getId).orElse(-1L)).orElse(false);
 
+    }
+
+    public static @Nullable ServerShipWorldCore getServerShipWorldCore(){
+        return Optional
+                .ofNullable(ValkyrienSkies.getShipWorld(ControlCraftServer.INSTANCE))
+                .filter(ServerShipWorldCore.class::isInstance)
+                .map(ServerShipWorldCore.class::cast).orElse(null);
     }
 
 }

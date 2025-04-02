@@ -2,8 +2,7 @@ package com.verr1.controlcraft.events;
 
 import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.blocks.transmitter.NetworkManager;
-import com.verr1.controlcraft.content.valkyrienskies.attachments.*;
-import com.verr1.controlcraft.foundation.ServerBlockEntityGetter;
+import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.managers.ConstraintCenter;
 import com.verr1.controlcraft.foundation.managers.SpatialLinkManager;
 import com.verr1.controlcraft.registry.ControlCraftAttachments;
@@ -12,8 +11,6 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.valkyrienskies.core.impl.hooks.VSEvents;
-import org.valkyrienskies.mod.api.ValkyrienSkies;
 
 @Mod.EventBusSubscriber
 public class ControlCraftEvents {
@@ -21,12 +18,12 @@ public class ControlCraftEvents {
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event) {
         // AttachmentRegistry.register();
-        ServerBlockEntityGetter.create(event.getServer());
+        BlockEntityGetter.create(event.getServer());
         ConstraintCenter.onServerStaring(event.getServer());
         ControlCraftServer.INSTANCE = event.getServer();
         ControlCraftAttachments.register();
 
-        VSEvents.ShipLoadEvent.Companion.on(ControlCraftAttachments::onShipLoad);
+        // VSEvents.ShipLoadEvent.Companion.on(ControlCraftAttachments::onShipLoad);
     }
 
     @SubscribeEvent

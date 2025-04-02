@@ -1,14 +1,13 @@
 package com.verr1.controlcraft.content.blocks.propeller;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
-import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
-import com.verr1.controlcraft.content.gui.PropellerScreen;
+import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.type.Side;
+import com.verr1.controlcraft.content.gui.legacy.PropellerScreen;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
@@ -18,7 +17,6 @@ import com.verr1.controlcraft.utils.MathUtils;
 import com.verr1.controlcraft.utils.SerializeUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -36,8 +34,17 @@ import static net.minecraft.ChatFormatting.GRAY;
 public class PropellerBlockEntity extends OnShipBlockEntity implements
         IHaveGoggleInformation, IPacketHandler
 {
+    public static NetworkKey THRUST = NetworkKey.create("thrust");
+    public static NetworkKey TORQUE = NetworkKey.create("torque");
+    public static NetworkKey SPEED = NetworkKey.create("speed");
+
     public double ThrustRatio = 1000;
     public double TorqueRatio = 1000;
+
+    public double getRotationalSpeed() {
+        return rotationalSpeed;
+    }
+
     public double rotationalSpeed = 5;
 
     public LerpedFloat angle;
@@ -89,7 +96,9 @@ public class PropellerBlockEntity extends OnShipBlockEntity implements
     @Override
     public void lazyTick() {
         if(level == null || level.isClientSide)return;
-        syncClient();
+        // sendData();
+        // syncClient();
+        syncForNear(SPEED);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -100,8 +109,9 @@ public class PropellerBlockEntity extends OnShipBlockEntity implements
 
     public PropellerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getThrustRatio, this::setThrustRatio, SerializeUtils.DOUBLE, "thrust"), Side.SERVER);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getTorqueRatio, this::setTorqueRatio, SerializeUtils.DOUBLE, "torque"), Side.SERVER);
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getThrustRatio, this::setThrustRatio, SerializeUtils.DOUBLE, THRUST), Side.SHARED);
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getTorqueRatio, this::setTorqueRatio, SerializeUtils.DOUBLE, TORQUE), Side.SHARED);
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getRotationalSpeed, this::setVisualRotationalSpeed, SerializeUtils.DOUBLE, SPEED), Side.SHARED);
         angle = LerpedFloat.angular();
         lazyTickRate = 3;
     }
@@ -162,8 +172,8 @@ public class PropellerBlockEntity extends OnShipBlockEntity implements
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
         if(packet.getType() == RegisteredPacketType.SETTING_0){
-            double torque_ratio = packet.getDoubles().get(0);
-            double thrust_ratio = packet.getDoubles().get(1);
+            double thrust_ratio = packet.getDoubles().get(0);
+            double torque_ratio = packet.getDoubles().get(1);
             setProperty(torque_ratio, thrust_ratio);
         }
     }

@@ -1,9 +1,10 @@
 package com.verr1.controlcraft.foundation.network.packets.specific;
 
+import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
-import com.verr1.controlcraft.foundation.type.ExposedFieldDirection;
-import com.verr1.controlcraft.foundation.type.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
+import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -49,6 +50,9 @@ public class ExposedFieldSettingsPacket extends SimplePacketBase {
             BlockEntity be = context.getSender().level().getExistingBlockEntity(pos);
             if(be instanceof ITerminalDevice device){
                 device.setExposedField(type, min, max, openTo);
+            }
+            if(be instanceof SmartBlockEntity){
+                be.setChanged();
             }
         });
         return true;

@@ -1,11 +1,12 @@
 package com.verr1.controlcraft.content.blocks.receiver;
 
 import com.simibubi.create.foundation.block.IBE;
+import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.ControlCraftServer;
+import com.verr1.controlcraft.content.gui.v1.factory.GenericUIFactory;
 import com.verr1.controlcraft.foundation.api.DeferralRunnable;
 import com.verr1.controlcraft.registry.ControlCraftBlockEntities;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -21,6 +22,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import static com.verr1.controlcraft.registry.ControlCraftShapes.HALF_BOX_BASE;
 
@@ -37,6 +40,11 @@ public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlock
     public void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
         super.createBlockStateDefinition(builder);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    protected void displayScreen(BlockPos pos){
+        ScreenOpener.open(GenericUIFactory.createPeripheralInterfaceScreen(pos));
     }
 
     @Override
@@ -65,11 +73,14 @@ public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlock
     @Override
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
                                  BlockHitResult hit){
-        if(worldIn.isClientSide)return InteractionResult.PASS;
-        if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
-            withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
+        if(     worldIn.isClientSide
+                && handIn == InteractionHand.MAIN_HAND
+                && player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()
+                && !player.isShiftKeyDown()
+        ) {
+            displayScreen(pos);
+            return InteractionResult.PASS;
         }
-
         return InteractionResult.PASS;
     }
 
@@ -108,7 +119,7 @@ public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlock
         }
 
         @Override
-        public void tickDown() {
+        public void tick() {
             deferralTick--;
         }
 

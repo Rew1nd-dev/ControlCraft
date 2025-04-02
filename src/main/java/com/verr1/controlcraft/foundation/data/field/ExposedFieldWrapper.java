@@ -3,8 +3,8 @@ package com.verr1.controlcraft.foundation.data.field;
 import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.foundation.data.NumericField;
-import com.verr1.controlcraft.foundation.type.ExposedFieldDirection;
-import com.verr1.controlcraft.foundation.type.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
+import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 

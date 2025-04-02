@@ -6,10 +6,7 @@ import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
 import com.verr1.controlcraft.foundation.network.packets.GenericClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.GenericServerPacket;
-import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldOpenScreenPacket;
-import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldSettingsPacket;
-import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldSyncClientPacket;
-import com.verr1.controlcraft.foundation.network.packets.specific.TerminalSettingsPacket;
+import com.verr1.controlcraft.foundation.network.packets.specific.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -30,11 +27,14 @@ public enum ControlCraftPackets {
     GENERIC_CLIENT(GenericClientPacket.class, GenericClientPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     EXPOSED_FIELD_OPEN_SCREEN(ExposedFieldOpenScreenPacket.class, ExposedFieldOpenScreenPacket::new, NetworkDirection.PLAY_TO_CLIENT),
     EXPOSED_FIELD_SYNC_CLIENT(ExposedFieldSyncClientPacket.class, ExposedFieldSyncClientPacket::new, NetworkDirection.PLAY_TO_CLIENT),
+    SYNC_BLOCKENTITY_CLIENT(SyncBlockEntityClientPacket.class, SyncBlockEntityClientPacket::new, NetworkDirection.PLAY_TO_CLIENT),
 
     GENERIC_SERVER(GenericServerPacket.class, GenericServerPacket::new, NetworkDirection.PLAY_TO_SERVER),
     BLOCK_BOUND_SERVER(BlockBoundServerPacket.class, BlockBoundServerPacket::new, NetworkDirection.PLAY_TO_SERVER),
     SETTING_EXPOSED_FIELD(ExposedFieldSettingsPacket.class, ExposedFieldSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
-    TERMINAL_SETTINGS(TerminalSettingsPacket.class, TerminalSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER)
+    TERMINAL_SETTINGS(TerminalSettingsPacket.class, TerminalSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    REQUEST_SYNC(LazyRequestBlockEntitySyncPacket.class, LazyRequestBlockEntitySyncPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    SYNC_BLOCKENTITY_SERVER(SyncBlockEntityServerPacket.class, SyncBlockEntityServerPacket::new, NetworkDirection.PLAY_TO_SERVER),
     ;
 
 

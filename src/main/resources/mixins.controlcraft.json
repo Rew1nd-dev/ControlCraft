@@ -2,12 +2,16 @@
   "required": true,
   "refmap": "mixins.controlcraft.refmap.json",
   "mixins": [
-    "MixinContraption"
+    "MixinContraption",
+    "MixinEntity",
+    "MixinVSGameUtilsKt"
   ],
   "package": "com.verr1.controlcraft.mixin",
   "injectors": {
     "defaultRequire": 1
   },
   "client": [
+    "MixinCamera",
+    "MixinGameRenderer"
   ]
 }

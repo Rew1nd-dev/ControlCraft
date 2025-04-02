@@ -36,6 +36,8 @@
   "vscontrolcraft.screen.labels.field.i" : "I",
   "vscontrolcraft.screen.labels.field.d" : "D",
   "vscontrolcraft.screen.labels.field.target" : "Target",
+  "vscontrolcraft.screen.labels.field.forced_target" : "Target",
+  "vscontrolcraft.screen.labels.field.compliance" : "Error",
   "vscontrolcraft.screen.labels.field.angle" : "Radian",
   "vscontrolcraft.screen.labels.field.degree" : "Degree",
   "vscontrolcraft.screen.labels.field.degree_1" : "Degree",
@@ -132,6 +134,10 @@
   "wand.mode.description.destroy_all.1": "right click to destroy all constrain on this ship",
   "wand.mode.callback.to_select_x.destroy_all": "right click to destroy all constrain on this ship",
 
-  "wand.gui.cycle" : "press [alt] + scroll to cycle"
+  "wand.gui.cycle" : "press [alt] + scroll to cycle",
+
+
+  "item.kinematic.tooltip": "Does Not Respect Physics, But At What Cost?",
+  "item.kinematic.tooltip.description": "Force Object At Desired Pose"
 
 }

@@ -1,6 +1,7 @@
 package com.verr1.controlcraft.foundation.data.executor;
 
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
+import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import com.verr1.controlcraft.utils.MinecraftUtils;
 import com.verr1.controlcraft.utils.VSMathUtils;
 import net.minecraft.core.BlockPos;
@@ -11,7 +12,6 @@ import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.ServerShip;
-import org.valkyrienskies.mod.api.ValkyrienSkies;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {

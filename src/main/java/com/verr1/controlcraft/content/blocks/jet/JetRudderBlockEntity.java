@@ -3,58 +3,89 @@ package com.verr1.controlcraft.content.blocks.jet;
 import com.simibubi.create.foundation.utility.Couple;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
-import com.verr1.controlcraft.foundation.ServerBlockEntityGetter;
+import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.type.Side;
+import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
+import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
 import com.verr1.controlcraft.utils.MathUtils;
+import com.verr1.controlcraft.utils.SerializeUtils;
 import com.verr1.controlcraft.utils.VSMathUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
-import org.joml.Vector2d;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.Ship;
-import org.valkyrienskies.mod.api.ValkyrienSkies;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
-
-import java.util.Optional;
 
 public class JetRudderBlockEntity extends OnShipBlockEntity implements
         IPacketHandler
 {
 
+    public static NetworkKey THRUST = NetworkKey.create("thrust");
+    public static NetworkKey HORIZONTAL = NetworkKey.create("horizontal");
+    public static NetworkKey VERTICAL = NetworkKey.create("vertical");
+
     public LerpedFloat animatedHorizontalAngle = LerpedFloat.angular();
+
+
+
+
     public float targetHorizontalAngle = 0;
     public LerpedFloat animatedVerticalAngle = LerpedFloat.angular();
     public float targetVerticalAngle = 0;
     public float targetThrust = 0;
 
 
+    public float getTargetThrust() {
+        return targetThrust;
+    }
+
+    public float getTargetVerticalAngle() {
+        return targetVerticalAngle;
+    }
+
+    public float getTargetHorizontalAngle() {
+        return targetHorizontalAngle;
+    }
+
+    public void setTargetHorizontalAngle(float targetHorizontalAngle) {
+        this.targetHorizontalAngle = (float) VSMathUtils.clamp(targetHorizontalAngle, Math.toRadians(90));
+    }
+
+    public void setTargetVerticalAngle(float targetVerticalAngle) {
+        this.targetVerticalAngle = (float) VSMathUtils.clamp(targetVerticalAngle, Math.toRadians(90));
+    }
+
+    public void setTargetThrust(float targetThrust) {
+        this.targetThrust = targetThrust;
+    }
+
     public Direction getFiexdDirection() {
         return getDirection().getOpposite();
     }
 
     public Direction getVertical(){
-        if(!(level instanceof ServerLevel lvl))return Direction.UP;
-        return ServerBlockEntityGetter.INSTANCE.getBlockEntityAt(lvl, getBlockPos().relative(getDirection().getOpposite()), JetBlockEntity.class)
+        // if(!(level instanceof ServerLevel lvl))return Direction.UP;
+        return BlockEntityGetter.getLevelBlockEntityAt(level, getBlockPos().relative(getDirection().getOpposite()), JetBlockEntity.class)
                 .map(JetBlockEntity::getVertical).orElse(Direction.UP);
     }
 
     // jet rudder's direction is the opposite of jet
     public Direction getHorizontal(){
-        if(!(level instanceof ServerLevel lvl))return Direction.NORTH;
-        return ServerBlockEntityGetter.INSTANCE.getBlockEntityAt(lvl, getBlockPos().relative(getDirection().getOpposite()), JetBlockEntity.class)
+        // if(!(level instanceof ServerLevel lvl))return Direction.NORTH;
+        return BlockEntityGetter.getLevelBlockEntityAt(level, getBlockPos().relative(getDirection().getOpposite()), JetBlockEntity.class)
                 .map(JetBlockEntity::getHorizontal).orElse(Direction.NORTH);
     }
 
@@ -68,18 +99,22 @@ public class JetRudderBlockEntity extends OnShipBlockEntity implements
 
     public JetRudderBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getTargetThrust, this::setTargetThrust, SerializeUtils.FLOAT, THRUST), Side.RUNTIME_SHARED);
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getTargetHorizontalAngle, this::setTargetHorizontalAngle, SerializeUtils.FLOAT, HORIZONTAL), Side.RUNTIME_SHARED);
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getTargetVerticalAngle, this::setTargetVerticalAngle, SerializeUtils.FLOAT, VERTICAL), Side.RUNTIME_SHARED);
+
     }
 
     public void setAnimatedAngles(double horizontal, double vertical, double thrust){
-        targetHorizontalAngle = (float) VSMathUtils.clamp(horizontal, Math.toRadians(45));
-        targetVerticalAngle = (float) VSMathUtils.clamp(vertical, Math.toRadians(45));
+        targetHorizontalAngle = (float) VSMathUtils.clamp(horizontal, Math.toRadians(90));
+        targetVerticalAngle = (float) VSMathUtils.clamp(vertical, Math.toRadians(90));
         targetThrust = (float)thrust;
     }
 
 
     public Couple<Double> getRenderAngles(){
 
-        int sign_fix = getDirection() == Direction.SOUTH || getDirection() == Direction.EAST || getDirection() == Direction.UP ? 1 : -1;
+        int sign_fix = getDirection() == Direction.SOUTH || getDirection() == Direction.EAST || getDirection() == Direction.UP ? -1 : 1;
         float h = animatedHorizontalAngle.getValue(1) * sign_fix;
         float v = animatedVerticalAngle.getValue(1);
 
@@ -103,7 +138,8 @@ public class JetRudderBlockEntity extends OnShipBlockEntity implements
     @Override
     public void tickServer() {
         super.tickServer();
-        syncClient();
+        syncForNear(THRUST, HORIZONTAL, VERTICAL);
+        // syncClient();
     }
 
 
@@ -206,12 +242,12 @@ public class JetRudderBlockEntity extends OnShipBlockEntity implements
     @Override
     @OnlyIn(Dist.CLIENT)
     public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == RegisteredPacketType.SYNC_0){
+        /*if(packet.getType() == RegisteredPacketType.SYNC_0){
             double h = packet.getDoubles().get(0);
             double v = packet.getDoubles().get(1);
             double t = packet.getDoubles().get(2);
             setAnimatedAngles(h, v, t);
-        }
+        }*/
     }
 
 }

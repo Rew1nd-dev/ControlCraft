@@ -1,17 +1,15 @@
 package com.verr1.controlcraft.content.valkyrienskies.attachments;
 
 import com.verr1.controlcraft.content.blocks.jet.JetBlockEntity;
-import com.verr1.controlcraft.content.blocks.motor.AbstractMotorBlockEntity;
 import com.verr1.controlcraft.content.valkyrienskies.controls.InducerControls;
-import com.verr1.controlcraft.foundation.ServerBlockEntityGetter;
-import com.verr1.controlcraft.foundation.data.logical.LogicalMotor;
+import com.verr1.controlcraft.foundation.BlockEntityGetter;
+import com.verr1.controlcraft.foundation.vsapi.PhysShipWrapper;
 import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.NotNull;
-import org.valkyrienskies.core.api.attachment.AttachmentHolder;
 import org.valkyrienskies.core.api.ships.PhysShip;
+import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.ShipForcesInducer;
-
-import java.util.Optional;
+import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
 
 public final class JetForceInducer extends AbstractExpirableForceInducer implements ShipForcesInducer {
     @Override
@@ -26,12 +24,12 @@ public final class JetForceInducer extends AbstractExpirableForceInducer impleme
     }
 
 
-    public static JetForceInducer getOrCreate(AttachmentHolder ship){
+    public static JetForceInducer getOrCreate(ServerShip ship){
         //return ship.getOrPutAttachment(AnchorForceInducer.class, AnchorForceInducer::new);
         var obj = ship.getAttachment(JetForceInducer.class);
         if(obj == null){
             obj = new JetForceInducer();
-            ship.setAttachment(obj);
+            ship.saveAttachment(JetForceInducer.class, obj);
         }
         return obj;
 
@@ -40,22 +38,22 @@ public final class JetForceInducer extends AbstractExpirableForceInducer impleme
 
     @Override
     public void applyControls(@NotNull PhysShip physShip) {
-
+        getLives()
+                .forEach(
+                        (pos, live) ->
+                                BlockEntityGetter
+                                        .INSTANCE
+                                        .getBlockEntityAt(pos.globalPos(), JetBlockEntity.class)
+                                        .map(JetBlockEntity::getLogicalJet)
+                                        .ifPresent(
+                                                logicalJet -> InducerControls.jetTickControls(logicalJet, new PhysShipWrapper((PhysShipImpl) physShip))
+                                        )
+                );
     }
 
     @Override
     public void applyControlsWithOther(@NotNull PhysShip physShip, @NotNull Function1<? super Long, ? extends PhysShip> lookupPhysShip) {
-        getLives()
-            .forEach(
-                (pos, live) ->
-                    ServerBlockEntityGetter
-                        .INSTANCE
-                        .getBlockEntityAt(pos.globalPos(), JetBlockEntity.class)
-                        .map(JetBlockEntity::getLogicalJet)
-                        .ifPresent(
-                                logicalJet -> InducerControls.jetTickControls(logicalJet, physShip)
-                        )
-            );
+
     }
 
 }

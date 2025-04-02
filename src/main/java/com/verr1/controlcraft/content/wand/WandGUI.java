@@ -2,11 +2,13 @@ package com.verr1.controlcraft.content.wand;
 
 import com.simibubi.create.AllKeys;
 import com.verr1.controlcraft.content.blocks.joints.AbstractJointBlockEntity;
-import com.verr1.controlcraft.content.blocks.motor.JointMotorBlockEntity;
-import com.verr1.controlcraft.content.blocks.motor.RevoluteMotorBlockEntity;
-import com.verr1.controlcraft.content.blocks.slider.SliderBlockEntity;
+import com.verr1.controlcraft.content.blocks.motor.DynamicRevoluteMotorBlockEntity;
+import com.verr1.controlcraft.content.blocks.motor.DynamicJointMotorBlockEntity;
+import com.verr1.controlcraft.content.blocks.motor.KinematicJointMotorBlockEntity;
+import com.verr1.controlcraft.content.blocks.motor.KinematicRevoluteMotorBlockEntity;
+import com.verr1.controlcraft.content.blocks.slider.DynamicSliderBlockEntity;
 import com.verr1.controlcraft.foundation.data.WandSelection;
-import com.verr1.controlcraft.foundation.type.WandGUIModesType;
+import com.verr1.controlcraft.foundation.type.descriptive.WandGUIModesType;
 import com.verr1.controlcraft.foundation.type.WandModesType;
 import com.verr1.controlcraft.registry.ControlCraftItems;
 import com.verr1.controlcraft.utils.MinecraftUtils;
@@ -73,17 +75,18 @@ public class WandGUI implements IGuiOverlay {
     }
 
     public void setModeByLooking(){
+        if(WandModesType.modeOf(currentType).isRunning())return;
         Optional
             .ofNullable(MinecraftUtils.lookingAt())
             .ifPresent(
                 blockEntity -> {
-                    if(blockEntity instanceof RevoluteMotorBlockEntity){
+                    if(blockEntity instanceof DynamicRevoluteMotorBlockEntity || blockEntity instanceof KinematicRevoluteMotorBlockEntity){
                         currentType = WandModesType.SERVO;
                     }
-                    if(blockEntity instanceof JointMotorBlockEntity){
+                    if(blockEntity instanceof DynamicJointMotorBlockEntity || blockEntity instanceof KinematicJointMotorBlockEntity){
                         currentType = WandModesType.JOINT;
                     }
-                    if(blockEntity instanceof SliderBlockEntity){
+                    if(blockEntity instanceof DynamicSliderBlockEntity){
                         currentType = WandModesType.SLIDER;
                     }
                     if(blockEntity instanceof AbstractJointBlockEntity){

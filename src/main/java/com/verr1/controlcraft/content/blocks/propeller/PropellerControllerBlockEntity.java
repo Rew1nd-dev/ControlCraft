@@ -1,11 +1,11 @@
 package com.verr1.controlcraft.content.blocks.propeller;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
-import com.simibubi.create.foundation.utility.Components;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
+import com.verr1.controlcraft.content.blocks.SharedKeys;
+import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.PropellerControllerPeripheral;
-import com.verr1.controlcraft.content.gui.PropellerControllerScreen;
-import com.verr1.controlcraft.content.valkyrienskies.attachments.AnchorForceInducer;
+import com.verr1.controlcraft.content.gui.legacy.PropellerControllerScreen;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.PropellerForceInducer;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
@@ -16,17 +16,16 @@ import com.verr1.controlcraft.foundation.data.logical.LogicalPropeller;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
 import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldSyncClientPacket;
-import com.verr1.controlcraft.foundation.type.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
+import com.verr1.controlcraft.utils.SerializeUtils;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -39,8 +38,6 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.valkyrienskies.core.api.ships.ServerShip;
-import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +49,6 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
 
     public SynchronizedField<Double> rotationalSpeed = new SynchronizedField<>(0.0);
 
-    public boolean attachPropellerReverseTorque = false;
     public double attachedPropellerThrustRatio = 0;
     public double attachedPropellerTorqueRatio = 0;
 
@@ -114,6 +110,22 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
 
     public PropellerControllerBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
+
+        registerFieldReadWriter(SerializeUtils.ReadWriter.of(
+                        rotationalSpeed::read,
+                        rotationalSpeed::write,
+                        SerializeUtils.DOUBLE,
+                        SharedKeys.VALUE
+                ),
+                Side.SHARED
+        );
+
+        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
+                        tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),
+                        tag -> tag.put("fields", ITerminalDevice.super.serialize()),
+                        FIELD),
+                Side.SHARED
+        );
     }
 
     public void syncAttachedPropeller(){

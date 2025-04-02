@@ -5,13 +5,13 @@ import com.verr1.controlcraft.foundation.api.IAdjustableJoint;
 import com.verr1.controlcraft.foundation.api.IBruteConnectable;
 import com.verr1.controlcraft.foundation.api.IConstraintHolder;
 import com.verr1.controlcraft.foundation.type.JointLevel;
+import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import com.verr1.controlcraft.utils.MinecraftUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3d;
-import org.valkyrienskies.mod.api.ValkyrienSkies;
 
 public abstract class AbstractJointBlockEntity extends ShipConnectorBlockEntity implements
         IConstraintHolder, IAdjustableJoint, IBruteConnectable

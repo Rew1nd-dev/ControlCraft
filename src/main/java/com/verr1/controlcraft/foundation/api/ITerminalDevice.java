@@ -2,12 +2,14 @@ package com.verr1.controlcraft.foundation.api;
 
 import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Couple;
+import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
-import com.verr1.controlcraft.foundation.type.ExposedFieldDirection;
-import com.verr1.controlcraft.foundation.type.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
+import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import com.verr1.controlcraft.utils.MinecraftUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -17,6 +19,7 @@ import java.util.List;
 import static java.lang.Math.min;
 
 public interface ITerminalDevice{
+    public static NetworkKey FIELD = NetworkKey.create("field");
 
     List<ExposedFieldWrapper> fields();
 
@@ -44,6 +47,30 @@ public interface ITerminalDevice{
         fields().forEach(ExposedFieldWrapper::reset);
     }
 
+    default CompoundTag serialize(){
+        CompoundTag tag = new CompoundTag();
+        tag.putString("name", name());
+        tag.putInt("fields", fields().size());
+        for (int i = 0; i < fields().size(); i++) {
+            tag.put("field" + i, fields().get(i).serialize());
+        }
+        return tag;
+    }
+
+    default void deserialize(CompoundTag tag){
+        if(!tag.getString("name").equals(name()))return;
+        deserializeUnchecked(tag);
+    }
+
+    default void deserializeUnchecked(CompoundTag tag){
+        // if(!tag.getString("name").equals(name()))return;
+        int size = tag.getInt("fields");
+        for (int i = 0; i < min(size, fields().size()); i++) {
+            fields().get(i).deserialize(tag.getCompound("field" + i));
+        }
+    }
+
+
     @OnlyIn(Dist.CLIENT)
     default boolean TerminalDeviceToolTip(List<Component> tooltip, boolean isPlayerSneaking) {
         Direction dir = MinecraftUtils.lookingAtFaceDirection();
@@ -51,7 +78,7 @@ public interface ITerminalDevice{
         tooltip.add(Components.literal("    Face " + dir + " Bounded:"));
         fields().forEach(f -> {
             if(!f.directionOptional.test(dir))return;
-            String info = f.type.getComponent().getString();
+            String info = f.type.asComponent().getString();
             tooltip.add(Component.literal(info).withStyle(ChatFormatting.AQUA));
         });
 

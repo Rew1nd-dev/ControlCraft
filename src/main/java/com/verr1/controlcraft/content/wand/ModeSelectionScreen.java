@@ -6,8 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllKeys;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.utility.Components;
-import com.verr1.controlcraft.foundation.type.WandGUIModesType;
-import com.verr1.controlcraft.foundation.type.WandModesType;
+import com.verr1.controlcraft.foundation.type.descriptive.WandGUIModesType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -42,8 +41,8 @@ public class ModeSelectionScreen extends Screen {
         initialized = false;
 
         callback.accept(modes.get(selection));
-
-        w = Math.max(modes.size() * 50 + 30, 220);
+        // mode.size() * 50 originally
+        w = Math.max(6 * 50 + 30, 220);
         h = 30;
     }
 
@@ -79,7 +78,7 @@ public class ModeSelectionScreen extends Screen {
 
         float toolTipAlpha = yOffset / 10;
         List<Component> toolTip = modes.get(selection)
-                .getDescription();
+                .specific();
         int stringAlphaComponent = ((int) (toolTipAlpha * 0xFF)) << 24;
 
         if (toolTipAlpha > 0.25f) {
@@ -121,7 +120,7 @@ public class ModeSelectionScreen extends Screen {
                 matrixStack.translate(0, -10, 0);
                 RenderSystem.setShaderColor(1, 1, 1, 1);
                 graphics.drawCenteredString(minecraft.font, modes.get(i)
-                                .getID()
+                                .asComponent()
                         , x + i * 50 + 24, y + 28, 0xCCDDFF);
                 alpha = 1;
             }

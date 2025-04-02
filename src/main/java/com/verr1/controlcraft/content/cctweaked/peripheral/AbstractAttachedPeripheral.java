@@ -14,6 +14,11 @@ import java.util.Set;
 @ParametersAreNonnullByDefault
 public abstract class AbstractAttachedPeripheral<T extends BlockEntity> implements IPeripheral {
     private final T target;
+
+    public Set<IComputerAccess> getComputers() {
+        return computers;
+    }
+
     private final Set<IComputerAccess> computers = Sets.newConcurrentHashSet();
 
     @Override

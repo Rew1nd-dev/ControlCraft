@@ -2,10 +2,10 @@ package com.verr1.controlcraft.foundation.network.packets.specific;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
-import com.verr1.controlcraft.content.gui.ExposedFieldSettingScreen;
+import com.verr1.controlcraft.content.gui.legacy.ExposedFieldSettingScreen;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldMessage;
-import com.verr1.controlcraft.foundation.type.ExposedFieldDirection;
-import com.verr1.controlcraft.foundation.type.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
+import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;

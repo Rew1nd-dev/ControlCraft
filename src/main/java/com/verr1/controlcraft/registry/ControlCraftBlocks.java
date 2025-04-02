@@ -4,23 +4,30 @@ import com.simibubi.create.foundation.data.BlockStateGen;
 import com.simibubi.create.foundation.data.SharedProperties;
 import com.simibubi.create.foundation.data.TagGen;
 import com.tterrag.registrate.util.entry.BlockEntry;
-import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.anchor.AnchorBlock;
+import com.verr1.controlcraft.content.blocks.camera.CameraBlock;
+import com.verr1.controlcraft.content.blocks.flap.FlapBearingBlock;
 import com.verr1.controlcraft.content.blocks.jet.JetBlock;
 import com.verr1.controlcraft.content.blocks.jet.JetRudderBlock;
 import com.verr1.controlcraft.content.blocks.joints.FreeJointBlock;
 import com.verr1.controlcraft.content.blocks.joints.PivotJointBlock;
 import com.verr1.controlcraft.content.blocks.joints.RevoluteJointBlock;
-import com.verr1.controlcraft.content.blocks.motor.JointMotorBlock;
-import com.verr1.controlcraft.content.blocks.motor.RevoluteMotorBlock;
+import com.verr1.controlcraft.content.blocks.motor.KinematicJointMotorBlock;
+import com.verr1.controlcraft.content.blocks.motor.KinematicRevoluteMotorBlock;
+import com.verr1.controlcraft.content.blocks.motor.DynamicJointMotorBlock;
+import com.verr1.controlcraft.content.blocks.motor.DynamicRevoluteMotorBlock;
 import com.verr1.controlcraft.content.blocks.propeller.PropellerBlock;
 import com.verr1.controlcraft.content.blocks.propeller.PropellerControllerBlock;
 import com.verr1.controlcraft.content.blocks.receiver.ReceiverBlock;
-import com.verr1.controlcraft.content.blocks.slider.SliderBlock;
+import com.verr1.controlcraft.content.blocks.slider.DynamicSliderBlock;
+import com.verr1.controlcraft.content.blocks.slider.KinematicSliderBlock;
 import com.verr1.controlcraft.content.blocks.spatial.SpatialAnchorBlock;
 import com.verr1.controlcraft.content.blocks.spatial.SpatialMovementBehavior;
+import com.verr1.controlcraft.content.blocks.spinalyzer.SpinalyzerBlock;
 import com.verr1.controlcraft.content.blocks.terminal.TerminalBlock;
 import com.verr1.controlcraft.content.blocks.transmitter.TransmitterBlock;
+import com.verr1.controlcraft.content.items.KinematicDeviceBlockItem;
+import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.material.MapColor;
 
@@ -36,6 +43,8 @@ public class ControlCraftBlocks {
     public static final BlockEntry<AnchorBlock> ANCHOR_BLOCK = REGISTRATE
             .block(AnchorBlock.ID, AnchorBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
             )
@@ -46,9 +55,11 @@ public class ControlCraftBlocks {
             .lang("Gravitational Anchor")
             .register();
 
-    public static final BlockEntry<RevoluteMotorBlock> SERVO_MOTOR_BLOCK = REGISTRATE
-            .block(RevoluteMotorBlock.ID, RevoluteMotorBlock::new)
+    public static final BlockEntry<DynamicRevoluteMotorBlock> SERVO_MOTOR_BLOCK = REGISTRATE
+            .block(DynamicRevoluteMotorBlock.ID, DynamicRevoluteMotorBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
@@ -56,12 +67,14 @@ public class ControlCraftBlocks {
             .item()
             .properties(p -> p.rarity(Rarity.RARE))
             .transform(customItemModel())
-            .lang("Servo Motor")
+            .lang("Dynamic Servo Motor")
             .register();
 
-    public static final BlockEntry<JointMotorBlock> JOINT_MOTOR_BLOCK = REGISTRATE
-            .block(JointMotorBlock.ID, JointMotorBlock::new)
+    public static final BlockEntry<DynamicJointMotorBlock> JOINT_MOTOR_BLOCK = REGISTRATE
+            .block(DynamicJointMotorBlock.ID, DynamicJointMotorBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
                     BlockStateGen.directionalAxisBlockProvider()
@@ -69,25 +82,29 @@ public class ControlCraftBlocks {
             .item()
             .properties(p -> p.rarity(Rarity.RARE))
             .transform(customItemModel())
-            .lang("Joint Motor")
+            .lang("Dynamic Joint Motor")
             .register();
 
-    public static final BlockEntry<SliderBlock> SLIDER_CONTROLLER_BLOCK = REGISTRATE
-            .block(SliderBlock.ID, SliderBlock::new)
+    public static final BlockEntry<DynamicSliderBlock> SLIDER_CONTROLLER_BLOCK = REGISTRATE
+            .block(DynamicSliderBlock.ID, DynamicSliderBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
             )
             .item()
-            .properties(p -> p.rarity(Rarity.EPIC))
+            .properties(p -> p.rarity(Rarity.RARE))
             .transform(customItemModel())
-            .lang("Physical Piston")
+            .lang("Dynamic Physical Piston")
             .register();
 
     public static final BlockEntry<RevoluteJointBlock> REVOLUTE_JOINT_BLOCK = REGISTRATE
             .block(RevoluteJointBlock.ID, RevoluteJointBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
                     RevoluteJointBlock.RevoluteJointDataGenerator.generate()
@@ -100,6 +117,8 @@ public class ControlCraftBlocks {
     public static final BlockEntry<FreeJointBlock> SPHERE_HINGE_BLOCK = REGISTRATE
             .block(FreeJointBlock.ID, FreeJointBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
                     FreeJointBlock.DirectionalAdjustableHingeDataGenerator.generate()
@@ -112,6 +131,8 @@ public class ControlCraftBlocks {
     public static final BlockEntry<PivotJointBlock> PIVOT_JOINT_BLOCK = REGISTRATE
             .block(PivotJointBlock.ID, PivotJointBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
                     FreeJointBlock.DirectionalAdjustableHingeDataGenerator.generate()
@@ -124,6 +145,8 @@ public class ControlCraftBlocks {
     public static final BlockEntry<TerminalBlock> TERMINAL_BLOCK = REGISTRATE
             .block(TerminalBlock.ID, TerminalBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
             )
@@ -136,6 +159,8 @@ public class ControlCraftBlocks {
     public static final BlockEntry<TransmitterBlock> TRANSMITTER_BLOCK = REGISTRATE
             .block(TransmitterBlock.ID, TransmitterBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
@@ -149,6 +174,8 @@ public class ControlCraftBlocks {
     public static final BlockEntry<ReceiverBlock> RECEIVER_BLOCK = REGISTRATE
             .block(ReceiverBlock.ID, ReceiverBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
@@ -161,6 +188,8 @@ public class ControlCraftBlocks {
     public static final BlockEntry<SpatialAnchorBlock> SPATIAL_ANCHOR_BLOCK = REGISTRATE
             .block(SpatialAnchorBlock.ID, SpatialAnchorBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .blockstate(
                     SpatialAnchorBlock.SpatialAnchorDataGenerator.generate()
             )
@@ -175,6 +204,8 @@ public class ControlCraftBlocks {
     public static final BlockEntry<JetBlock> JET_BLOCK = REGISTRATE
             .block(JetBlock.ID, JetBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
             )
@@ -187,6 +218,8 @@ public class ControlCraftBlocks {
     public static final BlockEntry<JetRudderBlock> JET_RUDDER_BLOCK = REGISTRATE
             .block(JetRudderBlock.ID, JetRudderBlock::new)
             .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
             )
@@ -200,6 +233,8 @@ public class ControlCraftBlocks {
             .block(PropellerControllerBlock.ID, PropellerControllerBlock::new)
             .initialProperties(SharedProperties::stone)
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .transform(TagGen.axeOrPickaxe())
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
@@ -212,12 +247,110 @@ public class ControlCraftBlocks {
             .block(PropellerBlock.ID, PropellerBlock::new)
             .initialProperties(SharedProperties::stone)
             .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
             )
             .item()
             .transform(customItemModel())
             .register();
+
+    public static final BlockEntry<SpinalyzerBlock> SPINALYZER_BLOCK = REGISTRATE
+            .block(SpinalyzerBlock.ID, SpinalyzerBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<FlapBearingBlock> WING_CONTROLLER_BLOCK = REGISTRATE
+            .block(FlapBearingBlock.ID, FlapBearingBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .item()
+            .transform(customItemModel())
+            .lang("Flap Bearing")
+            .register();
+
+    public static final BlockEntry<KinematicRevoluteMotorBlock> CONSTRAINT_SERVO_MOTOR_BLOCK = REGISTRATE
+            .block(KinematicRevoluteMotorBlock.ID, KinematicRevoluteMotorBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .item(KinematicDeviceBlockItem::new)
+            .properties(p -> p.rarity(Rarity.create("legendary", style -> style
+                    .applyFormat(ChatFormatting.RED)
+                    .withBold(true))))
+            .transform(customItemModel())
+            .lang("Kinematic Servo Motor")
+            .register();
+
+    public static final BlockEntry<KinematicJointMotorBlock> CONSTRAINT_JOINT_MOTOR_BLOCK = REGISTRATE
+            .block(KinematicJointMotorBlock.ID, KinematicJointMotorBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
+            .blockstate(
+                    BlockStateGen.directionalAxisBlockProvider()
+            )
+            .item(KinematicDeviceBlockItem::new)
+            .properties(p -> p.rarity(Rarity.create(
+                    "legendary",
+                    style -> style
+                            .applyFormat(ChatFormatting.RED)
+                            .withBold(true)
+            )))
+            .transform(customItemModel())
+            .lang("Kinematic Joint Motor")
+            .register();
+
+    public static final BlockEntry<KinematicSliderBlock> CONSTRAINT_SLIDER_BLOCK = REGISTRATE
+            .block(KinematicSliderBlock.ID, KinematicSliderBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .item(KinematicDeviceBlockItem::new)
+            .properties(p -> p.rarity(Rarity.create("legendary", style -> style
+                    .applyFormat(ChatFormatting.RED)
+                    .withBold(true))))
+            .transform(customItemModel())
+            .lang("Kinematic Physical Piston")
+            .register();
+
+    public static final BlockEntry<CameraBlock> CAMERA_BLOCK = REGISTRATE
+            .block(CameraBlock.ID, CameraBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(64))
+            .transform(TagGen.pickaxeOnly())
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .item()
+            .properties(p -> p.rarity(Rarity.RARE))
+            .transform(customItemModel())
+            .register();
+
 
     public static void register(){
     }

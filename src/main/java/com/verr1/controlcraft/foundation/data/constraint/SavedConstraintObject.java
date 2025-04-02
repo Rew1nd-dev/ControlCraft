@@ -3,13 +3,13 @@ package com.verr1.controlcraft.foundation.data.constraint;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.valkyrienskies.core.apigame.joints.VSJoint;
+import org.valkyrienskies.core.apigame.constraints.VSConstraint;
 
 import java.util.Optional;
 
 public record SavedConstraintObject(@NotNull ConstraintKey key, @Nullable ConstraintSerializable constrain) {
 
-    public @Nullable VSJoint getConstraint(){
+    public @Nullable VSConstraint getConstraint(){
         return Optional.ofNullable(constrain()).map(ConstraintSerializable::constraint).orElse(null);
     }
 

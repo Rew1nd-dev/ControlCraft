@@ -3,7 +3,6 @@ package com.verr1.controlcraft.content.valkyrienskies.attachments;
 import com.google.common.collect.Queues;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3dc;
-import org.valkyrienskies.core.api.attachment.AttachmentHolder;
 import org.valkyrienskies.core.api.ships.PhysShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.ShipForcesInducer;
@@ -20,11 +19,11 @@ public final class QueueForceInducer implements ShipForcesInducer {
     private final Queue<ForcePos> rotPosForces = Queues.newConcurrentLinkedQueue();
 
 
-    public static QueueForceInducer getOrCreate(@NotNull AttachmentHolder ship){
+    public static QueueForceInducer getOrCreate(@NotNull ServerShip ship){
         QueueForceInducer obj = ship.getAttachment(QueueForceInducer.class);
         if(obj == null){
             obj = new QueueForceInducer();
-            ship.setAttachment(obj);
+            ship.saveAttachment(QueueForceInducer.class, obj);
         }
         return obj;
     }

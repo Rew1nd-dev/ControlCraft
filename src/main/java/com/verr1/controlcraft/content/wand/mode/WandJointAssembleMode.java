@@ -1,6 +1,5 @@
 package com.verr1.controlcraft.content.wand.mode;
 
-import com.verr1.controlcraft.content.blocks.motor.JointMotorBlockEntity;
 import com.verr1.controlcraft.content.wand.mode.base.WandAbstractTripleSelectionMode;
 import com.verr1.controlcraft.foundation.api.IBruteConnectable;
 import com.verr1.controlcraft.foundation.api.IWandMode;
@@ -43,7 +42,7 @@ public class WandJointAssembleMode extends WandAbstractTripleSelectionMode {
     public void onSelection(WandSelection selection) {
         if(state == State.TO_SELECT_X){
             BlockEntity be = Minecraft.getInstance().player.level().getExistingBlockEntity(selection.pos());
-            if(!(be instanceof JointMotorBlockEntity))return;
+            if(!(be instanceof IBruteConnectable))return;
         }
         if(state == State.TO_SELECT_Y){
             if(selection.pos().equals(x.pos()))return;
@@ -93,10 +92,10 @@ public class WandJointAssembleMode extends WandAbstractTripleSelectionMode {
         if (player == null) return;
         if(x == WandSelection.NULL)return;
         BlockEntity be = Minecraft.getInstance().player.level().getExistingBlockEntity(x.pos());
-        if(!(be instanceof JointMotorBlockEntity joint))return;
+        if(!(be instanceof IBruteConnectable joint))return;
 
         Direction align = joint.getAlign();
-        Direction forward = joint.getForward();
+        Direction forward = joint.getForward().getOpposite(); // for joint motor, it should be reversed
 
 
 

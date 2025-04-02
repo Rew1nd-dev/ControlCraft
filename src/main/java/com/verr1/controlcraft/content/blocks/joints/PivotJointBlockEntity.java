@@ -1,6 +1,7 @@
 package com.verr1.controlcraft.content.blocks.joints;
 
-import com.verr1.controlcraft.foundation.ServerBlockEntityGetter;
+import com.verr1.controlcraft.ControlCraft;
+import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.utils.MinecraftUtils;
 import com.verr1.controlcraft.utils.VSGetterUtils;
 import com.verr1.controlcraft.utils.VSMathUtils;
@@ -14,15 +15,15 @@ import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.Ship;
-import org.valkyrienskies.core.apigame.joints.VSJoint;
-import org.valkyrienskies.core.apigame.joints.VSJointMaxForceTorque;
-import org.valkyrienskies.core.apigame.joints.VSJointPose;
-import org.valkyrienskies.core.apigame.joints.VSRevoluteJoint;
+import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint;
+import org.valkyrienskies.core.apigame.constraints.VSConstraint;
+import org.valkyrienskies.core.apigame.constraints.VSHingeOrientationConstraint;
 
 public class PivotJointBlockEntity extends AbstractJointBlockEntity{
     public PivotJointBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         registerConstraintKey("revolute");
+        registerConstraintKey("attach");
     }
 
     @Override
@@ -40,7 +41,7 @@ public class PivotJointBlockEntity extends AbstractJointBlockEntity{
         Ship selfShip = getShipOn();
         Ship otherShip = VSGetterUtils.getShipOn(level, pos).orElse(null);
         if(otherShip == null || selfShip == null)return;
-        PivotJointBlockEntity otherHinge = ServerBlockEntityGetter.INSTANCE.getBlockEntityAt((ServerLevel) level, pos, PivotJointBlockEntity.class).orElse(null);
+        PivotJointBlockEntity otherHinge = BlockEntityGetter.INSTANCE.getLevelBlockEntityAt((ServerLevel) level, pos, PivotJointBlockEntity.class).orElse(null);
         if(otherHinge == null)return;
 
         Vector3dc selfContact = getJointConnectorPosJOML();
@@ -55,8 +56,8 @@ public class PivotJointBlockEntity extends AbstractJointBlockEntity{
                 Quaterniond(VSMathUtils.getQuaternionOfPlacement(otherHinge.getJointDirection().getOpposite()))
                 .mul(new Quaterniond(new AxisAngle4d(Math.toRadians(90.0), 0.0, 0.0, 1.0)), new Quaterniond())
                 .normalize();
-
-        VSRevoluteJoint joint = new VSRevoluteJoint(
+        /*
+    VSRevoluteJoint joint = new VSRevoluteJoint(
                 selfShip.getId(),
                 new VSJointPose(selfContact, selfRotation),
                 otherShip.getId(),
@@ -64,13 +65,39 @@ public class PivotJointBlockEntity extends AbstractJointBlockEntity{
                 new VSJointMaxForceTorque(1e20f, 1e20f),
                 null, null, null, null, null
         );
+    * */
 
-        recreateConstraints(joint);
+
+        VSHingeOrientationConstraint orientation = new VSHingeOrientationConstraint(
+                selfShip.getId(),
+                otherShip.getId(),
+                1.0E-20,
+                selfRotation,
+                otherRotation,
+                1.0E20
+        );
+
+        VSAttachmentConstraint attachment = new VSAttachmentConstraint(
+                selfShip.getId(),
+                otherShip.getId(),
+                1.0E-20,
+                selfContact,
+                otherContact,
+                1.0E20,
+                0.0
+        );
+
+        recreateConstraints(orientation, attachment);
     }
 
-    public void recreateConstraints(VSJoint joint){
+    public void recreateConstraints(VSConstraint... joint){
         if(level == null || level.isClientSide)return;
-        overrideConstraint("revolute", joint);
+        if(joint.length < 2){
+            ControlCraft.LOGGER.error("invalid constraint data for pivot joint");
+            return;
+        }
+        overrideConstraint("revolute", joint[0]);
+        overrideConstraint("attach", joint[1]);
     }
 
     @Override

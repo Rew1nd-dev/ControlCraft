@@ -1,6 +1,6 @@
 package com.verr1.controlcraft.foundation.data.constraint;
 
-import org.valkyrienskies.core.apigame.joints.VSJoint;
+import org.valkyrienskies.core.apigame.constraints.VSConstraint;
 
-public record ConstraintWithID(VSJoint constrain, int ID) {
+public record ConstraintWithID(VSConstraint constrain, int ID) {
 }

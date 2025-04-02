@@ -5,18 +5,20 @@ import com.verr1.controlcraft.ControlCraft;
 
 public class ControlCraftPartialModels {
     public static final PartialModel
-            NORMAL_PROPELLER = block("simple_propeller"),
-            NORMAL_PROPELLER_CENTER = block("simple_propeller_center"),
-            SPINALYZR_AXES = block("spinalyzer_axes") ,
-            SERVO_TOP = block("servo_top"),
-            WING_CONTROLLER_TOP = block("wing_controller_top"),
-            CAMERA_LENS = block("camera_lens"),
-            RUDDER_PART = block("rudder"),
+        NORMAL_PROPELLER = block("simple_propeller"),
+        NORMAL_PROPELLER_CENTER = block("simple_propeller_center"),
+        SPINALYZR_AXES = block("spinalyzer_axes") ,
+        SERVO_TOP = block("servo_top"),
+        CONSTRAINT_SERVO_TOP = block("constraint_revolute_top"),
+        WING_CONTROLLER_TOP = block("wing_controller_top"),
+        CAMERA_LENS = block("camera_lens"),
+        RUDDER_PART = block("rudder"),
 
-    SPATIAL_CORE = block("spatial_core"),
+        SPATIAL_CORE = block("spatial_core"),
 
-    SLIDER_TOP = block("slider_top"),
-            SLIDER_PILLAR = block("slider_pillar");
+        SLIDER_TOP = block("slider_top"),
+        CONSTRAINT_SLIDER_TOP = block("constraint_slider_top"),
+        SLIDER_PILLAR = block("slider_pillar");
 
 
 

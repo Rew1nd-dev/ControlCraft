@@ -1,19 +1,18 @@
 package com.verr1.controlcraft.content.blocks.joints;
 
-import com.verr1.controlcraft.foundation.ServerBlockEntityGetter;
+import com.verr1.controlcraft.ControlCraft;
+import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.utils.VSGetterUtils;
-import com.verr1.controlcraft.utils.VSMathUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.joml.AxisAngle4d;
-import org.joml.Quaterniond;
-import org.joml.Quaterniondc;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.Ship;
-import org.valkyrienskies.core.apigame.joints.*;
+import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint;
+import org.valkyrienskies.core.apigame.constraints.VSConstraint;
 
 public class FreeJointBlockEntity extends AbstractJointBlockEntity{
     public FreeJointBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -32,13 +31,13 @@ public class FreeJointBlockEntity extends AbstractJointBlockEntity{
         Ship selfShip = getShipOn();
         Ship otherShip = VSGetterUtils.getShipOn(level, pos).orElse(null);
         if(otherShip == null || selfShip == null)return;
-        FreeJointBlockEntity otherHinge = ServerBlockEntityGetter.INSTANCE.getBlockEntityAt((ServerLevel) level, pos, FreeJointBlockEntity.class).orElse(null);
+        FreeJointBlockEntity otherHinge = BlockEntityGetter.INSTANCE.getLevelBlockEntityAt((ServerLevel) level, pos, FreeJointBlockEntity.class).orElse(null);
         if(otherHinge == null)return;
 
         Vector3dc selfContact = getJointConnectorPosJOML();
         Vector3dc otherContact = otherHinge.getJointConnectorPosJOML();
 
-
+        /*
         VSSphericalJoint joint = new VSSphericalJoint(
                 selfShip.getId(),
                 new VSJointPose(selfContact, new Quaterniond()),
@@ -47,13 +46,29 @@ public class FreeJointBlockEntity extends AbstractJointBlockEntity{
                 new VSJointMaxForceTorque(1e20f, 1e20f),
                 null
         );
+        * */
 
-        recreateConstraints(joint);
+
+        VSAttachmentConstraint attachment = new VSAttachmentConstraint(
+                selfShip.getId(),
+                otherShip.getId(),
+                1.0E-20,
+                selfContact,
+                otherContact,
+                1.0E20,
+                0.0
+        );
+
+        recreateConstraints(attachment);
     }
 
-    public void recreateConstraints(VSJoint joint){
+    public void recreateConstraints(@NotNull VSConstraint... joint){
         if(level == null || level.isClientSide)return;
-        overrideConstraint("fix", joint);
+        if(joint.length == 0){
+            ControlCraft.LOGGER.error("invalid constraint data for free joint");
+            return;
+        }
+        overrideConstraint("fix", joint[0]);
 
     }
 

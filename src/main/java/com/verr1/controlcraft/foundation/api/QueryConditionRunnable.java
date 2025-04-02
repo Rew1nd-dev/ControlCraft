@@ -6,7 +6,7 @@ public interface QueryConditionRunnable extends DeferralRunnable{
     boolean condition();
 
     @Override
-    default void tickDown() {
+    default void tick() {
 
     }
 

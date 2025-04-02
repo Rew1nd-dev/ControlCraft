@@ -1,16 +1,11 @@
 package com.verr1.controlcraft.foundation.type;
 
-import com.simibubi.create.foundation.gui.AllIcons;
 import com.verr1.controlcraft.content.wand.mode.*;
 import com.verr1.controlcraft.content.wand.mode.base.WandAbstractMultipleSelectionMode;
 import com.verr1.controlcraft.foundation.api.IWandMode;
-import com.verr1.controlcraft.utils.ParseUtils;
 import net.minecraft.network.chat.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 public enum WandModesType {
 
