@@ -1,0 +1,25 @@
+{
+  "values": [
+    "vscontrolcraft:anchor",
+    "vscontrolcraft:servo",
+    "vscontrolcraft:joint",
+    "vscontrolcraft:slider",
+    "vscontrolcraft:revolute_joint",
+    "vscontrolcraft:sphere_hinge",
+    "vscontrolcraft:pivot",
+    "vscontrolcraft:terminal",
+    "vscontrolcraft:transmitter",
+    "vscontrolcraft:receiver",
+    "vscontrolcraft:spatial_anchor",
+    "vscontrolcraft:jet",
+    "vscontrolcraft:jet_rudder",
+    "vscontrolcraft:propeller_controller",
+    "vscontrolcraft:propeller",
+    "vscontrolcraft:spinalyzer",
+    "vscontrolcraft:wing_controller",
+    "vscontrolcraft:constraint_revolute",
+    "vscontrolcraft:constraint_joint",
+    "vscontrolcraft:constraint_slider",
+    "vscontrolcraft:camera"
+  ]
+}

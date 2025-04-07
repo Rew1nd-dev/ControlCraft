@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "vscontrolcraft:block/jet_rudder/block",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "vscontrolcraft:block/jet_rudder/block",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "vscontrolcraft:block/jet_rudder/block",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "vscontrolcraft:block/jet_rudder/block",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "vscontrolcraft:block/jet_rudder/block"
+    },
+    "facing=west": {
+      "model": "vscontrolcraft:block/jet_rudder/block",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

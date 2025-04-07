@@ -1,0 +1,212 @@
+{
+  "variants": {
+    "axis_along_first=false,facing=down,joint_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 180
+    },
+    "axis_along_first=false,facing=down,joint_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 180
+    },
+    "axis_along_first=false,facing=down,joint_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 180
+    },
+    "axis_along_first=false,facing=down,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 180
+    },
+    "axis_along_first=false,facing=east,joint_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=false,facing=east,joint_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=false,facing=east,joint_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=false,facing=east,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=false,facing=north,joint_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 90
+    },
+    "axis_along_first=false,facing=north,joint_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 90
+    },
+    "axis_along_first=false,facing=north,joint_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 90
+    },
+    "axis_along_first=false,facing=north,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 90
+    },
+    "axis_along_first=false,facing=south,joint_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=false,facing=south,joint_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=false,facing=south,joint_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=false,facing=south,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=false,facing=up,joint_level=base": {
+      "model": "vscontrolcraft:block/pivot/base"
+    },
+    "axis_along_first=false,facing=up,joint_level=full": {
+      "model": "vscontrolcraft:block/pivot/full"
+    },
+    "axis_along_first=false,facing=up,joint_level=half": {
+      "model": "vscontrolcraft:block/pivot/half"
+    },
+    "axis_along_first=false,facing=up,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter"
+    },
+    "axis_along_first=false,facing=west,joint_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 90,
+      "y": 270
+    },
+    "axis_along_first=false,facing=west,joint_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 90,
+      "y": 270
+    },
+    "axis_along_first=false,facing=west,joint_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 90,
+      "y": 270
+    },
+    "axis_along_first=false,facing=west,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 90,
+      "y": 270
+    },
+    "axis_along_first=true,facing=down,joint_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 180
+    },
+    "axis_along_first=true,facing=down,joint_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 180
+    },
+    "axis_along_first=true,facing=down,joint_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 180
+    },
+    "axis_along_first=true,facing=down,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 180
+    },
+    "axis_along_first=true,facing=east,joint_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=true,facing=east,joint_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=true,facing=east,joint_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=true,facing=east,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=true,facing=north,joint_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 90
+    },
+    "axis_along_first=true,facing=north,joint_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 90
+    },
+    "axis_along_first=true,facing=north,joint_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 90
+    },
+    "axis_along_first=true,facing=north,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 90
+    },
+    "axis_along_first=true,facing=south,joint_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=true,facing=south,joint_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=true,facing=south,joint_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=true,facing=south,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=true,facing=up,joint_level=base": {
+      "model": "vscontrolcraft:block/pivot/base"
+    },
+    "axis_along_first=true,facing=up,joint_level=full": {
+      "model": "vscontrolcraft:block/pivot/full"
+    },
+    "axis_along_first=true,facing=up,joint_level=half": {
+      "model": "vscontrolcraft:block/pivot/half"
+    },
+    "axis_along_first=true,facing=up,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter"
+    },
+    "axis_along_first=true,facing=west,joint_level=base": {
+      "model": "vscontrolcraft:block/pivot/base",
+      "x": 90,
+      "y": 270
+    },
+    "axis_along_first=true,facing=west,joint_level=full": {
+      "model": "vscontrolcraft:block/pivot/full",
+      "x": 90,
+      "y": 270
+    },
+    "axis_along_first=true,facing=west,joint_level=half": {
+      "model": "vscontrolcraft:block/pivot/half",
+      "x": 90,
+      "y": 270
+    },
+    "axis_along_first=true,facing=west,joint_level=three_quarter": {
+      "model": "vscontrolcraft:block/pivot/three_quarter",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

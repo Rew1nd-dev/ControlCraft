@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "axis_along_first=false,facing=down": {
+      "model": "vscontrolcraft:block/constraint_revolute/block",
+      "x": 180
+    },
+    "axis_along_first=false,facing=east": {
+      "model": "vscontrolcraft:block/constraint_revolute/block",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=false,facing=north": {
+      "model": "vscontrolcraft:block/constraint_revolute/block",
+      "x": 90
+    },
+    "axis_along_first=false,facing=south": {
+      "model": "vscontrolcraft:block/constraint_revolute/block",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=false,facing=up": {
+      "model": "vscontrolcraft:block/constraint_revolute/block"
+    },
+    "axis_along_first=false,facing=west": {
+      "model": "vscontrolcraft:block/constraint_revolute/block",
+      "x": 90,
+      "y": 270
+    },
+    "axis_along_first=true,facing=down": {
+      "model": "vscontrolcraft:block/constraint_revolute/block",
+      "x": 180
+    },
+    "axis_along_first=true,facing=east": {
+      "model": "vscontrolcraft:block/constraint_revolute/block",
+      "x": 90,
+      "y": 90
+    },
+    "axis_along_first=true,facing=north": {
+      "model": "vscontrolcraft:block/constraint_revolute/block",
+      "x": 90
+    },
+    "axis_along_first=true,facing=south": {
+      "model": "vscontrolcraft:block/constraint_revolute/block",
+      "x": 90,
+      "y": 180
+    },
+    "axis_along_first=true,facing=up": {
+      "model": "vscontrolcraft:block/constraint_revolute/block"
+    },
+    "axis_along_first=true,facing=west": {
+      "model": "vscontrolcraft:block/constraint_revolute/block",
+      "x": 90,
+      "y": 270
+    }
+  }
+}
