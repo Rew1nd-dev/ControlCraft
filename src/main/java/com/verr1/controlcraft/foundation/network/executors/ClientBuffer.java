@@ -1,12 +1,26 @@
 package com.verr1.controlcraft.foundation.network.executors;
 
 import com.verr1.controlcraft.foundation.api.Unnamed;
+import com.verr1.controlcraft.foundation.data.constraint.ConnectContext;
 import com.verr1.controlcraft.utils.SerializeUtils;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
+
+import java.util.function.Supplier;
 
 public class ClientBuffer<T> implements Unnamed<CompoundTag> {
+
+    public static Supplier<ClientBuffer<Double>> DOUBLE = () -> new ClientBuffer<>(SerializeUtils.DOUBLE, Double.class);
+    public static Supplier<ClientBuffer<Float>> FLOAT = () -> new ClientBuffer<>(SerializeUtils.FLOAT, Float.class);
+    public static Supplier<ClientBuffer<Boolean>> BOOLEAN = () -> new ClientBuffer<>(SerializeUtils.BOOLEAN, Boolean.class);
+    public static Supplier<ClientBuffer<String>> STRING = () -> new ClientBuffer<>(SerializeUtils.STRING, String.class);
+    public static Supplier<ClientBuffer<Integer>> INT = () -> new ClientBuffer<>(SerializeUtils.INT, Integer.class);
+    public static Supplier<ClientBuffer<Long>> LONG = () -> new ClientBuffer<>(SerializeUtils.LONG, Long.class);
+    public static Supplier<ClientBuffer<Vector3d>> VECTOR3D = () -> new ClientBuffer<>(SerializeUtils.VECTOR3D, Vector3d.class);
+    public static Supplier<ClientBuffer<ConnectContext>> CONNECT_CONTEXT = () -> new ClientBuffer<>(SerializeUtils.CONNECT_CONTEXT, ConnectContext.class);
+
 
     @Nullable
     T buffer;
@@ -20,6 +34,10 @@ public class ClientBuffer<T> implements Unnamed<CompoundTag> {
     public ClientBuffer(SerializeUtils.@NotNull Serializer<T> serializer, Class<T> clazz) {
         this.serializer = serializer;
         this.clazz = clazz;
+    }
+
+    public static<T extends Enum<?>> ClientBuffer<T> of(Class<T> enumClass){
+        return new ClientBuffer<>(SerializeUtils.ofEnum(enumClass), enumClass);
     }
 
     public Class<T> getClazz() {

@@ -44,7 +44,7 @@ public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlock
 
     @OnlyIn(Dist.CLIENT)
     protected void displayScreen(BlockPos pos){
-        ScreenOpener.open(GenericUIFactory.createTestPeripheralInterfaceScreen(pos));
+        ScreenOpener.open(GenericUIFactory.createPeripheralInterfaceScreen(pos));
     }
 
     @Override

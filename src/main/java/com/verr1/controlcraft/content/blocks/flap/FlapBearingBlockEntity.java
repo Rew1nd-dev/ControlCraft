@@ -13,6 +13,9 @@ import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.FlapBearingPeripheral;
 import com.verr1.controlcraft.content.gui.legacy.FlapBearingScreen;
@@ -32,6 +35,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -144,16 +148,11 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
     }
 
     @Override
-    public void lazyTick() {
-        super.lazyTick();
-        if (physicalWing != null && !level.isClientSide){
+    public void lazyTickServer() {
+        super.lazyTickServer();
+        syncForNear(true, ANGLE);
+        if (physicalWing != null){
             sendData();
-        }
-
-        if(level == null || !level.isClientSide){
-            syncForNear(ANGLE);
-            // syncClient();
-            ExposedFieldSyncClientPacket.syncClient(this, getBlockPos(), level);
         }
     }
 
@@ -337,8 +336,27 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
     public FlapBearingBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
 
-        //buildRegistry()
+        buildRegistry(FIELD)
+            .withBasic(CompoundTagPort.of(
+                    ITerminalDevice.super::serialize,
+                    ITerminalDevice.super::deserializeUnchecked
+            ))
+            .withClient(
+                    new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+            )
+            .dispatchToSync()
+            .register();
 
+        buildRegistry(ANGLE)
+                .withBasic(SerializePort.of(
+                        this::getAngle,
+                        this::setAngle,
+                        SerializeUtils.FLOAT
+                ))
+                .dispatchToSync()
+                .runtimeOnly()
+                .register();
+        /*
         registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
                         tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),
                         tag -> tag.put("fields", ITerminalDevice.super.serialize()),
@@ -346,6 +364,8 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
                 Side.SHARED
         );
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getAngle, this::setAngle, SerializeUtils.FLOAT, ANGLE), Side.RUNTIME_SHARED);
+
+        * */
 
 
         lazyTickRate = 3;

@@ -49,7 +49,7 @@ public class BasicUIView <T> extends TypedUIPort<T>  implements TitleLabelProvid
 
     @Override
     protected T readGUI() {
-        return parseOut.apply(view.text);
+        return null; // parseOut.apply(view.text);
     }
 
     @Override

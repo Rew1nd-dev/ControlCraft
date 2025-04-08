@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class TerminalDeviceUIField extends NetworkUIPort<CompoundTag>
+public class TerminalDeviceUIField_ extends NetworkUIPort<CompoundTag>
         implements ITerminalDevice // This is for identical deserialize and serialize method
 {
     private int actualSize = 0;
@@ -61,14 +61,14 @@ public class TerminalDeviceUIField extends NetworkUIPort<CompoundTag>
     private final GridLayout directionSelectLayout = new GridLayout();
 
 
-    public TerminalDeviceUIField(Supplier<ITerminalDevice> supplier){
+    public TerminalDeviceUIField_(Supplier<ITerminalDevice> supplier){
         this(
                 t -> Optional.ofNullable(supplier.get()).ifPresent(it -> it.deserializeUnchecked(t)),
                 () -> Optional.ofNullable(supplier.get()).map(ITerminalDevice::serialize).orElse(new CompoundTag())
         );
     }
 
-    public TerminalDeviceUIField(Consumer<CompoundTag> write, Supplier<CompoundTag> read) {
+    public TerminalDeviceUIField_(Consumer<CompoundTag> write, Supplier<CompoundTag> read) {
         super(write, read);
         earlyInit();
     }

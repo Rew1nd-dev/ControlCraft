@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class DynamicControllerUIField extends NetworkUIPort<CompoundTag> implements
+public class DynamicControllerUIField_ extends NetworkUIPort<CompoundTag> implements
         ISerializableDynamicController, TitleLabelProvider
 {
 
@@ -36,7 +36,7 @@ public class DynamicControllerUIField extends NetworkUIPort<CompoundTag> impleme
 
     PID pid;
 
-    public DynamicControllerUIField(Consumer<CompoundTag> write, Supplier<CompoundTag> read, int fieldLength) {
+    public DynamicControllerUIField_(Consumer<CompoundTag> write, Supplier<CompoundTag> read, int fieldLength) {
         super(write, read);
         Font font = Minecraft.getInstance().font;
         pField = new EditBox(font, 0, 0, fieldLength, 10, Component.literal(""));
@@ -45,7 +45,7 @@ public class DynamicControllerUIField extends NetworkUIPort<CompoundTag> impleme
         GenericUIFactory.alignLabel(titles());
     }
 
-    public DynamicControllerUIField(Supplier<IControllerProvider> supplier){
+    public DynamicControllerUIField_(Supplier<IControllerProvider> supplier){
         this(
                 t -> Optional.ofNullable(supplier.get()).ifPresent(it -> it.getController().deserialize(t)),
                 () -> Optional.ofNullable(supplier.get()).map(it -> it.getController().serialize()).orElse(new CompoundTag()),

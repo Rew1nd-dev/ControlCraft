@@ -148,7 +148,7 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity {
                         .ifPresent(t -> syncTag.put(k.getSerializedName(), t))
         );
         CompoundTag tag = new CompoundTag();
-        tag.put("simplex", new CompoundTag());
+        tag.put("simplex", syncTag);
         dispatchPacket(target, syncTag);
     }
     

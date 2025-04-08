@@ -4,7 +4,8 @@ import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.ShipConnectorBlockEntity;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
-import com.verr1.controlcraft.foundation.type.Side;
+import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.api.IBruteConnectable;
 import com.verr1.controlcraft.foundation.data.ShipPhysics;
 import com.verr1.controlcraft.foundation.data.constraint.ConnectContext;
@@ -51,8 +52,12 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
 
     public AbstractMotor(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getServoAngle, this::setClientAngle, SerializeUtils.DOUBLE, ANIMATED_ANGLE), Side.RUNTIME_SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getOffset, this::setOffset, SerializeUtils.VECTOR3D, OFFSET), Side.SHARED);
+        // registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getServoAngle, this::setClientAngle, SerializeUtils.DOUBLE, ANIMATED_ANGLE), Side.RUNTIME_SHARED);
+        // registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getOffset, this::setOffset, SerializeUtils.VECTOR3DC, OFFSET), Side.SHARED);
+
+        buildRegistry(ANIMATED_ANGLE).withBasic(SerializePort.of(this::getServoAngle, this::setClientAngle, SerializeUtils.DOUBLE)).dispatchToSync().runtimeOnly().register();
+        buildRegistry(OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getOffset()), this::setOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
+
         registerConstraintKey("revolute");
         registerConstraintKey("attach_1");
         registerConstraintKey("attach_2");
@@ -294,7 +299,7 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
     @Override
     public void tickServer() {
         super.tickServer();
-        syncForNear(ANIMATED_ANGLE);
+        syncForNear(true, ANIMATED_ANGLE);
         // syncClientAnimation();
     }
 

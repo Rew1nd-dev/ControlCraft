@@ -1,12 +1,14 @@
-package com.verr1.controlcraft.content.gui.v1.layouts.preset;
+package com.verr1.controlcraft.content.gui.v2.preset;
 
 import com.simibubi.create.foundation.gui.widget.Label;
+import com.verr1.controlcraft.content.blocks.spatial.SpatialAnchorBlockEntity;
 import com.verr1.controlcraft.content.gui.v1.factory.GenericUIFactory;
-import com.verr1.controlcraft.content.gui.v1.layouts.NetworkUIPort;
 import com.verr1.controlcraft.content.gui.v1.layouts.api.TitleLabelProvider;
 import com.verr1.controlcraft.content.gui.v1.widgets.FormattedLabel;
+import com.verr1.controlcraft.content.gui.v2.element.TypedUIPort;
 import com.verr1.controlcraft.foundation.api.IScheduleProvider;
 import com.verr1.controlcraft.foundation.api.ISerializableSchedule;
+import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.data.control.PID;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import com.verr1.controlcraft.foundation.type.descriptive.UIContents;
@@ -15,14 +17,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-public class SpatialScheduleUIField extends NetworkUIPort<CompoundTag> implements
+public class SpatialScheduleUIField extends TypedUIPort<CompoundTag> implements
         ISerializableSchedule, TitleLabelProvider {
 
     PID qpid = new PID(0, 0, 0);
@@ -46,8 +45,11 @@ public class SpatialScheduleUIField extends NetworkUIPort<CompoundTag> implement
     EditBox piField;
     EditBox pdField;
 
-    public SpatialScheduleUIField(Consumer<CompoundTag> write, Supplier<CompoundTag> read, int fieldLength) {
-        super(write, read);
+
+    public SpatialScheduleUIField(
+            BlockPos boundPos, int fieldLength) {
+        super(boundPos, ISerializableSchedule.SCHEDULE, CompoundTag.class, new CompoundTag());
+
         Font font = Minecraft.getInstance().font;
         ppField = new EditBox(font, 0, 0, fieldLength, 10, Component.literal(""));
         piField = new EditBox(font, 0, 0, fieldLength, 10, Component.literal(""));
@@ -56,15 +58,7 @@ public class SpatialScheduleUIField extends NetworkUIPort<CompoundTag> implement
         qiField = new EditBox(font, 0, 0, fieldLength, 10, Component.literal(""));
         qdField = new EditBox(font, 0, 0, fieldLength, 10, Component.literal(""));
         GenericUIFactory.alignLabel(titles());
-    }
 
-
-    public SpatialScheduleUIField(Supplier<IScheduleProvider> supplier){
-        this(
-                t -> Optional.ofNullable(supplier.get()).ifPresent(it -> it.getSchedule().deserialize(t)),
-                () -> Optional.ofNullable(supplier.get()).map(it -> it.getSchedule().serialize()).orElse(new CompoundTag()),
-                30
-        );
     }
 
     @Override

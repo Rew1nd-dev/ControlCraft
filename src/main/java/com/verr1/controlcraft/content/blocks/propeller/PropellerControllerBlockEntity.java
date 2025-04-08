@@ -3,6 +3,9 @@ package com.verr1.controlcraft.content.blocks.propeller;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
+import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.PropellerControllerPeripheral;
 import com.verr1.controlcraft.content.gui.legacy.PropellerControllerScreen;
@@ -25,6 +28,7 @@ import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -110,7 +114,7 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
 
     public PropellerControllerBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
-
+        /*
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(
                         rotationalSpeed::read,
                         rotationalSpeed::write,
@@ -126,6 +130,24 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
                         FIELD),
                 Side.SHARED
         );
+        * */
+
+        buildRegistry(SharedKeys.VALUE)
+            .withBasic(SerializePort.of(rotationalSpeed::read, rotationalSpeed::write, SerializeUtils.DOUBLE))
+            .withClient(ClientBuffer.DOUBLE.get())
+            .register();
+
+        buildRegistry(FIELD)
+                .withBasic(CompoundTagPort.of(
+                        ITerminalDevice.super::serialize,
+                        ITerminalDevice.super::deserializeUnchecked
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+                )
+                .dispatchToSync()
+                .register();
+
     }
 
     public void syncAttachedPropeller(){

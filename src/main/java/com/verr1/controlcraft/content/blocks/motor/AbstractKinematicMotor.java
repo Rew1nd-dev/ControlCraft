@@ -8,6 +8,9 @@ import com.verr1.controlcraft.content.valkyrienskies.transform.LerpedTransformPr
 import com.verr1.controlcraft.foundation.api.IKinematicUIDevice;
 import com.verr1.controlcraft.foundation.data.GroundBodyShip;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
+import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.KinematicMotorPeripheral;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
@@ -24,6 +27,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
@@ -38,6 +42,8 @@ import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint;
 import java.lang.Math;
 import java.util.List;
 import java.util.Optional;
+
+import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 
 public abstract class AbstractKinematicMotor extends AbstractMotor implements
         ITerminalDevice, IPacketHandler, IKinematicUIDevice
@@ -124,6 +130,35 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
     public AbstractKinematicMotor(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         registerConstraintKey("control");
+
+
+        buildRegistry(COMPLIANCE).withBasic(SerializePort.of(this::getCompliance, this::setCompliance, SerializeUtils.DOUBLE)).withClient(ClientBuffer.DOUBLE.get()).register();
+        buildRegistry(TARGET_MODE)
+                .withBasic(SerializePort.of(this::getTargetMode, this::setTargetMode, SerializeUtils.ofEnum(TargetMode.class)))
+                .withClient(ClientBuffer.of(TargetMode.class))
+                .register();
+        buildRegistry(CONNECT_CONTEXT).withBasic(SerializePort.of(() -> context, ctx -> context = ctx, SerializeUtils.CONNECT_CONTEXT)).register();
+
+        buildRegistry(TARGET).withBasic(SerializePort.of(() -> getController().getControlTarget(), t -> getController().setControlTarget(t), SerializeUtils.DOUBLE)).withClient(ClientBuffer.DOUBLE.get()).register();
+        buildRegistry(VALUE).withBasic(SerializePort.of(() -> getController().getTarget(), $ -> {}, SerializeUtils.DOUBLE)).withClient(ClientBuffer.DOUBLE.get()).register();
+        buildRegistry(PLACE_HOLDER)
+                .withBasic(CompoundTagPort.of(
+                        CompoundTag::new,
+                        $ ->  {if(getTargetMode() == TargetMode.VELOCITY)getController().setTarget(0);}
+                ))
+                .register();
+
+        buildRegistry(FIELD)
+                .withBasic(CompoundTagPort.of(
+                        ITerminalDevice.super::serialize,
+                        ITerminalDevice.super::deserializeUnchecked
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+                )
+                .dispatchToSync()
+                .register();
+        /*
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> compliance, c -> compliance = c, SerializeUtils.DOUBLE, SharedKeys.COMPLIANCE), Side.SHARED);
         registerFieldReadWriter(
                 SerializeUtils.ReadWriter.of(
@@ -166,6 +201,8 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
                         SharedKeys.PLACE_HOLDER),
                 Side.SERVER_ONLY
         );
+        * */
+
     }
 
 

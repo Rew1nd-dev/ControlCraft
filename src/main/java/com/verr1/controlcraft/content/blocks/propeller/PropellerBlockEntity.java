@@ -6,6 +6,8 @@ import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.gui.legacy.PropellerScreen;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
@@ -94,11 +96,8 @@ public class PropellerBlockEntity extends OnShipBlockEntity implements
     }
 
     @Override
-    public void lazyTick() {
-        if(level == null || level.isClientSide)return;
-        // sendData();
-        // syncClient();
-        syncForNear(SPEED);
+    public void lazyTickServer() {
+        syncForNear(true, SPEED);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -109,9 +108,15 @@ public class PropellerBlockEntity extends OnShipBlockEntity implements
 
     public PropellerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+
+        buildRegistry(THRUST).withBasic(SerializePort.of(this::getThrustRatio, this::setThrustRatio, SerializeUtils.DOUBLE)).withClient(ClientBuffer.DOUBLE.get()).register();
+        buildRegistry(TORQUE).withBasic(SerializePort.of(this::getTorqueRatio, this::setTorqueRatio, SerializeUtils.DOUBLE)).withClient(ClientBuffer.DOUBLE.get()).register();
+        buildRegistry(SPEED).withBasic(SerializePort.of(this::getRotationalSpeed, this::setVisualRotationalSpeed, SerializeUtils.DOUBLE)).withClient(ClientBuffer.DOUBLE.get()).dispatchToSync().register();
+        /*
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getThrustRatio, this::setThrustRatio, SerializeUtils.DOUBLE, THRUST), Side.SHARED);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getTorqueRatio, this::setTorqueRatio, SerializeUtils.DOUBLE, TORQUE), Side.SHARED);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getRotationalSpeed, this::setVisualRotationalSpeed, SerializeUtils.DOUBLE, SPEED), Side.SHARED);
+        * */
         angle = LerpedFloat.angular();
         lazyTickRate = 3;
     }

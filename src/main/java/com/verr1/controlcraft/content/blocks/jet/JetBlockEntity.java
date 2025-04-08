@@ -4,6 +4,9 @@ import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.JetPeripheral;
 import com.verr1.controlcraft.content.gui.legacy.JetScreen;
@@ -26,6 +29,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -203,14 +207,6 @@ public class JetBlockEntity extends OnShipBlockEntity implements
         syncAttachedInducer();
     }
 
-    @Override
-    public void lazyTick() {
-        super.lazyTick();
-        if(level.isClientSide)return;
-        ExposedFieldSyncClientPacket.syncClient(this, getBlockPos(), level);
-    }
-
-
 
     @Override
     public List<ExposedFieldWrapper> fields() {
@@ -264,6 +260,49 @@ public class JetBlockEntity extends OnShipBlockEntity implements
     public JetBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
 
+        buildRegistry(FIELD)
+                .withBasic(CompoundTagPort.of(
+                        ITerminalDevice.super::serialize,
+                        ITerminalDevice.super::deserializeUnchecked
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+                )
+                .dispatchToSync()
+                .register();
+
+        buildRegistry(THRUST)
+                .withBasic(SerializePort.of(
+                        thrust::read,
+                        thrust::write,
+                        SerializeUtils.DOUBLE
+                ))
+                .withClient(new ClientBuffer<>(SerializeUtils.DOUBLE, Double.class))
+                .dispatchToSync()
+                .register();
+
+        buildRegistry(HORIZONTAL_ANGLE)
+                .withBasic(SerializePort.of(
+                        horizontalAngle::read,
+                        horizontalAngle::write,
+                        SerializeUtils.DOUBLE
+                ))
+                .withClient(new ClientBuffer<>(SerializeUtils.DOUBLE, Double.class))
+                .dispatchToSync()
+                .register();
+
+        buildRegistry(VERTICAL_ANGLE)
+                .withBasic(SerializePort.of(
+                        verticalAngle::read,
+                        verticalAngle::write,
+                        SerializeUtils.DOUBLE
+                ))
+                .withClient(new ClientBuffer<>(SerializeUtils.DOUBLE, Double.class))
+                .dispatchToSync()
+                .register();
+
+
+        /*
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(
                 thrust::read,
                 thrust::write,
@@ -297,6 +336,11 @@ public class JetBlockEntity extends OnShipBlockEntity implements
                         FIELD),
                 Side.SHARED
         );
+        * */
+
+
+
+
     }
 
     @Override

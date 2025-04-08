@@ -5,6 +5,9 @@ import com.verr1.controlcraft.Config;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.foundation.api.*;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.SpatialAnchorPeripheral;
 import com.verr1.controlcraft.content.gui.legacy.SpatialScreen;
@@ -29,6 +32,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -304,7 +308,7 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
         trackNearestWhenRunning();
         syncAttachedInducer();
         updateSchedule();
-        syncForNear(IS_STATIC, IS_RUNNING);
+        syncForNear(true, IS_STATIC, IS_RUNNING);
         // syncClient();
     }
 
@@ -443,6 +447,36 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
 
     public SpatialAnchorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+
+        buildRegistry(FIELD)
+                .withBasic(CompoundTagPort.of(
+                        ITerminalDevice.super::serialize,
+                        ITerminalDevice.super::deserializeUnchecked
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+                )
+                .dispatchToSync()
+                .register();
+
+        buildRegistry(SCHEDULE)
+                .withBasic(CompoundTagPort.of(
+                        () -> schedule.serialize(),
+                        tag -> schedule.deserialize(tag)
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+                )
+                .dispatchToSync()
+                .register();
+
+        buildRegistry(IS_RUNNING).withBasic(SerializePort.of(this::isRunning, this::setRunning, SerializeUtils.BOOLEAN)).withClient(ClientBuffer.BOOLEAN.get()).dispatchToSync().register();
+        buildRegistry(IS_STATIC).withBasic(SerializePort.of(this::isStatic, this::setStatic, SerializeUtils.BOOLEAN)).withClient(ClientBuffer.BOOLEAN.get()).dispatchToSync().register();
+        buildRegistry(OFFSET).withBasic(SerializePort.of(this::getAnchorOffset, this::setAnchorOffset, SerializeUtils.DOUBLE)).withClient(ClientBuffer.DOUBLE.get()).register();
+        buildRegistry(PROTOCOL).withBasic(SerializePort.of(this::getProtocol, this::setProtocol, SerializeUtils.LONG)).withClient(ClientBuffer.LONG.get()).register();
+
+
+        /*
         registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
                         tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),
                         tag -> tag.put("fields", ITerminalDevice.super.serialize()),
@@ -461,6 +495,9 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::isStatic, this::setStatic, SerializeUtils.BOOLEAN, IS_STATIC), Side.SHARED);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getAnchorOffset, this::setAnchorOffset, SerializeUtils.DOUBLE, OFFSET), Side.SHARED);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getProtocol, this::setProtocol, SerializeUtils.LONG, PROTOCOL), Side.SHARED);
+        *
+        * */
+
     }
 
 

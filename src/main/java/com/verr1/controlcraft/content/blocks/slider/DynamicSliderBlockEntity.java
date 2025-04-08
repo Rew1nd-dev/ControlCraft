@@ -3,7 +3,11 @@ package com.verr1.controlcraft.content.blocks.slider;
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.Config;
+import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
+import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.SliderPeripheral;
 import com.verr1.controlcraft.content.gui.legacy.SliderScreen;
@@ -30,6 +34,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -49,6 +54,8 @@ import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint;
 import java.lang.Math;
 import java.util.List;
 import java.util.Optional;
+
+import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 
 // @SuppressWarnings("unused")
 public class DynamicSliderBlockEntity extends AbstractSlider implements
@@ -162,7 +169,19 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
     }
 
     public void setTargetMode(TargetMode targetMode) {
+        if(this.targetMode == targetMode)return;
         this.targetMode = targetMode;
+        // delay this because client screen will also call to set PID values of last mode
+        Runnable task = () -> {if(targetMode == TargetMode.POSITION){
+            controller.PID(DEFAULT_POSITION_MODE_PARAMS);
+        }
+            if(targetMode == TargetMode.VELOCITY){
+                controller.PID(DEFAULT_VELOCITY_MODE_PARAMS);
+            }};
+
+        if(level == null || level.isClientSide)return;
+        ControlCraftServer.SERVER_DEFERRAL_EXECUTOR.executeLater(task, 1);
+        setChanged();
     }
 
     public TargetMode getTargetMode() {
@@ -233,10 +252,10 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
         VSAttachmentConstraint fixed = new VSAttachmentConstraint(
                 selfId,
                 compId,
-                1.0E-10,
+                1.0E-20,
                 context.self().getPos().fma(getSlideDistance(), sliDir, new Vector3d()),
                 context.comp().getPos(), // This is the opposite with the case of assemble()
-                1.0E10,
+                1.0E20,
                 0.0
         );
 
@@ -297,6 +316,72 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
 
     public DynamicSliderBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+
+        buildRegistry(CHEAT_MODE)
+                .withBasic(SerializePort.of(this::getCheatMode, this::setCheatMode, SerializeUtils.ofEnum(CheatMode.class)))
+                .withClient(ClientBuffer.of(CheatMode.class))
+                .register();
+
+        buildRegistry(TARGET_MODE)
+                .withBasic(SerializePort.of(this::getTargetMode, this::setTargetMode, SerializeUtils.ofEnum(TargetMode.class)))
+                .withClient(ClientBuffer.of(TargetMode.class))
+                .register();
+
+        buildRegistry(LOCK_MODE)
+                .withBasic(SerializePort.of(this::getLockMode, this::setLockMode, SerializeUtils.ofEnum(LockMode.class)))
+                .withClient(ClientBuffer.of(LockMode.class))
+                .register();
+
+        buildRegistry(IS_LOCKED)
+                .withBasic(SerializePort.of(this::isLocked, bl -> isLocked = bl, SerializeUtils.BOOLEAN))
+                .withClient(ClientBuffer.BOOLEAN.get())
+                .register();
+
+        buildRegistry(FIELD)
+                .withBasic(CompoundTagPort.of(
+                        ITerminalDevice.super::serialize,
+                        ITerminalDevice.super::deserializeUnchecked
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+                )
+                .dispatchToSync()
+                .register();
+
+        buildRegistry(CONTROLLER)
+                .withBasic(CompoundTagPort.of(
+                        () -> getController().serialize(),
+                        tag -> getController().deserialize(tag)
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+                )
+                .register();
+
+        buildRegistry(TARGET)
+                .withBasic(SerializePort.of(
+                        () -> getController().getTarget(),
+                        t -> getController().setTarget(t),
+                        SerializeUtils.DOUBLE
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.DOUBLE, Double.class)
+                )
+                .register();
+
+        buildRegistry(VALUE)
+                .withBasic(SerializePort.of(
+                        () -> getController().getValue(),
+                        $ -> {},
+                        SerializeUtils.DOUBLE
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.DOUBLE, Double.class)
+                )
+                .runtimeOnly()
+                .register();
+
+        /*
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> cheatMode.name(), n -> cheatMode = CheatMode.valueOf(n.toUpperCase()), SerializeUtils.STRING, SharedKeys.CHEAT_MODE), Side.SHARED);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> targetMode.name(), n -> targetMode = TargetMode.valueOf(n.toUpperCase()), SerializeUtils.STRING, SharedKeys.TARGET_MODE), Side.SHARED);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> lockMode.name(), n -> lockMode = LockMode.valueOf(n.toUpperCase()), SerializeUtils.STRING, SharedKeys.LOCK_MODE), Side.SHARED);
@@ -332,6 +417,9 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
                         SharedKeys.TARGET),
                 Side.SERVER_ONLY
         );
+        * */
+
+
 
 
         registerConstraintKey("fix");
@@ -368,7 +456,7 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
     @Override
     public void tickServer() {
         super.tickServer();
-
+        lockCheck();
         syncAttachInducer();
         ExposedFieldSyncClientPacket.syncClient(this, getBlockPos(), level);
     }

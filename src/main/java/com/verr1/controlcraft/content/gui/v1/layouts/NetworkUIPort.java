@@ -54,7 +54,9 @@ public abstract class NetworkUIPort<T> implements TabListener {
 
 
     public final void writeFromLayout(){
-        write.accept(readGUI());
+        T value = readGUI();
+        if(value == null)return;
+        write.accept(value);
     }
 
 

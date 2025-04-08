@@ -141,20 +141,11 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
         return networkKey;
     }
 
-    public void setClientViewKey(PeripheralKey key){
-        if(level == null || !level.isClientSide)return;
-        networkKey = key;
-    }
 
     public boolean registered(){
         return NetworkManager.isRegistered(getBlockPos());
     }
 
-    public void dispatchKey(PeripheralKey key){
-        if(level == null)return;
-        if (level.isClientSide)setClientViewKey(key);
-        else resetNetworkRegistry(key);
-    }
 
     public void resetNetworkRegistry(PeripheralKey newKey){
         if(level == null)return;

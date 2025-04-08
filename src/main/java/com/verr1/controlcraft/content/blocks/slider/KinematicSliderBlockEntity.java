@@ -3,6 +3,9 @@ package com.verr1.controlcraft.content.blocks.slider;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.foundation.api.IKinematicUIDevice;
+import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.gui.legacy.ConstraintSliderScreen;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
@@ -19,6 +22,7 @@ import com.verr1.controlcraft.registry.ControlCraftPackets;
 import com.verr1.controlcraft.utils.SerializeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -33,6 +37,8 @@ import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint;
 
 import java.lang.Math;
 import java.util.List;
+
+import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 
 public class KinematicSliderBlockEntity extends AbstractSlider implements
         ITerminalDevice, IPacketHandler, IKinematicUIDevice
@@ -112,48 +118,32 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
     public KinematicSliderBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         registerConstraintKey("control");
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> compliance, c -> compliance = c, SerializeUtils.DOUBLE, SharedKeys.COMPLIANCE), Side.SHARED);
-        registerFieldReadWriter(
-                SerializeUtils.ReadWriter.of(
-                        () -> getTargetMode().name(),
-                        n -> setTargetMode(TargetMode.valueOf(n.toUpperCase())),
-                        SerializeUtils.STRING,
-                        SharedKeys.TARGET_MODE),
-                Side.SHARED);
-        registerFieldReadWriter(
-                SerializeUtils.ReadWriter.of(
-                        () -> context,
-                        ctx -> context = ctx,
-                        SerializeUtils.CONNECT_CONTEXT,
-                        SharedKeys.CONNECT_CONTEXT),
-                Side.SERVER_ONLY);
+        buildRegistry(SharedKeys.COMPLIANCE).withBasic(SerializePort.of(this::getCompliance, this::setCompliance, SerializeUtils.DOUBLE)).withClient(ClientBuffer.DOUBLE.get()).register();
+        buildRegistry(TARGET_MODE)
+                .withBasic(SerializePort.of(this::getTargetMode, this::setTargetMode, SerializeUtils.ofEnum(TargetMode.class)))
+                .withClient(ClientBuffer.of(TargetMode.class))
+                .register();
+        buildRegistry(CONNECT_CONTEXT).withBasic(SerializePort.of(() -> context, ctx -> context = ctx, SerializeUtils.CONNECT_CONTEXT)).register();
 
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),
-                        tag -> tag.put("fields", ITerminalDevice.super.serialize()),
-                        FIELD),
-                Side.SHARED
-        );
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> getController().deserialize(tag.getCompound("controller_target")),
-                        tag -> tag.put("controller_target", getController().serialize()),
-                        SharedKeys.TARGET),
-                Side.SHARED
-        );
-        // for kinematic device, target is actual value
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> getController().setTarget(tag.getDouble("controller")),
-                        tag -> tag.putDouble("controller", getController().getTarget()),
-                        SharedKeys.VALUE),
-                Side.SHARED
-        );
+        buildRegistry(SharedKeys.TARGET).withBasic(SerializePort.of(() -> getController().getControlTarget(), t -> getController().setControlTarget(t), SerializeUtils.DOUBLE)).withClient(ClientBuffer.DOUBLE.get()).register();
+        buildRegistry(SharedKeys.VALUE).withBasic(SerializePort.of(() -> getController().getTarget(), $ -> {}, SerializeUtils.DOUBLE)).withClient(ClientBuffer.DOUBLE.get()).register();
+        buildRegistry(PLACE_HOLDER)
+                .withBasic(CompoundTagPort.of(
+                        CompoundTag::new,
+                        $ ->  {if(getTargetMode() == TargetMode.VELOCITY)getController().setTarget(0);}
+                ))
+                .register();
 
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        $ -> {if(getTargetMode() == TargetMode.VELOCITY)getController().setControlTarget(0);},
-                        $ -> {},
-                        SharedKeys.PLACE_HOLDER),
-                Side.SERVER_ONLY
-        );
+        buildRegistry(FIELD)
+                .withBasic(CompoundTagPort.of(
+                        ITerminalDevice.super::serialize,
+                        ITerminalDevice.super::deserializeUnchecked
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+                )
+                .dispatchToSync()
+                .register();
     }
 
     @Override

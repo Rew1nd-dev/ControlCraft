@@ -1,6 +1,6 @@
 package com.verr1.controlcraft.utils;
 
-import com.verr1.controlcraft.foundation.api.Unnamed;
+import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.data.constraint.ConnectContext;
 import com.verr1.controlcraft.foundation.network.SyncLock;
@@ -14,21 +14,24 @@ import org.joml.Vector3dc;
 import org.valkyrienskies.core.apigame.constraints.*;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class SerializeUtils {
+    public static HashMap<Class<?>, Serializer<?>> EnumSerializerCache = new HashMap<>();
+
     public static Serializer<Double> DOUBLE = of(SerializeUtils::ofDouble, tag -> tag.getDouble("value"));
     public static Serializer<Float> FLOAT = of(SerializeUtils::ofFloat, tag -> tag.getFloat("value"));
     public static Serializer<Integer> INT = of(SerializeUtils::ofInt, tag -> tag.getInt("value"));
     public static Serializer<Long> LONG = of(SerializeUtils::ofLong, tag -> tag.getLong("value"));
     public static Serializer<Boolean> BOOLEAN = of(SerializeUtils::ofBoolean, tag -> tag.getBoolean("value"));
     public static Serializer<String> STRING = of(SerializeUtils::ofString, tag -> tag.getString("value"));
+    public static Serializer<CompoundTag> UNIT = of(tag -> tag, tag -> tag);
 
-
-    public static Serializer<Vector3dc> VECTOR3D = of(
+    public static Serializer<Vector3dc> VECTOR3DC = of(
             vec -> {
                 CompoundTag tag = new CompoundTag();
                 tag.putDouble("x", vec.x());
@@ -38,7 +41,7 @@ public class SerializeUtils {
             },
             tag -> new Vector3d(tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"))
     );
-    public static Serializer<Quaterniondc> QUATERNION4D = of(
+    public static Serializer<Quaterniondc> QUATERNION4DC = of(
             quat -> {
                 CompoundTag tag = new CompoundTag();
                 tag.putDouble("x", quat.x());
@@ -50,16 +53,69 @@ public class SerializeUtils {
             tag -> new Quaterniond(tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"), tag.getDouble("w"))
     );
 
+    public static Serializer<Vector3d> VECTOR3D = of(
+            vec -> {
+                CompoundTag tag = new CompoundTag();
+                tag.putDouble("x", vec.x());
+                tag.putDouble("y", vec.y());
+                tag.putDouble("z", vec.z());
+                return tag;
+            },
+            tag -> new Vector3d(tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"))
+    );
+    public static Serializer<Quaterniond> QUATERNION4D = of(
+            quat -> {
+                CompoundTag tag = new CompoundTag();
+                tag.putDouble("x", quat.x());
+                tag.putDouble("y", quat.y());
+                tag.putDouble("z", quat.z());
+                tag.putDouble("w", quat.w());
+                return tag;
+            },
+            tag -> new Quaterniond(tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"), tag.getDouble("w"))
+    );
+
+    @SuppressWarnings("unchecked") // It's checked
+    public static<T extends Enum<?>> Serializer<T> ofEnum(Class<T> enumClazz){
+        return (Serializer<T>)EnumSerializerCache.computeIfAbsent(
+                enumClazz,
+                clazz_ ->
+                        new Serializer<T>() {
+                            final Class<T> clazz = enumClazz;
+
+                            @Override
+                            public CompoundTag serialize(@NotNull T obj) {
+                                return INT.serialize(obj.ordinal());
+                            }
+
+                            @Override
+                            public @NotNull T deserialize(CompoundTag tag) {
+                                int ordinal = INT.deserialize(tag);
+                                T validValue = clazz.getEnumConstants()[0];
+                                try{
+                                    validValue = clazz.getEnumConstants()[ordinal];
+                                }catch (IndexOutOfBoundsException e){
+                                    ControlCraft.LOGGER.error("receive ordinal: {}, but class {} does not contain that much elements", ordinal, clazz);
+                                }
+                                return validValue;
+                            }
+                        }
+                );
+
+    }
+
+
+
     public static Serializer<VSJointPose> JOINT_POSE = of(
             pose -> {
                 CompoundTag tag = new CompoundTag();
-                tag.put("p", VECTOR3D.serialize(pose.getPos()));
-                tag.put("q", QUATERNION4D.serialize(pose.getRot()));
+                tag.put("p", VECTOR3DC.serialize(pose.getPos()));
+                tag.put("q", QUATERNION4DC.serialize(pose.getRot()));
                 return tag;
             },
             tag -> new VSJointPose(
-                    VECTOR3D.deserialize(tag.getCompound("p")),
-                    QUATERNION4D.deserialize(tag.getCompound("q")))
+                    VECTOR3DC.deserialize(tag.getCompound("p")),
+                    QUATERNION4DC.deserialize(tag.getCompound("q")))
     );
 
     public static Serializer<ConnectContext> CONNECT_CONTEXT = of(
@@ -93,8 +149,8 @@ public class SerializeUtils {
             joint -> {
                 CompoundTag tag = new CompoundTag();
                 tag.put("joint", CONSTRAINT.serialize(joint));
-                tag.put("p_0", VECTOR3D.serialize(joint.getLocalPos0()));
-                tag.put("p_1", VECTOR3D.serialize(joint.getLocalPos1()));
+                tag.put("p_0", VECTOR3DC.serialize(joint.getLocalPos0()));
+                tag.put("p_1", VECTOR3DC.serialize(joint.getLocalPos1()));
                 tag.put("m_f", DOUBLE.serialize(joint.getMaxForce()));
                 tag.put("d", DOUBLE.serialize(joint.getFixedDistance()));
                 return tag;
@@ -105,8 +161,8 @@ public class SerializeUtils {
                         LONG.deserialize(commonJoint.getCompound("ship_id_0")),
                         LONG.deserialize(commonJoint.getCompound("ship_id_1")),
                         DOUBLE.deserialize(commonJoint.getCompound("compliance")),
-                        VECTOR3D.deserialize(tag.getCompound("p_0")),
-                        VECTOR3D.deserialize(tag.getCompound("p_1")),
+                        VECTOR3DC.deserialize(tag.getCompound("p_0")),
+                        VECTOR3DC.deserialize(tag.getCompound("p_1")),
                         DOUBLE.deserialize(tag.getCompound("m_f")),
                         DOUBLE.deserialize(tag.getCompound("d"))
                 );
@@ -118,8 +174,8 @@ public class SerializeUtils {
             joint -> {
                 CompoundTag tag = new CompoundTag();
                 tag.put("joint", CONSTRAINT.serialize(joint));
-                tag.put("q_0", QUATERNION4D.serialize(joint.getLocalRot0()));
-                tag.put("q_1", QUATERNION4D.serialize(joint.getLocalRot1()));
+                tag.put("q_0", QUATERNION4DC.serialize(joint.getLocalRot0()));
+                tag.put("q_1", QUATERNION4DC.serialize(joint.getLocalRot1()));
                 tag.put("m_t", DOUBLE.serialize(joint.getMaxTorque()));
                 return tag;
             },
@@ -129,8 +185,8 @@ public class SerializeUtils {
                         LONG.deserialize(commonJoint.getCompound("ship_id_0")),
                         LONG.deserialize(commonJoint.getCompound("ship_id_1")),
                         DOUBLE.deserialize(commonJoint.getCompound("compliance")),
-                        QUATERNION4D.deserialize(tag.getCompound("q_0")),
-                        QUATERNION4D.deserialize(tag.getCompound("q_1")),
+                        QUATERNION4DC.deserialize(tag.getCompound("q_0")),
+                        QUATERNION4DC.deserialize(tag.getCompound("q_1")),
                         DOUBLE.deserialize(tag.getCompound("m_t"))
                 );
             }
@@ -140,8 +196,8 @@ public class SerializeUtils {
             joint -> {
                 CompoundTag tag = new CompoundTag();
                 tag.put("joint", CONSTRAINT.serialize(joint));
-                tag.put("q_0", QUATERNION4D.serialize(joint.getLocalRot0()));
-                tag.put("q_1", QUATERNION4D.serialize(joint.getLocalRot1()));
+                tag.put("q_0", QUATERNION4DC.serialize(joint.getLocalRot0()));
+                tag.put("q_1", QUATERNION4DC.serialize(joint.getLocalRot1()));
                 tag.put("m_t", DOUBLE.serialize(joint.getMaxTorque()));
                 return tag;
             },
@@ -151,8 +207,8 @@ public class SerializeUtils {
                         LONG.deserialize(commonJoint.getCompound("ship_id_0")),
                         LONG.deserialize(commonJoint.getCompound("ship_id_1")),
                         DOUBLE.deserialize(commonJoint.getCompound("compliance")),
-                        QUATERNION4D.deserialize(tag.getCompound("q_0")),
-                        QUATERNION4D.deserialize(tag.getCompound("q_1")),
+                        QUATERNION4DC.deserialize(tag.getCompound("q_0")),
+                        QUATERNION4DC.deserialize(tag.getCompound("q_1")),
                         DOUBLE.deserialize(tag.getCompound("m_t"))
                 );
             }
@@ -162,10 +218,10 @@ public class SerializeUtils {
             joint -> {
                 CompoundTag tag = new CompoundTag();
                 tag.put("joint", CONSTRAINT.serialize(joint));
-                tag.put("p_0", VECTOR3D.serialize(joint.getLocalPos0()));
-                tag.put("p_1", VECTOR3D.serialize(joint.getLocalPos1()));
+                tag.put("p_0", VECTOR3DC.serialize(joint.getLocalPos0()));
+                tag.put("p_1", VECTOR3DC.serialize(joint.getLocalPos1()));
                 tag.put("m_f", DOUBLE.serialize(joint.getMaxForce()));
-                tag.put("axis", VECTOR3D.serialize(joint.getLocalSlideAxis0()));
+                tag.put("axis", VECTOR3DC.serialize(joint.getLocalSlideAxis0()));
                 tag.put("m_d", DOUBLE.serialize(joint.getMaxDistBetweenPoints()));
                 return tag;
             },
@@ -175,10 +231,10 @@ public class SerializeUtils {
                         LONG.deserialize(commonJoint.getCompound("ship_id_0")),
                         LONG.deserialize(commonJoint.getCompound("ship_id_1")),
                         DOUBLE.deserialize(commonJoint.getCompound("compliance")),
-                        VECTOR3D.deserialize(tag.getCompound("p_0")),
-                        VECTOR3D.deserialize(tag.getCompound("p_1")),
+                        VECTOR3DC.deserialize(tag.getCompound("p_0")),
+                        VECTOR3DC.deserialize(tag.getCompound("p_1")),
                         DOUBLE.deserialize(tag.getCompound("m_f")),
-                        VECTOR3D.deserialize(tag.getCompound("axis")),
+                        VECTOR3DC.deserialize(tag.getCompound("axis")),
                         DOUBLE.deserialize(tag.getCompound("m_d"))
                 );
             }

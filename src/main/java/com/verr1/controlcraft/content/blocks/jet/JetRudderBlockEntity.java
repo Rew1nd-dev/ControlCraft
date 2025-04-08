@@ -2,8 +2,10 @@ package com.verr1.controlcraft.content.blocks.jet;
 
 import com.simibubi.create.foundation.utility.Couple;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
+import com.verr1.controlcraft.content.blocks.NetworkBlockEntity;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
@@ -99,10 +101,15 @@ public class JetRudderBlockEntity extends OnShipBlockEntity implements
 
     public JetRudderBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        /*
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getTargetThrust, this::setTargetThrust, SerializeUtils.FLOAT, THRUST), Side.RUNTIME_SHARED);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getTargetHorizontalAngle, this::setTargetHorizontalAngle, SerializeUtils.FLOAT, HORIZONTAL), Side.RUNTIME_SHARED);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getTargetVerticalAngle, this::setTargetVerticalAngle, SerializeUtils.FLOAT, VERTICAL), Side.RUNTIME_SHARED);
 
+        * */
+        buildRegistry(THRUST).withBasic(SerializePort.of(this::getTargetThrust, this::setTargetThrust, SerializeUtils.FLOAT)).dispatchToSync().runtimeOnly().register();
+        buildRegistry(HORIZONTAL).withBasic(SerializePort.of(this::getTargetHorizontalAngle, this::setTargetHorizontalAngle, SerializeUtils.FLOAT)).dispatchToSync().runtimeOnly().register();
+        buildRegistry(VERTICAL).withBasic(SerializePort.of(this::getTargetVerticalAngle, this::setTargetVerticalAngle, SerializeUtils.FLOAT)).dispatchToSync().runtimeOnly().register();
     }
 
     public void setAnimatedAngles(double horizontal, double vertical, double thrust){
@@ -138,7 +145,7 @@ public class JetRudderBlockEntity extends OnShipBlockEntity implements
     @Override
     public void tickServer() {
         super.tickServer();
-        syncForNear(THRUST, HORIZONTAL, VERTICAL);
+        syncForNear(true, THRUST, HORIZONTAL, VERTICAL);
         // syncClient();
     }
 

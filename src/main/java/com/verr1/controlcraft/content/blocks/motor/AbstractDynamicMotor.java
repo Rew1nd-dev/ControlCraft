@@ -3,6 +3,9 @@ package com.verr1.controlcraft.content.blocks.motor;
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
+import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.DynamicMotorPeripheral;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.DynamicMotorForceInducer;
@@ -24,6 +27,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -41,7 +45,7 @@ import java.lang.Math;
 import java.util.List;
 import java.util.Optional;
 
-import static com.verr1.controlcraft.content.blocks.SharedKeys.CONTROLLER;
+import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 
 public abstract class AbstractDynamicMotor extends AbstractMotor implements
         IHaveGoggleInformation, IControllerProvider, ITerminalDevice, IPacketHandler
@@ -336,6 +340,82 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
     public AbstractDynamicMotor(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         registerConstraintKey("fix");
+
+        buildRegistry(CHEAT_MODE)
+                .withBasic(SerializePort.of(this::getCheatMode, this::setCheatMode, SerializeUtils.ofEnum(CheatMode.class)))
+                .withClient(ClientBuffer.of(CheatMode.class))
+                .register();
+
+        buildRegistry(TARGET_MODE)
+                .withBasic(SerializePort.of(this::getTargetMode, this::setTargetMode, SerializeUtils.ofEnum(TargetMode.class)))
+                .withClient(ClientBuffer.of(TargetMode.class))
+                .register();
+
+        buildRegistry(LOCK_MODE)
+                .withBasic(SerializePort.of(this::getLockMode, this::setLockMode, SerializeUtils.ofEnum(LockMode.class)))
+                .withClient(ClientBuffer.of(LockMode.class))
+                .register();
+
+        buildRegistry(IS_LOCKED)
+                .withBasic(SerializePort.of(this::isLocked, bl -> isLocked = bl, SerializeUtils.BOOLEAN))
+                .withClient(ClientBuffer.BOOLEAN.get())
+                .register();
+
+        buildRegistry(FIELD)
+                .withBasic(CompoundTagPort.of(
+                        ITerminalDevice.super::serialize,
+                        ITerminalDevice.super::deserializeUnchecked
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+                )
+                .dispatchToSync()
+                .register();
+
+        buildRegistry(CONTROLLER)
+                .withBasic(CompoundTagPort.of(
+                        () -> getController().serialize(),
+                        tag -> getController().deserialize(tag)
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+                )
+                .register();
+
+        buildRegistry(TARGET)
+                .withBasic(SerializePort.of(
+                        () -> getController().getTarget(),
+                        t -> getController().setTarget(t),
+                        SerializeUtils.DOUBLE
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.DOUBLE, Double.class)
+                )
+                .register();
+
+        buildRegistry(VALUE)
+                .withBasic(SerializePort.of(
+                        () -> getController().getValue(),
+                        $ -> {},
+                        SerializeUtils.DOUBLE
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.DOUBLE, Double.class)
+                )
+                .runtimeOnly()
+                .register();
+
+        buildRegistry(PLACE_HOLDER)
+                .withBasic(CompoundTagPort.of(
+                        CompoundTag::new,
+                        $ ->  {if(targetMode == TargetMode.VELOCITY)getController().setTarget(0);}
+                ))
+                .register();
+
+        /*
+
+
+
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> getCheatMode().name(), n -> setCheatMode(CheatMode.valueOf(n.toUpperCase())), SerializeUtils.STRING, SharedKeys.CHEAT_MODE), Side.SHARED);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> getTargetMode().name(), n -> setTargetMode(TargetMode.valueOf(n.toUpperCase())), SerializeUtils.STRING, SharedKeys.TARGET_MODE), Side.SHARED);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> getLockMode().name(), n -> setLockMode(LockMode.valueOf(n.toUpperCase())), SerializeUtils.STRING, SharedKeys.LOCK_MODE), Side.SHARED);
@@ -372,6 +452,9 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
                         SharedKeys.TARGET),
                 Side.SERVER_ONLY
         );
+        * */
+
+
     }
 
 

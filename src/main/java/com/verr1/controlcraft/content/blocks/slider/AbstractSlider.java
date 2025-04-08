@@ -3,8 +3,11 @@ package com.verr1.controlcraft.content.blocks.slider;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.ShipConnectorBlockEntity;
+import com.verr1.controlcraft.content.blocks.motor.AbstractDynamicMotor;
 import com.verr1.controlcraft.content.blocks.motor.AbstractMotor;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.foundation.api.IBruteConnectable;
 import com.verr1.controlcraft.foundation.api.IConstraintHolder;
@@ -56,8 +59,13 @@ public abstract class AbstractSlider extends ShipConnectorBlockEntity implements
 
     public AbstractSlider(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getSlideDistance, this::setClientDistance, SerializeUtils.DOUBLE, ANIMATED_DISTANCE), Side.RUNTIME_SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getOffset, this::setOffset, SerializeUtils.VECTOR3D, AbstractMotor.OFFSET), Side.SHARED);
+        // registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getSlideDistance, this::setClientDistance, SerializeUtils.DOUBLE, ANIMATED_DISTANCE), Side.RUNTIME_SHARED);
+        // registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getOffset, this::setOffset, SerializeUtils.VECTOR3D, AbstractMotor.OFFSET), Side.SHARED);
+
+        buildRegistry(ANIMATED_DISTANCE).withBasic(SerializePort.of(this::getSlideDistance, this::setClientDistance, SerializeUtils.DOUBLE)).dispatchToSync().runtimeOnly().register();
+        buildRegistry(AbstractDynamicMotor.OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getOffset()), this::setOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
+
+
         registerConstraintKey("slide");
         registerConstraintKey("orient");
     }
@@ -75,7 +83,7 @@ public abstract class AbstractSlider extends ShipConnectorBlockEntity implements
     @Override
     public void tickServer() {
         super.tickServer();
-        syncForNear(ANIMATED_DISTANCE);
+        syncForNear(true, ANIMATED_DISTANCE);
         // syncClient();
     }
 

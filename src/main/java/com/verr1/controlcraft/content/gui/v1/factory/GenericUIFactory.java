@@ -6,33 +6,26 @@ import com.verr1.controlcraft.content.blocks.OptionalSyncedBlockEntity;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.blocks.anchor.AnchorBlockEntity;
 import com.verr1.controlcraft.content.blocks.camera.CameraBlockEntity;
-import com.verr1.controlcraft.content.blocks.flap.FlapBearingBlockEntity;
 import com.verr1.controlcraft.content.blocks.jet.JetBlockEntity;
 import com.verr1.controlcraft.content.blocks.motor.AbstractDynamicMotor;
 import com.verr1.controlcraft.content.blocks.motor.AbstractMotor;
 import com.verr1.controlcraft.content.blocks.propeller.PropellerBlockEntity;
-import com.verr1.controlcraft.content.blocks.propeller.PropellerControllerBlockEntity;
 import com.verr1.controlcraft.content.blocks.receiver.ReceiverBlockEntity;
-import com.verr1.controlcraft.content.blocks.slider.DynamicSliderBlockEntity;
 import com.verr1.controlcraft.content.blocks.spatial.SpatialAnchorBlockEntity;
 import com.verr1.controlcraft.content.gui.v1.layouts.VerticalFlow;
 import com.verr1.controlcraft.content.gui.v1.layouts.api.ComponentLike;
 import com.verr1.controlcraft.content.gui.v1.layouts.api.Descriptive;
 import com.verr1.controlcraft.content.gui.v1.layouts.api.LabelProvider;
 import com.verr1.controlcraft.content.gui.v1.layouts.api.TitleLabelProvider;
-import com.verr1.controlcraft.content.gui.v1.layouts.preset.DynamicControllerUIField;
-import com.verr1.controlcraft.content.gui.v1.layouts.preset.SpatialScheduleUIField;
-import com.verr1.controlcraft.content.gui.v1.layouts.preset.TerminalDeviceUIField;
 import com.verr1.controlcraft.content.gui.v1.screens.GenericSettingScreen;
 import com.verr1.controlcraft.content.gui.v1.layouts.element.*;
 import com.verr1.controlcraft.content.gui.v1.widgets.FormattedLabel;
-import com.verr1.controlcraft.content.gui.v2.element.BooleanUIField;
-import com.verr1.controlcraft.content.gui.v2.element.DoubleUIField;
-import com.verr1.controlcraft.content.gui.v2.element.DoubleUIView;
+import com.verr1.controlcraft.content.gui.v2.element.*;
+import com.verr1.controlcraft.content.gui.v2.preset.DynamicControllerUIField;
+import com.verr1.controlcraft.content.gui.v2.preset.SpatialScheduleUIField;
+import com.verr1.controlcraft.content.gui.v2.preset.TerminalDeviceUIField;
 import com.verr1.controlcraft.foundation.BlockEntityGetter;
-import com.verr1.controlcraft.foundation.api.IControllerProvider;
 import com.verr1.controlcraft.foundation.api.IKinematicUIDevice;
-import com.verr1.controlcraft.foundation.api.IScheduleProvider;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.data.PeripheralKey;
@@ -245,6 +238,9 @@ public class GenericUIFactory {
 
 
     public static GenericSettingScreen createPropellerControllerScreen(BlockPos boundPos){
+
+
+        /*
         DoubleUIView_ speed_view = DoubleUIView_.of(
                 () -> boundBlockEntity(boundPos, PropellerControllerBlockEntity.class).map(be -> String.format("%.4f", be.rotationalSpeed.read())).orElse("Not Found"),
                 convert(ExposedFieldType.SPEED, GenericUIFactory::applyCommonViewStyle)
@@ -255,6 +251,12 @@ public class GenericUIFactory {
                 () -> boundBlockEntity(boundPos, PropellerControllerBlockEntity.class).map(e -> e.rotationalSpeed.read()).orElse(0.0),
                 convert(ExposedFieldType.SPEED, GenericUIFactory::applyCommonTitleStyle)
         );
+        * */
+
+        var speed_view = new DoubleUIView(boundPos, SharedKeys.VALUE, convert(ExposedFieldType.SPEED, GenericUIFactory::applyCommonViewStyle));
+
+        var speed = new DoubleUIField(boundPos, SharedKeys.VALUE, convert(ExposedFieldType.SPEED, GenericUIFactory::applyCommonViewStyle));
+
 
         Runnable alignLabels = () -> alignLabel(speed, speed_view);
 
@@ -278,6 +280,8 @@ public class GenericUIFactory {
     }
 
     public static GenericSettingScreen createJetScreen(BlockPos boundPos){
+
+        /*
         DoubleUIView_ thrust_view = DoubleUIView_.of(
                 () -> boundBlockEntity(boundPos, JetBlockEntity.class).map(be -> String.format("%.4f", be.thrust.read())).orElse("Not Found"),
                 convert(ExposedFieldType.THRUST, GenericUIFactory::applyCommonViewStyle)
@@ -311,6 +315,22 @@ public class GenericUIFactory {
                 () -> boundBlockEntity(boundPos, JetBlockEntity.class).map(e -> e.verticalAngle.read()).orElse(0.0),
                 convert(ExposedFieldType.VERTICAL_TILT, GenericUIFactory::applyCommonTitleStyle)
         );
+        * */
+
+        var thrust_view = new DoubleUIView(boundPos, JetBlockEntity.THRUST, convert(ExposedFieldType.THRUST, GenericUIFactory::applyCommonViewStyle));
+
+        var horizontal_view = new DoubleUIView(boundPos, JetBlockEntity.HORIZONTAL_ANGLE, convert(ExposedFieldType.HORIZONTAL_TILT, GenericUIFactory::applyCommonViewStyle));
+
+        var vertical_view = new DoubleUIView(boundPos, JetBlockEntity.VERTICAL_ANGLE, convert(ExposedFieldType.VERTICAL_TILT, GenericUIFactory::applyCommonViewStyle));
+
+        var thrust = new DoubleUIField(boundPos, JetBlockEntity.THRUST, convert(ExposedFieldType.THRUST, GenericUIFactory::applyCommonViewStyle));
+
+        var horizontal = new DoubleUIField(boundPos, JetBlockEntity.HORIZONTAL_ANGLE, convert(ExposedFieldType.HORIZONTAL_TILT, GenericUIFactory::applyCommonViewStyle));
+
+        var vertical = new DoubleUIField(boundPos, JetBlockEntity.VERTICAL_ANGLE, convert(ExposedFieldType.VERTICAL_TILT, GenericUIFactory::applyCommonViewStyle));
+
+
+
         Runnable alignLabels = () -> alignLabel(thrust, horizontal, vertical);
 
         return new GenericSettingScreen.builder(boundPos)
@@ -360,6 +380,8 @@ public class GenericUIFactory {
     }
 
     public static GenericSettingScreen createDynamicMotorScreen(BlockPos boundPos, ItemStack stack){
+
+        /*
         DoubleUIView_ current_view = DoubleUIView_.of(
                 () -> boundBlockEntity(boundPos, AbstractDynamicMotor.class).map(be -> String.format("%.4f", be.getController().getValue())).orElse("Not Found"),
                 convert(UIContents.CURRENT, GenericUIFactory::applyCommonViewStyle)
@@ -397,6 +419,31 @@ public class GenericUIFactory {
                 convert(UIContents.OFFSET, GenericUIFactory::applyCommonTitleStyle),
                 25
         );
+        * */
+
+        var current_view = new DoubleUIView(boundPos, SharedKeys.VALUE, convert(UIContents.CURRENT, GenericUIFactory::applyCommonViewStyle));
+
+        var lock_view = new BasicUIView<>(
+                boundPos,
+                SharedKeys.IS_LOCKED,
+                Boolean.class,
+                false,
+                convert(UIContents.LOCKED, GenericUIFactory::applyCommonViewStyle),
+                GenericUIFactory::lockViewComponent,
+                $ -> false
+        );
+
+        var target = new DoubleUIField(boundPos, SharedKeys.TARGET, convert(UIContents.TARGET, GenericUIFactory::applyCommonTitleStyle));
+
+        var toggle_mode = new OptionUIField<>(boundPos, SharedKeys.TARGET_MODE, TargetMode.class, convert(UIContents.MODE, GenericUIFactory::applyCommonTitleStyle));
+
+        var toggle_cheat = new OptionUIField<>(boundPos, SharedKeys.CHEAT_MODE, CheatMode.class, convert(UIContents.CHEAT, GenericUIFactory::applyCommonTitleStyle));
+
+        var toggle_lock_mode = new OptionUIField<>(boundPos, SharedKeys.LOCK_MODE, LockMode.class, convert(UIContents.AUTO_LOCK, GenericUIFactory::applyCommonTitleStyle));
+
+        var offset = new Vector3dUIField(boundPos, AbstractDynamicMotor.OFFSET, convert(UIContents.OFFSET, GenericUIFactory::applyCommonTitleStyle), 25);
+
+
         Runnable alignLabels = () -> {
             alignLabel(current_view, lock_view, target);
             alignLabel(toggle_mode, toggle_cheat, toggle_lock_mode);
@@ -431,37 +478,26 @@ public class GenericUIFactory {
     }
 
     public static GenericSettingScreen createDynamicSliderScreen(BlockPos boundPos, ItemStack stack){
-        DoubleUIView_ current_view = DoubleUIView_.of(
-                () -> boundBlockEntity(boundPos, DynamicSliderBlockEntity.class).map(be -> String.format("%.4f", be.getController().getValue())).orElse("Not Found"),
-                convert(UIContents.CURRENT, GenericUIFactory::applyCommonViewStyle)
+        var current_view = new DoubleUIView(boundPos, SharedKeys.VALUE, convert(UIContents.CURRENT, GenericUIFactory::applyCommonViewStyle));
+
+        var lock_view = new BasicUIView<>(
+                boundPos,
+                SharedKeys.IS_LOCKED,
+                Boolean.class,
+                false,
+                convert(UIContents.LOCKED, GenericUIFactory::applyCommonViewStyle),
+                GenericUIFactory::lockViewComponent,
+                $ -> false
         );
-        ComponentUIView_1 lock_view = new ComponentUIView_1(
-                () -> boundBlockEntity(boundPos, DynamicSliderBlockEntity.class).map(be -> lockViewComponent(be.isLocked())).orElse(NOT_FOUND),
-                convert(UIContents.LOCKED, GenericUIFactory::applyCommonViewStyle)
-        );
-        DoubleUIField_ target = new DoubleUIField_(
-                d -> boundBlockEntity(boundPos, DynamicSliderBlockEntity.class).ifPresent(be -> be.getController().setTarget(d)),
-                () -> boundBlockEntity(boundPos, DynamicSliderBlockEntity.class).map(be -> be.getController().getTarget()).orElse(0.0),
-                convert(UIContents.TARGET, GenericUIFactory::applyCommonTitleStyle)
-        );
-        OptionUIField_<TargetMode> toggle_mode = new OptionUIField_<>(
-                m -> boundBlockEntity(boundPos, DynamicSliderBlockEntity.class).ifPresent(be -> be.setTargetMode(m)),
-                () -> boundBlockEntity(boundPos, DynamicSliderBlockEntity.class).map(DynamicSliderBlockEntity::getTargetMode).orElse(TargetMode.POSITION),
-                TargetMode.class,
-                convert(UIContents.MODE, GenericUIFactory::applyCommonTitleStyle)
-        );
-        OptionUIField_<CheatMode> toggle_cheat = new OptionUIField_<>(
-                m -> boundBlockEntity(boundPos, DynamicSliderBlockEntity.class).ifPresent(be -> be.setCheatMode(m)),
-                () -> boundBlockEntity(boundPos, DynamicSliderBlockEntity.class).map(DynamicSliderBlockEntity::getCheatMode).orElse(CheatMode.NONE),
-                CheatMode.class,
-                convert(UIContents.CHEAT, GenericUIFactory::applyCommonTitleStyle)
-        );
-        OptionUIField_<LockMode> toggle_lock_mode = new OptionUIField_<>(
-                m -> boundBlockEntity(boundPos, DynamicSliderBlockEntity.class).ifPresent(be -> be.setLockMode(m)),
-                () -> boundBlockEntity(boundPos, DynamicSliderBlockEntity.class).map(DynamicSliderBlockEntity::getLockMode).orElse(LockMode.OFF),
-                LockMode.class,
-                convert(UIContents.AUTO_LOCK, GenericUIFactory::applyCommonTitleStyle)
-        );
+
+        var target = new DoubleUIField(boundPos, SharedKeys.TARGET, convert(UIContents.TARGET, GenericUIFactory::applyCommonTitleStyle));
+
+        var toggle_mode = new OptionUIField<>(boundPos, SharedKeys.TARGET_MODE, TargetMode.class, convert(UIContents.MODE, GenericUIFactory::applyCommonTitleStyle));
+
+        var toggle_cheat = new OptionUIField<>(boundPos, SharedKeys.CHEAT_MODE, CheatMode.class, convert(UIContents.CHEAT, GenericUIFactory::applyCommonTitleStyle));
+
+        var toggle_lock_mode = new OptionUIField<>(boundPos, SharedKeys.LOCK_MODE, LockMode.class, convert(UIContents.AUTO_LOCK, GenericUIFactory::applyCommonTitleStyle));
+
         Runnable alignLabels = () -> {
             alignLabel(current_view, lock_view, target);
             alignLabel(toggle_mode, toggle_cheat, toggle_lock_mode);
@@ -495,7 +531,7 @@ public class GenericUIFactory {
     }
 
 
-    public static GenericSettingScreen createTestPeripheralInterfaceScreen(BlockPos boundPos){
+    public static GenericSettingScreen createPeripheralInterfaceScreen(BlockPos boundPos){
         ComponentUIView_1 type_view = new ComponentUIView_1(
                 () -> boundBlockEntity(boundPos, NetworkBlockEntity.class)
                         .map(be -> be.readClientBuffer(ReceiverBlockEntity.PERIPHERAL_TYPE, String.class))
@@ -549,34 +585,10 @@ public class GenericUIFactory {
                 .build();
     }
 
-    public static GenericSettingScreen createPeripheralInterfaceScreen(BlockPos boundPos){
-        ComponentUIView_1 type_view = new ComponentUIView_1(
-                () -> boundBlockEntity(boundPos, ReceiverBlockEntity.class).map(be -> Component.literal(be.getClientViewType())).orElse(NOT_FOUND.copy()),
-                convert(UIContents.TYPE, GenericUIFactory::applyCommonViewStyle)
-        );
-
-        PeripheralKeyUIField_ key_field = new PeripheralKeyUIField_(
-                k -> boundBlockEntity(boundPos, ReceiverBlockEntity.class).ifPresent(be -> be.dispatchKey(k)),
-                () -> boundBlockEntity(boundPos, ReceiverBlockEntity.class).map(ReceiverBlockEntity::getClientViewKey).orElse(PeripheralKey.NULL)
-        );
-
-        key_field.getNameLabel().withTextStyle(GenericUIFactory::applyCommonTitleStyle);
-        key_field.getProtocolLabel().withTextStyle(GenericUIFactory::applyCommonTitleStyle);
-
-        return new GenericSettingScreen.builder(boundPos)
-                .withRenderedStack(ControlCraftBlocks.RECEIVER_BLOCK.asStack())
-                .withTab(
-                        "general",
-                        new VerticalFlow.builder(boundPos)
-                                .withPort(ReceiverBlockEntity.PERIPHERAL_TYPE, type_view)
-                                .withPort(ReceiverBlockEntity.PERIPHERAL, key_field)
-                                .build()
-                )
-                .withBackground(ControlCraftGuiTextures.SIMPLE_BACKGROUND_HALF)
-                .build();
-    }
 
     public static GenericSettingScreen createSpatialAnchorScreen(BlockPos pos){
+
+        /*
         DoubleUIField_ offset_field = new DoubleUIField_(
                 d -> boundBlockEntity(pos, SpatialAnchorBlockEntity.class).ifPresent(be -> be.setAnchorOffset(d)),
                 () -> boundBlockEntity(pos, SpatialAnchorBlockEntity.class).map(SpatialAnchorBlockEntity::getAnchorOffset).orElse(0.0),
@@ -601,6 +613,18 @@ public class GenericUIFactory {
                 () -> boundBlockEntity(pos, SpatialAnchorBlockEntity.class).map(SpatialAnchorBlockEntity::isStatic).orElse(false),
                 ExposedFieldType.IS_STATIC
         );
+        * */
+
+        var offset_field = new DoubleUIField(pos, SpatialAnchorBlockEntity.OFFSET, UIContents.SPATIAL_OFFSET);
+
+        var protocol_field = new LongUIField(pos, SpatialAnchorBlockEntity.PROTOCOL, UIContents.PROTOCOL);
+
+        var is_running_field = new BooleanUIField(pos, SpatialAnchorBlockEntity.IS_RUNNING, ExposedFieldType.IS_RUNNING);
+
+        var is_static_field = new BooleanUIField(pos, SpatialAnchorBlockEntity.IS_STATIC, ExposedFieldType.IS_STATIC);
+
+
+
 
         Runnable alignLabels = () -> {
             alignLabel(offset_field, protocol_field);
@@ -630,7 +654,7 @@ public class GenericUIFactory {
     }
 
     public static GenericSettingScreen createKinematicDeviceScreen(BlockPos boundPos, ItemStack stack){
-
+        /*
         DoubleUIView_ current_view = DoubleUIView_.of(
                 () -> boundBlockEntity(boundPos, IKinematicUIDevice.class).map(be -> String.format("%.4f", be.getController().getTarget())).orElse("Not Found"),
                 convert(UIContents.CURRENT, GenericUIFactory::applyCommonViewStyle)
@@ -661,6 +685,18 @@ public class GenericUIFactory {
                 TargetMode.class,
                 convert(UIContents.MODE, GenericUIFactory::applyCommonTitleStyle)
         );
+        * */
+
+        var current_view = new DoubleUIView(boundPos, SharedKeys.VALUE, convert(UIContents.CURRENT, GenericUIFactory::applyCommonViewStyle));
+
+        var target_field = new DoubleUIField(boundPos, SharedKeys.TARGET, convert(UIContents.TARGET, GenericUIFactory::applyCommonTitleStyle));
+
+        var offset = new Vector3dUIField(boundPos, AbstractMotor.OFFSET, convert(UIContents.OFFSET, GenericUIFactory::applyCommonTitleStyle), 25);
+
+        var compliance_field = new DoubleUIField(boundPos, SharedKeys.COMPLIANCE, convert(UIContents.COMPLIANCE, GenericUIFactory::applyCommonTitleStyle));
+
+        var toggle_mode = new OptionUIField<>(boundPos, SharedKeys.TARGET_MODE, TargetMode.class, convert(UIContents.MODE, GenericUIFactory::applyCommonTitleStyle));
+
 
         Runnable alignLabels = () -> alignLabel(current_view, target_field, compliance_field, toggle_mode);
 
@@ -719,7 +755,7 @@ public class GenericUIFactory {
         return new VerticalFlow.builder(boundPos)
                 .withPort(
                         ITerminalDevice.FIELD,
-                        new TerminalDeviceUIField(() -> boundBlockEntity(boundPos, ITerminalDevice.class).orElse(null))
+                        new TerminalDeviceUIField(boundPos)
                 ).build();
     }
 
@@ -727,7 +763,7 @@ public class GenericUIFactory {
         return new VerticalFlow.builder(boundPos)
                 .withPort(
                         SharedKeys.CONTROLLER,
-                        new DynamicControllerUIField(() -> boundBlockEntity(boundPos, IControllerProvider.class).orElse(null))
+                        new DynamicControllerUIField(boundPos, 30)
                 ).build();
     }
 
@@ -736,7 +772,7 @@ public class GenericUIFactory {
         return new VerticalFlow.builder(boundPos)
                 .withPort(
                         SCHEDULE,
-                        new SpatialScheduleUIField(() -> boundBlockEntity(boundPos, IScheduleProvider.class).orElse(null))
+                        new SpatialScheduleUIField(boundPos, 25)
                 ).build();
     }
 
