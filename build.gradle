@@ -224,7 +224,9 @@ dependencies {
     implementation fg.deobf("libs:createbigcannons:5.8.3")
 
     // minecraftLibrary("org.jgrapht:jgrapht-core:1.5.2")
-    implementation fg.deobf("libs:valkyrien-ship-schematics-forge:1.0")
+    implementation fg.deobf(jarJar("libs:valkyrien-ship-schematics-forge:1.0")){
+        jarJar.ranged(it, "[1.0,)")
+    }
     // implementation fg.deobf("libs:VMod-Forge-1.20.1:1.0.0")
 
     implementation fg.deobf("com.rbasamoyai:ritchiesprojectilelib:${rpl_version}+mc.${minecraft_version}-forge-build." + rpl_build){ transitive = false }

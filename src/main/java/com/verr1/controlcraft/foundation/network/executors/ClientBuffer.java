@@ -1,6 +1,6 @@
 package com.verr1.controlcraft.foundation.network.executors;
 
-import com.verr1.controlcraft.foundation.api.Unnamed;
+import com.verr1.controlcraft.foundation.api.Slot;
 import com.verr1.controlcraft.foundation.data.constraint.ConnectContext;
 import com.verr1.controlcraft.utils.SerializeUtils;
 import net.minecraft.nbt.CompoundTag;
@@ -10,7 +10,7 @@ import org.joml.Vector3d;
 
 import java.util.function.Supplier;
 
-public class ClientBuffer<T> implements Unnamed<CompoundTag> {
+public class ClientBuffer<T> implements Slot<CompoundTag> {
 
     public static Supplier<ClientBuffer<Double>> DOUBLE = () -> new ClientBuffer<>(SerializeUtils.DOUBLE, Double.class);
     public static Supplier<ClientBuffer<Float>> FLOAT = () -> new ClientBuffer<>(SerializeUtils.FLOAT, Float.class);

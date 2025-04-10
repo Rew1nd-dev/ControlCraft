@@ -1,6 +1,6 @@
 package com.verr1.controlcraft.foundation.type.descriptive;
 
-import com.verr1.controlcraft.content.gui.v1.layouts.api.Descriptive;
+import com.verr1.controlcraft.content.gui.layouts.api.Descriptive;
 import com.verr1.controlcraft.utils.LangUtils;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;

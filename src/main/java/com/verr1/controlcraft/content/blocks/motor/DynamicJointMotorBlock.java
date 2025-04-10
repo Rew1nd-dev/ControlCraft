@@ -5,7 +5,8 @@ import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.gui.ScreenOpener;
-import com.verr1.controlcraft.content.gui.v1.factory.GenericUIFactory;
+import com.verr1.controlcraft.content.compact.vmod.CopyableMotor;
+import com.verr1.controlcraft.content.gui.factory.GenericUIFactory;
 import com.verr1.controlcraft.foundation.api.ISignalAcceptor;
 import com.verr1.controlcraft.registry.ControlCraftBlockEntities;
 import com.verr1.controlcraft.registry.ControlCraftBlocks;
@@ -35,7 +36,7 @@ import static com.verr1.controlcraft.registry.ControlCraftShapes.HALF_BOX_BASE;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class DynamicJointMotorBlock extends DirectionalAxisKineticBlock implements
-        IBE<DynamicJointMotorBlockEntity>, IWrenchable, ISignalAcceptor
+        IBE<DynamicJointMotorBlockEntity>, IWrenchable, ISignalAcceptor, CopyableMotor
 {
     public static final String ID = "joint";
 
@@ -78,8 +79,6 @@ public class DynamicJointMotorBlock extends DirectionalAxisKineticBlock implemen
         }
         if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty() && player.isShiftKeyDown()) {
             withBlockEntityDo(worldIn, pos, DynamicJointMotorBlockEntity::assemble);
-        }else if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
-            // withBlockEntityDo(worldIn, pos, be -> be.displayScreen((ServerPlayer) player));
         }
         return InteractionResult.PASS;
     }

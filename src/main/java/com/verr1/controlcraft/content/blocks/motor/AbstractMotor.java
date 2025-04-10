@@ -3,6 +3,7 @@ package com.verr1.controlcraft.content.blocks.motor;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.ShipConnectorBlockEntity;
+import com.verr1.controlcraft.content.compact.vmod.VSchematicCompactCenter;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
@@ -19,6 +20,7 @@ import com.verr1.controlcraft.utils.SerializeUtils;
 import com.verr1.controlcraft.utils.VSMathUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies.toJOML;
+import static com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies.toMinecraft;
 
 public abstract class AbstractMotor extends ShipConnectorBlockEntity implements IBruteConnectable
 {
@@ -47,7 +50,7 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
     protected float clientAngle = 0;
     protected final LerpedFloat clientLerpedAngle = LerpedFloat.angular();
 
-    protected ConnectContext context = ConnectContext.EMPTY;
+    public ConnectContext context = ConnectContext.EMPTY;
     protected Vector3d offset = new Vector3d();
 
     public AbstractMotor(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -182,6 +185,7 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
         recreateRevoluteConstraints(hingeConstraint, attachment_1, attachment_2);
         setCompanionShipID(compId);
         setCompanionShipDirection(getServoDirection().getOpposite());
+        setBlockConnectContext(new BlockPos(toMinecraft(new Vector3i().set(p_comp))));
         setStartingAngleOfCompanionShip();
         setChanged();
     }
@@ -233,9 +237,8 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
     }
 
     @Override
-    public void bruteDirectionalConnectWith(BlockPos bp_comp, Direction align, Direction forward) {
-        Direction direction_serv = getServoDirection();
-        Direction direction_comp = forward; ///.getOpposite();
+    public void bruteDirectionalConnectWith(BlockPos bp_comp, Direction align, Direction direction_comp) {
+        Direction direction_serv = getServoDirection();///.getOpposite();
         Ship compShip = ValkyrienSkies.getShipManagingBlock(level, bp_comp);
         if(compShip == null)return;
         long selfId = getShipOrGroundID();
@@ -291,6 +294,7 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
         recreateRevoluteConstraints(hingeConstraint, attachment_1, attachment_2);
         setCompanionShipID(compId);
         setCompanionShipDirection(direction_comp);
+        setBlockConnectContext(bp_comp);
         setStartingAngleOfCompanionShip();
         setChanged();
 
@@ -332,4 +336,9 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
 
     public abstract void setStartingAngleOfCompanionShip();
 
+
+    @Override
+    protected void readExtra(CompoundTag compound) {
+        VSchematicCompactCenter.PostMotorReadVModCompact(this, compound);
+    }
 }

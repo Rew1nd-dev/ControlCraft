@@ -3,7 +3,8 @@ package com.verr1.controlcraft.content.blocks.motor;
 import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.gui.ScreenOpener;
-import com.verr1.controlcraft.content.gui.v1.factory.GenericUIFactory;
+import com.verr1.controlcraft.content.compact.vmod.CopyableMotor;
+import com.verr1.controlcraft.content.gui.factory.GenericUIFactory;
 import com.verr1.controlcraft.foundation.api.ISignalAcceptor;
 import com.verr1.controlcraft.registry.ControlCraftBlockEntities;
 import com.verr1.controlcraft.registry.ControlCraftBlocks;
@@ -29,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import static com.verr1.controlcraft.registry.ControlCraftShapes.HALF_BOX_BASE;
 
 public class DynamicRevoluteMotorBlock extends DirectionalKineticBlock implements
-        IBE<DynamicRevoluteMotorBlockEntity>, ISignalAcceptor
+        IBE<DynamicRevoluteMotorBlockEntity>, ISignalAcceptor, CopyableMotor
 {
 
     public static String ID = "servo";

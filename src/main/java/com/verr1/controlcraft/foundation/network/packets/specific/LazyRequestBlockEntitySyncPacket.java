@@ -3,8 +3,6 @@ package com.verr1.controlcraft.foundation.network.packets.specific;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.controlcraft.content.blocks.NetworkBlockEntity;
-import com.verr1.controlcraft.content.blocks.OptionalSyncedBlockEntity;
-import com.verr1.controlcraft.foundation.api.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;

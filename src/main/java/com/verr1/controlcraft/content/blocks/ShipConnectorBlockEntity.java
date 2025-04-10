@@ -6,6 +6,8 @@ import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.data.constraint.ConstraintKey;
 import com.verr1.controlcraft.foundation.data.ShipPhysics;
 import com.verr1.controlcraft.foundation.managers.ConstraintCenter;
+import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import com.verr1.controlcraft.utils.SerializeUtils;
@@ -31,13 +33,21 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
 {
     private long companionShipID;
     private Direction companionShipDirection = Direction.UP;
+
+
+
+    private BlockPos blockConnectContext = BlockPos.ZERO;
     private final Map<String, ConstraintKey> registeredConstraintKeys = new HashMap<>();
 
     public static final NetworkKey COMPANION = NetworkKey.create("companion");
     public static final NetworkKey COMPANION_DIRECTION = NetworkKey.create("companion_direction");
+    public static final NetworkKey BLOCK_CONNECT_CONTEXT = NetworkKey.create("block_connect_context");
 
     public ShipConnectorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        buildRegistry(COMPANION).withBasic(SerializePort.of(this::getCompanionShipID, this::setCompanionShipID, SerializeUtils.LONG)).dispatchToSync().register();
+        buildRegistry(COMPANION_DIRECTION).withBasic(SerializePort.of(() -> companionShipDirection, d -> companionShipDirection = d, SerializeUtils.ofEnum(Direction.class))).dispatchToSync().register();
+        buildRegistry(BLOCK_CONNECT_CONTEXT).withBasic(SerializePort.of(() -> blockConnectContext.asLong(), l -> blockConnectContext = BlockPos.of(l), SerializeUtils.LONG)).register();
 
         /*
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getCompanionShipID, this::setCompanionShipID, SerializeUtils.LONG, COMPANION), Side.SHARED);
@@ -50,6 +60,14 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
         * */
 
 
+    }
+
+    public BlockPos blockConnectContext() {
+        return blockConnectContext;
+    }
+
+    public void setBlockConnectContext(BlockPos blockConnectContext) {
+        this.blockConnectContext = blockConnectContext;
     }
 
     public void registerConstraintKey(String id){
@@ -85,7 +103,7 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
     protected void setCompanionShipID(long companionShipID) {
         this.companionShipID = companionShipID;
         if(level != null && level.isClientSide)return;
-        syncForAllPlayers(COMPANION);
+        syncForAllPlayers(true, COMPANION);
     }
 
     protected long getCompanionShipID() {
@@ -113,7 +131,7 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
     public void setCompanionShipDirection(@NotNull Direction direction){
         this.companionShipDirection = direction;
         if(level != null && level.isClientSide)return;
-        syncForAllPlayers(COMPANION_DIRECTION);
+        syncForAllPlayers(true, COMPANION_DIRECTION);
     }
 
     public Vector3d getCompanionShipAlignJOML(){
@@ -132,6 +150,7 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
     public void clearCompanionShipInfo(){
         setCompanionShipID(-1);
         setCompanionShipDirection(Direction.UP);
+        setBlockConnectContext(BlockPos.ZERO);
     }
 
     @Override

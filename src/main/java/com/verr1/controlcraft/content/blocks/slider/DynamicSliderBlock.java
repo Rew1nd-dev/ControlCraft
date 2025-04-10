@@ -4,7 +4,7 @@ import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.gui.ScreenOpener;
-import com.verr1.controlcraft.content.gui.v1.factory.GenericUIFactory;
+import com.verr1.controlcraft.content.gui.factory.GenericUIFactory;
 import com.verr1.controlcraft.foundation.api.ISignalAcceptor;
 import com.verr1.controlcraft.registry.ControlCraftBlockEntities;
 import com.verr1.controlcraft.registry.ControlCraftBlocks;

@@ -2,8 +2,6 @@ package com.verr1.controlcraft.foundation.network.packets.specific;
 
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.controlcraft.content.blocks.NetworkBlockEntity;
-import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
-import com.verr1.controlcraft.content.blocks.OptionalSyncedBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;

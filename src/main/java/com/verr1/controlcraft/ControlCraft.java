@@ -150,7 +150,7 @@ public class ControlCraft
         // Some common setup code
         LOGGER.info("HELLO FROM COMMON SETUP");
 
-        if (Config.OverclockComputerCraft) LOGGER.info("CC OverClocked");
+        if (Config.OVERCLOCK_COMPUTERCRAFT) LOGGER.info("CC OverClocked");
 
 
     }

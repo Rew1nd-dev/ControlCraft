@@ -1,5 +1,6 @@
 package com.verr1.controlcraft.content.blocks.propeller;
 
+import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
@@ -47,7 +48,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
-        ITerminalDevice, IPacketHandler
+        ITerminalDevice, IPacketHandler, IHaveGoggleInformation
 {
     public boolean hasAttachedPropeller = false;
 
@@ -100,6 +101,7 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
     @Override
     public void tickServer() {
         super.tickServer();
+        syncForNear(true, FIELD);
         syncAttachedPropeller();
         syncAttachedInducer();
     }
@@ -180,12 +182,14 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
                 .ifPresent(inducer -> inducer.alive(WorldBlockPos.of(level, getBlockPos())));
     }
 
-
+    /*
     @Override
     public void onSpeedChanged(float previousSpeed) {
         super.onSpeedChanged(previousSpeed);
         rotationalSpeed.write((double)speed);
     }
+    * */
+
 
     @Override
     public void destroy(){

@@ -2,9 +2,11 @@
   "required": true,
   "refmap": "mixins.controlcraft.refmap.json",
   "mixins": [
+    "MixinCommonHooks",
     "MixinContraption",
     "MixinEntity",
-    "MixinVSGameUtilsKt"
+    "MixinVSGameUtilsKt",
+    "accessor.ShipObjectServerWorldAccessor"
   ],
   "package": "com.verr1.controlcraft.mixin",
   "injectors": {

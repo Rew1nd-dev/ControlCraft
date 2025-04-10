@@ -6,8 +6,9 @@ import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
-import com.verr1.controlcraft.foundation.type.Side;
-import com.verr1.controlcraft.content.gui.TerminalMenu;
+import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
+import com.verr1.controlcraft.content.gui.screens.TerminalMenu;
 import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
@@ -16,7 +17,6 @@ import com.verr1.controlcraft.utils.SerializeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -73,9 +73,6 @@ public class TerminalBlockEntity extends OnShipBlockEntity implements
         this.exposedChannel = exposedChannel;
     }
 
-    private void clearChannelField(){
-        channels.forEach(e -> e.setField(ExposedFieldWrapper.EMPTY));
-    }
 
     public List<TerminalChannel> getChannels(){
         return channels;
@@ -107,16 +104,6 @@ public class TerminalBlockEntity extends OnShipBlockEntity implements
         }
     }
 
-    public List<Couple<Double>> getMinMax(){
-        return channels.stream().map(TerminalChannel::getMinMax).toList();
-    }
-
-    @Override
-    public void lazyTick() {
-        super.lazyTick();
-        if(level == null || level.isClientSide)return;
-        // updateKeys(channels.stream().map(TerminalChannel::getNetworkKey).toList());
-    }
 
     public void syncAttachedDevice(){
         if(level == null || level.isClientSide)return;
@@ -130,10 +117,6 @@ public class TerminalBlockEntity extends OnShipBlockEntity implements
     public void tick() {
         super.tick();
         syncAttachedDevice();
-    }
-
-    public List<ExposedFieldWrapper> getAttachedNumericFields() {
-        return channels.stream().map(TerminalChannel::getField).toList();
     }
 
     public String getAttachedDeviceName(){
@@ -191,6 +174,12 @@ public class TerminalBlockEntity extends OnShipBlockEntity implements
 
     public TerminalBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+
+        buildRegistry(EXPOSED_CHANNEL).withBasic(SerializePort.of(() -> exposedChannel, i -> exposedChannel = i, SerializeUtils.INT)).register();
+        buildRegistry(CHANNEL).withBasic(CompoundTagPort.of(this::serializeChannels, this::deserializeChannels)).register();
+        buildRegistry(WRAPPER).withBasic(CompoundTagPort.of(wrapper::saveToTag, wrapper::loadFromTag)).register();
+
+        /*
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(
                     () -> exposedChannel,
                     i -> exposedChannel = i,
@@ -211,7 +200,20 @@ public class TerminalBlockEntity extends OnShipBlockEntity implements
                         WRAPPER),
                 Side.SERVER_ONLY
         );
+        * */
+    }
 
+    private CompoundTag serializeChannels(){
+        CompoundTag wrap = new CompoundTag();
+        CompoundTag channelTag = new CompoundTag();
+        channels.forEach(e -> channelTag.put("channel_" + channels.indexOf(e), e.serialize()));
+        wrap.put("channel tags", channelTag);
+        return wrap;
+    }
+
+    private void deserializeChannels(CompoundTag wrap){
+        CompoundTag channelTag = wrap.getCompound("channel tags");
+        channels.forEach(e -> e.deserialize(channelTag.getCompound("channel_" + channels.indexOf(e))));
     }
 
     public void openScreen(Player player){

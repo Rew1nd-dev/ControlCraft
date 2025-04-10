@@ -1,7 +1,7 @@
 package com.verr1.controlcraft.foundation.type.descriptive;
 
-import com.verr1.controlcraft.content.gui.v1.layouts.api.Descriptive;
-import com.verr1.controlcraft.content.gui.v1.widgets.FormattedLabel;
+import com.verr1.controlcraft.content.gui.layouts.api.Descriptive;
+import com.verr1.controlcraft.content.gui.widgets.FormattedLabel;
 import com.verr1.controlcraft.utils.LangUtils;
 import net.minecraft.network.chat.Component;
 
@@ -31,8 +31,10 @@ public enum UIContents implements Descriptive<UIContents> {
     NAME(Component.literal("Name"), literals("Unique Name Under A Same Protocol")),
     SPATIAL_OFFSET(Component.literal("Spatial Offset"), literals("Offset Distance In Space")),
 
-    ANCHOR_RESISTANCE_AT_POS(Component.literal("At Pos"), literals("Resistance Apply To Block Instead Of COM")),
-    ANCHOR_EXTRA_GRAVITY_AT_POS(Component.literal("At Pos"), literals("Extra Gravity Apply To Block Instead Of COM")),
+    ANCHOR_RESISTANCE_AT_POS(Component.literal("Resist At Pos"), literals("Resistance Apply To Block Instead Of COM")),
+    ANCHOR_EXTRA_GRAVITY_AT_POS(Component.literal("Gravity At Pos"), literals("Extra Gravity Apply To Block Instead Of COM")),
+
+
     ;
 
 

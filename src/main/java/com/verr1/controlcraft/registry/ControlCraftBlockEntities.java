@@ -12,6 +12,8 @@ import com.verr1.controlcraft.content.blocks.jet.JetBlockEntity;
 import com.verr1.controlcraft.content.blocks.jet.JetRudderBlock;
 import com.verr1.controlcraft.content.blocks.jet.JetRudderBlockEntity;
 import com.verr1.controlcraft.content.blocks.joints.*;
+import com.verr1.controlcraft.content.blocks.loader.ChunkLoaderBlock;
+import com.verr1.controlcraft.content.blocks.loader.ChunkLoaderBlockEntity;
 import com.verr1.controlcraft.content.blocks.motor.*;
 import com.verr1.controlcraft.content.blocks.propeller.PropellerBlock;
 import com.verr1.controlcraft.content.blocks.propeller.PropellerBlockEntity;
@@ -36,6 +38,11 @@ import com.verr1.controlcraft.render.*;
 import static com.verr1.controlcraft.ControlCraft.REGISTRATE;
 
 public class ControlCraftBlockEntities {
+
+    public static final BlockEntityEntry<ChunkLoaderBlockEntity> CHUNK_LOADER_BLOCKENTITY = REGISTRATE
+            .blockEntity(ChunkLoaderBlock.ID, ChunkLoaderBlockEntity::new)
+            .validBlock(ControlCraftBlocks.CHUNK_LOADER)
+            .register();
 
     public static final BlockEntityEntry<AnchorBlockEntity> ANCHOR_BLOCKENTITY = REGISTRATE
             .blockEntity(AnchorBlock.ID, AnchorBlockEntity::new)

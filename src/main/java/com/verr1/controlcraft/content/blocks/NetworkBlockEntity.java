@@ -1,6 +1,6 @@
 package com.verr1.controlcraft.content.blocks;
 
-import com.verr1.controlcraft.foundation.api.Unnamed;
+import com.verr1.controlcraft.foundation.api.Slot;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.packets.specific.LazyRequestBlockEntitySyncPacket;
@@ -149,7 +149,7 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity {
         );
         CompoundTag tag = new CompoundTag();
         tag.put("simplex", syncTag);
-        dispatchPacket(target, syncTag);
+        dispatchPacket(target, tag);
     }
     
     protected void syncDuplex(PacketDistributor.PacketTarget target, NetworkKey... key){
@@ -189,67 +189,85 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity {
     @Override
     protected void read(CompoundTag compound, boolean clientPacket) {
         super.read(compound, clientPacket);
+
         if(clientPacket)return;
         CompoundTag saveloads = compound.getCompound("saveloads");
         saveLoads.forEach((k, sidePort) -> {
-            if(compound.contains(k.getSerializedName())){
+            if(saveloads.contains(k.getSerializedName())){
                 sidePort.dispatch(saveloads.getCompound(k.getSerializedName()), false);
             }
         });
+        readExtra(compound);
     }
 
     @Override
     protected void write(CompoundTag compound, boolean clientPacket) {
         super.write(compound, clientPacket);
+
         if(clientPacket)return;
         CompoundTag saveloads = new CompoundTag();
         saveLoads.forEach((k, sidePort) -> {
             saveloads.put(k.getSerializedName(), sidePort.send(false));
         });
         compound.put("saveloads", saveloads);
+        writeExtra(compound);
     }
 
 
+    // For VMod Compact
+    protected void writeExtra(CompoundTag compound){
+
+    }
+
+    // For VMod Compact
+    protected void readExtra(CompoundTag compound){
+
+    }
+
+    public void writeCompact(CompoundTag compound){
+        write(compound, false);
+    }
+
     public static class AsymmetricPort implements SidePort{
         ClientBuffer<?> rx;
-        Unnamed<CompoundTag> tx;
+        Slot<CompoundTag> tx;
 
-        public AsymmetricPort(ClientBuffer<?> rx, Unnamed<CompoundTag> tx){
+        public AsymmetricPort(ClientBuffer<?> rx, Slot<CompoundTag> tx){
             this.rx = rx;
             this.tx = tx;
         }
 
         @Override
-        public Unnamed<CompoundTag> client() {
+        public Slot<CompoundTag> client() {
             return rx;
         }
 
         @Override
-        public Unnamed<CompoundTag> server() {
+        public Slot<CompoundTag> server() {
             return tx;
         }
     }
 
     public static class SymmetricPort implements SidePort{
-        Unnamed<CompoundTag> trx;
-        public SymmetricPort(Unnamed<CompoundTag> trx){
+        Slot<CompoundTag> trx;
+        public SymmetricPort(Slot<CompoundTag> trx){
             this.trx = trx;
         }
         @Override
-        public Unnamed<CompoundTag> client() {
+        public Slot<CompoundTag> client() {
             return trx;
         }
         @Override
-        public Unnamed<CompoundTag> server() {
+        public Slot<CompoundTag> server() {
             return trx;
         }
     }
 
     public interface SidePort {
 
-        Unnamed<CompoundTag> client();
+        Slot<CompoundTag> client();
 
-        Unnamed<CompoundTag> server();
+        Slot<CompoundTag> server();
 
         default void dispatch(CompoundTag tag, boolean isClientside){
             if(isClientside){
@@ -274,7 +292,7 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity {
 
     private void registerAsymmetric(
             NetworkKey key,
-            Unnamed<CompoundTag> server,
+            Slot<CompoundTag> server,
             ClientBuffer<?> client
     ){
         duplex.put(key, new AsymmetricPort(client, server));
@@ -282,20 +300,20 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity {
 
     private void registerSaveLoads(
             NetworkKey key,
-            Unnamed<CompoundTag> server
+            Slot<CompoundTag> server
     ){
         saveLoads.put(key, new SymmetricPort(server));
     }
 
     private void registerSync(
             NetworkKey key,
-            Unnamed<CompoundTag> server
+            Slot<CompoundTag> server
     ){
         simplex.put(key, new SymmetricPort(server));
     }
 
     protected class Registry {
-        Unnamed<CompoundTag> server = Unnamed.createEmpty(CompoundTag.class);
+        Slot<CompoundTag> server = Slot.createEmpty(CompoundTag.class);
         ClientBuffer<?> client = null;
         NetworkKey key;
         boolean asSaveLoad = true;
@@ -306,7 +324,7 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity {
             this.key = key;
         }
 
-        public Registry withBasic(Unnamed<CompoundTag> server){
+        public Registry withBasic(Slot<CompoundTag> server){
             this.server = server;
             return this;
         }

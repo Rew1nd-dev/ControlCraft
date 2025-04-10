@@ -11,7 +11,6 @@ import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
-import org.valkyrienskies.core.api.ships.ServerShip;
 
 public class ShipQPNavigationSchedule implements IntervalRunnable {
     protected int cyclesRemained = 0;
@@ -96,8 +95,7 @@ public class ShipQPNavigationSchedule implements IntervalRunnable {
         Vector3dc accel_p = new Vector3d(p_err).mul(p);
         Vector3dc accel_d = new Vector3d(p_err).sub(p_err_prev, new Vector3d()).mul(d / ts);
         Vector3dc accel_i = new Vector3d(0, p_int.y(), 0).mul(i);
-        Vector3dc force_pid = new Vector3d(accel_p).add(accel_d).add(accel_i).add(new Vector3d(0, 1.25, 0)).mul(mass * Math.pow(scale, 3));
-        return force_pid;
+        return new Vector3d(accel_p).add(accel_d).add(accel_i).add(new Vector3d(0, 30, 0)).mul(mass * Math.pow(scale, 3));
     }
 
     public Vector3dc calcControlTorque(){
@@ -107,11 +105,8 @@ public class ShipQPNavigationSchedule implements IntervalRunnable {
         Vector3dc accel_p = new Vector3d(q_err.x(), q_err.y(), q_err.z()).mul(sign * p);
         Vector3dc accel_d = new Vector3d(q_d.x(), q_d.y(), q_d.z()).mul(-2 / ts).mul(d);
 
-        Vector3dc torque_pd = new Vector3d(accel_p).add(accel_d).mul(inertia * Math.pow(scale, 5));
-        return torque_pd;
+        return new Vector3d(accel_p).add(accel_d).mul(inertia * Math.pow(scale, 5));
     }
-
-    public ShipQPNavigationSchedule(){}
 
     @Override
     public void run() {

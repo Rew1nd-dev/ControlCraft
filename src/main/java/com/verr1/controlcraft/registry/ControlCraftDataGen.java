@@ -63,6 +63,7 @@ public class ControlCraftDataGen {
         MiscDescription.register();
         UIContents.register();
         TargetMode.register();
+        TabType.register();
     }
 
 }

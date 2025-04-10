@@ -7,6 +7,9 @@ import com.simibubi.create.foundation.utility.Color;
 import com.simibubi.create.foundation.utility.Components;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
+import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.CameraPeripheral;
 import com.verr1.controlcraft.content.gui.legacy.CameraScreen;
@@ -35,6 +38,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -734,6 +738,22 @@ public class CameraBlockEntity extends OnShipBlockEntity
 
     public CameraBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+
+        buildRegistry(PITCH).withBasic(SerializePort.of(this::getPitch, this::setPitch, SerializeUtils.DOUBLE)).register();
+        buildRegistry(YAW).withBasic(SerializePort.of(this::getYaw, this::setYaw, SerializeUtils.DOUBLE)).register();
+        buildRegistry(IS_ACTIVE_SENSOR).withBasic(SerializePort.of(this::isActiveDistanceSensor, this::setActiveDistanceSensor, SerializeUtils.BOOLEAN)).register();
+
+        buildRegistry(FIELD)
+                .withBasic(CompoundTagPort.of(
+                        ITerminalDevice.super::serialize,
+                        ITerminalDevice.super::deserializeUnchecked
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+                )
+                .dispatchToSync()
+                .register();
+        /*
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getPitch, this::setPitch, SerializeUtils.DOUBLE, PITCH), Side.SERVER_ONLY);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getYaw, this::setYaw, SerializeUtils.DOUBLE, YAW), Side.SERVER_ONLY);
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::isActiveDistanceSensor, this::setActiveDistanceSensor, SerializeUtils.BOOLEAN, IS_ACTIVE_SENSOR), Side.SHARED);
@@ -743,6 +763,8 @@ public class CameraBlockEntity extends OnShipBlockEntity
                         FIELD),
                 Side.SERVER_ONLY
         );
+        * */
+
     }
 
 

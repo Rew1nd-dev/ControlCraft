@@ -2,11 +2,10 @@ package com.verr1.controlcraft.content.blocks.slider;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
-import com.verr1.controlcraft.foundation.api.IKinematicUIDevice;
+import com.verr1.controlcraft.content.gui.layouts.api.IKinematicUIDevice;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.gui.legacy.ConstraintSliderScreen;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
@@ -46,7 +45,7 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
 
     protected KinematicController controller = new KinematicController();
 
-    protected double compliance = 1e-4;
+    protected double compliance = -5;
 
     protected TargetMode mode = TargetMode.VELOCITY;
 
@@ -72,7 +71,8 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
     );
 
     public void setCompliance(double compliance) {
-        this.compliance = Math.max(compliance, 1e-5);
+        this.compliance = compliance;
+        setChanged();
     }
 
 
@@ -162,7 +162,7 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
 
     private void tickConstraint(){
         tickTarget();
-        if(Math.abs(targetOfLastAppliedConstraint - controller.getTarget()) < compliance)return;
+        if(Math.abs(targetOfLastAppliedConstraint - controller.getTarget()) < Math.pow(10, compliance) + 1e-6)return;
         if(level == null || level.isClientSide)return;
         Ship compShip = getCompanionServerShip();
         if(compShip == null)return;
@@ -220,7 +220,7 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
     @Override
     public void tickServer() {
         super.tickServer();
-
+        syncForNear(true, FIELD);
         tickConstraint();
         // tickPose();
         // syncAttachInducer();

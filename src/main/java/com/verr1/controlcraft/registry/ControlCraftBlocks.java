@@ -12,6 +12,7 @@ import com.verr1.controlcraft.content.blocks.jet.JetRudderBlock;
 import com.verr1.controlcraft.content.blocks.joints.FreeJointBlock;
 import com.verr1.controlcraft.content.blocks.joints.PivotJointBlock;
 import com.verr1.controlcraft.content.blocks.joints.RevoluteJointBlock;
+import com.verr1.controlcraft.content.blocks.loader.ChunkLoaderBlock;
 import com.verr1.controlcraft.content.blocks.motor.KinematicJointMotorBlock;
 import com.verr1.controlcraft.content.blocks.motor.KinematicRevoluteMotorBlock;
 import com.verr1.controlcraft.content.blocks.motor.DynamicJointMotorBlock;
@@ -39,6 +40,18 @@ public class ControlCraftBlocks {
     static {
         REGISTRATE.setCreativeTab(ControlCraftCreativeTabs.TAB);
     }
+
+    public static final BlockEntry<ChunkLoaderBlock> CHUNK_LOADER = REGISTRATE
+            .block(ChunkLoaderBlock.ID, ChunkLoaderBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .transform(TagGen.axeOrPickaxe())
+            .blockstate(
+                    BlockStateGen.horizontalBlockProvider(true)
+            )
+            .item()
+            .transform(customItemModel())
+            .register();
 
     public static final BlockEntry<AnchorBlock> ANCHOR_BLOCK = REGISTRATE
             .block(AnchorBlock.ID, AnchorBlock::new)

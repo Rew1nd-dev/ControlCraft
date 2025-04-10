@@ -1,13 +1,12 @@
 package com.verr1.controlcraft.foundation.network.executors;
 
-import com.verr1.controlcraft.foundation.api.Unnamed;
-import com.verr1.controlcraft.utils.SerializeUtils;
+import com.verr1.controlcraft.foundation.api.Slot;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class CompoundTagPort implements Unnamed<CompoundTag> {
+public class CompoundTagPort implements Slot<CompoundTag> {
 
     private final Supplier<CompoundTag> supplier;
     private final Consumer<CompoundTag> consumer;

@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.joml.primitives.AABBd;
 import org.joml.primitives.AABBdc;
 import org.valkyrienskies.core.api.ships.Ship;
@@ -54,6 +55,7 @@ public class ValkyrienSkies {
         return VectorConversionsMCKt.set(dest, source);
     }
 
+
     public static Vector3d set(Vector3d dest, Vec3 source){
         return VectorConversionsMCKt.set(dest, source);
     }
@@ -66,12 +68,17 @@ public class ValkyrienSkies {
         return VSGameUtilsKt.getDimensionId(level);
     }
 
+
     public static Vector3d toJOML(Vec3 source){
         return VectorConversionsMCKt.toJOML(source);
     }
 
     public static Vec3 toMinecraft(Vector3dc source){
         return VectorConversionsMCKt.toMinecraft(source);
+    }
+
+    public static Vec3i toMinecraft(Vector3ic source){
+        return new Vec3i(source.x(), source.y(), source.z());
     }
 
     public static AABBd toJOML(AABB source){

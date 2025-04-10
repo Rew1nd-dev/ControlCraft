@@ -1,6 +1,6 @@
 package com.verr1.controlcraft.foundation.type.descriptive;
 
-import com.verr1.controlcraft.content.gui.v1.layouts.api.Descriptive;
+import com.verr1.controlcraft.content.gui.layouts.api.Descriptive;
 import com.verr1.controlcraft.utils.LangUtils;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -251,11 +251,16 @@ public enum ExposedFieldType implements Descriptive<ExposedFieldType> {
     }
 
     @Override
+    public List<Component> overall() {
+        return Descriptive.super.overall();
+    }
+
+    @Override
     public List<Component> specific() {
         return toMain().callDescriptiveSuper();
     }
 
     public static void register(){
-
+        LangUtils.registerDefaultDescription(ExposedFieldType.class, literals("Some Fields Is Redundant", "In order to apply different Min-Max"));
     }
 }

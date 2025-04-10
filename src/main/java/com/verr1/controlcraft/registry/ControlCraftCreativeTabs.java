@@ -23,7 +23,7 @@ public class ControlCraftCreativeTabs {
             () -> CreativeModeTab.builder()
                     .title(Components.translatable("itemGroup."+ ControlCraft.MODID +".main"))
                     .withTabsBefore(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey())
-                    .icon(ControlCraftBlocks.ANCHOR_BLOCK::asStack)
+                    .icon(ControlCraftBlocks.CONSTRAINT_SERVO_MOTOR_BLOCK::asStack)
                     .displayItems((params, output) -> {
 
                         List<ItemStack> items = ControlCraft.REGISTRATE.getAll(Registries.ITEM)

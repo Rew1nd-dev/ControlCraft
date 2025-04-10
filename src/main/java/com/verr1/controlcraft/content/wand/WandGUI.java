@@ -7,6 +7,7 @@ import com.verr1.controlcraft.content.blocks.motor.DynamicJointMotorBlockEntity;
 import com.verr1.controlcraft.content.blocks.motor.KinematicJointMotorBlockEntity;
 import com.verr1.controlcraft.content.blocks.motor.KinematicRevoluteMotorBlockEntity;
 import com.verr1.controlcraft.content.blocks.slider.DynamicSliderBlockEntity;
+import com.verr1.controlcraft.content.blocks.slider.KinematicSliderBlockEntity;
 import com.verr1.controlcraft.foundation.data.WandSelection;
 import com.verr1.controlcraft.foundation.type.descriptive.WandGUIModesType;
 import com.verr1.controlcraft.foundation.type.WandModesType;
@@ -86,7 +87,7 @@ public class WandGUI implements IGuiOverlay {
                     if(blockEntity instanceof DynamicJointMotorBlockEntity || blockEntity instanceof KinematicJointMotorBlockEntity){
                         currentType = WandModesType.JOINT;
                     }
-                    if(blockEntity instanceof DynamicSliderBlockEntity){
+                    if(blockEntity instanceof DynamicSliderBlockEntity || blockEntity instanceof KinematicSliderBlockEntity){
                         currentType = WandModesType.SLIDER;
                     }
                     if(blockEntity instanceof AbstractJointBlockEntity){
@@ -151,8 +152,8 @@ public class WandGUI implements IGuiOverlay {
 
 
     public void onRightClickEmpty(boolean shiftDown){
-        if(shiftDown)confirm();
-        if(!shiftDown)flush();
+        if(!shiftDown)confirm();
+        if(shiftDown)flush();
     }
 
 

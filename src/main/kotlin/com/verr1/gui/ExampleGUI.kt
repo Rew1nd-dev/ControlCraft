@@ -191,7 +191,7 @@ class ExampleGui : WindowScreen(ElementaVersion.V8) {
     // Now, since we want to create a bunch of sticky notes, it makes sense
     // to have them be a custom UIComponent. We extend from [UIBlock] in order
     // to draw a background color, which will be used as an outline for the sticky note.
-    // Instead, we want to delegate drawing to the normal hierarchy based drawing,
+    // Instead, we want to delegation drawing to the normal hierarchy based drawing,
     // rendering all of our children.
     class StickyNote : UIBlock(Color.BLACK) {
         // We will need to hold some state about this component.

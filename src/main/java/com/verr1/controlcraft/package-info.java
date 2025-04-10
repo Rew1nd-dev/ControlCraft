@@ -4,7 +4,7 @@ package com.verr1.controlcraft;
 *   TODO:
 *    √ xyz offset of motors
 *    - chunk loader on/off button, loads chunks base on ship's AABB size
-*    - Angle limit of motors
+*    × Angle limit of motors
 *    √ Reworked gui
 *    - Dynamic / Kinematic Spherical Joint
 *    - Camera Remote Link
@@ -14,7 +14,7 @@ package com.verr1.controlcraft;
 *    √ Gravitational Anchor, Resistance force at pos
 *    √ Acceleration limit of thrusters and propellers (low speed == no limit, high speed == limit acceleration)
 *    - Make Flap Bearing Easier to Assemble
-*    - Add Inertia Mass Fix for Scaled Ships
+*    √ Add Inertia Mass Fix for Scaled Ships
 *   fixes:
 *    - camera reset √
 *    - propeller redstone is not saved √

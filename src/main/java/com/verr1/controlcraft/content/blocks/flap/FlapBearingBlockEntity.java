@@ -150,7 +150,7 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
     @Override
     public void lazyTickServer() {
         super.lazyTickServer();
-        syncForNear(true, ANGLE);
+        syncForNear(true, ANGLE, FIELD);
         if (physicalWing != null){
             sendData();
         }

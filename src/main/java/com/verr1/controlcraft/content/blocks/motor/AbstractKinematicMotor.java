@@ -1,17 +1,15 @@
 package com.verr1.controlcraft.content.blocks.motor;
 
-import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.KinematicMotorForceInducer;
 import com.verr1.controlcraft.content.valkyrienskies.controls.InducerControls;
 import com.verr1.controlcraft.content.valkyrienskies.transform.KinematicMotorTransformProvider;
 import com.verr1.controlcraft.content.valkyrienskies.transform.LerpedTransformProvider;
-import com.verr1.controlcraft.foundation.api.IKinematicUIDevice;
+import com.verr1.controlcraft.content.gui.layouts.api.IKinematicUIDevice;
 import com.verr1.controlcraft.foundation.data.GroundBodyShip;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.KinematicMotorPeripheral;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
@@ -50,7 +48,7 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
 {
     protected KinematicController controller = new KinematicController();
 
-    protected double compliance = 1e-4;
+    protected double compliance = -5;
 
     protected TargetMode mode = TargetMode.VELOCITY;
 
@@ -216,7 +214,7 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
 
     private void tickConstraint(){
         tickTarget();
-        if(Math.abs(targetOfLastAppliedConstraint - controller.getTarget()) < compliance + 1e-4)return;
+        if(Math.abs(targetOfLastAppliedConstraint - controller.getTarget()) < Math.pow(10, compliance) + 1e-6)return;
         if(level == null || level.isClientSide)return;
         long compID = Optional.ofNullable(getCompanionServerShip()).map(Ship::getId).orElse(-1L);
         if(compID == -1)return;
@@ -308,6 +306,7 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
     @Override
     public void tickServer() {
         super.tickServer();
+        syncForNear(true, FIELD);
         if(USE_CONSTRAINT_SPAMMING) {
             tickConstraint();
         } else{

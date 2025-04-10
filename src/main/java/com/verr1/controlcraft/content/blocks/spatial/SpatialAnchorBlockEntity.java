@@ -1,14 +1,15 @@
 package com.verr1.controlcraft.content.blocks.spatial;
 
+import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.Config;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
+import com.verr1.controlcraft.content.gui.layouts.api.IScheduleProvider;
 import com.verr1.controlcraft.foundation.api.*;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.SpatialAnchorPeripheral;
 import com.verr1.controlcraft.content.gui.legacy.SpatialScreen;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.SpatialForceInducer;
@@ -58,10 +59,10 @@ import java.util.Optional;
 
 import static com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock.AXIS_ALONG_FIRST_COORDINATE;
 import static com.simibubi.create.content.kinetics.base.DirectionalKineticBlock.FACING;
-import static com.verr1.controlcraft.foundation.api.ISerializableSchedule.SCHEDULE;
+import static com.verr1.controlcraft.content.gui.layouts.api.ISerializableSchedule.SCHEDULE;
 
 public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
-        IBruteConnectable, ITerminalDevice, IPacketHandler, IScheduleProvider
+        IBruteConnectable, ITerminalDevice, IPacketHandler, IScheduleProvider, IHaveGoggleInformation
 {
     public static NetworkKey IS_RUNNING = NetworkKey.create("is_running");
     public static NetworkKey IS_STATIC = NetworkKey.create("is_static");
@@ -308,7 +309,7 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
         trackNearestWhenRunning();
         syncAttachedInducer();
         updateSchedule();
-        syncForNear(true, IS_STATIC, IS_RUNNING);
+        syncForNear(true, IS_STATIC, IS_RUNNING, FIELD);
         // syncClient();
     }
 

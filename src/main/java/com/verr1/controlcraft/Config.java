@@ -12,7 +12,7 @@ public class Config
 {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    private static final ForgeConfigSpec.BooleanValue CC_OverLocking = BUILDER
+    private static final ForgeConfigSpec.BooleanValue CC_OVERCLOCKING = BUILDER
             .comment(
                     "------------------------------------",
                     "  Warning: Experimental, May Break Saves !!!",
@@ -32,10 +32,6 @@ public class Config
                     "  Defines The Square Radius Of Chunk Loader Loading Spec")
             .defineInRange("Chunk Loader Radius", 2, 1, 16);
 
-    private static final ForgeConfigSpec.BooleanValue ENABLE_ANNIHILATOR = BUILDER
-            .comment(
-                    "  When Enabled, Annihilator Will Delete The Ship It's On In 3s When Redstone Powered")
-            .define("Enable Annihilator", false);
 
     private static final ForgeConfigSpec.BooleanValue NO_NEGATIVE_PID_INPUT = BUILDER
             .comment(
@@ -52,7 +48,7 @@ public class Config
 
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
-    public static boolean OverclockComputerCraft = false;
+    public static boolean OVERCLOCK_COMPUTERCRAFT = false;
     public static int MaxDistanceSpatialCanLink = 64;
     public static int ChunkLoaderRadius = 2;
     public static boolean EnableAnnihilator = false;
@@ -64,10 +60,9 @@ public class Config
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event)
     {
-        OverclockComputerCraft = CC_OverLocking.get();
+        OVERCLOCK_COMPUTERCRAFT = CC_OVERCLOCKING.get();
         MaxDistanceSpatialCanLink = MAX_DISTANCE_SPATIAL_CAN_LINK.get();
         ChunkLoaderRadius = CHUNK_LOADER_RADIUS.get();
-        EnableAnnihilator = ENABLE_ANNIHILATOR.get();
         NoNegativePIDInput = NO_NEGATIVE_PID_INPUT.get();
         PhysicsMaxSlideDistance = PHYSICS_MAX_SLIDE_DISTANCE.get();
     }

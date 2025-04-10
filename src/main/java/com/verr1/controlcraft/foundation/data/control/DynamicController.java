@@ -1,6 +1,6 @@
 package com.verr1.controlcraft.foundation.data.control;
 
-import com.verr1.controlcraft.foundation.api.ISerializableDynamicController;
+import com.verr1.controlcraft.content.gui.layouts.api.ISerializableDynamicController;
 import com.verr1.controlcraft.utils.InputChecker;
 import com.verr1.controlcraft.utils.MathUtils;
 

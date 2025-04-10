@@ -270,6 +270,7 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
     public void tickServer() {
         super.tickServer();
         syncAttachInducer();
+        syncForNear(true, FIELD);
         lockCheck();
         // ExposedFieldSyncClientPacket.syncClient(this, getBlockPos(), level);
     }
@@ -278,7 +279,7 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
     @Override
     public void lazyTickServer() {
         super.lazyTickServer();
-        syncForNear(FIELD, CONTROLLER);
+        syncForNear(true, FIELD, CONTROLLER);
     }
 
     public void lockCheck(){
@@ -342,7 +343,10 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
         registerConstraintKey("fix");
 
         buildRegistry(CHEAT_MODE)
-                .withBasic(SerializePort.of(this::getCheatMode, this::setCheatMode, SerializeUtils.ofEnum(CheatMode.class)))
+                .withBasic(SerializePort.of(
+                        this::getCheatMode,
+                        this::setCheatMode,
+                        SerializeUtils.ofEnum(CheatMode.class)))
                 .withClient(ClientBuffer.of(CheatMode.class))
                 .register();
 

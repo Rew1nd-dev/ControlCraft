@@ -225,29 +225,6 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
 
         Vector3dc sliDir = ValkyrienSkies.set(new Vector3d(), getSlideDirection().getNormal());
 
-        /*
-        Direction selfAlign = getAlign();
-        Direction selfForward = getForward();
-        Direction compAlign = getCompanionShipAlign();
-        Quaterniondc hingeQuaternion_Own = VSMathUtils.getQuaternionToEast(selfAlign);
-        Quaterniondc hingeQuaternion_Cmp = VSMathUtils.getQuaternionToEast(getCompanionShipAlign().getOpposite());
-
-        int sign = compAlign.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1 : -1;
-        Vector3dc absDir = MathUtils.abs(ValkyrienSkies.set(new Vector3d(), compAlign.getNormal()));
-        float d = (float) getSlideDistance();
-        * VSDistanceJoint joint = new VSDistanceJoint(
-                selfId,
-                context.self(),
-                compId,
-                context.comp(),
-                new VSJointMaxForceTorque(1e20f, 1e20f),
-                d - 1e-4f,
-                d + 1e-4f,
-                1e-20f,
-                null,
-                null
-        );
-        * */
 
         VSAttachmentConstraint fixed = new VSAttachmentConstraint(
                 selfId,
@@ -458,7 +435,7 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
         super.tickServer();
         lockCheck();
         syncAttachInducer();
-        ExposedFieldSyncClientPacket.syncClient(this, getBlockPos(), level);
+        syncForNear(true, FIELD);
     }
 
 

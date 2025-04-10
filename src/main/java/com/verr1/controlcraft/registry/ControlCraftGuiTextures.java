@@ -20,13 +20,19 @@ public enum ControlCraftGuiTextures implements SizedScreenElement {
 
     SMALL_BUTTON_RED("icons10x10", 0, 0, 10, 10),
     SMALL_BUTTON_GREEN("icons10x10", 10, 0, 10, 10),
-            ;
+
+    TAB_BUTTON_BACKGROUND("tab_button_background", 0, 0, 40, 12),
+    TAB_BUTTON_FRAME("tab_button_frame", 0, 0, 40, 1),
+    TAB_BAR("tab_bar", 0, 0, 164, 24),
+    ;
 
     public static final int FONT_COLOR = 0x575F7A;
 
     public final ResourceLocation location;
-    public int width, height;
-    public int startX, startY;
+    public final int width;
+    public final int height;
+    public final int startX;
+    public final int startY;
 
     ControlCraftGuiTextures(String location, int width, int height) {
         this(location, 0, 0, width, height);

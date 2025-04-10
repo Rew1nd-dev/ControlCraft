@@ -205,6 +205,7 @@ public class JetBlockEntity extends OnShipBlockEntity implements
     public void tickServer() {
         syncAttachedJet();
         syncAttachedInducer();
+        syncForNear(true, FIELD);
     }
 
 

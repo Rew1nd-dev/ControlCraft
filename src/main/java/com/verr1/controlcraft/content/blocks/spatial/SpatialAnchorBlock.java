@@ -7,7 +7,7 @@ import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
-import com.verr1.controlcraft.content.gui.v1.factory.GenericUIFactory;
+import com.verr1.controlcraft.content.gui.factory.GenericUIFactory;
 import com.verr1.controlcraft.foundation.api.ISignalAcceptor;
 import com.verr1.controlcraft.registry.ControlCraftBlockEntities;
 import net.minecraft.core.BlockPos;

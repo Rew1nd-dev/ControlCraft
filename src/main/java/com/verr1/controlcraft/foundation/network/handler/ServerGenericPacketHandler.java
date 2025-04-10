@@ -12,12 +12,16 @@ import com.verr1.controlcraft.foundation.api.IControllerProvider;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.executor.FaceAlignmentSchedule;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldMessage;
+import com.verr1.controlcraft.foundation.managers.ConstraintCenter;
 import com.verr1.controlcraft.foundation.network.packets.GenericServerPacket;
 import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldOpenScreenPacket;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -49,7 +53,7 @@ public class ServerGenericPacketHandler {
 
          Optional
             .ofNullable(context.getSender())
-            .map(e -> BlockEntityGetter.INSTANCE.getLevelBlockEntityAt(e.serverLevel(), basePos, IBruteConnectable.class))
+            .map(e -> BlockEntityGetter.getLevelBlockEntityAt(e.serverLevel(), basePos, IBruteConnectable.class))
             .map(Optional::orElseThrow)
             .ifPresent(b -> b.bruteDirectionalConnectWith(slavePos, slaveAlign, slaveForward));
     }
@@ -66,7 +70,7 @@ public class ServerGenericPacketHandler {
             Runnable expiredTask =
                     () -> Optional
                             .ofNullable(context.getSender())
-                            .map(e -> BlockEntityGetter.INSTANCE.getLevelBlockEntityAt(e.serverLevel(), basePos, IBruteConnectable.class))
+                            .map(e -> BlockEntityGetter.getLevelBlockEntityAt(e.serverLevel(), basePos, IBruteConnectable.class))
                             .map(Optional::orElseThrow)
                             .ifPresent(b -> b.bruteDirectionalConnectWith(slavePos, slaveAlign, slaveForward));
 
@@ -77,7 +81,7 @@ public class ServerGenericPacketHandler {
                                         .builder(basePos, baseAlign, slavePos, slaveAlign, level)
                                         .withGivenXForward(baseForward)
                                         .withGivenYForward(slaveForward)
-                                        .withTimeBeforeExpired(0)
+                                        .withTimeBeforeExpired(10)
                                         .withOnExpiredTask(expiredTask)
                                         .build()
                     )
@@ -91,7 +95,15 @@ public class ServerGenericPacketHandler {
     }
 
     public static void handleDestroyAllConstraints(GenericServerPacket packet, NetworkEvent.Context context){
-        // currently does nothing
+        BlockPos pos = BlockPos.of(packet.getLongs().get(0));
+        Optional
+            .ofNullable(context.getSender())
+            .map(Entity::level)
+            .filter(ServerLevel.class::isInstance)
+            .map(ServerLevel.class::cast)
+            .ifPresent(
+                    serverLevel -> ConstraintCenter.destroyAllConstrains(serverLevel, pos)
+            );
     }
 
     public static void handleDestroyConstraints(GenericServerPacket packet, NetworkEvent.Context context){

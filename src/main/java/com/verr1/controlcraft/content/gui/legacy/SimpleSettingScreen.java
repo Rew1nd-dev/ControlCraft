@@ -5,7 +5,7 @@ import com.simibubi.create.foundation.gui.AllIcons;
 import com.simibubi.create.foundation.gui.element.GuiGameElement;
 import com.simibubi.create.foundation.gui.widget.IconButton;
 import com.simibubi.create.foundation.gui.widget.Label;
-import com.verr1.controlcraft.content.gui.v1.widgets.SmallCheckbox;
+import com.verr1.controlcraft.content.gui.widgets.SmallCheckbox;
 import com.verr1.controlcraft.foundation.network.packets.GenericServerPacket;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
 import com.verr1.controlcraft.registry.ControlCraftGuiLabels;

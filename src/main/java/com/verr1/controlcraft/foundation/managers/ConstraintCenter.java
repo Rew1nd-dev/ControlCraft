@@ -6,6 +6,8 @@ import com.verr1.controlcraft.foundation.data.constraint.ConstraintKey;
 import com.verr1.controlcraft.foundation.data.constraint.ConstraintWithID;
 import com.verr1.controlcraft.foundation.data.constraint.SavedConstraintObject;
 import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
+import com.verr1.controlcraft.mixin.accessor.ShipObjectServerWorldAccessor;
+import com.verr1.controlcraft.utils.VSGetterUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -14,12 +16,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.core.apigame.constraints.VSConstraint;
 import org.valkyrienskies.core.apigame.world.ServerShipWorldCore;
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld;
 import org.valkyrienskies.core.impl.hooks.VSEvents;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +48,7 @@ public class ConstraintCenter {
                         .stream()
                         .map(entry -> new SavedConstraintObject(entry.getKey(), entry.getValue()))
                         .toList();
-        /*
+
         VSEvents.ShipLoadEvent.Companion.on(((shipLoadEvent, registeredHandler) -> {
             // Execute All Recreating Constrain Tasks Shortly After Any Ship Being Reloaded
             ControlCraftServer
@@ -52,7 +57,7 @@ public class ConstraintCenter {
 
             registeredHandler.unregister();
         }));
-        * */
+
 
 
     }
@@ -81,6 +86,20 @@ public class ConstraintCenter {
                 .filter(ServerShipWorldCore.class::isInstance)
                 .map(ServerShipWorldCore.class::cast)
                 .ifPresent(shipWorldCore -> shipWorldCore.removeConstraint(id));
+    }
+
+    public static void destroyAllConstrains(ServerLevel level, BlockPos pos){
+        try{
+            ServerShipWorldCore sswc = VSGameUtilsKt.getShipObjectWorld(level);
+            ShipObjectServerWorldAccessor accessor = ((ShipObjectServerWorldAccessor) sswc);
+            var constraints = accessor.controlCraft$getShipIdToConstraints();
+            long id = VSGetterUtils.getShip(level, pos).map(Ship::getId).orElse(-1L);
+            if(id == -1)return;
+            new ArrayList<>(constraints.get(id)).forEach(sswc::removeConstraint);
+
+        }catch (Exception ignored){
+            ControlCraft.LOGGER.error("Failed to destroy all constraints", ignored);
+        }
     }
 
     private static @Nullable Object createNewConstraint(@Nullable VSConstraint constraint){
@@ -135,10 +154,6 @@ public class ConstraintCenter {
 
     public static void createOrReplaceNewConstrain(@NotNull SavedConstraintObject obj){
         createOrReplaceNewConstrain(obj.key(), obj.getConstraint());
-    }
-
-    public static void destroyAllConstrains(ServerLevel level, BlockPos pos){
-
     }
 
     public static VSConstraint get(@NotNull ConstraintKey key){
