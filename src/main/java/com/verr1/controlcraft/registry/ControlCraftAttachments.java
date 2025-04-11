@@ -18,7 +18,7 @@ public enum ControlCraftAttachments {
     SPATIAL(SpatialForceInducer.class),
     JET(JetForceInducer.class),
     PROPELLER(PropellerForceInducer.class),
-    CAFFEINE(Caffeine.class),
+    // CAFFEINE(Caffeine.class),
     KINEMATIC_MOTOR(KinematicMotorForceInducer.class),
 
     ;

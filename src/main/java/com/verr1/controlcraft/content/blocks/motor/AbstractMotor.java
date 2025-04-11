@@ -16,6 +16,7 @@ import com.verr1.controlcraft.foundation.vsapi.ShipAssembler;
 import com.verr1.controlcraft.foundation.vsapi.VSJointPose;
 import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
+import com.verr1.controlcraft.utils.MinecraftUtils;
 import com.verr1.controlcraft.utils.SerializeUtils;
 import com.verr1.controlcraft.utils.VSMathUtils;
 import net.minecraft.core.BlockPos;
@@ -75,7 +76,7 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
     }
 
     @Override
-    public Direction getAlign() {return getDirection();}
+    public Direction getAlign() {return MinecraftUtils.getVerticalDirectionSimple(getForward());}
 
     @Override
     public Direction getForward() {return getServoDirection();}
@@ -185,7 +186,7 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
         recreateRevoluteConstraints(hingeConstraint, attachment_1, attachment_2);
         setCompanionShipID(compId);
         setCompanionShipDirection(getServoDirection().getOpposite());
-        setBlockConnectContext(new BlockPos(toMinecraft(new Vector3i().set(p_comp))));
+        setBlockConnectContext(BlockPos.containing(toMinecraft(p_comp)));
         setStartingAngleOfCompanionShip();
         setChanged();
     }

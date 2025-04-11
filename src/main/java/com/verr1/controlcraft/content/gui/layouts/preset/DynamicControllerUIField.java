@@ -24,7 +24,7 @@ import static com.verr1.controlcraft.content.gui.factory.Converter.convert;
 public class DynamicControllerUIField extends TypedUIPort<CompoundTag> implements
         ISerializableDynamicController, TitleLabelProvider
 {
-    FormattedLabel title =  convert(UIContents.PID_CONTROLLER, Converter::pidStyle).toDescriptiveLabel();
+    FormattedLabel title =  convert(UIContents.PID_CONTROLLER, Converter::viewStyle).toDescriptiveLabel();
     FormattedLabel pLabel = convert(ExposedFieldType.P, Converter::pidStyle).toDescriptiveLabel();
     FormattedLabel iLabel = convert(ExposedFieldType.I, Converter::pidStyle).toDescriptiveLabel();
     FormattedLabel dLabel = convert(ExposedFieldType.D, Converter::pidStyle).toDescriptiveLabel();

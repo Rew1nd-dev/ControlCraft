@@ -1,5 +1,8 @@
 package com.verr1.controlcraft.content.valkyrienskies.attachments;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.verr1.controlcraft.foundation.data.*;
 import com.verr1.controlcraft.foundation.vsapi.AttachmentHolder;
 import kotlin.jvm.functions.Function1;
@@ -12,9 +15,17 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE
+)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class Observer implements ShipForcesInducer {
-
+    @JsonIgnore
     private final ConcurrentHashMap<WorldBlockPos, ExpirableListener<ShipPhysics>> Listener = new ConcurrentHashMap<>();
+    @JsonIgnore
     private final SynchronizedField<ShipPhysics> Observation = new SynchronizedField<>(ShipPhysics.EMPTY);
 
 

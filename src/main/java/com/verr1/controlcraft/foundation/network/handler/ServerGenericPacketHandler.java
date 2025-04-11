@@ -66,6 +66,8 @@ public class ServerGenericPacketHandler {
             BlockPos slavePos = BlockPos.of(packet.getLongs().get(3));
             Direction slaveAlign = Direction.values()[packet.getLongs().get(4).intValue()];
             Direction slaveForward = Direction.values()[packet.getLongs().get(5).intValue()];
+            Direction slaveTaskAlign = Direction.values()[packet.getLongs().get(6).intValue()];
+            Direction slaveTaskForward = Direction.values()[packet.getLongs().get(7).intValue()];
 
             Runnable expiredTask =
                     () -> Optional
@@ -78,9 +80,9 @@ public class ServerGenericPacketHandler {
                     .ofNullable(context.getSender())
                     .map(ServerPlayer::serverLevel)
                     .map(level -> new FaceAlignmentSchedule
-                                        .builder(basePos, baseAlign, slavePos, slaveAlign, level)
+                                        .builder(basePos, baseAlign, slavePos, slaveTaskAlign, level)
                                         .withGivenXForward(baseForward)
-                                        .withGivenYForward(slaveForward)
+                                        .withGivenYForward(slaveTaskForward)
                                         .withTimeBeforeExpired(10)
                                         .withOnExpiredTask(expiredTask)
                                         .build()

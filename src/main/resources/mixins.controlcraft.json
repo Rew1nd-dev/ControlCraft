@@ -5,7 +5,7 @@
     "MixinCommonHooks",
     "MixinContraption",
     "MixinEntity",
-    "MixinVSGameUtilsKt",
+
     "accessor.ShipObjectServerWorldAccessor"
   ],
   "package": "com.verr1.controlcraft.mixin",
@@ -14,6 +14,7 @@
   },
   "client": [
     "MixinCamera",
-    "MixinGameRenderer"
+    "MixinGameRenderer",
+    "MixinVSGameUtilsKt"
   ]
 }

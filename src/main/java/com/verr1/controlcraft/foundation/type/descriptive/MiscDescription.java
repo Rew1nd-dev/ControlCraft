@@ -32,6 +32,18 @@ public enum MiscDescription implements Descriptive<MiscDescription> {
             "Dump Settings"
     )),
 
+    AS_REDSTONE_INPUT(literals(
+            "Receive Direct Redstone Input"
+    )),
+
+    REVERSE_INPUT(literals(
+            "Integrated Negate"
+    )),
+
+    TURN_ON(literals(
+            "Enable This Channel"
+    )),
+
     ;
 
 

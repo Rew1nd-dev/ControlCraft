@@ -31,7 +31,7 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
 
     @Override
     public void onExpire() {
-        if(!alignmentDone())return;
+        // if(!alignmentDone())return;
         onExpiredTask.run();
     }
 

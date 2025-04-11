@@ -72,7 +72,7 @@ public class WandJointConnectionMode extends WandAbstractDualSelectionMode {
     public void tick() {
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
-        if(!WandGUI.isClientWandInHand() && !WandGUI.isWrenchInHand())return;
+        if(!WandGUI.isClientWandInHand() || !WandGUI.isWrenchInHand())return;
         if(MinecraftUtils.lookingAt() instanceof RevoluteJointBlockEntity rvl){
             ClientOutliner.drawOutline(rvl.getBlockPos(), rvl.getJointDirection(), Color.RED.getRGB(), "rvl_joint_dir");
         }
@@ -93,7 +93,7 @@ public class WandJointConnectionMode extends WandAbstractDualSelectionMode {
             .map(IBruteConnectable.class::cast)
             .ifPresent(
                 joint -> {
-                    var p = new GenericServerPacket.builder(RegisteredPacketType.CONNECT)
+                    var p = new GenericServerPacket.builder(RegisteredPacketType.BRUTE_CONNECT)
                             .withLong(jointPos.asLong())
                             .withLong(Direction.UP.ordinal()) // this is simply occupying the packet index
                             .withLong(MinecraftUtils.getVerticalDirectionSimple(Direction.UP).ordinal())

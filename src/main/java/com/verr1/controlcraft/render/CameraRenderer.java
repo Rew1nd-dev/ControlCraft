@@ -5,9 +5,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 import com.simibubi.create.foundation.render.SuperByteBuffer;
 import com.verr1.controlcraft.content.blocks.camera.CameraBlockEntity;
-import com.verr1.controlcraft.foundation.managers.ClientCameraManager;
+import com.verr1.controlcraft.content.blocks.camera.ClientCameraManager;
 import com.verr1.controlcraft.registry.ControlCraftPartialModels;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -28,7 +27,7 @@ public class CameraRenderer extends SafeBlockEntityRenderer<CameraBlockEntity> {
         SuperByteBuffer propellerBuffer = CachedBufferer.partialFacing(ControlCraftPartialModels.CAMERA_LENS, state);
 
         propellerBuffer
-                .light(LightTexture.FULL_BRIGHT)
+                .light(light)
                 .renderInto(ms, solid);
     }
 }

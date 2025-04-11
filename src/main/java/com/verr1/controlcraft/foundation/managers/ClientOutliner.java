@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -81,6 +82,12 @@ public class ClientOutliner {
                 .colored(color)
                 .lineWidth(1 / 16f);
     }
+
+    public static void drawOutline(Entity e){
+        CreateClient.OUTLINER.showAABB(e.getUUID(), e.getBoundingBox(), 1);
+    }
+
+
 
     public static void drawOutline(@NotNull AABB aabb, int color, String slot, double scale) {
         CreateClient.OUTLINER.showAABB(slot, aabb)

@@ -3,8 +3,6 @@ package com.verr1.controlcraft.content.gui.layouts.preset;
 import com.simibubi.create.foundation.gui.AllIcons;
 import com.simibubi.create.foundation.gui.widget.IconButton;
 import com.simibubi.create.foundation.gui.widget.Label;
-import com.simibubi.create.foundation.utility.Components;
-import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.gui.factory.Converter;
 import com.verr1.controlcraft.content.gui.widgets.DescriptiveScrollInput;
 import com.verr1.controlcraft.content.gui.layouts.element.TypedUIPort;
@@ -48,8 +46,8 @@ public class TerminalDeviceUIField extends TypedUIPort<CompoundTag> implements I
     public DescriptiveScrollInput<ExposedFieldType> fieldSelector;
     public DescriptiveScrollInput<ExposedFieldDirection> directionSelector;
 
-    public Label minLabel = convert(UIContents.MIN, Converter::minMaxStyle).toDescriptiveLabel();
-    public Label maxLabel = convert(UIContents.MAX, Converter::minMaxStyle).toDescriptiveLabel();
+    public Label minLabel = convert(UIContents.MIN, Converter::titleStyle).toDescriptiveLabel();
+    public Label maxLabel = convert(UIContents.MAX, Converter::titleStyle).toDescriptiveLabel();
     public FormattedLabel fieldLabel;
     public FormattedLabel directionLabel;
     public EditBox minField;
@@ -71,8 +69,8 @@ public class TerminalDeviceUIField extends TypedUIPort<CompoundTag> implements I
     }
 
     private void earlyInit(){
-        fieldSelector = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_GREEN); // see lateInit()
-        directionSelector = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_GREEN, ExposedFieldDirection.class);
+        fieldSelector = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_SELECTION); // see lateInit()
+        directionSelector = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_SELECTION, ExposedFieldDirection.class);
         fieldLabel = new FormattedLabel(0,0, Component.literal("      "));
         directionLabel = new FormattedLabel(0, 0, Component.literal("      "));
         minField = new EditBox(Minecraft.getInstance().font, 0, 0, 60, 10, Component.empty());
@@ -93,13 +91,13 @@ public class TerminalDeviceUIField extends TypedUIPort<CompoundTag> implements I
 
     protected void lateInit(){
         directionSelector.valueCalling(
-                it -> directionLabel.text = it.asComponent().copy().withStyle(Converter::directionStyle)
+                it -> directionLabel.text = it.asComponent().copy().withStyle(Converter::optionStyle)
         );
         fieldSelector.withValues(GUIFields.stream().limit(actualSize).map(w -> w.type).toArray(ExposedFieldType[]::new));
         fieldSelector
                 .calling(i -> {
                     var currentSelection = fields().get(fieldSelector.getState());
-                    fieldLabel.text = currentSelection.type.asComponent().copy().withStyle(Converter::fieldStyle);
+                    fieldLabel.text = currentSelection.type.asComponent().copy().withStyle(Converter::optionStyle);
                     directionSelector.setState(currentSelection.directionOptional.ordinal());
                     directionSelector.onChanged();
                     maxField.setValue(String.format("%.2f", currentSelection.min_max.get(false)));
@@ -128,11 +126,11 @@ public class TerminalDeviceUIField extends TypedUIPort<CompoundTag> implements I
     private void setMaxLength(){
         AtomicInteger maxLen = new AtomicInteger(0);
         fieldSelector.values().stream().map(ExposedFieldType::asComponent).forEach(c -> {
-            int len = Minecraft.getInstance().font.width(c.copy().withStyle(Converter::fieldStyle));
+            int len = Minecraft.getInstance().font.width(c.copy().withStyle(Converter::optionStyle));
             if(len > maxLen.get()) maxLen.set(len);
         });
         directionSelector.values().stream().map(ExposedFieldDirection::asComponent).forEach(c -> {
-            int len = Minecraft.getInstance().font.width(c.copy().withStyle(Converter::directionStyle));
+            int len = Minecraft.getInstance().font.width(c.copy().withStyle(Converter::optionStyle));
             if(len > maxLen.get()) maxLen.set(len);
         });
         fieldLabel.setWidth(maxLen.get());

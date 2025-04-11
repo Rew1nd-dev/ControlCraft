@@ -33,7 +33,7 @@ public class ShipQPNavigationSchedule implements IntervalRunnable {
     protected Vector3dc p_curr = new Vector3d();
 
     protected double p = 12;
-    protected double d = 4;
+    protected double d = 12;
     protected double i = 1;
 
     protected double mass;
@@ -95,7 +95,7 @@ public class ShipQPNavigationSchedule implements IntervalRunnable {
         Vector3dc accel_p = new Vector3d(p_err).mul(p);
         Vector3dc accel_d = new Vector3d(p_err).sub(p_err_prev, new Vector3d()).mul(d / ts);
         Vector3dc accel_i = new Vector3d(0, p_int.y(), 0).mul(i);
-        return new Vector3d(accel_p).add(accel_d).add(accel_i).add(new Vector3d(0, 30, 0)).mul(mass * Math.pow(scale, 3));
+        return new Vector3d(accel_p).add(accel_d).add(accel_i).add(new Vector3d(0, 10, 0)).mul(mass * Math.pow(scale, 3));
     }
 
     public Vector3dc calcControlTorque(){

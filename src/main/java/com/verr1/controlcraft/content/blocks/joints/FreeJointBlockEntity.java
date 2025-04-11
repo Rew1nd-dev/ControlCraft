@@ -28,30 +28,22 @@ public class FreeJointBlockEntity extends AbstractJointBlockEntity{
     @Override
     public void bruteDirectionalConnectWith(BlockPos pos, Direction align, Direction forward) {
         if(level == null || level.isClientSide)return;
-        Ship selfShip = getShipOn();
-        Ship otherShip = VSGetterUtils.getShipOn(level, pos).orElse(null);
-        if(otherShip == null || selfShip == null)return;
-        FreeJointBlockEntity otherHinge = BlockEntityGetter.INSTANCE.getLevelBlockEntityAt((ServerLevel) level, pos, FreeJointBlockEntity.class).orElse(null);
+
+        // if(otherShip == null || selfShip == null)return;
+        FreeJointBlockEntity otherHinge = BlockEntityGetter.getLevelBlockEntityAt(level, pos, FreeJointBlockEntity.class).orElse(null);
         if(otherHinge == null)return;
 
         Vector3dc selfContact = getJointConnectorPosJOML();
         Vector3dc otherContact = otherHinge.getJointConnectorPosJOML();
 
-        /*
-        VSSphericalJoint joint = new VSSphericalJoint(
-                selfShip.getId(),
-                new VSJointPose(selfContact, new Quaterniond()),
-                otherShip.getId(),
-                new VSJointPose(otherContact, new Quaterniond()),
-                new VSJointMaxForceTorque(1e20f, 1e20f),
-                null
-        );
-        * */
+        long selfID = getShipOrGroundID();
+        long otherID = otherHinge.getShipOrGroundID();
+
 
 
         VSAttachmentConstraint attachment = new VSAttachmentConstraint(
-                selfShip.getId(),
-                otherShip.getId(),
+                selfID,
+                otherID,
                 1.0E-20,
                 selfContact,
                 otherContact,

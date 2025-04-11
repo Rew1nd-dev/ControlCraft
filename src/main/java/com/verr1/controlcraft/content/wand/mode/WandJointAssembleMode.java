@@ -9,6 +9,7 @@ import com.verr1.controlcraft.foundation.network.packets.GenericServerPacket;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
 import com.verr1.controlcraft.foundation.type.WandModesType;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
+import com.verr1.controlcraft.utils.MinecraftUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -75,11 +76,18 @@ public class WandJointAssembleMode extends WandAbstractTripleSelectionMode {
 
                         var p = new GenericServerPacket.builder(RegisteredPacketType.CONNECT)
                                 .withLong(jointPos.asLong())
+
                                 .withLong(jointAlign.ordinal())
                                 .withLong(jointForward.ordinal())
+
                                 .withLong(compPos.asLong())
+
                                 .withLong(compAlign.ordinal())
                                 .withLong(compForward.ordinal())
+
+                                .withLong(compAlign.ordinal())
+                                .withLong(compForward.getOpposite().ordinal()) // this is a fix
+
                                 .build();
 
                         ControlCraftPackets.getChannel().sendToServer(p);

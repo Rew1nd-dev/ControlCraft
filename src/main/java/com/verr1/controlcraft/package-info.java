@@ -3,7 +3,7 @@ package com.verr1.controlcraft;
 /*
 *   TODO:
 *    √ xyz offset of motors
-*    - chunk loader on/off button, loads chunks base on ship's AABB size
+*    × chunk loader on/off button, loads chunks base on ship's AABB size
 *    × Angle limit of motors
 *    √ Reworked gui
 *    - Dynamic / Kinematic Spherical Joint

@@ -2,6 +2,7 @@ package com.verr1.controlcraft.content.gui.widgets;
 
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.verr1.controlcraft.content.gui.layouts.api.Identifiable;
 import com.verr1.controlcraft.registry.ControlCraftGuiTextures;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @OnlyIn(Dist.CLIENT)
-public class SmallCheckbox extends AbstractButton {
+public class SmallCheckbox extends AbstractButton implements Identifiable<String> {
     // private static final ResourceLocation TEXTURE_ON = new ResourceLocation("textures/gui/checkbox.png");
     private static final ControlCraftGuiTextures BUTTON_ON = ControlCraftGuiTextures.SMALL_BUTTON_GREEN;
     private static final ControlCraftGuiTextures BUTTON_OFF = ControlCraftGuiTextures.SMALL_BUTTON_RED;
@@ -25,6 +26,7 @@ public class SmallCheckbox extends AbstractButton {
     private static final int TEXT_COLOR = 14737632;
     private boolean selected;
     private final boolean showLabel;
+    private String id = "";
 
     private Function<SmallCheckbox, Boolean> callback = (s)->{return false;};
 
@@ -36,6 +38,11 @@ public class SmallCheckbox extends AbstractButton {
         super(p_93833_, p_93834_, p_93835_, p_93836_, p_93837_);
         this.selected = p_93838_;
         this.showLabel = p_93839_;
+    }
+
+    public SmallCheckbox withID(String id){
+        this.id = id;
+        return this;
     }
 
     public SmallCheckbox withCallback(Function<SmallCheckbox, Boolean> callback){
@@ -89,5 +96,10 @@ public class SmallCheckbox extends AbstractButton {
             graphics.renderComponentTooltip(font, List.of(this.getMessage()), p_282925_, mouse_x);
         }
 
+    }
+
+    @Override
+    public String id() {
+        return id;
     }
 }

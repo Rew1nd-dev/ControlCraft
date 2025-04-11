@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.verr1.controlcraft.content.blocks.camera.CameraBlockEntity;
-import com.verr1.controlcraft.foundation.managers.ClientCameraManager;
+import com.verr1.controlcraft.content.blocks.camera.ClientCameraManager;
 import com.verr1.controlcraft.mixinducks.ICameraDuck;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -18,8 +18,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.valkyrienskies.core.api.ships.ClientShip;
+import org.valkyrienskies.core.api.ships.properties.ShipTransform;
+import org.valkyrienskies.core.impl.game.ships.ShipTransformImpl;
 
 import java.lang.Math;
+import java.util.Optional;
 
 @Mixin(value = GameRenderer.class)
 abstract class MixinGameRenderer {
@@ -61,7 +64,7 @@ abstract class MixinGameRenderer {
         ClientShip cameraClientShip = linkedCamera.getClientShip();
         Vector3dc cameraPosOnShip = linkedCamera.getCameraPositionShip();
 
-        if(cameraClientShip == null || this.minecraft.player == null) {
+        if(this.minecraft.player == null) {
             prepareCullFrustum.call(instance, matrixStack, vec3, matrix4f);
             return;
         }
@@ -77,8 +80,18 @@ abstract class MixinGameRenderer {
         );
 
         // Apply the ship render transform to [matrixStack]
+        ShipTransform renderTransform = Optional.ofNullable(cameraClientShip).map(ClientShip::getRenderTransform).orElse(
+                new ShipTransformImpl(
+                        new Vector3d(),
+                        new Vector3d(),
+                        new Quaterniond(),
+                        new Vector3d(1, 1, 1)
+                )
+        );
+
+
         final Quaternionf invShipRenderRotation = new Quaternionf(
-                cameraClientShip.getRenderTransform().getShipToWorldRotation().conjugate(new Quaterniond())
+                renderTransform.getShipToWorldRotation().conjugate(new Quaterniond())
         );
         matrixStack.mulPose(invShipRenderRotation);
 

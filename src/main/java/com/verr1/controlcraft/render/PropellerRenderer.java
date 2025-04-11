@@ -34,7 +34,7 @@ public class PropellerRenderer extends SafeBlockEntityRenderer<PropellerBlockEnt
                 );
 
         propellerBuffer.rotateCentered(state.getValue(BlockStateProperties.FACING), angle)
-                .light(LightTexture.FULL_BRIGHT)
+                .light(light)
                 .renderInto(ms, solid);
     }
 }

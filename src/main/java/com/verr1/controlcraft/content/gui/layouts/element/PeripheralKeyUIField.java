@@ -52,6 +52,8 @@ public class PeripheralKeyUIField extends TypedUIPort<PeripheralKey> implements 
         layoutToFill.addChild(protocolField, 0, 1);
         layoutToFill.addChild(nameLabel, 1, 0);
         layoutToFill.addChild(nameField, 1, 1);
+        layoutToFill.columnSpacing(4);
+        layoutToFill.rowSpacing(2);
     }
 
     @Override

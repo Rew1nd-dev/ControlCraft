@@ -80,6 +80,10 @@ public class WandSliderAssembleMode extends WandAbstractTripleSelectionMode {
                                     .withLong(compPos.asLong())
                                     .withLong(compAlign.ordinal())
                                     .withLong(compForward.ordinal())
+
+                                    .withLong(compAlign.ordinal())
+                                    .withLong(compForward.ordinal())
+
                                     .build();
 
                             ControlCraftPackets.getChannel().sendToServer(p);

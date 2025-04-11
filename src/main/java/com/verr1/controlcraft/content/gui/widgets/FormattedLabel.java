@@ -34,9 +34,10 @@ public class FormattedLabel extends Label {
         return this;
     }
 
-    public void setText(Component text){
+    public FormattedLabel setText(Component text){
         this.text = text;
         setWidth(font.width(text));
+        return this;
     }
 
     public void setTextOnly(Component text){

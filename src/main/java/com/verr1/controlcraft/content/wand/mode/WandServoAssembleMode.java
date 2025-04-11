@@ -76,13 +76,22 @@ public class WandServoAssembleMode extends WandAbstractDualSelectionMode {
 
     @Override
     protected void sendPacket(WandSelection x, WandSelection y) {
+
+        // for servo motor, align and forward is reversed here, not a mistake
+
         var p = new GenericServerPacket.builder(RegisteredPacketType.CONNECT)
                 .withLong(x.pos().asLong())
-                .withLong(MinecraftUtils.getVerticalDirectionSimple(x.face()).ordinal())
+
                 .withLong(x.face().ordinal())
+                .withLong(MinecraftUtils.getVerticalDirectionSimple(x.face()).ordinal())
+
                 .withLong(y.pos().asLong())
+
                 .withLong(MinecraftUtils.getVerticalDirectionSimple(y.face()).ordinal())
                 .withLong(y.face().ordinal())
+
+                .withLong(y.face().ordinal())
+                .withLong(MinecraftUtils.getVerticalDirectionSimple(y.face()).ordinal())
                 .build();
 
         ControlCraftPackets.getChannel().sendToServer(p);

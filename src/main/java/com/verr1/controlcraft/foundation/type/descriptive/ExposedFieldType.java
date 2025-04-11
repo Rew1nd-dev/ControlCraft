@@ -49,7 +49,12 @@ public enum ExposedFieldType implements Descriptive<ExposedFieldType> {
             )
     ),
 
-    FORCED_TARGET(false),
+    FORCED_TARGET(false,
+            Component.literal("Target"),
+            literals(
+                "Target Value For Control",
+                "Absolute"
+        )),
     FORCED_TARGET$1(false),
 
     COMPLIANCE(false),
@@ -63,7 +68,8 @@ public enum ExposedFieldType implements Descriptive<ExposedFieldType> {
     TARGET$1(false),
     TARGET$2(false),
 
-    ANGLE(false, Component.literal("Radian"),
+    RADIAN(false, Component.literal("Radian"),
+
             literals(
                     "Angle in rad"
             )
@@ -77,13 +83,13 @@ public enum ExposedFieldType implements Descriptive<ExposedFieldType> {
     DEGREE$1(false),
     DEGREE$2(false),
 
-    HORIZONTAL_TILT(false, Component.literal("Horizontal Tilt"),
+    HORIZONTAL_TILT(false, Component.literal("Horizontal"),
             literals(
                     "in rad",
                     "See Rudder Changes For Direction"
             )
     ),
-    VERTICAL_TILT(false, Component.literal("Vertical Tilt"),
+    VERTICAL_TILT(false, Component.literal("Vertical"),
             literals(
                     "in rad",
                     "See Rudder Changes For Direction"
@@ -140,6 +146,24 @@ public enum ExposedFieldType implements Descriptive<ExposedFieldType> {
             literals(
                     "If Camera Is a distance Sensor:",
                     " . Outputs Redstone By Distance"
+            )
+    ),
+
+    CAST_RAY(true, Component.literal("Cast Ray"),
+            literals(
+                    "Whether Cast A Ray Of View"
+            )
+    ),
+
+    CLIP_SHIP(true, Component.literal("Ship Outline"),
+            literals(
+                    "Whether Cast A Ray Of View"
+            )
+    ),
+
+    CLIP_ENTITY(true, Component.literal("Entity Outline"),
+            literals(
+                    "Whether Cast A Ray Of View"
             )
     ),
 

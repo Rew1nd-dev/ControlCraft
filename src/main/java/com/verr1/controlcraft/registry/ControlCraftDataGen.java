@@ -22,7 +22,7 @@ public class ControlCraftDataGen {
 
         ControlCraft.REGISTRATE.addDataGenerator(ProviderType.LANG, provider -> {
             BiConsumer<String, String> langConsumer = provider::add;
-            // provideDefaultLang(langConsumer);
+            provideDefaultLang(langConsumer);
             provideExtra(langConsumer);
         });
 
@@ -63,6 +63,7 @@ public class ControlCraftDataGen {
         MiscDescription.register();
         UIContents.register();
         TargetMode.register();
+        CameraClipType.register();
         TabType.register();
     }
 

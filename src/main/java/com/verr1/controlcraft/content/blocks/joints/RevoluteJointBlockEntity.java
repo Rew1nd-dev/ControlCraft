@@ -38,6 +38,7 @@ public class RevoluteJointBlockEntity extends AbstractJointBlockEntity implement
     public void destroyConstraints() {
         if(level == null || level.isClientSide)return;
         removeConstraint("revolute");
+        removeConstraint("attach");
     }
 
     public Direction getJointDirection(){
@@ -59,10 +60,9 @@ public class RevoluteJointBlockEntity extends AbstractJointBlockEntity implement
     @Override
     public void bruteDirectionalConnectWith(BlockPos pos, Direction align, Direction forward) {
         if(level == null || level.isClientSide)return;
-        Ship selfShip = getShipOn();
-        Ship otherShip = VSGetterUtils.getShipOn(level, pos).orElse(null);
-        if(otherShip == null || selfShip == null)return;
-        RevoluteJointBlockEntity otherHinge = BlockEntityGetter.INSTANCE.getLevelBlockEntityAt((ServerLevel) level, pos, RevoluteJointBlockEntity.class).orElse(null);
+
+        // if(otherShip == null || selfShip == null)return;
+        RevoluteJointBlockEntity otherHinge = BlockEntityGetter.getLevelBlockEntityAt(level, pos, RevoluteJointBlockEntity.class).orElse(null);
         if(otherHinge == null)return;
 
         Vector3dc selfContact = getJointConnectorPosJOML();
@@ -77,21 +77,13 @@ public class RevoluteJointBlockEntity extends AbstractJointBlockEntity implement
                 Quaterniond(VSMathUtils.getQuaternionOfPlacement(otherHinge.getJointDirection().getOpposite()))
                 .mul(new Quaterniond(new AxisAngle4d(Math.toRadians(90.0), 0.0, 0.0, 1.0)), new Quaterniond())
                 .normalize();
-        /*
-        VSRevoluteJoint joint = new VSRevoluteJoint(
-                selfShip.getId(),
-                new VSJointPose(selfContact, selfRotation),
-                otherShip.getId(),
-                new VSJointPose(otherContact, otherRotation),
-                new VSJointMaxForceTorque(1e20f, 1e20f),
-                null, null, null, null, null
-        );
-        * */
 
+        long selfID = getShipOrGroundID();
+        long otherID = otherHinge.getShipOrGroundID();
 
         VSHingeOrientationConstraint orientation = new VSHingeOrientationConstraint(
-                selfShip.getId(),
-                otherShip.getId(),
+                selfID,
+                otherID,
                 1.0E-20,
                 selfRotation,
                 otherRotation,
@@ -99,8 +91,8 @@ public class RevoluteJointBlockEntity extends AbstractJointBlockEntity implement
         );
 
         VSAttachmentConstraint attachment = new VSAttachmentConstraint(
-                selfShip.getId(),
-                otherShip.getId(),
+                selfID,
+                otherID,
                 1.0E-20,
                 selfContact,
                 otherContact,

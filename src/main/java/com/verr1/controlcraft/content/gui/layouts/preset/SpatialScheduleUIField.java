@@ -24,9 +24,9 @@ public class SpatialScheduleUIField extends TypedUIPort<CompoundTag> implements
     PID qpid = new PID(0, 0, 0);
     PID ppid = new PID(0, 0, 0);
 
-    FormattedLabel title = UIContents.PID_CONTROLLER.convertTo(Converter::titleStyle).toDescriptiveLabel();
+    FormattedLabel title = UIContents.PID_CONTROLLER.convertTo(Converter::viewStyle).toDescriptiveLabel();
 
-    FormattedLabel qTitle = UIContents.QPID_CONTROLLER.convertTo(Converter::pidStyle).toDescriptiveLabel();
+    FormattedLabel qTitle = UIContents.QPID_CONTROLLER.convertTo(Converter::viewStyle).toDescriptiveLabel();
     FormattedLabel qpLabel = ExposedFieldType.P.convertTo(Converter::pidStyle).toDescriptiveLabel();
     FormattedLabel qiLabel = ExposedFieldType.I.convertTo(Converter::pidStyle).toDescriptiveLabel();
     FormattedLabel qdLabel = ExposedFieldType.D.convertTo(Converter::pidStyle).toDescriptiveLabel();
@@ -34,7 +34,7 @@ public class SpatialScheduleUIField extends TypedUIPort<CompoundTag> implements
     EditBox qiField;
     EditBox qdField;
 
-    FormattedLabel pTitle = UIContents.PPID_CONTROLLER.convertTo(Converter::pidStyle).toDescriptiveLabel();
+    FormattedLabel pTitle = UIContents.PPID_CONTROLLER.convertTo(Converter::viewStyle).toDescriptiveLabel();
     FormattedLabel ppLabel = ExposedFieldType.P.convertTo(Converter::pidStyle).toDescriptiveLabel();
     FormattedLabel piLabel = ExposedFieldType.I.convertTo(Converter::pidStyle).toDescriptiveLabel();
     FormattedLabel pdLabel = ExposedFieldType.D.convertTo(Converter::pidStyle).toDescriptiveLabel();

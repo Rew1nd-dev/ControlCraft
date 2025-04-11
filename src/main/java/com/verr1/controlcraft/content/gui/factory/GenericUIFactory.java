@@ -25,7 +25,6 @@ import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.data.PeripheralKey;
 import com.verr1.controlcraft.foundation.type.descriptive.*;
 import com.verr1.controlcraft.registry.ControlCraftBlocks;
-import com.verr1.controlcraft.registry.ControlCraftGuiTextures;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -105,12 +104,45 @@ public class GenericUIFactory {
                 Converter.convert(ExposedFieldType.IS_SENSOR, Converter::titleStyle)
         );
 
+        OptionUIField<CameraClipType> cast_ray = new OptionUIField<>(
+                boundAnchorPos,
+                CameraBlockEntity.RAY_TYPE,
+                CameraClipType.class,
+                CameraClipType.RAY,
+                Converter.convert(ExposedFieldType.CAST_RAY, Converter::titleStyle)
+        );
+
+        OptionUIField<CameraClipType> ship_ray = new OptionUIField<>(
+                boundAnchorPos,
+                CameraBlockEntity.SHIP_TYPE,
+                CameraClipType.class,
+                CameraClipType.SHIP,
+                Converter.convert(ExposedFieldType.CLIP_SHIP, Converter::titleStyle)
+        );
+
+        OptionUIField<CameraClipType> entity_ray = new OptionUIField<>(
+                boundAnchorPos,
+                CameraBlockEntity.ENTITY_TYPE,
+                CameraClipType.class,
+                CameraClipType.ENTITY,
+                Converter.convert(ExposedFieldType.CLIP_ENTITY, Converter::titleStyle)
+        );
+
+        Runnable alignLabels = () -> {
+            Converter.alignLabel(is_sensor, cast_ray, ship_ray, entity_ray);
+            Converter.alignLabel(cast_ray.valueLabel(), ship_ray.valueLabel(), entity_ray.valueLabel());
+        };
+
         return new GenericSettingScreen.builder(boundAnchorPos)
                 .withRenderedStack(ControlCraftBlocks.CAMERA_BLOCK.asStack())
                 .withTab(
                         GENERIC_SETTING_TAB,
                         new VerticalFlow.builder(boundAnchorPos)
                                 .withPort(CameraBlockEntity.IS_ACTIVE_SENSOR, is_sensor)
+                                .withPort(CameraBlockEntity.RAY_TYPE, cast_ray)
+                                .withPort(CameraBlockEntity.SHIP_TYPE, ship_ray)
+                                .withPort(CameraBlockEntity.ENTITY_TYPE, entity_ray)
+                                .withPreDoLayout(alignLabels)
                                 .build()
                 )
                 .withTab(
@@ -124,14 +156,14 @@ public class GenericUIFactory {
         DoubleUIView angle_view = new DoubleUIView(
                 boundPos,
                 ANGLE,
-                Converter.convert(ExposedFieldType.ANGLE, Converter::viewStyle)
+                Converter.convert(ExposedFieldType.DEGREE, Converter::viewStyle)
         );
 
 
         DoubleUIField angle = new DoubleUIField(
                 boundPos,
                 ANGLE,
-                Converter.convert(ExposedFieldType.ANGLE, Converter::titleStyle)
+                Converter.convert(ExposedFieldType.DEGREE, Converter::titleStyle)
         );
 
         return new GenericSettingScreen.builder(boundPos)
@@ -192,7 +224,7 @@ public class GenericUIFactory {
 
         var speed_view = new DoubleUIView(boundPos, SharedKeys.VALUE, Converter.convert(ExposedFieldType.SPEED, Converter::viewStyle));
 
-        var speed = new DoubleUIField(boundPos, SharedKeys.VALUE, Converter.convert(ExposedFieldType.SPEED, Converter::viewStyle));
+        var speed = new DoubleUIField(boundPos, SharedKeys.VALUE, Converter.convert(ExposedFieldType.SPEED, Converter::titleStyle));
 
 
         Runnable alignLabels = () -> Converter.alignLabel(speed, speed_view);
@@ -224,13 +256,13 @@ public class GenericUIFactory {
 
         var vertical_view = new DoubleUIView(boundPos, JetBlockEntity.VERTICAL_ANGLE, Converter.convert(ExposedFieldType.VERTICAL_TILT, Converter::viewStyle));
 
-        var thrust = new DoubleUIField(boundPos, JetBlockEntity.THRUST, Converter.convert(ExposedFieldType.THRUST, Converter::viewStyle));
+        var thrust = new DoubleUIField(boundPos, JetBlockEntity.THRUST, Converter.convert(ExposedFieldType.THRUST, Converter::titleStyle));
 
-        var horizontal = new DoubleUIField(boundPos, JetBlockEntity.HORIZONTAL_ANGLE, Converter.convert(ExposedFieldType.HORIZONTAL_TILT, Converter::viewStyle));
+        var horizontal = new DoubleUIField(boundPos, JetBlockEntity.HORIZONTAL_ANGLE, Converter.convert(ExposedFieldType.HORIZONTAL_TILT, Converter::titleStyle));
 
-        var vertical = new DoubleUIField(boundPos, JetBlockEntity.VERTICAL_ANGLE, Converter.convert(ExposedFieldType.VERTICAL_TILT, Converter::viewStyle));
+        var vertical = new DoubleUIField(boundPos, JetBlockEntity.VERTICAL_ANGLE, Converter.convert(ExposedFieldType.VERTICAL_TILT, Converter::titleStyle));
 
-        Runnable alignLabels = () -> Converter.alignLabel(thrust, horizontal, vertical);
+        Runnable alignLabels = () -> Converter.alignLabel(thrust, horizontal, vertical, thrust_view, horizontal_view, vertical_view);
 
         return new GenericSettingScreen.builder(boundPos)
                 .withRenderedStack(ControlCraftBlocks.JET_BLOCK.asStack())
@@ -398,7 +430,6 @@ public class GenericUIFactory {
                                 .withPort(ReceiverBlockEntity.PERIPHERAL, key_field)
                                 .build()
                 )
-                .withBackground(ControlCraftGuiTextures.SIMPLE_BACKGROUND_HALF)
                 .build();
     }
 

@@ -13,6 +13,8 @@ import com.verr1.controlcraft.foundation.data.terminal.TerminalRowData;
 import com.verr1.controlcraft.foundation.data.terminal.TerminalRowSetting;
 import com.verr1.controlcraft.foundation.network.packets.specific.TerminalSettingsPacket;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.MiscDescription;
+import com.verr1.controlcraft.foundation.type.descriptive.UIContents;
 import com.verr1.controlcraft.registry.ControlCraftGuiLabels;
 import com.verr1.controlcraft.registry.ControlCraftGuiTextures;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
@@ -156,8 +158,7 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
         var name = new com.simibubi.create.foundation.gui.widget.Label(0, 0, row_type.asComponent()).colored(color_label);
         name.text = row_type.asComponent();
 
-        var minTitle = new com.simibubi.create.foundation.gui.widget.Label(0, 0, ControlCraftGuiLabels.minLabel).colored(color_label);
-        minTitle.text = ControlCraftGuiLabels.minLabel;
+        var minTitle = UIContents.MIN.toDescriptiveLabel();
 
 
         var minField = new EditBox(font, 0, 0, input_len_x, len_y, Components.literal(""));
@@ -169,8 +170,7 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
         minField.setValue(isBoolean ? "0" : String.format("%.2f", row_min));
         minField.setFilter(ParseUtils::tryParseDoubleFilter);
 
-        var maxTitle = new Label(0, 0, ControlCraftGuiLabels.maxLabel).colored(color_label);
-        maxTitle.text = ControlCraftGuiLabels.maxLabel;
+        var maxTitle = UIContents.MAX.toDescriptiveLabel();
 
 
 
@@ -184,11 +184,11 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
         maxField.setFilter(ParseUtils::tryParseDoubleFilter);
 
 
-        var toggleField = new SmallCheckbox(0, 0, 10, 10, Components.translatable(ControlCraft.MODID + ".tooltip.enable_channel"), row_data.get(i).enabled());
+        var toggleField = new SmallCheckbox(0, 0, 10, 10, MiscDescription.TURN_ON.specific().get(0), row_data.get(i).enabled());
 
-        var toggleReverse = new SmallCheckbox(0, 0, 10, 10, Components.translatable(ControlCraft.MODID + ".tooltip.reverse_redstone"), row_data.get(i).isReverse());
+        var toggleReverse = new SmallCheckbox(0, 0, 10, 10, MiscDescription.REVERSE_INPUT.specific().get(0), row_data.get(i).isReverse());
 
-        var select = new SmallCheckbox(0, 0, 10, 10, Components.translatable(ControlCraft.MODID + ".tooltip.as_redstone_input"), i == exposedIndex).withCallback(
+        var select = new SmallCheckbox(0, 0, 10, 10, MiscDescription.AS_REDSTONE_INPUT.specific().get(0), i == exposedIndex).withCallback(
                 (self) -> {
                     for(int j = 0; j < selectAsOutputButtons.size(); j++){
                         if(j == i)break;

@@ -2,6 +2,7 @@ package com.verr1.controlcraft.content.gui.layouts.element;
 
 import com.simibubi.create.foundation.gui.widget.Label;
 import com.verr1.controlcraft.ControlCraft;
+import com.verr1.controlcraft.content.gui.factory.Converter;
 import com.verr1.controlcraft.content.gui.layouts.api.ComponentLike;
 import com.verr1.controlcraft.content.gui.layouts.api.Descriptive;
 import com.verr1.controlcraft.content.gui.layouts.api.LabelProvider;
@@ -26,14 +27,14 @@ public class OptionUIField<T extends Enum<?> & Descriptive<?>> extends TypedUIPo
 
     public OptionUIField(BlockPos boundPos, NetworkKey key, Class<T> clazz, LabelProvider titleText) {
         super(boundPos, key, clazz, tryGetDefault(clazz));
-        options = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_GREEN, clazz);
+        options = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_SELECTION, clazz);
         title = titleText.toDescriptiveLabel();
         lateInit();
     }
 
     public OptionUIField(BlockPos boundPos, NetworkKey key, Class<T> clazz, T[] scope, LabelProvider titleText) {
         super(boundPos, key, clazz, tryGetDefault(clazz));
-        options = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_GREEN, clazz);
+        options = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_SELECTION, clazz);
         options.withValues(scope);
         title = titleText.toDescriptiveLabel();
         lateInit();
@@ -56,6 +57,7 @@ public class OptionUIField<T extends Enum<?> & Descriptive<?>> extends TypedUIPo
         options.valueCalling(
                 it -> Optional.of(it)
                         .map(ComponentLike::asComponent)
+                        .map(c -> c.copy().withStyle(Converter::optionStyle))
                         .ifPresent(value::setTextOnly)
         );
         setMaxLength();
@@ -80,7 +82,7 @@ public class OptionUIField<T extends Enum<?> & Descriptive<?>> extends TypedUIPo
         layoutToFill.addChild(title, 0, 0);
         layoutToFill.addChild(value, 0, 1);
         layoutToFill.addChild(options, 0, 2);
-        layoutToFill.columnSpacing(2);
+        layoutToFill.columnSpacing(3);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.verr1.controlcraft.content.blocks;
 
+import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.Observer;
 import com.verr1.controlcraft.foundation.api.IConstraintHolder;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
@@ -14,6 +15,7 @@ import com.verr1.controlcraft.utils.SerializeUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -47,7 +49,11 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
         super(type, pos, state);
         buildRegistry(COMPANION).withBasic(SerializePort.of(this::getCompanionShipID, this::setCompanionShipID, SerializeUtils.LONG)).dispatchToSync().register();
         buildRegistry(COMPANION_DIRECTION).withBasic(SerializePort.of(() -> companionShipDirection, d -> companionShipDirection = d, SerializeUtils.ofEnum(Direction.class))).dispatchToSync().register();
-        buildRegistry(BLOCK_CONNECT_CONTEXT).withBasic(SerializePort.of(() -> blockConnectContext.asLong(), l -> blockConnectContext = BlockPos.of(l), SerializeUtils.LONG)).register();
+        buildRegistry(BLOCK_CONNECT_CONTEXT).withBasic(SerializePort.of(
+                () -> blockConnectContext().asLong(),
+                l -> setBlockConnectContext(BlockPos.of(l)),
+                SerializeUtils.LONG)
+        ).register();
 
         /*
         registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getCompanionShipID, this::setCompanionShipID, SerializeUtils.LONG, COMPANION), Side.SHARED);
@@ -67,6 +73,7 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
     }
 
     public void setBlockConnectContext(BlockPos blockConnectContext) {
+        ControlCraft.LOGGER.info("setBlockConnectContext: " + blockConnectContext);
         this.blockConnectContext = blockConnectContext;
     }
 
@@ -176,5 +183,7 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
                 .map(Observer::read)
                 .orElseGet(() -> ShipPhysics.of(getCompanionServerShip()));
     }
+
+
 
 }

@@ -149,8 +149,12 @@ public class Converter {
         return s.withItalic(false).withColor(ChatFormatting.DARK_GRAY);
     }
 
-    public static Style fieldStyle(Style s){
-        return s.withBold(true).withItalic(true).withColor(ChatFormatting.DARK_GRAY);
+    public static Style viewStyle(Style s){
+        return s.withBold(true).withUnderlined(true).withItalic(false).withColor(ChatFormatting.DARK_GRAY);
+    }
+
+    public static Style optionStyle(Style s){
+        return s.withBold(false).withItalic(true).withUnderlined(true).withColor(ChatFormatting.DARK_AQUA);
     }
 
     public static Style minMaxStyle(Style s){
@@ -158,14 +162,12 @@ public class Converter {
     }
 
     public static Style pidStyle(Style s){
-        return s.withBold(true).withColor(ChatFormatting.DARK_GRAY).withItalic(true);
+        return titleStyle(s);
     }
 
     public static Style directionStyle(Style s){
         return s.withBold(true).withItalic(true).withColor(ChatFormatting.DARK_GRAY);
     }
 
-    public static Style viewStyle(Style s){
-        return s.withBold(true).withUnderlined(true).withItalic(false).withColor(ChatFormatting.DARK_GRAY);
-    }
+
 }

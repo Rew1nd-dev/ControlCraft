@@ -1,6 +1,5 @@
-package com.verr1.controlcraft.foundation.managers;
+package com.verr1.controlcraft.content.blocks.camera;
 
-import com.verr1.controlcraft.content.blocks.camera.CameraBlockEntity;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
@@ -37,6 +36,8 @@ public class ClientCameraManager {
     public static @Nullable BlockPos getLinkCameraPos(){
         return LinkCameraPos;
     }
+
+
 
     public static void link(BlockPos cameraPos){
         LinkCameraPos = cameraPos;
@@ -75,9 +76,10 @@ public class ClientCameraManager {
             camera.syncServer(player.getName().getString());
             // camera.outlineViewClip();
             // camera.outlineEntityClip();
-            camera.outlineEntityInView();
-            camera.outlineClipRay();
-            camera.outlineShipClip();
+            // camera.outlineEntityInView();
+            // if(camera.castRay())camera.outlineClipRay();
+            // camera.outlineShipClip();
+            // camera.outlineAllEntityInView();
         }
 
 

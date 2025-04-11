@@ -28,7 +28,7 @@ public class FlapBearingRenderer extends SafeBlockEntityRenderer<FlapBearingBloc
         SuperByteBuffer propellerBuffer = CachedBufferer.partialFacing(ControlCraftPartialModels.WING_CONTROLLER_TOP, state);
 
         propellerBuffer.rotateCentered(state.getValue(BlockStateProperties.FACING), (float) Math.toRadians(angle * sign))
-                .light(LightTexture.FULL_BRIGHT)
+                .light(light)
                 .renderInto(ms, solid);
     }
 }

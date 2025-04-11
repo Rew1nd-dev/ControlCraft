@@ -19,7 +19,7 @@ version = mod_version
 group = mod_group_id
 
 base {
-    archivesName = mod_id
+    archivesName = mod_name + " Forge-1.20.1"
 }
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
@@ -216,17 +216,18 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-annotations:2.13.3"
     implementation "thedarkcolour:kotlinforforge:$forge_kotlin_version"
 
-    implementation fg.deobf(jarJar("libs:tau:2.0.1")){
-        jarJar.ranged(it, "[2.0.1,)")
-    }
+    implementation fg.deobf("libs:tau:2.0.1")
 
     implementation fg.deobf("libs:cbcmodernwarfare:0.0.6c")
     implementation fg.deobf("libs:createbigcannons:5.8.3")
 
     // minecraftLibrary("org.jgrapht:jgrapht-core:1.5.2")
-    implementation fg.deobf(jarJar("libs:valkyrien-ship-schematics-forge:1.0")){
-        jarJar.ranged(it, "[1.0,)")
+
+    implementation fg.deobf(jarJar("libs:valkyrien-ship-schematics-forge:0.9")){
+        jarJar.ranged(it, "[0.0,)")
     }
+
+    // implementation fg.deobf("libs:valkyrien-ship-schematics-forge:1.0")
     // implementation fg.deobf("libs:VMod-Forge-1.20.1:1.0.0")
 
     implementation fg.deobf("com.rbasamoyai:ritchiesprojectilelib:${rpl_version}+mc.${minecraft_version}-forge-build." + rpl_build){ transitive = false }

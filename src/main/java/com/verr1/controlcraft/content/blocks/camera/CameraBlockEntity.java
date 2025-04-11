@@ -10,7 +10,6 @@ import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.CameraPeripheral;
 import com.verr1.controlcraft.content.gui.legacy.CameraScreen;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
@@ -19,11 +18,10 @@ import com.verr1.controlcraft.foundation.data.ShipHitResult;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.managers.ClientOutliner;
-import com.verr1.controlcraft.foundation.managers.ClientCameraManager;
 import com.verr1.controlcraft.foundation.managers.ServerCameraManager;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
-import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldSyncClientPacket;
+import com.verr1.controlcraft.foundation.type.descriptive.CameraClipType;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
 import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
@@ -89,6 +87,11 @@ public class CameraBlockEntity extends OnShipBlockEntity
     public static NetworkKey YAW = NetworkKey.create("yaw");
     public static NetworkKey IS_ACTIVE_SENSOR = NetworkKey.create("sensor");
 
+    public static NetworkKey RAY_TYPE = NetworkKey.create("ray_type");
+    public static NetworkKey SHIP_TYPE = NetworkKey.create("ship_type");
+    public static NetworkKey ENTITY_TYPE = NetworkKey.create("entity_type");
+
+
     public ShipHitResult latestShipHitResult = null;
     public EntityHitResult latestEntityHitResult = null;
     public EntityHitResult latestServerPlayerHitResult = null;
@@ -104,6 +107,18 @@ public class CameraBlockEntity extends OnShipBlockEntity
 
     private double pitch = 0; // in degree
     private double yaw = 0;
+
+
+
+    private CameraClipType rayType = CameraClipType.NO_RAY;
+
+
+
+    private CameraClipType shipType = CameraClipType.SHIP_CLIP_OFF;
+
+    private CameraClipType entityType = CameraClipType.ENTITY_OFF;
+
+
 
     private CameraPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
@@ -144,6 +159,29 @@ public class CameraBlockEntity extends OnShipBlockEntity
         );
     }
 
+    public CameraClipType rayType() {
+        return rayType;
+    }
+
+    public void setRayType(CameraClipType rayType) {
+        this.rayType = rayType;
+    }
+
+    public CameraClipType shipType() {
+        return shipType;
+    }
+
+    public void setShipType(CameraClipType shipType) {
+        this.shipType = shipType;
+    }
+
+    public CameraClipType entityType() {
+        return entityType;
+    }
+
+    public void setEntityType(CameraClipType entityType) {
+        this.entityType = entityType;
+    }
 
     public void clipNewServerPlayer(){
         latestServerPlayerHitResult = clipServerPlayer();
@@ -518,12 +556,14 @@ public class CameraBlockEntity extends OnShipBlockEntity
 
     @OnlyIn(Dist.CLIENT)
     public void outlineAllEntityInView(){
-        clipAllEntityInView((e) -> true).forEach(
-                e -> {
-                    if(e instanceof IEntityDuck lv){
-                        lv.controlCraft$setClientGlowing(4);
-                    }
+        /*
+        */
+        clipAllEntityInView(LivingEntity.class::isInstance).forEach(
+            e -> {
+                if(e instanceof IEntityDuck lv){
+                    lv.controlCraft$setClientGlowing(4);
                 }
+            }
         );
     }
 
@@ -562,7 +602,7 @@ public class CameraBlockEntity extends OnShipBlockEntity
     public void outlineExtra(Vec3 pos, Direction direction, String slot, int rgb){
         if(level == null)return;
         if(!ClientCameraManager.isLinked())return;
-        if(!ClientCameraManager.getLinkCameraPos().equals(getBlockPos()))return;
+        if(!isLinkedCamera())return;
         outlineLocation(pos, direction, rgb, slot);
 
     }
@@ -615,21 +655,41 @@ public class CameraBlockEntity extends OnShipBlockEntity
 
 
     @Override
-    public void tick() {
-        super.tick();
+    public void tickServer() {
         if(isActiveDistanceSensor()){
             //setChanged();
             updateOutputSignal();
             updateNeighbor();
         }
 
-        if(level != null && level.isClientSide){
-            outlineClipRay();
-            return;
-        }
-        ExposedFieldSyncClientPacket.syncClient(this, getBlockPos(), level);
     }
 
+    @Override
+    public void lazyTickServer() {
+        super.lazyTickServer();
+        syncForNear(true, RAY_TYPE, SHIP_TYPE, ENTITY_TYPE , IS_ACTIVE_SENSOR, FIELD);
+    }
+
+
+    @OnlyIn(Dist.CLIENT)
+    @Override
+    public void tickClient() {
+        super.tickClient();
+        if(
+                rayType() == CameraClipType.RAY_ALWAYS
+                        ||
+                rayType() == CameraClipType.RAY_ON_USE && isLinkedCamera()
+        )outlineClipRay();
+
+        if(shipType() == CameraClipType.SHIP_CLIP_ON && isLinkedCamera())outlineShipClip();
+
+        if(isLinkedCamera()){
+            if(entityType() == CameraClipType.ENTITY_IN_VIEW)outlineAllEntityInView();
+            if(entityType() == CameraClipType.ENTITY_NEAREST)outlineEntityInView();
+            if(entityType() == CameraClipType.ENTITY_TARGETED_ONLY)outlineEntityClip();
+        }
+
+    }
 
     public Quaterniond getAbsViewTransform(){
         Quaterniondc originalRotation =
@@ -742,6 +802,48 @@ public class CameraBlockEntity extends OnShipBlockEntity
         buildRegistry(PITCH).withBasic(SerializePort.of(this::getPitch, this::setPitch, SerializeUtils.DOUBLE)).register();
         buildRegistry(YAW).withBasic(SerializePort.of(this::getYaw, this::setYaw, SerializeUtils.DOUBLE)).register();
         buildRegistry(IS_ACTIVE_SENSOR).withBasic(SerializePort.of(this::isActiveDistanceSensor, this::setActiveDistanceSensor, SerializeUtils.BOOLEAN)).register();
+
+        buildRegistry(RAY_TYPE)
+                .withBasic(
+                    SerializePort.of(
+                            this::rayType,
+                            this::setRayType,
+                            SerializeUtils.ofEnum(CameraClipType.class)
+                    )
+                )
+                .withClient(
+                    ClientBuffer.of(CameraClipType.class)
+                )
+                .dispatchToSync()
+                .register();
+
+        buildRegistry(SHIP_TYPE)
+                .withBasic(
+                        SerializePort.of(
+                                this::shipType,
+                                this::setShipType,
+                                SerializeUtils.ofEnum(CameraClipType.class)
+                        )
+                )
+                .withClient(
+                        ClientBuffer.of(CameraClipType.class)
+                )
+                .dispatchToSync()
+                .register();
+
+        buildRegistry(ENTITY_TYPE)
+                .withBasic(
+                        SerializePort.of(
+                                this::entityType,
+                                this::setEntityType,
+                                SerializeUtils.ofEnum(CameraClipType.class)
+                        )
+                )
+                .withClient(
+                        ClientBuffer.of(CameraClipType.class)
+                )
+                .dispatchToSync()
+                .register();
 
         buildRegistry(FIELD)
                 .withBasic(CompoundTagPort.of(

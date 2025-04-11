@@ -34,7 +34,10 @@ public enum UIContents implements Descriptive<UIContents> {
     ANCHOR_RESISTANCE_AT_POS(Component.literal("Resist At Pos"), literals("Resistance Apply To Block Instead Of COM")),
     ANCHOR_EXTRA_GRAVITY_AT_POS(Component.literal("Gravity At Pos"), literals("Extra Gravity Apply To Block Instead Of COM")),
 
-
+    CAMERA_LINK_ACCEPT(Component.literal("Camera Link"), literals("Link To Camera")),
+    CAMERA_LINK_DUMP(Component.literal("Camera Dump"), literals("Dump Camera Link")),
+    CAMERA_LINK_RESET(Component.literal("Camera Reset"), literals("Dump All Camera Link")),
+    CAMERA_LINK_VALIDATE(Component.literal("Camera Validate"), literals("Dump Unloaded Or Removed Camera Link")),
     ;
 
 

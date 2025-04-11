@@ -66,15 +66,21 @@ public abstract class MixinCamera implements ICameraDuck {
     //Simply Coping VS camera setup functions without third person mode
     @Unique
     @Override
-    public void controlCraft$setupWithShipMounted(final @NotNull BlockGetter level, final @NotNull Entity renderViewEntity,
-                                                  final boolean thirdPerson, final boolean thirdPersonReverse, final float partialTicks,
-                                                  final @Nullable ClientShip shipMountedTo, final @NotNull Vector3dc inShipPlayerPosition) {
+    public void controlCraft$setupWithShipMounted(
+            final @NotNull BlockGetter level,
+            final @NotNull Entity renderViewEntity,
+            final boolean thirdPerson,
+            final boolean thirdPersonReverse,
+            final float partialTicks,
+            final @Nullable ClientShip shipMountedTo,
+            final @NotNull Vector3dc inShipPlayerPosition
+    ) {
 
 
         ShipTransform renderTransform = Optional
                 .ofNullable(shipMountedTo)
                 .map(ClientShip::getRenderTransform)
-                .orElse(ShipTransformImpl.Companion.createEmpty());
+                .orElse(new ShipTransformImpl(new Vector3d(), new Vector3d(), new Quaterniond(), new Vector3d(1, 1, 1)));
 
         final Vector3dc playerBasePos =
                 renderTransform.getShipToWorldMatrix().transformPosition(inShipPlayerPosition, new Vector3d());

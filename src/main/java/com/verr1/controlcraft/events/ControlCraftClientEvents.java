@@ -1,15 +1,12 @@
 package com.verr1.controlcraft.events;
 
 
-import com.github.wintersteve25.tau.renderer.HudUIRenderer;
 import com.verr1.controlcraft.ControlCraftClient;
-import com.verr1.controlcraft.foundation.managers.ClientCameraManager;
+import com.verr1.controlcraft.content.blocks.camera.ClientCameraManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;

@@ -16,10 +16,14 @@ public enum ControlCraftGuiTextures implements SizedScreenElement {
     SIMPLE_BACKGROUND_HALF("simple_background_half", 87, 108),
     SIMPLE_BACKGROUND_QUARTER("simple_background_5_6", 164, 116),
     SIMPLE_BACKGROUND_LARGE("simple_background_large", 256, 133),
+    SIMPLE_BACKGROUND_ONE_LINE("simple_background_one_line", 160, 29),
 
 
     SMALL_BUTTON_RED("icons10x10", 0, 0, 10, 10),
     SMALL_BUTTON_GREEN("icons10x10", 10, 0, 10, 10),
+    SMALL_BUTTON_SELECTION("icons10x10", 20, 0, 10, 10),
+    SMALL_BUTTON_NO("icons10x10", 30, 0, 10, 10),
+    SMALL_BUTTON_YES("icons10x10", 40, 0, 10, 10),
 
     TAB_BUTTON_BACKGROUND("tab_button_background", 0, 0, 40, 12),
     TAB_BUTTON_FRAME("tab_button_frame", 0, 0, 40, 1),
