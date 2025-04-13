@@ -1,25 +1,22 @@
 package com.verr1.controlcraft.content.blocks.spatial;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.Config;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.content.gui.layouts.api.IScheduleProvider;
+import com.verr1.controlcraft.content.valkyrienskies.attachments.SpatialForceInducer;
 import com.verr1.controlcraft.foundation.api.*;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.content.cctweaked.peripheral.SpatialAnchorPeripheral;
-import com.verr1.controlcraft.content.gui.legacy.SpatialScreen;
-import com.verr1.controlcraft.content.valkyrienskies.attachments.SpatialForceInducer;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
 import com.verr1.controlcraft.foundation.data.control.SpatialSchedule;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.data.logical.LogicalSpatial;
 import com.verr1.controlcraft.foundation.managers.SpatialLinkManager;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
-import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
 import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldSyncClientPacket;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
@@ -43,8 +40,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -138,7 +133,6 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
     }
 
     public LogicalSpatial getLogicalSpatial(){
-        if(level == null || level.isClientSide)return null;
         return new LogicalSpatial(
                 WorldBlockPos.of(level, getBlockPos()),
                 getAlign(),
@@ -298,7 +292,10 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
 
         Optional.ofNullable(getLoadedServerShip())
                 .map(SpatialForceInducer::getOrCreate)
-                .ifPresent(forceInducer -> forceInducer.alive(WorldBlockPos.of(level, getBlockPos())));
+                .ifPresent(inducer -> inducer.replace(
+                        WorldBlockPos.of(level, getBlockPos()),
+                        this::getLogicalSpatial
+                ));
 
     }
 
@@ -315,13 +312,13 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
 
     @Override
     public void bruteDirectionalConnectWith(BlockPos pos, Direction align, Direction forward) {
-        if(level.isClientSide)return;
+        if(level == null || level.isClientSide)return;
         // just make a dummy
         tracking = new LogicalSpatial(
                 WorldBlockPos.of(level, getBlockPos()),
                 align,
                 forward,
-                VSGetterUtils.getShip((ServerLevel)level ,pos).map(LoadedServerShip::getId).orElse(-1L),
+                VSGetterUtils.getLoadedServerShip((ServerLevel)level ,pos).map(LoadedServerShip::getId).orElse(-1L),
                 getDimensionID(),
                 true,
                 true,
@@ -409,40 +406,7 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
         ControlCraftPackets.sendToPlayer(p, player);
     }
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == RegisteredPacketType.OPEN_SCREEN_0){
-            BlockPos pos = packet.getBoundPos();
-            double offset = packet.getDoubles().get(0);
-            long protocol = packet.getLongs().get(0);
-            boolean isRunning = packet.getBooleans().get(0);
-            boolean isStatic = packet.getBooleans().get(1);
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ScreenOpener.open(
-                    new SpatialScreen(pos, offset, protocol, isRunning, isStatic)
-            ));
-        }
-        /*
-        if(packet.getType() == RegisteredPacketType.SYNC_0){
-            isRunning = packet.getBooleans().get(0);
-            isStatic = packet.getBooleans().get(1);
-        }
-        * */
-    }
 
-    @Override
-    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        if(packet.getType() == RegisteredPacketType.SETTING_0){
-            double offset = packet.getDoubles().get(0);
-            long protocol = packet.getLongs().get(0);
-            boolean isRunning = packet.getBooleans().get(0);
-            boolean isStatic = packet.getBooleans().get(1);
-            setAnchorOffset(offset);
-            setProtocol(protocol);
-            setRunning(isRunning);
-            setStatic(isStatic);
-        }
-    }
 
 
 

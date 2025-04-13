@@ -4,7 +4,6 @@ import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.NetworkBlockEntity;
 import com.verr1.controlcraft.content.blocks.transmitter.NetworkManager;
-import com.verr1.controlcraft.content.gui.legacy.ReceiverScreen;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.data.PeripheralKey;
@@ -45,8 +44,6 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
 {
     public static final NetworkKey PERIPHERAL = NetworkKey.create("peripheral");
     public static final NetworkKey PERIPHERAL_TYPE = NetworkKey.create("peripheral_type");
-    public static final NetworkKey PERIPHERAL_NAME =  NetworkKey.create("peripheral_name");
-    public static final NetworkKey PERIPHERAL_PROTOCOL =  NetworkKey.create("peripheral_protocol");
 
     private IPeripheral attachedPeripheral;
     private final Map<String, PeripheralMethod> methods = new HashMap<>();
@@ -54,7 +51,6 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
 
     private PeripheralKey networkKey = PeripheralKey.NULL;
 
-    private String attachedViewType = "";
 
     private final ConcurrentLinkedQueue<Runnable> syncedTasks = new ConcurrentLinkedQueue<>();
 
@@ -63,7 +59,16 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
         if(attachedPeripheral == null) return MethodResult.of(null, "Receiver Called, But No Peripheral Attached");
         if(!methods.containsKey(methodName))return MethodResult.of(null, "Receiver Called, But Method Not Found");
         if(access == null)return MethodResult.of(null, "Receiver Called, But No Access Provided");
-        return methods.get(methodName).apply(attachedPeripheral, context, access, args);
+
+        return Optional.ofNullable(methods.get(methodName)).map(m -> {
+            try {
+                return m.apply(attachedPeripheral, context, access, args);
+            } catch (LuaException e) {
+                throw new RuntimeException(e);
+            }
+        }).orElse(MethodResult.of(null, "Exception Occurred"));
+
+
     }
 
     public MethodResult callPeripheralAsync(IComputerAccess access, ILuaContext context, String methodName, IArguments args){
@@ -91,9 +96,6 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
         }
     }
 
-    public String getClientViewType(){
-        return attachedViewType;
-    }
 
     public String getAttachedPeripheralType(){
         if(level == null || level.isClientSide)return "You Are Calling This On The Client Side, Nothing Returned";
@@ -124,7 +126,6 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
                 new InvalidPeripheralCallBack()
         );
         attachedPeripheral = peripheral;
-        attachedViewType = Optional.ofNullable(peripheral).map(IPeripheral::getType).orElse("Not Attached");
         if(attachedPeripheral == null)return;
         methods.putAll(ServerContext.get(((ServerLevel) level).getServer()).peripheralMethods().getSelfMethods(peripheral));
     }
@@ -134,10 +135,6 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
         return PeripheralKey.NULL;
     }
 
-    public PeripheralKey getClientViewKey(){
-        if(level == null || !level.isClientSide)return PeripheralKey.NULL;
-        return networkKey;
-    }
 
 
     public boolean registered(){
@@ -174,47 +171,17 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
 
     public ReceiverBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        /*
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                tag -> enqueueTask(()-> dispatchKey(PeripheralKey.deserialize(tag.getCompound("peripheral_key")))),
-                tag -> tag.put("peripheral_key", networkKey.serialize()),
-                PERIPHERAL
-            ),
-                Side.SHARED
-        );
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(
-                () -> attachedViewType,
-                t -> attachedViewType = t,
-                SerializeUtils.STRING,
-                PERIPHERAL_TYPE
-            ),
-                Side.RUNTIME_SHARED
-        );
-        * */
         buildRegistry(PERIPHERAL_TYPE).withBasic(SerializePort.of(
                     () -> Optional.ofNullable(attachedPeripheral).map(IPeripheral::getType).orElse("Not Attached"),
                     $ -> {},
                     SerializeUtils.STRING
                 )).withClient(new ClientBuffer<>(SerializeUtils.STRING, String.class)).runtimeOnly().register();
 
-        /*
-        buildRegistry(PERIPHERAL_NAME).withBasic(SerializePort.of(
-                () -> networkKey.Name(),
-                $ -> {},
-                SerializeUtils.STRING
-        )).withClient(new ClientBuffer<>(SerializeUtils.STRING, String.class)).runtimeOnly().register();
-
-        buildRegistry(PERIPHERAL_PROTOCOL).withBasic(SerializePort.of(
-                () -> networkKey.Protocol(),
-                $ -> {},
-                SerializeUtils.LONG
-        )).withClient(new ClientBuffer<>(SerializeUtils.LONG, Long.class)).runtimeOnly().register();
-        * */
 
 
         buildRegistry(PERIPHERAL).withBasic(CompoundTagPort.of(
                 () -> networkKey.serialize(),
-                tag -> resetNetworkRegistry(PeripheralKey.deserialize(tag))
+                tag -> enqueueTask(() -> resetNetworkRegistry(PeripheralKey.deserialize(tag)))
         )).withClient(new ClientBuffer<>(SerializeUtils.of(PeripheralKey::serialize, PeripheralKey::deserialize), PeripheralKey.class)).register();
 
     }
@@ -242,19 +209,6 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
 
     }
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == RegisteredPacketType.SETTING_0){
-            String peripheralType = packet.getUtf8s().get(0);
-            String name = packet.getUtf8s().get(1);
-            Long protocol = packet.getLongs().get(0);
-            BlockPos pos = packet.getBoundPos();
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                ScreenOpener.open(new ReceiverScreen(pos, name, peripheralType, protocol));
-            });
-        }
-    }
 
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {

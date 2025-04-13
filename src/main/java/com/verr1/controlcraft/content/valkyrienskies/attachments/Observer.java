@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.verr1.controlcraft.foundation.data.*;
-import com.verr1.controlcraft.foundation.vsapi.AttachmentHolder;
 import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.NotNull;
 import org.valkyrienskies.core.api.ships.PhysShip;

@@ -14,7 +14,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public enum ControlCraftGuiTextures implements SizedScreenElement {
     SIMPLE_BACKGROUND("simple_background", 176, 108),
     SIMPLE_BACKGROUND_HALF("simple_background_half", 87, 108),
-    SIMPLE_BACKGROUND_QUARTER("simple_background_5_6", 164, 116),
+    SIMPLE_BACKGROUND_QUARTER("simple_background_5_6", 164, 138),
     SIMPLE_BACKGROUND_LARGE("simple_background_large", 256, 133),
     SIMPLE_BACKGROUND_ONE_LINE("simple_background_one_line", 160, 29),
 

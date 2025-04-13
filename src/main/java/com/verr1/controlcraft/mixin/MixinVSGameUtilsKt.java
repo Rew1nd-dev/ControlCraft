@@ -1,6 +1,6 @@
 package com.verr1.controlcraft.mixin;
 
-import com.verr1.controlcraft.content.blocks.camera.ClientCameraManager;
+import com.verr1.controlcraft.foundation.managers.ClientCameraManager;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;

@@ -60,6 +60,7 @@ public record LogicalActorSpatial(
      *   I won't try to fix this, so try not to use spatial anchors on rotating contraption,
      *   unless you don't mind the extra rotation :)
      *
+     *   25-4-12: it's already fixed, just negate the quaternion to find the shortest arc
      * */
     @Override
     public Quaterniondc qBase() {
@@ -82,7 +83,7 @@ public record LogicalActorSpatial(
     public Vector3dc vPos() {
         Vector3dc p_sc = ValkyrienSkies.set(new Vector3d(), position);
         return VSGetterUtils
-                .getShip(worldBlockPos())
+                .getLoadedServerShip(worldBlockPos())
                 .map(ship -> ship
                         .getTransform()
                         .getShipToWorld()

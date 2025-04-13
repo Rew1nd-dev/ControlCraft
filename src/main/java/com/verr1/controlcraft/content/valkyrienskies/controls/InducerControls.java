@@ -9,16 +9,12 @@ import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import com.verr1.controlcraft.utils.VSMathUtils;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.*;
-import org.valkyrienskies.core.api.ships.PhysShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
-import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
 import org.valkyrienskies.physics_api.PoseVel;
 
 import java.lang.Math;
-import java.util.Optional;
 
 /*
 *   This is what makes Control Craft to be Control Craft :)
@@ -27,7 +23,7 @@ import java.util.Optional;
 
 public class InducerControls {
 
-    public static double SPEED_THRESHOLD = 120; // m/s
+    public static double SPEED_THRESHOLD = 1200000; // m/s a big number, currently not useful
     public static double OVER_THRESHOLD_MAX_ACCEL = 0.5; // m/s^2
 
     public static void anchorTickControls(LogicalAnchor anchor, @NotNull PhysShipWrapper physShip) {
@@ -68,6 +64,7 @@ public class InducerControls {
     }
 
     public static void dynamicMotorTickControls(LogicalDynamicMotor motor, @NotNull  PhysShipWrapper motorShip, @NotNull PhysShipWrapper compShip) {
+        if(!motor.free())return;
         double metric = motor.angleOrSpeed() ?
                 VSMathUtils.get_yc2xc(motorShip, compShip, motor.motorDir(), motor.compDir()) :
                 VSMathUtils.get_dyc2xc(motorShip, compShip, motorShip.getOmega(), compShip.getOmega(), motor.motorDir(), motor.compDir());
@@ -93,6 +90,7 @@ public class InducerControls {
 
 
     public static void sliderTickControls(LogicalSlider slider, @NotNull PhysShipWrapper selfShip, @NotNull PhysShipWrapper compShip){
+        if(!slider.free())return;
         Vector3dc own_local_pos = slider.selfContact();
         Vector3dc cmp_local_pos = slider.compContact();
 
@@ -146,6 +144,7 @@ public class InducerControls {
     }
 
     public static void spatialTickControls(LogicalSpatial spatial, @NotNull PhysShipWrapper physShip){
+        if(!spatial.shouldDrive())return;
         spatial.schedule().overridePhysics(physShip);
         Vector3dc controlTorque = spatial.schedule().calcControlTorque();
         Vector3dc controlForce  = spatial.schedule().calcControlForce();
@@ -173,6 +172,7 @@ public class InducerControls {
     }
 
     public static void propellerTickControls(LogicalPropeller propeller, @NotNull PhysShipWrapper physShip) {
+        if(!propeller.canDrive())return;
         Vector3dc p_sc = ValkyrienSkies.set(new Vector3d(), propeller.pos().pos().getCenter());
         Vector3dc s_sc = physShip.getTransform().getPositionInShip();
         Vector3dc r_sc = p_sc.sub(s_sc, new Vector3d());
@@ -181,7 +181,7 @@ public class InducerControls {
         double torque_abs = propeller.speed() * propeller.TORQUE_RATIO();
 
         double v_abs = physShip.getVelocity().length();
-        double mass = physShip.getMass() + 1e-20;
+        double mass = physShip.getMass() + 1e-10;
         double accel = v_abs > SPEED_THRESHOLD ? 0.5 : thrust_abs / mass;
 
         Vector3dc torque = new Vector3d(propeller.direction()).mul(torque_abs);

@@ -11,8 +11,6 @@ import com.verr1.controlcraft.content.blocks.propeller.PropellerBlockEntity;
 import com.verr1.controlcraft.content.blocks.receiver.ReceiverBlockEntity;
 import com.verr1.controlcraft.content.blocks.spatial.SpatialAnchorBlockEntity;
 import com.verr1.controlcraft.content.gui.layouts.element.*;
-import com.verr1.controlcraft.content.gui.legacy.element_.ComponentUIView_;
-import com.verr1.controlcraft.content.gui.legacy.element_.PeripheralKeyUIField_;
 import com.verr1.controlcraft.content.gui.layouts.VerticalFlow;
 import com.verr1.controlcraft.content.gui.layouts.api.Descriptive;
 import com.verr1.controlcraft.content.gui.screens.GenericSettingScreen;
@@ -22,7 +20,6 @@ import com.verr1.controlcraft.content.gui.layouts.preset.TerminalDeviceUIField;
 import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
-import com.verr1.controlcraft.foundation.data.PeripheralKey;
 import com.verr1.controlcraft.foundation.type.descriptive.*;
 import com.verr1.controlcraft.registry.ControlCraftBlocks;
 import net.minecraft.ChatFormatting;
@@ -312,7 +309,8 @@ public class GenericUIFactory {
 
         var toggle_lock_mode = new OptionUIField<>(boundPos, SharedKeys.LOCK_MODE, LockMode.class, Converter.convert(UIContents.AUTO_LOCK, Converter::titleStyle));
 
-        var offset = new Vector3dUIField(boundPos, AbstractDynamicMotor.OFFSET, Converter.convert(UIContents.OFFSET, Converter::titleStyle), 25);
+        var offset_self = new Vector3dUIField(boundPos, AbstractDynamicMotor.SELF_OFFSET, Converter.convert(UIContents.SELF_OFFSET, Converter::titleStyle), 25);
+        var offset_comp = new Vector3dUIField(boundPos, AbstractDynamicMotor.COMP_OFFSET, Converter.convert(UIContents.COMP_OFFSET, Converter::titleStyle), 25);
 
 
         Runnable alignLabels = () -> {
@@ -328,7 +326,8 @@ public class GenericUIFactory {
                                 .withPort(SharedKeys.VALUE, current_view)
                                 .withPort(SharedKeys.IS_LOCKED, lock_view)
                                 .withPort(SharedKeys.TARGET, target)
-                                .withPort(AbstractDynamicMotor.OFFSET, offset)
+                                .withPort(AbstractDynamicMotor.SELF_OFFSET, offset_self)
+                                .withPort(AbstractDynamicMotor.COMP_OFFSET, offset_comp)
                                 .withPort(SharedKeys.TARGET_MODE, toggle_mode)
                                 .withPort(SharedKeys.CHEAT_MODE, toggle_cheat)
                                 .withPort(SharedKeys.LOCK_MODE, toggle_lock_mode)
@@ -403,20 +402,17 @@ public class GenericUIFactory {
 
 
     public static GenericSettingScreen createPeripheralInterfaceScreen(BlockPos boundPos){
-        ComponentUIView_ type_view = new ComponentUIView_(
-                () -> boundBlockEntity(boundPos, NetworkBlockEntity.class)
-                        .map(be -> be.readClientBuffer(ReceiverBlockEntity.PERIPHERAL_TYPE, String.class))
-                        .map(Component::literal)
-                        .orElse(NOT_FOUND.copy()),
-                Converter.convert(UIContents.TYPE, Converter::viewStyle)
+        var type_view = new BasicUIView<>(
+                boundPos,
+                ReceiverBlockEntity.PERIPHERAL_TYPE,
+                String.class,
+                "Not Attached",
+                Converter.convert(UIContents.TYPE, Converter::viewStyle),
+                s -> Component.literal(s).withStyle(Converter::optionStyle),
+                $ -> ""
         );
-        PeripheralKeyUIField_ key_field = new PeripheralKeyUIField_(
-                k -> boundBlockEntity(boundPos, NetworkBlockEntity.class).ifPresent(be -> be.writeClientBuffer(ReceiverBlockEntity.PERIPHERAL, k, PeripheralKey.class)),
-                () -> boundBlockEntity(boundPos, NetworkBlockEntity.class)
-                                    .map(be -> be.readClientBuffer(ReceiverBlockEntity.PERIPHERAL, PeripheralKey.class))
-                                    .orElse(PeripheralKey.NULL)
 
-        );
+        var key_field = new PeripheralKeyUIField(boundPos);
 
         key_field.getNameLabel().withTextStyle(Converter::titleStyle);
         key_field.getProtocolLabel().withTextStyle(Converter::titleStyle);
@@ -480,7 +476,10 @@ public class GenericUIFactory {
 
         var target_field = new DoubleUIField(boundPos, SharedKeys.TARGET, Converter.convert(UIContents.TARGET, Converter::titleStyle));
 
-        var offset = new Vector3dUIField(boundPos, AbstractMotor.OFFSET, Converter.convert(UIContents.OFFSET, Converter::titleStyle), 25);
+        var self_offset = new Vector3dUIField(boundPos, AbstractMotor.SELF_OFFSET, Converter.convert(UIContents.SELF_OFFSET, Converter::titleStyle), 25);
+
+        var comp_offset = new Vector3dUIField(boundPos, AbstractMotor.COMP_OFFSET, Converter.convert(UIContents.COMP_OFFSET, Converter::titleStyle), 25);
+
 
         var compliance_field = new DoubleUIField(
                 boundPos,
@@ -500,7 +499,8 @@ public class GenericUIFactory {
                                 .withPort(SharedKeys.VALUE, current_view)
                                 .withPort(SharedKeys.TARGET, target_field)
                                 .withPort(SharedKeys.COMPLIANCE, compliance_field)
-                                .withPort(AbstractMotor.OFFSET, offset)
+                                .withPort(AbstractMotor.COMP_OFFSET, comp_offset)
+                                .withPort(AbstractMotor.SELF_OFFSET, self_offset)
                                 .withPort(SharedKeys.TARGET_MODE, toggle_mode)
                                 .withPreDoLayout(alignLabels)
                                 .build()

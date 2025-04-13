@@ -4,6 +4,7 @@ import com.simibubi.create.AllShapes;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.content.gui.factory.GenericUIFactory;
+import com.verr1.controlcraft.foundation.managers.ClientCameraManager;
 import com.verr1.controlcraft.registry.ControlCraftBlockEntities;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;

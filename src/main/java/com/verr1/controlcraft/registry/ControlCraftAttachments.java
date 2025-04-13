@@ -1,10 +1,9 @@
 package com.verr1.controlcraft.registry;
 
 import com.verr1.controlcraft.content.valkyrienskies.attachments.*;
+import com.verr1.controlcraft.content.valkyrienskies.attachments.legacy.*;
 import org.valkyrienskies.core.api.ships.ShipForcesInducer;
 import org.valkyrienskies.core.impl.hooks.VSEvents;
-
-import java.util.Arrays;
 
 public enum ControlCraftAttachments {
 
@@ -19,12 +18,16 @@ public enum ControlCraftAttachments {
     JET(JetForceInducer.class),
     PROPELLER(PropellerForceInducer.class),
     // CAFFEINE(Caffeine.class),
-    KINEMATIC_MOTOR(KinematicMotorForceInducer.class),
+    // KINEMATIC_MOTOR(KinematicMotorForceInducer.class),
 
     ;
     // I don't know where to register it, in constructor method will cause flw crash, idk
     // put it in serverStarting, and prevent duplicate registration
     public static boolean isRegistered = false;
+
+    public Class<?> getClazz() {
+        return clazz;
+    }
 
     private final Class<?> clazz;
     <T extends ShipForcesInducer> ControlCraftAttachments (Class<T> clazz) {

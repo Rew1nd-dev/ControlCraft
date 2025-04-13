@@ -145,6 +145,10 @@ public class Converter {
                 Component.literal("Free").withStyle(s -> s.withColor(ChatFormatting.DARK_GREEN));
     }
 
+    public static Style warnStyle(Style s){
+        return s.withItalic(true).withColor(ChatFormatting.RED).withBold(true);
+    }
+
     public static Style titleStyle(Style s){
         return s.withItalic(false).withColor(ChatFormatting.DARK_GRAY);
     }

@@ -94,7 +94,7 @@ public class ControlCraft
         // modEventBus.addListener((e) -> ControlCraftAttachments.register());
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ControlCraftClient::clientInit);
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ControlCraftServer::serverInit);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ControlCraftServer::ServerInit);
 
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);// Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
@@ -134,7 +134,7 @@ public class ControlCraft
         // modEventBus.addListener((e) -> ControlCraftAttachments.register());
         modEventBus.addListener(EventPriority.LOWEST, ControlCraftDataGen::gatherData);
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ControlCraftClient::clientInit);
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ControlCraftServer::serverInit);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ControlCraftServer::ServerInit);
 
         Configurator.setLevel("org.valkryienskies.core.impl.networking", Level.ERROR);
         Configurator.setLevel("org.valkryienskies.core.networking", Level.ERROR);

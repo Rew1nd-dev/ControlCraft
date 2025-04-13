@@ -16,9 +16,11 @@ public interface IKinematicUIDevice {
 
     void setCompliance(double d);
 
-    Vector3dc getOffset();
+    Vector3dc getSelfOffset();
 
-    void setOffset(Vector3dc offset);
+    Vector3dc getCompOffset();
 
+    void setSelfOffset(Vector3dc offset);
 
+    void setCompOffset(Vector3dc offset);
 }

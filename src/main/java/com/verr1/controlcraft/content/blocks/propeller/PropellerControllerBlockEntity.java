@@ -1,16 +1,13 @@
 package com.verr1.controlcraft.content.blocks.propeller;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
+import com.verr1.controlcraft.content.valkyrienskies.attachments.PropellerForceInducer;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.PropellerControllerPeripheral;
-import com.verr1.controlcraft.content.gui.legacy.PropellerControllerScreen;
-import com.verr1.controlcraft.content.valkyrienskies.attachments.PropellerForceInducer;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.SynchronizedField;
@@ -23,6 +20,7 @@ import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldSy
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
+import com.verr1.controlcraft.utils.MathUtils;
 import com.verr1.controlcraft.utils.SerializeUtils;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
@@ -39,7 +37,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -179,7 +176,10 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
         Optional
                 .ofNullable(getLoadedServerShip())
                 .map(PropellerForceInducer::getOrCreate)
-                .ifPresent(inducer -> inducer.alive(WorldBlockPos.of(level, getBlockPos())));
+                .ifPresent(inducer -> inducer.replace(
+                        WorldBlockPos.of(level, getBlockPos()),
+                        this::getLogicalPropeller
+                ));
     }
 
     /*
@@ -192,8 +192,10 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
 
 
     @Override
-    public void destroy(){
-        super.destroy();
+    public void remove() {
+        super.remove();
+        setTargetSpeed(0);
+        syncAttachedPropeller();
     }
 
     public void setTargetSpeed(double speed){
@@ -201,9 +203,8 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
     }
 
     public @Nullable LogicalPropeller getLogicalPropeller() {
-        if(level == null || level.isClientSide)return null;
         if(!isOnShip())return null;
-        return  new LogicalPropeller(
+        return new LogicalPropeller(
                 canDrive(),
                 getDirectionJOML(),
                 getTargetSpeed(),
@@ -237,16 +238,6 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
         ControlCraftPackets.sendToPlayer(p, player);
     }
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == RegisteredPacketType.OPEN_SCREEN_0){
-            double speed = packet.getDoubles().get(0);
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                ScreenOpener.open(new PropellerControllerScreen(getBlockPos(), speed));
-            });
-        }
-    }
 
 
     @Override

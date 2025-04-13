@@ -18,7 +18,6 @@ import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.FlapBearingPeripheral;
-import com.verr1.controlcraft.content.gui.legacy.FlapBearingScreen;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.WingContraption;
@@ -310,20 +309,6 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
         return "Wing Controller";
     }
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        /*
-        * if(packet.getType() == RegisteredPacketType.SYNC_0){
-            double angle = packet.getDoubles().get(0);
-            setAngle((float)angle);
-        }
-        * */
-        if(packet.getType() == RegisteredPacketType.OPEN_SCREEN_0){
-            double angle = packet.getDoubles().get(0);
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ScreenOpener.open(new FlapBearingScreen(packet.getBoundPos(), angle)));
-        }
-    }
 
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {

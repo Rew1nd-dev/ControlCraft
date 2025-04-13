@@ -1,6 +1,6 @@
 package com.verr1.controlcraft.content.blocks.motor;
 
-import com.verr1.controlcraft.content.valkyrienskies.attachments.KinematicMotorForceInducer;
+import com.verr1.controlcraft.content.valkyrienskies.attachments.legacy.KinematicMotorForceInducer_;
 import com.verr1.controlcraft.content.valkyrienskies.controls.InducerControls;
 import com.verr1.controlcraft.content.valkyrienskies.transform.KinematicMotorTransformProvider;
 import com.verr1.controlcraft.content.valkyrienskies.transform.LerpedTransformProvider;
@@ -318,7 +318,7 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
         if(level == null || level.isClientSide)return;
         Optional
                 .ofNullable(getCompanionServerShip())
-                .map(KinematicMotorForceInducer::getOrCreate)
+                .map(KinematicMotorForceInducer_::getOrCreate)
                 .ifPresent(inducer -> inducer.alive(WorldBlockPos.of(level, getBlockPos())));
     }
 

@@ -1,6 +1,5 @@
 package com.verr1.controlcraft.foundation.data.executor;
 
-import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.QueueForceInducer;
 import com.verr1.controlcraft.foundation.api.IntervalRunnable;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
@@ -110,7 +109,7 @@ public class ShipQPNavigationSchedule implements IntervalRunnable {
 
     @Override
     public void run() {
-        LoadedServerShip ship = VSGetterUtils.getShip(shipPos.level(ControlCraftServer.INSTANCE), shipPos.pos()).orElse(null);
+        LoadedServerShip ship = VSGetterUtils.getLoadedServerShip(shipPos).orElse(null);
         if(ship == null)return;
         QueueForceInducer qfi = QueueForceInducer.getOrCreate(ship);
         mass = ship.getInertiaData().getMass();

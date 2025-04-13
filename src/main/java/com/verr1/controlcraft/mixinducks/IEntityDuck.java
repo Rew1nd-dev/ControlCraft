@@ -8,4 +8,6 @@ public interface IEntityDuck {
 
     Vec3 controlCraft$velocityObserver();
 
+    void controlCraftOldVS$tickObserver();
+
 }

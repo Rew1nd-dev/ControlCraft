@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 import org.joml.primitives.AABBdc;
 import org.joml.primitives.AABBic;
+import org.valkyrienskies.core.api.ships.PhysShip;
 import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim;
 import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet;
@@ -19,6 +20,10 @@ import java.util.Optional;
 public record PhysShipWrapper(@Nullable PhysShipImpl impl) implements Ship {
     public PhysShipWrapper(@Nullable PhysShipImpl impl) {
         this.impl = impl;
+    }
+
+    public static PhysShipWrapper of(@Nullable PhysShip impl) {
+        return new PhysShipWrapper(impl instanceof PhysShipImpl ? (PhysShipImpl) impl : null);
     }
 
     public Optional<PhysShipImpl> implOptional() {

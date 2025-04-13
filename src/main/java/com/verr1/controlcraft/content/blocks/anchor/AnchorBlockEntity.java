@@ -1,13 +1,10 @@
 package com.verr1.controlcraft.content.blocks.anchor;
 
 
-import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.type.Side;
-import com.verr1.controlcraft.content.gui.legacy.AnchorScreen;
-import com.verr1.controlcraft.content.valkyrienskies.attachments.AnchorForceInducer;
+import com.verr1.controlcraft.content.valkyrienskies.attachments.legacy.AnchorForceInducer_;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.foundation.data.logical.LogicalAnchor;
@@ -21,9 +18,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.Optional;
@@ -136,7 +130,7 @@ public class AnchorBlockEntity extends OnShipBlockEntity
         if(level != null && level.isClientSide)return;
         Optional
             .ofNullable(getLoadedServerShip())
-            .map(AnchorForceInducer::getOrCreate)
+            .map(AnchorForceInducer_::getOrCreate)
             .ifPresent(inducer -> inducer.alive(WorldBlockPos.of(level, getBlockPos())));
     }
 
@@ -150,20 +144,6 @@ public class AnchorBlockEntity extends OnShipBlockEntity
         ControlCraftPackets.sendToPlayer(p, player);
     }
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == RegisteredPacketType.OPEN_SCREEN_0){
-            var a = packet.getDoubles().get(0);
-            var e = packet.getDoubles().get(1);
-            var r = packet.getDoubles().get(2);
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    ScreenOpener.open(new AnchorScreen(packet.getBoundPos(), a, e, r))
-                    // ScreenOpener.open(new ExampleGui())
-                    // Minecraft.getInstance().setScreen(new ScreenUIRenderer(new ExampleDynamic()))
-            );
-        }
-    }
 
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {

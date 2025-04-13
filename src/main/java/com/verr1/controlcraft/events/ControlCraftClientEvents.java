@@ -2,7 +2,7 @@ package com.verr1.controlcraft.events;
 
 
 import com.verr1.controlcraft.ControlCraftClient;
-import com.verr1.controlcraft.content.blocks.camera.ClientCameraManager;
+import com.verr1.controlcraft.foundation.managers.ClientCameraManager;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;

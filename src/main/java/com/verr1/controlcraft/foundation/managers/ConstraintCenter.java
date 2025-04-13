@@ -9,14 +9,10 @@ import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import com.verr1.controlcraft.mixin.accessor.ShipObjectServerWorldAccessor;
 import com.verr1.controlcraft.utils.VSGetterUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.core.apigame.constraints.VSConstraint;
 import org.valkyrienskies.core.apigame.world.ServerShipWorldCore;
@@ -93,12 +89,12 @@ public class ConstraintCenter {
             ServerShipWorldCore sswc = VSGameUtilsKt.getShipObjectWorld(level);
             ShipObjectServerWorldAccessor accessor = ((ShipObjectServerWorldAccessor) sswc);
             var constraints = accessor.controlCraft$getShipIdToConstraints();
-            long id = VSGetterUtils.getShip(level, pos).map(Ship::getId).orElse(-1L);
+            long id = VSGetterUtils.getLoadedServerShip(level, pos).map(Ship::getId).orElse(-1L);
             if(id == -1)return;
             new ArrayList<>(constraints.get(id)).forEach(sswc::removeConstraint);
 
-        }catch (Exception ignored){
-            ControlCraft.LOGGER.error("Failed to destroy all constraints", ignored);
+        }catch (Exception e){
+            ControlCraft.LOGGER.error("Failed to destroy all constraints", e);
         }
     }
 

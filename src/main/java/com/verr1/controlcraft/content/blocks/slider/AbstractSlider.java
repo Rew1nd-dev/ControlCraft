@@ -4,11 +4,9 @@ import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.ShipConnectorBlockEntity;
 import com.verr1.controlcraft.content.blocks.motor.AbstractDynamicMotor;
-import com.verr1.controlcraft.content.blocks.motor.AbstractMotor;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.foundation.api.IBruteConnectable;
 import com.verr1.controlcraft.foundation.api.IConstraintHolder;
 import com.verr1.controlcraft.foundation.data.ShipPhysics;
@@ -53,7 +51,11 @@ public abstract class AbstractSlider extends ShipConnectorBlockEntity implements
 
     private final LerpedFloat clientLerpedDistance = LerpedFloat.linear();
 
-    private Vector3d offset = new Vector3d();
+    private Vector3d selfOffset = new Vector3d();
+
+
+
+    private Vector3d compOffset = new Vector3d();
 
     public float clientDistance = 0;
 
@@ -63,7 +65,7 @@ public abstract class AbstractSlider extends ShipConnectorBlockEntity implements
         // registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getOffset, this::setOffset, SerializeUtils.VECTOR3D, AbstractMotor.OFFSET), Side.SHARED);
 
         buildRegistry(ANIMATED_DISTANCE).withBasic(SerializePort.of(this::getSlideDistance, this::setClientDistance, SerializeUtils.DOUBLE)).dispatchToSync().runtimeOnly().register();
-        buildRegistry(AbstractDynamicMotor.OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getOffset()), this::setOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
+        buildRegistry(AbstractDynamicMotor.SELF_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getSelfOffset()), this::setSelfOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
 
 
         registerConstraintKey("slide");
@@ -74,6 +76,14 @@ public abstract class AbstractSlider extends ShipConnectorBlockEntity implements
     public void tickClient() {
         super.tickClient();
         tickAnimation();
+    }
+
+    public Vector3d getCompOffset() {
+        return compOffset;
+    }
+
+    public void setCompOffset(Vector3dc compOffset) {
+        this.compOffset = new Vector3d(compOffset);
     }
 
     public void setClientDistance(double clientDistance) {
@@ -89,12 +99,12 @@ public abstract class AbstractSlider extends ShipConnectorBlockEntity implements
 
 
 
-    public Vector3dc getOffset() {
+    public Vector3dc getSelfOffset() {
         return new Vector3d();
     }
 
 
-    public void setOffset(Vector3dc offset) {
+    public void setSelfOffset(Vector3dc selfOffset) {
 
     }
 

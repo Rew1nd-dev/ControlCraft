@@ -13,7 +13,9 @@ public enum UIContents implements Descriptive<UIContents> {
     CURRENT(Component.literal("Current"), literals("Current Angle, Velocity, Position Etc.")),
     LOCKED(Component.literal("Locked"), literals("Whether The Device Is Locked By Constraint")),
     TARGET(Component.literal("Target"), literals("Target Angle, Velocity, Position Etc.")),
-    OFFSET(Component.literal("Offset"), literals("Offset For Next Assembly / Connection")),
+    SELF_OFFSET(Component.literal("Offset"), literals("Rotation Axis Offset For Next Assembly / Connection")),
+    COMP_OFFSET(Component.literal("Offset"), literals("Companion Offset For Next Assembly / Connection")),
+
     MODE(Component.literal("Mode"), literals("Velocity / Position")),
     CHEAT(Component.literal("Cheat"), literals("Convenience")),
     AUTO_LOCK(Component.literal("Auto Lock"), literals("Locked When:", " .Target Speed = 0", " .Target Angle Reached")),

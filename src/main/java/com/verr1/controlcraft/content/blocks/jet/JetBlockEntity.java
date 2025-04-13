@@ -1,16 +1,13 @@
 package com.verr1.controlcraft.content.blocks.jet;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
+import com.verr1.controlcraft.content.valkyrienskies.attachments.JetForceInducer;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.JetPeripheral;
-import com.verr1.controlcraft.content.gui.legacy.JetScreen;
-import com.verr1.controlcraft.content.valkyrienskies.attachments.JetForceInducer;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.SynchronizedField;
@@ -19,7 +16,6 @@ import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.data.logical.LogicalJet;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
-import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldSyncClientPacket;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
 import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
@@ -38,7 +34,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -162,7 +157,6 @@ public class JetBlockEntity extends OnShipBlockEntity implements
 
 
     public @Nullable LogicalJet getLogicalJet(){
-        if(level == null)return null;
         Vector3dc basis_h = getHorizontalJOML();
         Vector3dc basis_v = getVerticalJOML();
         Vector3dc basis_t = getDirectionJOML();
@@ -198,7 +192,10 @@ public class JetBlockEntity extends OnShipBlockEntity implements
         Optional
             .ofNullable(getLoadedServerShip())
             .map(JetForceInducer::getOrCreate)
-            .ifPresent(inducer -> inducer.alive(WorldBlockPos.of(level, getBlockPos())));
+            .ifPresent(inducer -> inducer.replace(
+                    WorldBlockPos.of(level, getBlockPos()),
+                    this::getLogicalJet
+            ));
     }
 
     @Override
@@ -232,18 +229,6 @@ public class JetBlockEntity extends OnShipBlockEntity implements
         ControlCraftPackets.sendToPlayer(p, player);
     }
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == RegisteredPacketType.OPEN_SCREEN_0){
-            double h = packet.getDoubles().get(0);
-            double v = packet.getDoubles().get(1);
-            double t = packet.getDoubles().get(2);
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    ScreenOpener.open(new JetScreen(t, h, v, packet.getBoundPos())
-            ));
-        }
-    }
 
 
     @Override

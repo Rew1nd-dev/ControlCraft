@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.verr1.controlcraft.content.blocks.camera.CameraBlockEntity;
-import com.verr1.controlcraft.content.blocks.camera.ClientCameraManager;
+import com.verr1.controlcraft.foundation.managers.ClientCameraManager;
 import com.verr1.controlcraft.mixinducks.ICameraDuck;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;

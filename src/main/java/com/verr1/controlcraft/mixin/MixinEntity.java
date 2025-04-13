@@ -20,6 +20,8 @@ public abstract class MixinEntity implements IEntityDuck {
 
     @Shadow public abstract Vec3 position();
 
+    @Unique
+    private Vec3 controlCraftOldVS$velocity = new Vec3(0, 0, 0);
 
     @Unique
     private int controlCraft$clientGlowingTick = 0;
@@ -36,8 +38,7 @@ public abstract class MixinEntity implements IEntityDuck {
 
     @Inject(method = "tick", at = @At("HEAD"))
     void tick(CallbackInfo ci) {
-        if(controlCraft$clientGlowingTick > 0)controlCraft$clientGlowingTick--;
-        controlCraft$positionOld = new Vec3(position().x(), position().y(), position().z());
+        controlCraftOldVS$tickObserver();
     }
 
     @Override
@@ -47,7 +48,14 @@ public abstract class MixinEntity implements IEntityDuck {
 
     @Override
     public Vec3 controlCraft$velocityObserver(){
-        return position().subtract(controlCraft$positionOld).scale(1 / 0.05);
+        return controlCraftOldVS$velocity;
     }
 
+    @Override
+    public void controlCraftOldVS$tickObserver() {
+        if(controlCraft$clientGlowingTick > 0)controlCraft$clientGlowingTick--;
+        controlCraftOldVS$velocity = position().subtract(controlCraft$positionOld).scale(20f);
+        controlCraft$positionOld = new Vec3(position().x(), position().y(), position().z());
+
+    }
 }

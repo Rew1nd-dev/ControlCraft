@@ -76,6 +76,10 @@ public class VSchematicCompactCenter {
         BlockPos comp_center_old = BlockPos.of(compact.getLong("o_comp_chunk_center"));
         BlockPos comp_center_new = BlockPos.of(compact.getLong("n_comp_chunk_center"));
 
+        BlockPos connectContext = motor.blockConnectContext();
+        motor.clearCompanionShipInfo();
+        motor.setBlockConnectContext(connectContext);
+
         ControlCraft.LOGGER.info("PostMotorReadVModCompact: {} {}", comp_center_old, comp_center_new);
 
         BlockPos offset = comp_center_new.subtract(comp_center_old);

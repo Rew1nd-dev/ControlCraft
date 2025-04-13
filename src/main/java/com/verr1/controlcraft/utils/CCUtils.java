@@ -108,7 +108,7 @@ public class CCUtils {
                 "type", hitResult.getEntity().getType().toString(),
                 "name", hitResult.getEntity().getName().getString(),
                 "velocity", dumpVec3(ValkyrienSkies.set(new Vector3d(), getEntityVelocity(hitResult.getEntity()))),
-                "position", dumpVec3(ValkyrienSkies.set(new Vector3d(), hitResult.getEntity().position()))
+                "position", dumpVec3(ValkyrienSkies.set(new Vector3d(), hitResult.getEntity().getEyePosition()))
         );
     }
 
@@ -118,7 +118,7 @@ public class CCUtils {
                 "name", entity.getName().getString(),
                 "health", entity instanceof LivingEntity lv ? lv.getHealth() : 0,
                 "velocity", dumpVec3(ValkyrienSkies.set(new Vector3d(), getEntityVelocity(entity))),
-                "position", dumpVec3(ValkyrienSkies.set(new Vector3d(), entity.position()))
+                "position", dumpVec3(ValkyrienSkies.set(new Vector3d(), entity.getEyePosition()))
         );
     }
 

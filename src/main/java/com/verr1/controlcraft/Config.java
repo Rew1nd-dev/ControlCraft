@@ -15,7 +15,7 @@ public class Config
     private static final ForgeConfigSpec.BooleanValue CC_OVERCLOCKING = BUILDER
             .comment(
                     "------------------------------------",
-                    "  Warning: Experimental, May Break Saves !!!",
+                    "  Warning: Experimental",
                     "------------------------------------",
                     "  By Default, ComputerCraft Is Running at Game Thread. ",
                     "  When Enable This Settings, ComputerCraft Will Run at Another Thread Which Is Synced By VS Physics Thread. ",

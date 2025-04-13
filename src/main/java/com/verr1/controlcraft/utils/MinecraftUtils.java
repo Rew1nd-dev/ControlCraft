@@ -73,7 +73,7 @@ public class MinecraftUtils {
 
     public static Direction getVerticalDirectionSimple(Direction facing){
         if(facing.getAxis() != Direction.Axis.Y)return Direction.UP;
-        return facing.getClockWise(Direction.Axis.Y);
+        return Direction.NORTH;
     }
 
     public static Direction getVerticalDirection(BlockState state){

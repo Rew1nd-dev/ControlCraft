@@ -1,17 +1,13 @@
 package com.verr1.controlcraft.content.blocks.slider;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.Config;
 import com.verr1.controlcraft.ControlCraftServer;
-import com.verr1.controlcraft.content.blocks.SharedKeys;
+import com.verr1.controlcraft.content.valkyrienskies.attachments.DynamicSliderForceInducer;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.SliderPeripheral;
-import com.verr1.controlcraft.content.gui.legacy.SliderScreen;
-import com.verr1.controlcraft.content.valkyrienskies.attachments.DynamicSliderForceInducer;
 import com.verr1.controlcraft.foundation.api.*;
 import com.verr1.controlcraft.foundation.data.SynchronizedField;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
@@ -21,7 +17,6 @@ import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.data.logical.LogicalSlider;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
-import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldSyncClientPacket;
 import com.verr1.controlcraft.foundation.type.*;
 import com.verr1.controlcraft.foundation.type.descriptive.CheatMode;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
@@ -39,15 +34,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
-import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint;
 
@@ -424,7 +415,10 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
         Optional
             .ofNullable(getCompanionServerShip())
             .map(DynamicSliderForceInducer::getOrCreate)
-            .ifPresent(inducer -> inducer.alive(WorldBlockPos.of(level, getBlockPos())));
+            .ifPresent(inducer -> inducer.replace(
+                    WorldBlockPos.of(level, getBlockPos()),
+                    this::getLogicalSlider
+            ));
 
 
     }
@@ -446,10 +440,7 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
     }
 
     public LogicalSlider getLogicalSlider() {
-        if(level == null || level.isClientSide)return null;
-        ServerShip ship = getCompanionServerShip();
-        if(ship == null)return null;
-
+        if(noCompanionShip())return null;
         return new LogicalSlider(
                 getShipOrGroundID(),
                 getCompanionShipID(),
@@ -496,25 +487,6 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
 
     }
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == RegisteredPacketType.OPEN_SCREEN_0){
-            double t = packet.getDoubles().get(0);
-            double v = packet.getDoubles().get(1);
-            double p = packet.getDoubles().get(2);
-            double i = packet.getDoubles().get(3);
-            double d = packet.getDoubles().get(4);
-            boolean m = packet.getBooleans().get(0);
-            boolean l = packet.getBooleans().get(1);
-            boolean c = packet.getBooleans().get(2);
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    ScreenOpener.open(new SliderScreen(getBlockPos(), p, i, d, v, t, m, l, c)));
-        }
-        if(packet.getType() == RegisteredPacketType.SYNC_0){
-            setAnimatedDistance(packet.getDoubles().get(0).floatValue());
-        }
-    }
 
     @Override
     public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {

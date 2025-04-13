@@ -1,7 +1,7 @@
 package com.verr1.controlcraft;
 
 import com.simibubi.create.foundation.render.SuperByteBufferCache;
-import com.verr1.controlcraft.content.wand.WandGUI;
+import com.verr1.controlcraft.content.gui.wand.WandGUI;
 import com.verr1.controlcraft.foundation.executor.DeferralExecutor;
 import com.verr1.controlcraft.foundation.executor.IntervalExecutor;
 import com.verr1.controlcraft.registry.ControlCraftPartialModels;

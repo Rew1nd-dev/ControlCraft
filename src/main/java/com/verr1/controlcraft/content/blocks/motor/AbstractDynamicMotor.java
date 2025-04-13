@@ -2,13 +2,11 @@ package com.verr1.controlcraft.content.blocks.motor;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.verr1.controlcraft.ControlCraftServer;
-import com.verr1.controlcraft.content.blocks.SharedKeys;
+import com.verr1.controlcraft.content.valkyrienskies.attachments.DynamicMotorForceInducer;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.DynamicMotorPeripheral;
-import com.verr1.controlcraft.content.valkyrienskies.attachments.DynamicMotorForceInducer;
 import com.verr1.controlcraft.foundation.api.IControllerProvider;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
@@ -50,9 +48,6 @@ import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 public abstract class AbstractDynamicMotor extends AbstractMotor implements
         IHaveGoggleInformation, IControllerProvider, ITerminalDevice, IPacketHandler
 {
-    public static NetworkKey REVERSE_CREATE_INPUT = NetworkKey.create("reverse_create_input");
-
-
     public SynchronizedField<Double> controlTorque = new SynchronizedField<>(0.0);
 
     private final DynamicController controller = new DynamicController().withPID(DEFAULT_VELOCITY_MODE_PARAMS);
@@ -242,7 +237,6 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
     }
 
     public @Nullable LogicalDynamicMotor getLogicalMotor(){
-        if(level == null || level.isClientSide)return null;
         if(noCompanionShip())return null;
         return new LogicalDynamicMotor(
                 getShipOrGroundID(),
@@ -263,7 +257,10 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
         Optional
             .ofNullable(getCompanionServerShip())
             .map(DynamicMotorForceInducer::getOrCreate)
-            .ifPresent(inducer -> inducer.alive(WorldBlockPos.of(level, getBlockPos())));
+            .ifPresent(inducer -> inducer.replace(
+                    WorldBlockPos.of(level, getBlockPos()),
+                    this::getLogicalMotor
+            ));
     }
 
     @Override

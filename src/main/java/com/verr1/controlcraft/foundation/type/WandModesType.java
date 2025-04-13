@@ -1,7 +1,7 @@
 package com.verr1.controlcraft.foundation.type;
 
-import com.verr1.controlcraft.content.wand.mode.*;
-import com.verr1.controlcraft.content.wand.mode.base.WandAbstractMultipleSelectionMode;
+import com.verr1.controlcraft.content.gui.wand.mode.*;
+import com.verr1.controlcraft.content.gui.wand.mode.base.WandAbstractMultipleSelectionMode;
 import com.verr1.controlcraft.foundation.api.IWandMode;
 import net.minecraft.network.chat.Component;
 

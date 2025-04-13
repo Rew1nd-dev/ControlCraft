@@ -7,11 +7,11 @@ import com.simibubi.create.foundation.utility.Color;
 import com.simibubi.create.foundation.utility.Components;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.managers.ClientCameraManager;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.content.cctweaked.peripheral.CameraPeripheral;
-import com.verr1.controlcraft.content.gui.legacy.CameraScreen;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.ShipHitResult;
@@ -339,7 +339,7 @@ public class CameraBlockEntity extends OnShipBlockEntity
 
     private @NotNull ClipContext clipContext(){
         if(level == null)return EMPTY;
-        Vector3dc camPos_wc = VSGetterUtils.getAbsolutePosition(WorldBlockPos.of(level, worldPosition));
+        Vector3dc camPos_wc = getCameraPosition(); // VSGetterUtils.getAbsolutePosition(WorldBlockPos.of(level, worldPosition));
         Vector3dc camFront_wc = getAbsViewForward();
         Vector3dc camStart_wc = camPos_wc.add(camFront_wc, new Vector3d());
         Vector3dc camTo_wc = camStart_wc.fma(clipRange, camFront_wc, new Vector3d());
@@ -355,7 +355,7 @@ public class CameraBlockEntity extends OnShipBlockEntity
 
     private @NotNull AABB clipAABB(){
         if(level == null)return AABB.of(BoundingBox.fromCorners(new Vec3i(0, 0, 0), new Vec3i(0, 0, 0)));
-        Vector3dc center = VSGetterUtils.getAbsolutePosition(WorldBlockPos.of(level, worldPosition));
+        Vector3dc center = getCameraPosition(); // VSGetterUtils.getAbsolutePosition(WorldBlockPos.of(level, worldPosition));
         Vector3dc view = getAbsViewForward();
         Vector3dc camMin = center.fma(clipRange, view, new Vector3d());
         Vector3dc camMax = center.fma(-10, view, new Vector3d());
@@ -367,7 +367,7 @@ public class CameraBlockEntity extends OnShipBlockEntity
 
     private @NotNull AABB trivialAABB(){
         if(level == null)return AABB.of(BoundingBox.fromCorners(new Vec3i(0, 0, 0), new Vec3i(0, 0, 0)));
-        Vector3dc center = VSGetterUtils.getAbsolutePosition(WorldBlockPos.of(level, worldPosition));
+        Vector3dc center = getCameraPosition(); // VSGetterUtils.getAbsolutePosition(WorldBlockPos.of(level, worldPosition));
         return new AABB(
                 ValkyrienSkies.toMinecraft(center.add(new Vector3d(clipRange, clipRange, clipRange), new Vector3d())),
                 ValkyrienSkies.toMinecraft(center.add(new Vector3d(-clipRange, -clipRange, -clipRange), new Vector3d()))
@@ -376,7 +376,7 @@ public class CameraBlockEntity extends OnShipBlockEntity
 
     private @NotNull AABB coneAABB(){
         if(level == null)return AABB.of(BoundingBox.fromCorners(new Vec3i(0, 0, 0), new Vec3i(0, 0, 0)));
-        Vector3dc center = VSGetterUtils.getAbsolutePosition(WorldBlockPos.of(level, worldPosition));
+        Vector3dc center = getCameraPosition(); // VSGetterUtils.getAbsolutePosition(WorldBlockPos.of(level, worldPosition));
         Vector3dc view = getAbsViewForward();
         Vector3dc camEnd = center.fma(clipRange * 0.7, view, new Vector3d());
         double radiusSquare = Math.tan(coneAngle) * clipRange;
@@ -641,13 +641,20 @@ public class CameraBlockEntity extends OnShipBlockEntity
     }
 
     public Vector3d getCameraPosition(){
-        if(level == null) return new Vector3d();
-        return VSGetterUtils.getAbsolutePosition(WorldBlockPos.of(level, worldPosition));
+        Vector3d original = getCameraPositionShip();
+        if(level == null) return original;
+        return Optional
+                .ofNullable(getShipOn())
+                .map(Ship::getTransform)
+                .map(t -> t
+                        .getShipToWorld()
+                        .transformPosition(original))
+                .orElse(original);
     }
 
     public Quaterniondc getCameraBaseRotation(){
         Quaterniond q = new Quaterniond();
-        Ship ship = VSGameUtilsKt.getShipManagingPos(level, getBlockPos());
+        Ship ship = getShipOn();
         if(ship == null)return q;
         return ship.getTransform().getShipToWorldRotation();
     }
@@ -786,12 +793,6 @@ public class CameraBlockEntity extends OnShipBlockEntity
             setPitchForceClient(p);
             setYawForceClient(y);
             syncServerFromClient();
-        }
-        if(packet.getType() == RegisteredPacketType.OPEN_SCREEN_0){
-            boolean isActive = packet.getBooleans().get(0);
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    ScreenOpener.open(new CameraScreen(getBlockPos(), isActive)
-            ));
         }
 
     }

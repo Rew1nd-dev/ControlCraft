@@ -44,15 +44,19 @@ import static com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies.toMinecraft
 
 public abstract class AbstractMotor extends ShipConnectorBlockEntity implements IBruteConnectable
 {
-    public static NetworkKey OFFSET = NetworkKey.create("offset");
+    public static NetworkKey SELF_OFFSET = NetworkKey.create("self_offset");
+    public static NetworkKey COMP_OFFSET = NetworkKey.create("comp_offset");
     public static NetworkKey ANIMATED_ANGLE = NetworkKey.create("animated_angle");
+
+    public static NetworkKey CONNECT_CONTEXT = NetworkKey.create("connect_context");
 
 
     protected float clientAngle = 0;
     protected final LerpedFloat clientLerpedAngle = LerpedFloat.angular();
 
     public ConnectContext context = ConnectContext.EMPTY;
-    protected Vector3d offset = new Vector3d();
+    protected Vector3d selfOffset = new Vector3d();
+    protected Vector3d compOffset = new Vector3d();
 
     public AbstractMotor(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -60,7 +64,9 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
         // registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getOffset, this::setOffset, SerializeUtils.VECTOR3DC, OFFSET), Side.SHARED);
 
         buildRegistry(ANIMATED_ANGLE).withBasic(SerializePort.of(this::getServoAngle, this::setClientAngle, SerializeUtils.DOUBLE)).dispatchToSync().runtimeOnly().register();
-        buildRegistry(OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getOffset()), this::setOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
+        buildRegistry(SELF_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getSelfOffset()), this::setSelfOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
+        buildRegistry(COMP_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getCompOffset()), this::setCompOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
+        buildRegistry(CONNECT_CONTEXT).withBasic(SerializePort.of(() -> context, ctx -> context = ctx, SerializeUtils.CONNECT_CONTEXT)).register();
 
         registerConstraintKey("revolute");
         registerConstraintKey("attach_1");
@@ -111,6 +117,14 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
         return VSMathUtils.get_dyc2xc(m_own, w_own, w_cmp,  getServoDirection(), getCompanionShipAlign());
     }
 
+    public Vector3d getCompOffset() {
+        return compOffset;
+    }
+
+    public void setCompOffset(Vector3dc compOffset) {
+        this.compOffset = new Vector3d(compOffset);
+    }
+
     public void assemble(){
         if(level == null || level.isClientSide)return;
         // var self = Optional.ofNullable(getShipOn());
@@ -135,7 +149,7 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
         long compId = comp.getId();
         long selfId = getShipOrGroundID();
         Vector3dc p_self = getRotationCenterPosJOML();
-        Vector3dc p_comp = comp.getTransform().getPositionInShip().add(new Vector3d(0.5, 0.5, 0.5), new Vector3d());  // new Vector3d();
+        Vector3dc p_comp = comp.getTransform().getPositionInShip().add(new Vector3d(0.5, 0.5, 0.5).add(compOffset), new Vector3d());  // new Vector3d();
         // Vector3dc selfOffset = self.map(s -> s.getTransform().getPositionInShip()).orElse(); //.sub(p_self, new Vector3d())
         Quaterniondc q_self = VSMathUtils.getQuaternionToEast_(getServoDirection());
         Quaterniondc q_comp = VSMathUtils.getQuaternionToEast_(getServoDirection());
@@ -248,7 +262,7 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
         Quaterniondc q_comp = VSMathUtils.getQuaternionToEast_(direction_comp.getOpposite());
 
         Vector3dc p_self = getRotationCenterPosJOML();
-        Vector3dc p_comp = ValkyrienSkies.set(new Vector3d(), bp_comp.getCenter());
+        Vector3dc p_comp = ValkyrienSkies.set(new Vector3d(), bp_comp.getCenter()).add(compOffset);
         Vector3d dir_self = getServoDirectionJOML();
         Vector3d dir_comp = ValkyrienSkies.set(new Vector3d(), direction_comp.getNormal());
         /*
@@ -308,8 +322,8 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
         // syncClientAnimation();
     }
 
-    public void setOffset(Vector3dc offset) {
-        this.offset = new Vector3d(offset);
+    public void setSelfOffset(Vector3dc selfOffset) {
+        this.selfOffset = new Vector3d(selfOffset);
         setChanged();
     }
 
@@ -333,7 +347,7 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
         clientLerpedAngle.tickChaser();
     }
 
-    public Vector3dc getOffset() {return offset;}
+    public Vector3dc getSelfOffset() {return selfOffset;}
 
     public abstract void setStartingAngleOfCompanionShip();
 

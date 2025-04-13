@@ -2,6 +2,8 @@ package com.verr1.controlcraft.events;
 
 import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.blocks.transmitter.NetworkManager;
+import com.verr1.controlcraft.content.cctweaked.delegation.ComputerCraftDelegation;
+import com.verr1.controlcraft.content.commands.ControlCraftCommands;
 import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.managers.ChunkManager;
 import com.verr1.controlcraft.foundation.managers.ConstraintCenter;
@@ -45,5 +47,12 @@ public class ControlCraftEvents {
         ConstraintCenter.onServerStopping(event.getServer());
     }
 
+    public static void onPhysicsTickStart(){
+        ComputerCraftDelegation.FreeDelegateThread();
+    }
+
+    public static void onPhysicsTickEnd(){
+        ComputerCraftDelegation.LockDelegateThread();
+    }
 
 }

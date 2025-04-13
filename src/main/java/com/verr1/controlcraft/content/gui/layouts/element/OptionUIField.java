@@ -11,6 +11,7 @@ import com.verr1.controlcraft.content.gui.widgets.DescriptiveScrollInput;
 import com.verr1.controlcraft.content.gui.widgets.FormattedLabel;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.registry.ControlCraftGuiTextures;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -66,10 +67,10 @@ public class OptionUIField<T extends Enum<?> & Descriptive<?>> extends TypedUIPo
     private void setMaxLength(){
         AtomicInteger maxLen = new AtomicInteger(0);
         options.values().stream().map(ComponentLike::asComponent).forEach(c -> {
-            int len = c.getString().length();
+            int len = Minecraft.getInstance().font.width(c);
             if(len > maxLen.get()) maxLen.set(len);
         });
-        value.setWidth(maxLen.get() * 6);
+        value.setWidth(maxLen.get());
     }
 
     private T valueOfOption(){

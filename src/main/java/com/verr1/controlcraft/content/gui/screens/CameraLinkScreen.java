@@ -8,7 +8,8 @@ import com.verr1.controlcraft.content.gui.widgets.FormattedLabel;
 import com.verr1.controlcraft.content.gui.widgets.SmallIconButton;
 import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.api.SizedScreenElement;
-import com.verr1.controlcraft.content.blocks.camera.ClientCameraManager;
+import com.verr1.controlcraft.foundation.managers.ClientCameraManager;
+import com.verr1.controlcraft.foundation.type.descriptive.UIContents;
 import com.verr1.controlcraft.registry.ControlCraftGuiTextures;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -76,8 +77,8 @@ public class CameraLinkScreen extends AbstractSimiScreen{
             $ -> {
                 var lwc = new LabelWithButtons(
                         new FormattedLabel(0, 0, Component.literal("")),
-                        new SmallIconButton(0, 0, ControlCraftGuiTextures.SMALL_BUTTON_YES),
-                        new SmallIconButton(0, 0, ControlCraftGuiTextures.SMALL_BUTTON_NO)
+                        new SmallIconButton(0, 0, ControlCraftGuiTextures.SMALL_BUTTON_YES).withToolTips(UIContents.CAMERA_LINK_ACCEPT.specific()),
+                        new SmallIconButton(0, 0, ControlCraftGuiTextures.SMALL_BUTTON_NO).withToolTips(UIContents.CAMERA_LINK_DUMP.specific())
                     );
 
                 selections.add(lwc);
@@ -93,6 +94,9 @@ public class CameraLinkScreen extends AbstractSimiScreen{
             selectionLayout.addChild(s.createLayout(), cell_y, cell_x);
 
         });
+
+        resetButton.getToolTip().addAll(UIContents.CAMERA_LINK_RESET.specific());
+        validateButton.getToolTip().addAll(UIContents.CAMERA_LINK_VALIDATE.specific());
 
         selectionLayout.visitWidgets(this::addRenderableWidget);
         selectionLayout.columnSpacing(4);

@@ -1,7 +1,5 @@
 package com.verr1.controlcraft.content.blocks.motor;
 
-import com.simibubi.create.foundation.gui.ScreenOpener;
-import com.verr1.controlcraft.content.gui.legacy.RevoluteMotorScreen;
 import com.verr1.controlcraft.foundation.data.control.PID;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
@@ -18,7 +16,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import org.joml.Vector3d;
 
@@ -40,7 +37,7 @@ public class DynamicRevoluteMotorBlockEntity extends AbstractDynamicMotor {
     @Override
     public Vector3d getRotationCenterPosJOML() {
         Vector3d center = ValkyrienSkies.set(new Vector3d(), getAssembleBlockPos().getCenter());
-        return center.add(getOffset());
+        return center.add(getSelfOffset());
     }
 
 
@@ -48,7 +45,7 @@ public class DynamicRevoluteMotorBlockEntity extends AbstractDynamicMotor {
 
         double t = getController().getTarget();
         double v = getController().getValue();
-        double o = getOffset().get(0);
+        double o = getSelfOffset().get(0);
         boolean m = getTargetMode() == TargetMode.POSITION;
         boolean c = getCheatMode() == CheatMode.NO_REPULSE;
         boolean l = isLocked();
@@ -96,19 +93,6 @@ public class DynamicRevoluteMotorBlockEntity extends AbstractDynamicMotor {
             clientAngle = (float) angle;
         }
         * */
-        if(packet.getType() == RegisteredPacketType.OPEN_SCREEN_0){
-            double t = packet.getDoubles().get(0);
-            double v = packet.getDoubles().get(1);
-            double p = packet.getDoubles().get(2);
-            double i = packet.getDoubles().get(3);
-            double d = packet.getDoubles().get(4);
-            double o = packet.getDoubles().get(5);
-            boolean m = packet.getBooleans().get(0);
-            boolean c = packet.getBooleans().get(1);
-            boolean l = packet.getBooleans().get(2);
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    ScreenOpener.open(new RevoluteMotorScreen(getBlockPos(), p, i, d, v, t, o, m, c, l)));
-        }
     }
 
 }

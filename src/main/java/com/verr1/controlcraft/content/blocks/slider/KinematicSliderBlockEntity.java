@@ -6,7 +6,6 @@ import com.verr1.controlcraft.content.gui.layouts.api.IKinematicUIDevice;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.content.gui.legacy.ConstraintSliderScreen;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.api.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.control.KinematicController;
@@ -245,33 +244,5 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
         ControlCraftPackets.sendToPlayer(p, player);
     }
 
-    @Override
-    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        if(packet.getType() == RegisteredPacketType.SETTING_1){
-            getController().setControlTarget(packet.getDoubles().get(0));
-            setLerpSpeed(packet.getDoubles().get(1));
-            setCompliance(packet.getDoubles().get(2));
-        }
-        if(packet.getType() == RegisteredPacketType.TOGGLE_0){
-            setTargetMode(getTargetMode() == TargetMode.VELOCITY ? TargetMode.POSITION : TargetMode.VELOCITY);
-        }
-    }
-
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void handleClient(NetworkEvent.Context context, BlockBoundClientPacket packet) {
-        if(packet.getType() == RegisteredPacketType.SYNC_0){
-            double angle = packet.getDoubles().get(0);
-            clientDistance = (float) angle;
-        }
-        if(packet.getType() == RegisteredPacketType.OPEN_SCREEN_0){
-            double t = packet.getDoubles().get(0);
-            double v = packet.getDoubles().get(1);
-            double l = packet.getDoubles().get(2);
-            double c = packet.getDoubles().get(3);
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    ScreenOpener.open(new ConstraintSliderScreen(getBlockPos(), v, t, c, l)));
-        }
-    }
 
 }

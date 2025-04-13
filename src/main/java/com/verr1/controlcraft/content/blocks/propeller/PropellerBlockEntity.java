@@ -9,7 +9,6 @@ import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.foundation.type.Side;
-import com.verr1.controlcraft.content.gui.legacy.PropellerScreen;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
@@ -164,13 +163,6 @@ public class PropellerBlockEntity extends OnShipBlockEntity implements
         if(packet.getType() == RegisteredPacketType.SYNC_0){
             double speed = packet.getDoubles().get(0);
             setVisualRotationalSpeed(speed);
-        }
-        if(packet.getType() == RegisteredPacketType.OPEN_SCREEN_0){
-            double torque_ratio = packet.getDoubles().get(0);
-            double thrust_ratio = packet.getDoubles().get(1);
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    ScreenOpener.open(new PropellerScreen(packet.getBoundPos(), thrust_ratio, torque_ratio))
-            );
         }
     }
 

@@ -41,7 +41,7 @@ public class SpatialMovementBehavior implements MovementBehaviour {
     }
 
     public long getServerShipID(Vec3 p, ServerLevel level){
-        return VSGetterUtils.getShip(level, BlockPos.containing(p)).map(Ship::getId).orElse(-1L);
+        return VSGetterUtils.getLoadedServerShip(level, BlockPos.containing(p)).map(Ship::getId).orElse(-1L);
     }
 
     public long getProtocol(MovementContext context){

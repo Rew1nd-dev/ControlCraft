@@ -2,7 +2,6 @@ package com.verr1.controlcraft.foundation.network.packets.specific;
 
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
-import com.verr1.controlcraft.content.gui.legacy.ExposedFieldSettingScreen;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldMessage;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
@@ -65,16 +64,6 @@ public class ExposedFieldOpenScreenPacket extends SimplePacketBase {
     @OnlyIn(Dist.CLIENT)
     public boolean handle(NetworkEvent.Context context) {
         context.enqueueWork(() -> {
-            // It Should Occur On The Client Side
-            LocalPlayer player = Minecraft.getInstance().player;
-            Level world = player.level();
-            if (!world.isLoaded(pos))
-                return;
-
-            if(pos == null)return;
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                ScreenOpener.open(new ExposedFieldSettingScreen(pos, availableFields)
-            ));
 
         });
         return true;

@@ -15,6 +15,7 @@ package com.verr1.controlcraft;
 *    √ Acceleration limit of thrusters and propellers (low speed == no limit, high speed == limit acceleration)
 *    - Make Flap Bearing Easier to Assemble
 *    √ Add Inertia Mass Fix for Scaled Ships
+*    - Scale Ship Mod For Wand
 *   fixes:
 *    - camera reset √
 *    - propeller redstone is not saved √
