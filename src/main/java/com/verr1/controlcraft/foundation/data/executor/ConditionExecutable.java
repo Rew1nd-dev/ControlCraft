@@ -1,6 +1,6 @@
 package com.verr1.controlcraft.foundation.data.executor;
 
-import com.verr1.controlcraft.foundation.api.Executable;
+import com.verr1.controlcraft.foundation.api.operatable.Executable;
 
 import java.util.function.Supplier;
 
@@ -12,6 +12,7 @@ public class ConditionExecutable implements Executable {
     private Runnable orElse = () -> {};
 
     private boolean latest = false;
+    private boolean alreadyRun = false;
 
     public ConditionExecutable(Runnable orElse, Runnable task, int expirationTicks, Supplier<Boolean> condition) {
         this.orElse = orElse;
@@ -22,26 +23,33 @@ public class ConditionExecutable implements Executable {
 
     @Override
     public boolean shouldRun() {
-        return latest || expirationTicks == 0;
+        return latest;
     }
 
     @Override
     public boolean shouldRemove() {
-        return expirationTicks < -1;
+        return expirationTicks < 0;
     }
 
     @Override
     public void tick() {
-        latest = condition.get();
+        latest = !alreadyRun && condition.get();
         expirationTicks--;
     }
 
     @Override
     public void run() {
-        if(latest)task.run();
-        else if(expirationTicks == 0)orElse.run();
+        if(alreadyRun)return;
+        alreadyRun = true;
+        expirationTicks = -1;
+        task.run();
     }
 
+    @Override
+    public void onRemove() {
+        if(alreadyRun) return;
+        orElse.run();
+    }
 
     public static class builder{
 

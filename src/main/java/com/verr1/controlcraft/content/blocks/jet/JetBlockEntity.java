@@ -9,7 +9,7 @@ import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.content.cctweaked.peripheral.JetPeripheral;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
-import com.verr1.controlcraft.foundation.api.ITerminalDevice;
+import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.SynchronizedField;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;

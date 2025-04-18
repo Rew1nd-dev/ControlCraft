@@ -1,4 +1,4 @@
-package com.verr1.controlcraft.foundation.api;
+package com.verr1.controlcraft.foundation.api.delegate;
 
 import com.verr1.controlcraft.foundation.data.control.DynamicController;
 import com.verr1.controlcraft.foundation.data.control.PID;

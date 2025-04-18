@@ -4,7 +4,6 @@ import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.gui.factory.GenericUIFactory;
-import com.verr1.controlcraft.foundation.api.DeferralRunnable;
 import com.verr1.controlcraft.registry.ControlCraftBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -65,7 +64,15 @@ public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlock
     @Override
     public void onPlace(BlockState state, Level world, BlockPos pos, BlockState oldState, boolean isMoving) {
         if(world.isClientSide)return;
-        ControlCraftServer.SERVER_DEFERRAL_EXECUTOR.executeLater(new UpdateAttachedPeripheralLater(10, pos, world));
+        ControlCraftServer.SERVER_EXECUTOR.executeLater(
+                () -> {
+                    BlockEntity entity = world.getExistingBlockEntity(pos);
+                    if(entity instanceof ReceiverBlockEntity receiver){
+                        receiver.updateAttachedPeripheral();
+                    }
+                },
+                    5
+        );
     }
 
 
@@ -102,34 +109,6 @@ public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlock
     }
 
 
-    private static class UpdateAttachedPeripheralLater implements DeferralRunnable {
-        int deferralTick;
-        BlockPos pos;
-        Level level;
 
-        UpdateAttachedPeripheralLater(int tick, BlockPos pos, Level level){
-            deferralTick = tick;
-            this.pos = pos;
-            this.level = level;
-        }
-
-        @Override
-        public int getDeferralTicks() {
-            return deferralTick;
-        }
-
-        @Override
-        public void tick() {
-            deferralTick--;
-        }
-
-        @Override
-        public void run() {
-            BlockEntity entity = level.getExistingBlockEntity(pos);
-            if(entity instanceof ReceiverBlockEntity){
-                ((ReceiverBlockEntity)entity).updateAttachedPeripheral();
-            }
-        }
-    }
 
 }

@@ -48,7 +48,7 @@ public class ConstraintCenter {
         VSEvents.ShipLoadEvent.Companion.on(((shipLoadEvent, registeredHandler) -> {
             // Execute All Recreating Constrain Tasks Shortly After Any Ship Being Reloaded
             ControlCraftServer
-                    .SERVER_DEFERRAL_EXECUTOR
+                    .SERVER_EXECUTOR
                     .executeLater(() -> constraintList.forEach(ConstraintCenter::createOrReplaceNewConstrain), 4);
 
             registeredHandler.unregister();

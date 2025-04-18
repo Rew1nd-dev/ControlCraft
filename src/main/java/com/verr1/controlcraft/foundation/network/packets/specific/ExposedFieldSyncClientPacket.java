@@ -2,7 +2,7 @@ package com.verr1.controlcraft.foundation.network.packets.specific;
 
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.simibubi.create.foundation.utility.Couple;
-import com.verr1.controlcraft.foundation.api.ITerminalDevice;
+import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldMessage;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;

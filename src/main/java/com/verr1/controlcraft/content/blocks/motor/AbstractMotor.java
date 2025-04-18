@@ -2,12 +2,13 @@ package com.verr1.controlcraft.content.blocks.motor;
 
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.controlcraft.ControlCraft;
+import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.blocks.ShipConnectorBlockEntity;
 import com.verr1.controlcraft.content.compact.vmod.VSchematicCompactCenter;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.api.IBruteConnectable;
+import com.verr1.controlcraft.foundation.api.operatable.IBruteConnectable;
 import com.verr1.controlcraft.foundation.data.ShipPhysics;
 import com.verr1.controlcraft.foundation.data.constraint.ConnectContext;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
@@ -44,11 +45,11 @@ import static com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies.toMinecraft
 
 public abstract class AbstractMotor extends ShipConnectorBlockEntity implements IBruteConnectable
 {
-    public static NetworkKey SELF_OFFSET = NetworkKey.create("self_offset");
-    public static NetworkKey COMP_OFFSET = NetworkKey.create("comp_offset");
-    public static NetworkKey ANIMATED_ANGLE = NetworkKey.create("animated_angle");
+    public static final NetworkKey SELF_OFFSET = NetworkKey.create("self_offset");
+    public static final NetworkKey COMP_OFFSET = NetworkKey.create("comp_offset");
+    public static final NetworkKey ANIMATED_ANGLE = NetworkKey.create("animated_angle");
 
-    public static NetworkKey CONNECT_CONTEXT = NetworkKey.create("connect_context");
+    public static final NetworkKey CONNECT_CONTEXT = NetworkKey.create("connect_context");
 
 
     protected float clientAngle = 0;
@@ -64,9 +65,13 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
         // registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getOffset, this::setOffset, SerializeUtils.VECTOR3DC, OFFSET), Side.SHARED);
 
         buildRegistry(ANIMATED_ANGLE).withBasic(SerializePort.of(this::getServoAngle, this::setClientAngle, SerializeUtils.DOUBLE)).dispatchToSync().runtimeOnly().register();
-        buildRegistry(SELF_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getSelfOffset()), this::setSelfOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
+        buildRegistry(SELF_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getSelfOffset()), this::setSelfOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).dispatchToSync().register();
         buildRegistry(COMP_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getCompOffset()), this::setCompOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
         buildRegistry(CONNECT_CONTEXT).withBasic(SerializePort.of(() -> context, ctx -> context = ctx, SerializeUtils.CONNECT_CONTEXT)).register();
+
+
+        panel().registerUnit(SharedKeys.ASSEMBLE, this::assemble);
+        panel().registerUnit(SharedKeys.DISASSEMBLE, this::destroyConstraints);
 
         registerConstraintKey("revolute");
         registerConstraintKey("attach_1");
@@ -318,7 +323,7 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
     @Override
     public void tickServer() {
         super.tickServer();
-        syncForNear(true, ANIMATED_ANGLE);
+        syncForNear(true, ANIMATED_ANGLE, SELF_OFFSET);
         // syncClientAnimation();
     }
 

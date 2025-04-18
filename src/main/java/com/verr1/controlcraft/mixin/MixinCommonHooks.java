@@ -35,7 +35,7 @@ abstract class MixinCommonHooks {
             return;
         }
         ComputerCraftDelegation.setServer(server);
-        ControlCraftServer.SERVER_DEFERRAL_EXECUTOR.executeLater(ComputerCraftDelegation::DelegateThreadStart, 10);
+        ControlCraftServer.SERVER_EXECUTOR.executeLater(ComputerCraftDelegation::DelegateThreadStart, 10);
     }
 
     @Inject(method = "onServerStopped", at = @At("HEAD"), remap = false)

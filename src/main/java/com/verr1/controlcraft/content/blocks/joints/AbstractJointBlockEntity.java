@@ -1,14 +1,13 @@
 package com.verr1.controlcraft.content.blocks.joints;
 
 import com.verr1.controlcraft.content.blocks.ShipConnectorBlockEntity;
-import com.verr1.controlcraft.foundation.api.IAdjustableJoint;
-import com.verr1.controlcraft.foundation.api.IBruteConnectable;
-import com.verr1.controlcraft.foundation.api.IConstraintHolder;
+import com.verr1.controlcraft.foundation.api.operatable.IAdjustableJoint;
+import com.verr1.controlcraft.foundation.api.operatable.IBruteConnectable;
+import com.verr1.controlcraft.foundation.api.operatable.IConstraintHolder;
 import com.verr1.controlcraft.foundation.type.JointLevel;
 import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import com.verr1.controlcraft.utils.MinecraftUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3d;

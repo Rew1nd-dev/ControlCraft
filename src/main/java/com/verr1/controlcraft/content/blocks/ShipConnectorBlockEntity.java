@@ -2,7 +2,7 @@ package com.verr1.controlcraft.content.blocks;
 
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.Observer;
-import com.verr1.controlcraft.foundation.api.IConstraintHolder;
+import com.verr1.controlcraft.foundation.api.operatable.IConstraintHolder;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.data.constraint.ConstraintKey;
 import com.verr1.controlcraft.foundation.data.ShipPhysics;
@@ -104,7 +104,7 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
     }
 
 
-    protected void setCompanionShipID(long companionShipID) {
+    public void setCompanionShipID(long companionShipID) {
         this.companionShipID = companionShipID;
         if(level != null && level.isClientSide)return;
         syncForAllPlayers(true, COMPANION);

@@ -20,6 +20,7 @@ public record ShipPhysics(Vector3dc velocity,
                           Matrix4dc s2wTransform,
                           Matrix4dc w2sTransform,
                           double mass,
+                          double scale,
                           Long ID
 ){
     public static ShipPhysics EMPTY = new ShipPhysics(
@@ -33,6 +34,7 @@ public record ShipPhysics(Vector3dc velocity,
             new Matrix4d(),
             new Matrix4d(),
             0,
+            1,
             -1L
     );
 
@@ -50,6 +52,7 @@ public record ShipPhysics(Vector3dc velocity,
                         new Matrix4d(ship.getTransform().getShipToWorld()),
                         new Matrix4d(ship.getTransform().getWorldToShip()),
                         ship.getMass(),
+                        ship.getTransform().getShipToWorldScaling().get(0),
                         ship.getId()
                 );
     }
@@ -67,12 +70,13 @@ public record ShipPhysics(Vector3dc velocity,
                 new Matrix4d(ship.getTransform().getShipToWorld()),
                 new Matrix4d(ship.getTransform().getWorldToShip()),
                 ship.getInertiaData().getMass(),
+                ship.getTransform().getShipToWorldScaling().get(0),
                 ship.getId()
         );
     }
 
 
-    public Map<String, Object> getCCPhysics(){
+    public Map<String, Object> toLua(){
         return Map.of(
                 "velocity", CCUtils.dumpVec3(velocity()),
                 "omega", CCUtils.dumpVec3(omega()),

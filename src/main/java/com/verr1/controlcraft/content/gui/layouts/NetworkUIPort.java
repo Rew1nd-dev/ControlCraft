@@ -39,11 +39,6 @@ public abstract class NetworkUIPort<T> implements TabListener {
     }
 
     @Override
-    public void onMessage(Message msg) {
-
-    }
-
-    @Override
     public void onAddRenderable(Collection<AbstractWidget> toAdd) {
         layout.visitWidgets(toAdd::add);
     }

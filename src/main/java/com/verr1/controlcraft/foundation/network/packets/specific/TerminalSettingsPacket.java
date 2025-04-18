@@ -70,7 +70,7 @@ public class TerminalSettingsPacket extends SimplePacketBase {
                                 terminal.setEnabled(row_enabled);
                                 terminal.setReversed(row_reversed);
                                 terminal.setExposedChannel(exposedChannelIndex);
-                                ControlCraftServer.SERVER_DEFERRAL_EXECUTOR.executeLater(terminal::setFrequency, 10);
+                                ControlCraftServer.SERVER_EXECUTOR.executeLater(terminal::setFrequency, 10);
                         }
             ));
         return true;

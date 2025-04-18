@@ -16,6 +16,8 @@ import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
 
+    private boolean force_connect = false;
+
     private final BlockPos xPos;
     private final BlockPos yPos;
 
@@ -30,15 +32,16 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
     private Runnable onExpiredTask = () -> {};
 
     @Override
-    public void onExpire() {
-        // if(!alignmentDone())return;
+    public void onExpired() {
+        if(!alignmentDone())return;
         onExpiredTask.run();
     }
 
     public boolean alignmentDone(){
+        if(force_connect)return true;
         Vector3d xp = VSMathUtils.getFaceCenterPos(level, xPos, xAlign);
         Vector3d yp = VSMathUtils.getFaceCenterPos(level, yPos, yAlign);
-        return xp.sub(yp).lengthSquared() < 0.5;
+        return xp.sub(yp).lengthSquared() < 4;
     }
 
     public Vector3dc getXFacePos(){
@@ -87,6 +90,7 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
             Direction yAlign,
             Direction yForward,
             ServerLevel level,
+            boolean forced,
             int timeBeforeExpired,
             Runnable onExpiredTask
     ){
@@ -95,6 +99,8 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
         super(WorldBlockPos.of(level, yPos), new Quaterniond(), new Vector3d(), timeBeforeExpired);
         this.xPos = xPos;
         this.yPos = yPos;
+
+        this.force_connect = forced;
 
         this.xAlign = xAlign;
         this.yAlign = yAlign;
@@ -126,6 +132,8 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
 
         private final ServerLevel level;
         private int timeBeforeExpired = 10;
+
+        private boolean force_connect = false;
 
         private Runnable onExpiredTask = () -> {};
 
@@ -162,7 +170,23 @@ public class FaceAlignmentSchedule extends ShipQPNavigationSchedule {
         }
 
         public FaceAlignmentSchedule build(){
-            return new FaceAlignmentSchedule(xPos, xAlign, xForward, yPos, yAlign, yForward, level, timeBeforeExpired, onExpiredTask).setTarget();
+            return new FaceAlignmentSchedule(
+                    xPos,
+                    xAlign,
+                    xForward,
+                    yPos,
+                    yAlign,
+                    yForward,
+                    level,
+                    force_connect,
+                    timeBeforeExpired,
+                    onExpiredTask
+            ).setTarget();
+        }
+
+        public builder withForced(){
+            force_connect = true;
+            return this;
         }
 
     }

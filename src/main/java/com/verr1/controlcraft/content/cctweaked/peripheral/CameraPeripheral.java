@@ -147,6 +147,11 @@ public class CameraPeripheral extends AbstractAttachedPeripheral<CameraBlockEnti
     }
 
     @LuaFunction
+    public final void setConeAngle(double angle){
+        getTarget().setConeAngle(angle);
+    }
+
+    @LuaFunction
     public final void setYaw(double degree){
         getTarget().setYaw(degree);
     }

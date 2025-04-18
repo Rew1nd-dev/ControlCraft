@@ -105,6 +105,10 @@ public class MathUtils {
         return new AABBd(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
+    public static double clampDigit(double value, int digits){
+        return Math.round(value * Math.pow(10, digits)) / Math.pow(10, digits);
+    }
+
     public static AABBd centerWithRadius(Vector3dc center, double r){
         return new AABBd(center.x() - r, center.y() - r, center.z() - r, center.x() + r, center.y() + r, center.z() + r);
     }

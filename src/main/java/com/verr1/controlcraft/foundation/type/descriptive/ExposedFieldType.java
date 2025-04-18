@@ -243,7 +243,8 @@ public enum ExposedFieldType implements Descriptive<ExposedFieldType> {
     }
 
     public @NotNull Component asComponent(){
-        return toMain().callComponentLikeSuper();
+        if(series() == 0)return toMain().callComponentLikeSuper();
+        return toMain().callComponentLikeSuper().copy().append(Component.literal(" (" + series() + ")"));
     }
 
 
@@ -274,6 +275,16 @@ public enum ExposedFieldType implements Descriptive<ExposedFieldType> {
         }
     }
 
+    private int series(){
+        try{
+            String[] main_key = name().split("\\$");
+            return Integer.parseInt(main_key[1]);
+        }catch (Exception e){
+            return 0;
+        }
+    }
+
+
     @Override
     public List<Component> overall() {
         return Descriptive.super.overall();
@@ -285,6 +296,6 @@ public enum ExposedFieldType implements Descriptive<ExposedFieldType> {
     }
 
     public static void register(){
-        LangUtils.registerDefaultDescription(ExposedFieldType.class, literals("Some Fields Is Redundant", "In order to apply different Min-Max"));
+        LangUtils.registerDefaultDescription(ExposedFieldType.class, literals("Some Fields Are Redundant", "In order to apply different Min-Max"));
     }
 }

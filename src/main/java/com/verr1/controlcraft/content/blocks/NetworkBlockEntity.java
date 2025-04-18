@@ -1,8 +1,12 @@
 package com.verr1.controlcraft.content.blocks;
 
+import com.verr1.controlcraft.foundation.api.delegate.INetworkDelegated;
+import com.verr1.controlcraft.foundation.api.delegate.IRemoteDevice;
 import com.verr1.controlcraft.foundation.api.Slot;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.data.remote.RemotePanel;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
+import com.verr1.controlcraft.foundation.network.handler.NetworkHandler;
 import com.verr1.controlcraft.foundation.network.packets.specific.LazyRequestBlockEntitySyncPacket;
 import com.verr1.controlcraft.foundation.network.packets.specific.SyncBlockEntityClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.specific.SyncBlockEntityServerPacket;
@@ -10,6 +14,7 @@ import com.verr1.controlcraft.registry.ControlCraftPackets;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.PacketDistributor;
@@ -21,12 +26,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class NetworkBlockEntity extends SidedTickedBlockEntity {
+public class NetworkBlockEntity extends SidedTickedBlockEntity implements IRemoteDevice, INetworkDelegated {
 
     /*
     *  simplex channel: sync action raise from server, it's 
     *
     * */
+    private final RemotePanel panel = new RemotePanel();
+
+    private final NetworkHandler handler = new NetworkHandler(this);
 
     private final HashMap<NetworkKey, AsymmetricPort> duplex = new HashMap<>();
     private final HashMap<NetworkKey, SymmetricPort> simplex = new HashMap<>();
@@ -166,13 +174,14 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity {
         dispatchPacket(target, tag);
     }
 
-    public void receiveSync(CompoundTag tag){
+    public void receiveSync(CompoundTag tag, Player sender){
         if(level == null)return;
         CompoundTag duplexTag = tag.getCompound("duplex");
         CompoundTag simplexTag = tag.getCompound("simplex");
         if(!duplexTag.isEmpty()){
             duplex.forEach((k, sidePort) -> {
                 if(!duplexTag.contains(k.getSerializedName()))return;
+                if(!checkPermission(k, sender))return;
                 sidePort.dispatch(duplexTag.getCompound(k.getSerializedName()), level.isClientSide);
             });
         }
@@ -186,10 +195,25 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity {
         setChanged();
     }
 
+    private boolean checkPermission(NetworkKey key, Player player){
+        if(level == null || level.isClientSide)return true;
+        return Optional
+                .ofNullable(level.getServer())
+                .map(s -> s.getProfilePermissions(player.getGameProfile()))
+                .map(p -> p >= key.permissionLevel())
+                .orElseGet(() -> {
+                        //player.sendSystemMessage();
+                        return false;
+                    }
+                );
+    }
+
     @Override
     protected void read(CompoundTag compound, boolean clientPacket) {
         super.read(compound, clientPacket);
-
+        /*
+        *
+        * */
         if(clientPacket)return;
         CompoundTag saveloads = compound.getCompound("saveloads");
         saveLoads.forEach((k, sidePort) -> {
@@ -226,6 +250,16 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity {
 
     public void writeCompact(CompoundTag compound){
         write(compound, false);
+    }
+
+    @Override
+    public RemotePanel panel() {
+        return panel;
+    }
+
+    @Override
+    public NetworkHandler handler() {
+        return handler;
     }
 
     public static class AsymmetricPort implements SidePort{

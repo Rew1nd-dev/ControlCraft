@@ -6,7 +6,6 @@ import com.verr1.controlcraft.utils.CCUtils;
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3d;
 import org.joml.Matrix3dc;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
@@ -83,12 +82,12 @@ public class SpinalyzerPeripheral extends AbstractAttachedPeripheral<SpinalyzerB
 
     @LuaFunction
     public final Map<String, Object> getPhysics(){
-        return getTarget().readSelf().getCCPhysics();
+        return getTarget().readSelf().toLua();
     }
 
 
     public void queueEvent(ShipPhysics sp){
-        getComputers().forEach((c) -> c.queueEvent("phys_tick", sp.getCCPhysics()));
+        getComputers().forEach((c) -> c.queueEvent("phys_tick", sp.toLua()));
     }
 
 

@@ -77,17 +77,16 @@ public class VSchematicCompactCenter {
         BlockPos comp_center_new = BlockPos.of(compact.getLong("n_comp_chunk_center"));
 
         BlockPos connectContext = motor.blockConnectContext();
-        motor.clearCompanionShipInfo();
-        motor.setBlockConnectContext(connectContext);
+        motor.setCompanionShipID(-1);
 
         ControlCraft.LOGGER.info("PostMotorReadVModCompact: {} {}", comp_center_old, comp_center_new);
 
         BlockPos offset = comp_center_new.subtract(comp_center_old);
-        BlockPos newContact = motor.blockConnectContext().offset(offset);
+        BlockPos newContact = connectContext.offset(offset);
 
         ControlCraft.LOGGER.info("PostMotorReadVModCompact: {} {}", motor.blockConnectContext(), newContact);
 
-        ControlCraftServer.SERVER_DEFERRAL_EXECUTOR.executeLater(() -> motor.bruteDirectionalConnectWith(newContact, Direction.UP, motor.getCompanionShipAlign()), 12);
+        ControlCraftServer.SERVER_EXECUTOR.executeLater(() -> motor.bruteDirectionalConnectWith(newContact, Direction.UP, motor.getCompanionShipAlign()), 12);
 
     }
 

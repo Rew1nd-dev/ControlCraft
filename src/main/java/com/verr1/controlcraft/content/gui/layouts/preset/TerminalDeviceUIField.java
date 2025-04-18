@@ -7,7 +7,7 @@ import com.verr1.controlcraft.content.gui.factory.Converter;
 import com.verr1.controlcraft.content.gui.widgets.DescriptiveScrollInput;
 import com.verr1.controlcraft.content.gui.layouts.element.TypedUIPort;
 import com.verr1.controlcraft.content.gui.widgets.FormattedLabel;
-import com.verr1.controlcraft.foundation.api.ITerminalDevice;
+import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;

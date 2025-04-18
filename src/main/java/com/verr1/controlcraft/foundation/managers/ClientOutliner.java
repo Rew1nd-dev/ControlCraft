@@ -14,6 +14,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4dc;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientOutliner {
@@ -86,7 +87,6 @@ public class ClientOutliner {
     public static void drawOutline(Entity e){
         CreateClient.OUTLINER.showAABB(e.getUUID(), e.getBoundingBox(), 1);
     }
-
 
 
     public static void drawOutline(@NotNull AABB aabb, int color, String slot, double scale) {

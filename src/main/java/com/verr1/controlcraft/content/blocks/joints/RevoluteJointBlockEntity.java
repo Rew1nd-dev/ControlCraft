@@ -2,17 +2,14 @@ package com.verr1.controlcraft.content.blocks.joints;
 
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.foundation.BlockEntityGetter;
-import com.verr1.controlcraft.foundation.api.IFlippableJoint;
+import com.verr1.controlcraft.foundation.api.operatable.IFlippableJoint;
 import com.verr1.controlcraft.utils.MinecraftUtils;
-import com.verr1.controlcraft.utils.VSGetterUtils;
 import com.verr1.controlcraft.utils.VSMathUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.*;
-import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint;
 import org.valkyrienskies.core.apigame.constraints.VSConstraint;
 import org.valkyrienskies.core.apigame.constraints.VSHingeOrientationConstraint;

@@ -2,14 +2,15 @@ package com.verr1.controlcraft.content.blocks.motor;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.verr1.controlcraft.ControlCraftServer;
+import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.DynamicMotorForceInducer;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.content.cctweaked.peripheral.DynamicMotorPeripheral;
-import com.verr1.controlcraft.foundation.api.IControllerProvider;
+import com.verr1.controlcraft.foundation.api.delegate.IControllerProvider;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
-import com.verr1.controlcraft.foundation.api.ITerminalDevice;
+import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.*;
 import com.verr1.controlcraft.foundation.data.control.DynamicController;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
@@ -102,7 +103,7 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
         }};
 
         if(level == null || level.isClientSide)return;
-        ControlCraftServer.SERVER_DEFERRAL_EXECUTOR.executeLater(task, 1);
+        ControlCraftServer.SERVER_EXECUTOR.executeLater(task, 1);
         setChanged();
     }
 
@@ -211,10 +212,10 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
         VSAttachmentConstraint fixed = new VSAttachmentConstraint(
                 getShipOrGroundID(),
                 getCompanionShipID(),
-                1.0E-10,
+                1.0E-20,
                 context.self().getPos().add(v_own, new Vector3d()),
                 context.comp().getPos().add(v_cmp, new Vector3d()),
-                1.0E10,
+                1.0E20,
                 0.0
         );
 
@@ -325,7 +326,7 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
             getController().PID(DEFAULT_VELOCITY_MODE_PARAMS);
         }};
 
-        if(level != null && !level.isClientSide) ControlCraftServer.SERVER_DEFERRAL_EXECUTOR.executeLater(task, 1);
+        if(level != null && !level.isClientSide) ControlCraftServer.SERVER_EXECUTOR.executeLater(task, 1);
 
         setChanged();
     }
@@ -413,48 +414,10 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
                 ))
                 .register();
 
-        /*
 
-
-
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> getCheatMode().name(), n -> setCheatMode(CheatMode.valueOf(n.toUpperCase())), SerializeUtils.STRING, SharedKeys.CHEAT_MODE), Side.SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> getTargetMode().name(), n -> setTargetMode(TargetMode.valueOf(n.toUpperCase())), SerializeUtils.STRING, SharedKeys.TARGET_MODE), Side.SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> getLockMode().name(), n -> setLockMode(LockMode.valueOf(n.toUpperCase())), SerializeUtils.STRING, SharedKeys.LOCK_MODE), Side.SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> reverseCreateInput, b -> reverseCreateInput = b, SerializeUtils.BOOLEAN, REVERSE_CREATE_INPUT), Side.SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::isLocked, bl -> isLocked = bl, SerializeUtils.BOOLEAN, SharedKeys.IS_LOCKED), Side.SHARED);
-
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),
-                        tag -> tag.put("fields", ITerminalDevice.super.serialize()),
-                        FIELD),
-                Side.SHARED
-        );
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> getController().deserialize(tag.getCompound("controller")),
-                        tag -> tag.put("controller", getController().serialize()),
-                        CONTROLLER),
-                Side.SHARED
-        );
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> getController().setTarget(tag.getDouble("controller_target")),
-                        tag -> tag.putDouble("controller_target", getController().getTarget()),
-                        SharedKeys.TARGET),
-                Side.SHARED
-        );
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> getController().overrideError(tag.getDouble("controller_value")),
-                        tag -> tag.putDouble("controller_value", getController().getValue()),
-                        SharedKeys.VALUE),
-                Side.SHARED
-        );
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        $ -> {if(targetMode == TargetMode.VELOCITY)getController().setTarget(0);},
-                        $ -> {},
-                        SharedKeys.TARGET),
-                Side.SERVER_ONLY
-        );
-        * */
-
+        panel().registerUnit(SharedKeys.LOCK, this::tryLock);
+        panel().registerUnit(SharedKeys.UNLOCK, this::tryUnlock);
+        panel().registerUnit(SharedKeys.DISASSEMBLE, this::destroyConstraints);
 
     }
 

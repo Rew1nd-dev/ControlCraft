@@ -12,7 +12,7 @@ import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.content.cctweaked.peripheral.KinematicMotorPeripheral;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
-import com.verr1.controlcraft.foundation.api.ITerminalDevice;
+import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.control.KinematicController;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.data.logical.LogicalKinematicMotor;

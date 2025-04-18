@@ -40,7 +40,7 @@ public class SyncBlockEntityServerPacket extends SimplePacketBase {
                     .map(level -> level.getBlockEntity(pos))
                     .filter(NetworkBlockEntity.class::isInstance)
                     .map(NetworkBlockEntity.class::cast)
-                    .ifPresent(syncable -> syncable.receiveSync(tag)));
+                    .ifPresent(syncable -> syncable.receiveSync(tag, context.getSender())));
         return true;
     }
 }

@@ -2,7 +2,7 @@ package com.verr1.controlcraft.foundation.network.packets.specific;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
-import com.verr1.controlcraft.foundation.api.ITerminalDevice;
+import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import net.minecraft.core.BlockPos;

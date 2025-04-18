@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 public class Converter {
@@ -27,6 +28,16 @@ public class Converter {
         return d.specific().stream().map(Component::copy).toList();
     }
 
+
+    @SafeVarargs
+    public static<T> Function<T, T> combine(Function<T, T>... functions){
+        return t -> {
+            for (var function : functions){
+                t = function.apply(t);
+            }
+            return t;
+        };
+    }
 
     public static LabelProvider convert(LabelProvider prov, UnaryOperator<Style> title){
         FormattedLabel original = prov.toDescriptiveLabel();

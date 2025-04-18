@@ -8,7 +8,7 @@ import com.verr1.controlcraft.content.gui.layouts.TabSwitch;
 import com.verr1.controlcraft.content.gui.layouts.VerticalFlow;
 import com.verr1.controlcraft.content.gui.layouts.api.Descriptive;
 import com.verr1.controlcraft.content.gui.widgets.TabIconButton;
-import com.verr1.controlcraft.foundation.api.SizedScreenElement;
+import com.verr1.controlcraft.content.gui.layouts.api.SizedScreenElement;
 import com.verr1.controlcraft.registry.ControlCraftGuiTextures;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;

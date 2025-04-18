@@ -6,6 +6,8 @@ import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.content.gui.layouts.api.IScheduleProvider;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.SpatialForceInducer;
 import com.verr1.controlcraft.foundation.api.*;
+import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
+import com.verr1.controlcraft.foundation.api.operatable.IBruteConnectable;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;

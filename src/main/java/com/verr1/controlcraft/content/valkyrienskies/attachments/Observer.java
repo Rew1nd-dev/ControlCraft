@@ -53,8 +53,8 @@ public final class Observer implements ShipForcesInducer {
     }
 
 
-    public void aliveOrCreate(WorldBlockPos pos, Supplier<ExpirableListener<ShipPhysics>> listenerProv){
-        Listener.putIfAbsent(pos, listenerProv.get());
+    public void replace(WorldBlockPos pos, ExpirableListener<ShipPhysics> listener){
+        Listener.put(pos, listener);
         alive(pos);
     }
 

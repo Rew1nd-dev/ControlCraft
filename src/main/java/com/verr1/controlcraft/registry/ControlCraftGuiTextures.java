@@ -2,10 +2,9 @@ package com.verr1.controlcraft.registry;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.simibubi.create.foundation.gui.UIRenderHelper;
-import com.simibubi.create.foundation.gui.element.ScreenElement;
 import com.simibubi.create.foundation.utility.Color;
 import com.verr1.controlcraft.ControlCraft;
-import com.verr1.controlcraft.foundation.api.SizedScreenElement;
+import com.verr1.controlcraft.content.gui.layouts.api.SizedScreenElement;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;

@@ -34,8 +34,8 @@ public class ControlCraftEvents {
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
-        ControlCraftServer.SERVER_INTERVAL_EXECUTOR.tick();
-        ControlCraftServer.SERVER_DEFERRAL_EXECUTOR.tick();
+        // ControlCraftServer.SERVER_INTERVAL_EXECUTOR.tick();
+        ControlCraftServer.SERVER_EXECUTOR.tick();
         SpatialLinkManager.tick();
         ChunkManager.tick(event);
         NetworkManager.tick();
@@ -48,11 +48,11 @@ public class ControlCraftEvents {
     }
 
     public static void onPhysicsTickStart(){
-        ComputerCraftDelegation.FreeDelegateThread();
+        ComputerCraftDelegation.LockDelegateThread();
     }
 
     public static void onPhysicsTickEnd(){
-        ComputerCraftDelegation.LockDelegateThread();
+        ComputerCraftDelegation.FreeDelegateThread();
     }
 
 }

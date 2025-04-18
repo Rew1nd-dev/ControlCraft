@@ -35,6 +35,7 @@ public enum ControlCraftPackets {
     TERMINAL_SETTINGS(TerminalSettingsPacket.class, TerminalSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
     REQUEST_SYNC(LazyRequestBlockEntitySyncPacket.class, LazyRequestBlockEntitySyncPacket::new, NetworkDirection.PLAY_TO_SERVER),
     SYNC_BLOCKENTITY_SERVER(SyncBlockEntityServerPacket.class, SyncBlockEntityServerPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    REMOTE(RemotePacket.class, RemotePacket::new, NetworkDirection.PLAY_TO_SERVER),
     ;
 
 

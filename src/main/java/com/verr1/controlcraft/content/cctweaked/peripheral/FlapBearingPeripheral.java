@@ -24,7 +24,7 @@ public class FlapBearingPeripheral extends AbstractAttachedPeripheral<FlapBearin
     }
 
     @LuaFunction
-    public final float getAngle(){
+    public final double getAngle(){
         return getTarget().getAngle();
     }
 

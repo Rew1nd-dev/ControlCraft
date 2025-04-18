@@ -18,7 +18,7 @@ import com.verr1.controlcraft.content.gui.layouts.preset.DynamicControllerUIFiel
 import com.verr1.controlcraft.content.gui.layouts.preset.SpatialScheduleUIField;
 import com.verr1.controlcraft.content.gui.layouts.preset.TerminalDeviceUIField;
 import com.verr1.controlcraft.foundation.BlockEntityGetter;
-import com.verr1.controlcraft.foundation.api.ITerminalDevice;
+import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.type.descriptive.*;
 import com.verr1.controlcraft.registry.ControlCraftBlocks;
@@ -30,7 +30,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
 
-import static com.verr1.controlcraft.content.blocks.flap.FlapBearingBlockEntity.ANGLE;
+import static com.verr1.controlcraft.content.blocks.flap.FlapBearingBlockEntity.*;
 import static com.verr1.controlcraft.content.gui.layouts.api.ISerializableSchedule.SCHEDULE;
 
 public class GenericUIFactory {
@@ -42,6 +42,8 @@ public class GenericUIFactory {
     public static Descriptive<TabType> REDSTONE_TAB = Converter.convert(TabType.REDSTONE, s -> s, s -> s, s -> s.withColor(ChatFormatting.GOLD).withBold(true).withItalic(true));
 
     public static Descriptive<TabType> CONTROLLER_TAB = Converter.convert(TabType.CONTROLLER, s -> s, s -> s, s -> s.withColor(ChatFormatting.GOLD).withBold(true).withItalic(true));
+
+    public static Descriptive<TabType> REMOTE_TAB = Converter.convert(TabType.REMOTE, s -> s, s -> s, s -> s.withColor(ChatFormatting.GOLD).withBold(true).withItalic(true));
 
 
     public static GenericSettingScreen createAnchorScreen(BlockPos boundAnchorPos){
@@ -163,6 +165,24 @@ public class GenericUIFactory {
                 Converter.convert(ExposedFieldType.DEGREE, Converter::titleStyle)
         );
 
+        UnitUIPanel assemble = new UnitUIPanel(
+                boundPos,
+                SharedKeys.ASSEMBLE,
+                Double.class,
+                0.0,
+                Converter.convert(UIContents.ASSEMBLY, Converter::titleStyle)
+        );
+
+        UnitUIPanel disassemble = new UnitUIPanel(
+                boundPos,
+                SharedKeys.DISASSEMBLE,
+                Double.class,
+                0.0,
+                Converter.convert(UIContents.DISASSEMBLY, Converter::titleStyle)
+        );
+
+        Runnable alignLabels = () -> Converter.alignLabel(assemble, disassemble);
+
         return new GenericSettingScreen.builder(boundPos)
                 .withRenderedStack(ControlCraftBlocks.WING_CONTROLLER_BLOCK.asStack())
                 .withTab(
@@ -175,6 +195,14 @@ public class GenericUIFactory {
                 .withTab(
                         REDSTONE_TAB,
                         createTerminalDeviceTab(boundPos)
+                )
+                .withTab(
+                        REMOTE_TAB,
+                        new VerticalFlow.builder(boundPos)
+                                .withPort(SharedKeys.ASSEMBLE, assemble)
+                                .withPort(SharedKeys.DISASSEMBLE, disassemble)
+                                .withPreDoLayout(alignLabels)
+                                .build()
                 )
                 .withTickTask(createSyncTasks(boundPos, ANGLE))
                 .build();
@@ -289,7 +317,7 @@ public class GenericUIFactory {
 
     public static GenericSettingScreen createDynamicMotorScreen(BlockPos boundPos, ItemStack stack){
 
-        var current_view = new DoubleUIView(boundPos, SharedKeys.VALUE, Converter.convert(UIContents.CURRENT, Converter::viewStyle));
+        var current_view = DoubleUIView.of(boundPos, SharedKeys.VALUE, Converter.convert(UIContents.CURRENT, Converter::viewStyle), Math::toDegrees);
 
         var lock_view = new BasicUIView<>(
                 boundPos,
@@ -301,7 +329,7 @@ public class GenericUIFactory {
                 $ -> false
         );
 
-        var target = new DoubleUIField(boundPos, SharedKeys.TARGET, Converter.convert(UIContents.TARGET, Converter::titleStyle));
+        var target = new DoubleUIField(boundPos, SharedKeys.TARGET, Converter.convert(UIContents.TARGET, Converter::titleStyle)); //, Converter.combine(Math::toDegrees, d -> MathUtils.clampDigit(d, 2)), Math::toRadians
 
         var toggle_mode = new OptionUIField<>(boundPos, SharedKeys.TARGET_MODE, TargetMode.class, Converter.convert(UIContents.MODE, Converter::titleStyle));
 
@@ -313,10 +341,43 @@ public class GenericUIFactory {
         var offset_comp = new Vector3dUIField(boundPos, AbstractDynamicMotor.COMP_OFFSET, Converter.convert(UIContents.COMP_OFFSET, Converter::titleStyle), 25);
 
 
+        var asm = new UnitUIPanel(
+                boundPos,
+                SharedKeys.ASSEMBLE,
+                Double.class,
+                0.0,
+                Converter.convert(UIContents.ASSEMBLY, Converter::titleStyle)
+        );
+
+        var lock = new UnitUIPanel(
+                boundPos,
+                SharedKeys.LOCK,
+                Double.class,
+                0.0,
+                Converter.convert(UIContents.LOCK, Converter::titleStyle)
+        );
+
+        var unlock = new UnitUIPanel(
+                boundPos,
+                SharedKeys.UNLOCK,
+                Double.class,
+                0.0,
+                Converter.convert(UIContents.UNLOCK, Converter::titleStyle)
+        );
+
+        var disasm = new UnitUIPanel(
+                boundPos,
+                SharedKeys.DISASSEMBLE,
+                Double.class,
+                0.0,
+                Converter.convert(UIContents.DISASSEMBLY, Converter::titleStyle)
+        );
+
         Runnable alignLabels = () -> {
             Converter.alignLabel(current_view, lock_view, target);
             Converter.alignLabel(toggle_mode, toggle_cheat, toggle_lock_mode);
             Converter.alignLabel(toggle_mode.valueLabel(), toggle_cheat.valueLabel(), toggle_lock_mode.valueLabel());
+            Converter.alignLabel(lock, unlock, asm, disasm);
         };
         return new GenericSettingScreen.builder(boundPos)
                 .withRenderedStack(stack)
@@ -341,6 +402,16 @@ public class GenericUIFactory {
                 .withTab(
                         CONTROLLER_TAB,
                         createControllerTab(boundPos)
+                )
+                .withTab(
+                        REMOTE_TAB,
+                        new VerticalFlow.builder(boundPos)
+                                .withPort(SharedKeys.ASSEMBLE, asm)
+                                .withPort(SharedKeys.LOCK, lock)
+                                .withPort(SharedKeys.UNLOCK, unlock)
+                                .withPort(SharedKeys.DISASSEMBLE, disasm)
+                                .withPreDoLayout(alignLabels)
+                                .build()
                 )
                 .withTickTask(createSyncTasks(boundPos, SharedKeys.IS_LOCKED, SharedKeys.VALUE))
                 .build();
@@ -368,10 +439,35 @@ public class GenericUIFactory {
 
         var toggle_lock_mode = new OptionUIField<>(boundPos, SharedKeys.LOCK_MODE, LockMode.class, Converter.convert(UIContents.AUTO_LOCK, Converter::titleStyle));
 
+        var asm = new UnitUIPanel(
+                boundPos,
+                SharedKeys.ASSEMBLE,
+                Double.class,
+                0.0,
+                Converter.convert(UIContents.ASSEMBLY, Converter::titleStyle)
+        );
+
+        var lock = new UnitUIPanel(
+                boundPos,
+                SharedKeys.LOCK,
+                Double.class,
+                0.0,
+                Converter.convert(UIContents.LOCK, Converter::titleStyle)
+        );
+
+        var unlock = new UnitUIPanel(
+                boundPos,
+                SharedKeys.UNLOCK,
+                Double.class,
+                0.0,
+                Converter.convert(UIContents.UNLOCK, Converter::titleStyle)
+        );
+
         Runnable alignLabels = () -> {
             Converter.alignLabel(current_view, lock_view, target);
             Converter.alignLabel(toggle_mode, toggle_cheat, toggle_lock_mode);
             Converter.alignLabel(toggle_mode.valueLabel(), toggle_cheat.valueLabel(), toggle_lock_mode.valueLabel());
+            Converter.alignLabel(lock, unlock, asm);
         };
         return new GenericSettingScreen.builder(boundPos)
                 .withRenderedStack(stack)
@@ -394,6 +490,15 @@ public class GenericUIFactory {
                 .withTab(
                         CONTROLLER_TAB,
                         createControllerTab(boundPos)
+                )
+                .withTab(
+                        REMOTE_TAB,
+                        new VerticalFlow.builder(boundPos)
+                                .withPort(SharedKeys.ASSEMBLE, asm)
+                                .withPort(SharedKeys.LOCK, lock)
+                                .withPort(SharedKeys.UNLOCK, unlock)
+                                .withPreDoLayout(alignLabels)
+                                .build()
                 )
                 .withTickTask(createSyncTasks(boundPos, SharedKeys.IS_LOCKED, SharedKeys.VALUE))
                 .build();
@@ -489,6 +594,13 @@ public class GenericUIFactory {
 
         var toggle_mode = new OptionUIField<>(boundPos, SharedKeys.TARGET_MODE, TargetMode.class, Converter.convert(UIContents.MODE, Converter::titleStyle));
 
+        var asm = new UnitUIPanel(
+                boundPos,
+                SharedKeys.ASSEMBLE,
+                Double.class,
+                0.0,
+                Converter.convert(UIContents.ASSEMBLY, Converter::titleStyle)
+        );
 
         Runnable alignLabels = () -> Converter.alignLabel(current_view, target_field, compliance_field, toggle_mode);
 
@@ -508,6 +620,13 @@ public class GenericUIFactory {
                 .withTab(
                         REDSTONE_TAB,
                         createTerminalDeviceTab(boundPos)
+                )
+                .withTab(
+                        REMOTE_TAB,
+                        new VerticalFlow.builder(boundPos)
+                                .withPort(SharedKeys.ASSEMBLE, asm)
+                                .withPreDoLayout(alignLabels)
+                                .build()
                 )
                 .withRenderedStack(stack)
                 .withTickTask(createSyncTasks(boundPos, SharedKeys.VALUE))

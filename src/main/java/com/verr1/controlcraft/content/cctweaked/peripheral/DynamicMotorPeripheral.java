@@ -48,8 +48,8 @@ public class DynamicMotorPeripheral extends AbstractAttachedPeripheral<AbstractD
 
     @LuaFunction
     public final Map<String, Map<String, Object>> getPhysics(){
-        Map<String, Object> own = getTarget().readSelf().getCCPhysics();
-        Map<String, Object> asm = getTarget().readComp().getCCPhysics();
+        Map<String, Object> own = getTarget().readSelf().toLua();
+        Map<String, Object> asm = getTarget().readComp().toLua();
         return Map.of(
                 "servomotor", own,
                 "companion", asm

@@ -7,7 +7,7 @@ import com.verr1.controlcraft.content.blocks.camera.CameraBlockEntity;
 import com.verr1.controlcraft.content.gui.widgets.FormattedLabel;
 import com.verr1.controlcraft.content.gui.widgets.SmallIconButton;
 import com.verr1.controlcraft.foundation.BlockEntityGetter;
-import com.verr1.controlcraft.foundation.api.SizedScreenElement;
+import com.verr1.controlcraft.content.gui.layouts.api.SizedScreenElement;
 import com.verr1.controlcraft.foundation.managers.ClientCameraManager;
 import com.verr1.controlcraft.foundation.type.descriptive.UIContents;
 import com.verr1.controlcraft.registry.ControlCraftGuiTextures;

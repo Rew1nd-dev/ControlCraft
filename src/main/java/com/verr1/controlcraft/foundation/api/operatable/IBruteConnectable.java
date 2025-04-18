@@ -1,4 +1,4 @@
-package com.verr1.controlcraft.foundation.api;
+package com.verr1.controlcraft.foundation.api.operatable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

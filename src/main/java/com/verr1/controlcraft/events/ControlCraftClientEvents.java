@@ -18,8 +18,8 @@ public class ControlCraftClientEvents {
 
     @SubscribeEvent
     public static void onTick(TickEvent.ClientTickEvent event){
-        ControlCraftClient.CLIENT_DEFERRAL_EXECUTOR.tick();
-        ControlCraftClient.CLIENT_INTERVAL_EXECUTOR.tick();
+        ControlCraftClient.CLIENT_EXECUTOR.tick();
+        // ControlCraftClient.CLIENT_INTERVAL_EXECUTOR.tick();
         ControlCraftClient.CLIENT_WAND_HANDLER.tick();
         ClientCameraManager.tick();
     }

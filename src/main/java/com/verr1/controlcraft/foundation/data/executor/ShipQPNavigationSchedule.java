@@ -1,7 +1,6 @@
 package com.verr1.controlcraft.foundation.data.executor;
 
 import com.verr1.controlcraft.content.valkyrienskies.attachments.QueueForceInducer;
-import com.verr1.controlcraft.foundation.api.IntervalRunnable;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
 import com.verr1.controlcraft.utils.MathUtils;
 import com.verr1.controlcraft.utils.VSGetterUtils;
@@ -11,9 +10,7 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
 
-public class ShipQPNavigationSchedule implements IntervalRunnable {
-    protected int cyclesRemained = 0;
-
+public class ShipQPNavigationSchedule extends IntervalExecutable {
 
     protected WorldBlockPos shipPos;
 
@@ -46,41 +43,12 @@ public class ShipQPNavigationSchedule implements IntervalRunnable {
     protected double MAX_INTEGRAL = 10;
 
     public ShipQPNavigationSchedule(WorldBlockPos levelPos, Quaterniond quaterniond, Vector3d vector3d, int timeBeforeExpired) {
+        super(() -> {}, 1, timeBeforeExpired * 20);
         this.shipPos = levelPos;
-        this.cyclesRemained = (int)(timeBeforeExpired / ts);
         this.q_tar = quaterniond;
         this.p_tar = vector3d;
     }
 
-    @Override
-    public int getCyclesRemained() {
-        return cyclesRemained;
-    }
-
-    @Override
-    public int getIntervalTicks() {
-        // always run per tick
-        return -1;
-    }
-
-    @Override
-    public void reset() {
-
-    }
-
-    @Override
-    public void tickDown() {
-
-    }
-
-    @Override
-    public void cycleDown() {
-        cyclesRemained--;
-    }
-
-    @Override
-    public void onExpire() {
-    }
 
     public ShipQPNavigationSchedule setPID(double p, double i, double d, double MAX_INTEGRAL){
         this.p = p;
@@ -105,6 +73,15 @@ public class ShipQPNavigationSchedule implements IntervalRunnable {
         Vector3dc accel_d = new Vector3d(q_d.x(), q_d.y(), q_d.z()).mul(-2 / ts).mul(d);
 
         return new Vector3d(accel_p).add(accel_d).mul(inertia * Math.pow(scale, 5));
+    }
+
+    @Override
+    public void onRemove() {
+        onExpired();
+    }
+
+    public void onExpired(){
+
     }
 
     @Override

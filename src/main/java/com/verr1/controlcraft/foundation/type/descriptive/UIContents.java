@@ -40,6 +40,11 @@ public enum UIContents implements Descriptive<UIContents> {
     CAMERA_LINK_DUMP(Component.literal("Camera Dump"), literals("Dump Camera Link")),
     CAMERA_LINK_RESET(Component.literal("Camera Reset"), literals("Dump All Camera Link")),
     CAMERA_LINK_VALIDATE(Component.literal("Camera Validate"), literals("Dump Unloaded Or Removed Camera Link")),
+
+    ASSEMBLY(Component.literal("Assembly"), literals("Assemble Contraption or Ship")),
+    DISASSEMBLY(Component.literal("Dis Assembly"), literals("Disassemble Contraption or Ship")),
+    LOCK(Component.literal("Lock"), literals("Lock The Device")),
+    UNLOCK(Component.literal("Unlock"), literals("Unlock The Device")),
     ;
 
 

@@ -101,9 +101,10 @@ public class SpinalyzerBlockEntity extends OnShipBlockEntity {
     }
 
 
+
     @Override
-    public void tickServer() {
-        super.tickServer();
+    public void lazyTickServer() {
+        super.lazyTickServer();
         syncAttachInducer();
     }
 
@@ -112,9 +113,9 @@ public class SpinalyzerBlockEntity extends OnShipBlockEntity {
         Optional
             .ofNullable(getLoadedServerShip())
             .map(Observer::getOrCreate)
-            .ifPresent(inducer -> inducer.aliveOrCreate(
+            .ifPresent(inducer -> inducer.replace(
                 WorldBlockPos.of(level, getBlockPos()),
-                () ->  new ExpirableListener<>(sp -> Optional.ofNullable(peripheral).ifPresent(p -> p.queueEvent(sp)), 10)
+                new ExpirableListener<>(sp -> Optional.ofNullable(peripheral).ifPresent(p -> p.queueEvent(sp)), 60)
             ));
     }
 }

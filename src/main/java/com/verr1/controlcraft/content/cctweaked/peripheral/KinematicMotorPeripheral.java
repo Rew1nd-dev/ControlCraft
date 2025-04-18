@@ -1,6 +1,5 @@
 package com.verr1.controlcraft.content.cctweaked.peripheral;
 
-import com.verr1.controlcraft.content.blocks.motor.AbstractDynamicMotor;
 import com.verr1.controlcraft.content.blocks.motor.AbstractKinematicMotor;
 import com.verr1.controlcraft.utils.CCUtils;
 import com.verr1.controlcraft.utils.VSMathUtils;
@@ -56,8 +55,8 @@ public class KinematicMotorPeripheral extends AbstractAttachedPeripheral<Abstrac
 
     @LuaFunction
     public final Map<String, Map<String, Object>> getPhysics(){
-        Map<String, Object> own = getTarget().readSelf().getCCPhysics();
-        Map<String, Object> asm = getTarget().readComp().getCCPhysics();
+        Map<String, Object> own = getTarget().readSelf().toLua();
+        Map<String, Object> asm = getTarget().readComp().toLua();
         return Map.of(
                 "servomotor", own,
                 "companion", asm

@@ -1,5 +1,6 @@
-package com.verr1.controlcraft.foundation.api;
+package com.verr1.controlcraft.foundation.api.common;
 
+import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;

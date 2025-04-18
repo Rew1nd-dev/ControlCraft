@@ -1,31 +1,30 @@
 package com.verr1.controlcraft.foundation.data.executor;
 
-import com.verr1.controlcraft.foundation.api.Executable;
+import com.verr1.controlcraft.foundation.api.operatable.Executable;
+import org.jetbrains.annotations.NotNull;
 
 public class DeferralExecutable implements Executable {
-
-    private int deferralTicks = 0;
+    private int counter = 0;
     private Runnable task = () -> {};
 
-    public DeferralExecutable(int deferralTicks, Runnable task) {
-        this.deferralTicks = deferralTicks;
+    public DeferralExecutable(@NotNull Runnable task, int deferralTicks){
+        this.counter = deferralTicks;
         this.task = task;
     }
 
-
     @Override
     public boolean shouldRun() {
-        return deferralTicks == 0;
+        return counter == 0;
     }
 
     @Override
     public boolean shouldRemove() {
-        return deferralTicks < 0;
+        return counter <= 0;
     }
 
     @Override
     public void tick() {
-        if(deferralTicks > -1)deferralTicks--;
+        if(counter >= 0)counter--;
     }
 
     @Override

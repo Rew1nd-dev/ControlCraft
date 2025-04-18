@@ -2,13 +2,14 @@ package com.verr1.controlcraft.content.blocks.slider;
 
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.controlcraft.ControlCraft;
+import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.blocks.ShipConnectorBlockEntity;
 import com.verr1.controlcraft.content.blocks.motor.AbstractDynamicMotor;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.api.IBruteConnectable;
-import com.verr1.controlcraft.foundation.api.IConstraintHolder;
+import com.verr1.controlcraft.foundation.api.operatable.IBruteConnectable;
+import com.verr1.controlcraft.foundation.api.operatable.IConstraintHolder;
 import com.verr1.controlcraft.foundation.data.ShipPhysics;
 import com.verr1.controlcraft.foundation.data.constraint.ConnectContext;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
@@ -67,6 +68,8 @@ public abstract class AbstractSlider extends ShipConnectorBlockEntity implements
         buildRegistry(ANIMATED_DISTANCE).withBasic(SerializePort.of(this::getSlideDistance, this::setClientDistance, SerializeUtils.DOUBLE)).dispatchToSync().runtimeOnly().register();
         buildRegistry(AbstractDynamicMotor.SELF_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getSelfOffset()), this::setSelfOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
 
+        panel().registerUnit(SharedKeys.ASSEMBLE, this::assemble);
+        panel().registerUnit(SharedKeys.DISASSEMBLE, this::destroyConstraints);
 
         registerConstraintKey("slide");
         registerConstraintKey("orient");

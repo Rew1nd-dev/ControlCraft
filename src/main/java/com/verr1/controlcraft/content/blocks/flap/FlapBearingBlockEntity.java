@@ -8,23 +8,21 @@ import com.simibubi.create.content.contraptions.bearing.BearingBlock;
 import com.simibubi.create.content.contraptions.bearing.BearingContraption;
 import com.simibubi.create.content.contraptions.bearing.IBearingBlockEntity;
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
+import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
-import com.verr1.controlcraft.foundation.type.Side;
 import com.verr1.controlcraft.content.cctweaked.peripheral.FlapBearingPeripheral;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
-import com.verr1.controlcraft.foundation.api.ITerminalDevice;
+import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.WingContraption;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
-import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldSyncClientPacket;
 import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
@@ -41,11 +39,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
@@ -254,11 +249,16 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
     }
 
     @Override
-    public void setAngle(float forcedAngle) {
-        angle = MathUtils.angleReset(forcedAngle);
+    public void setAngle(float v) {
+        setAngle((double)v);
     }
 
-    public float getAngle() {
+
+    public void setAngle(double forcedAngle) {
+        angle = MathUtils.angleReset((float) forcedAngle);
+    }
+
+    public double getAngle() {
         return angle;
     }
 
@@ -336,11 +336,17 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
                 .withBasic(SerializePort.of(
                         this::getAngle,
                         this::setAngle,
-                        SerializeUtils.FLOAT
+                        SerializeUtils.DOUBLE
                 ))
+                .withClient(ClientBuffer.DOUBLE.get())
                 .dispatchToSync()
                 .runtimeOnly()
                 .register();
+
+        panel().registerUnit(SharedKeys.ASSEMBLE, this::assemble);
+
+        panel().registerUnit(SharedKeys.DISASSEMBLE, this::disassemble);
+
         /*
         registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
                         tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),

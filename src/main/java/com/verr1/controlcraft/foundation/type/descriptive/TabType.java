@@ -29,6 +29,15 @@ public enum TabType implements Descriptive<TabType> {
             literal("Controller")
     ),
 
+    REMOTE(
+            literals(
+                    "Remote Device Panel",
+                    "Ask Device To Do Something"
+                ),
+            literal("Remote")
+    ),
+
+
     ;
 
     TabType(List<Component> descriptions, Component name){

@@ -1,5 +1,8 @@
 package com.verr1.controlcraft.content.blocks.transmitter;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.verr1.controlcraft.foundation.data.PeripheralKey;
@@ -23,6 +26,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class TransmitterBlockEntity extends SmartBlockEntity {
 
@@ -30,6 +36,21 @@ public class TransmitterBlockEntity extends SmartBlockEntity {
 
     private TransmitterPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
+
+
+    private final LoadingCache<BlockPos, Optional<ReceiverBlockEntity>> cache = CacheBuilder.newBuilder()
+                    .maximumSize(20)
+                    .expireAfterWrite(20, TimeUnit.MILLISECONDS)
+                    .build(
+                            new CacheLoader<>() {
+                                @Override
+                                public @NotNull Optional<ReceiverBlockEntity> load(@NotNull BlockPos pos) throws Exception {
+                                    return Optional.ofNullable(getLevel())
+                                            .map(level -> level.getExistingBlockEntity(pos))
+                                            .filter(te -> te instanceof ReceiverBlockEntity)
+                                            .map(te -> (ReceiverBlockEntity) te);
+                                }
+                            });
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -57,15 +78,14 @@ public class TransmitterBlockEntity extends SmartBlockEntity {
             ILuaContext context,
             String peripheralName,
             String methodName,
-            IArguments args) throws LuaException
-    {
+            IArguments args) throws LuaException, ExecutionException {
 
         BlockPos peripheralPos = NetworkManager.getRegisteredPeripheralPos(new PeripheralKey(peripheralName, currentProtocol));
         if(peripheralPos == null)return MethodResult.of(null, "Receiver Not Registered");
         if(getLevel() == null)return MethodResult.of(null, "Level Is Null");
-        BlockEntity receiver = getLevel().getExistingBlockEntity(peripheralPos);
-        if(!(receiver instanceof ReceiverBlockEntity))return MethodResult.of(null, "Peripheral Is Not A Receiver");
-        return ((ReceiverBlockEntity)receiver)
+        ReceiverBlockEntity receiver = cache.get(peripheralPos).orElse(null);
+        if(receiver == null)return MethodResult.of(null, "Peripheral Is Not A Receiver");
+        return receiver
                     .callPeripheral(
                             access,
                             context,

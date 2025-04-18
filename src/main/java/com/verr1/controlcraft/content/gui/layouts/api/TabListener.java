@@ -19,6 +19,8 @@ public interface TabListener{
 
     void onAddRenderable(Collection<AbstractWidget> toAdd);
 
+    default void onClose(){}
+
     record Message(String message){
         public static Message PRE_APPLY = new Message("pre_apply");
         public static Message POST_APPLY = new Message("post_apply");

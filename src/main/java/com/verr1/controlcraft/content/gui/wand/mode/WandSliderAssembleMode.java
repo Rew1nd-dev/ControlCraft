@@ -2,7 +2,7 @@ package com.verr1.controlcraft.content.gui.wand.mode;
 
 import com.verr1.controlcraft.content.blocks.slider.DynamicSliderBlockEntity;
 import com.verr1.controlcraft.content.gui.wand.mode.base.WandAbstractTripleSelectionMode;
-import com.verr1.controlcraft.foundation.api.IBruteConnectable;
+import com.verr1.controlcraft.foundation.api.operatable.IBruteConnectable;
 import com.verr1.controlcraft.foundation.api.IWandMode;
 import com.verr1.controlcraft.foundation.data.WandSelection;
 import com.verr1.controlcraft.foundation.managers.ClientOutliner;

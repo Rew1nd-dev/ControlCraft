@@ -5,7 +5,7 @@ import com.jozufozu.flywheel.util.Color;
 import com.verr1.controlcraft.content.blocks.joints.RevoluteJointBlockEntity;
 import com.verr1.controlcraft.content.gui.wand.WandGUI;
 import com.verr1.controlcraft.content.gui.wand.mode.base.WandAbstractDualSelectionMode;
-import com.verr1.controlcraft.foundation.api.IBruteConnectable;
+import com.verr1.controlcraft.foundation.api.operatable.IBruteConnectable;
 import com.verr1.controlcraft.foundation.data.WandSelection;
 import com.verr1.controlcraft.foundation.managers.ClientOutliner;
 import com.verr1.controlcraft.foundation.network.packets.GenericServerPacket;

@@ -2,7 +2,6 @@ package com.verr1.controlcraft.content.blocks.camera;
 
 import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.utility.Color;
 import com.simibubi.create.foundation.utility.Components;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
@@ -13,7 +12,7 @@ import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.content.cctweaked.peripheral.CameraPeripheral;
 import com.verr1.controlcraft.foundation.api.IPacketHandler;
-import com.verr1.controlcraft.foundation.api.ITerminalDevice;
+import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.ShipHitResult;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
@@ -56,7 +55,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
@@ -124,6 +122,7 @@ public class CameraBlockEntity extends OnShipBlockEntity
     private LazyOptional<IPeripheral> peripheralCap;
 
     private double clipRange = 256;
+
     private double coneAngle = 0.4;
 
 
@@ -205,6 +204,10 @@ public class CameraBlockEntity extends OnShipBlockEntity
 
     public void setActiveDistanceSensor(boolean activeDistanceSensor) {
         isActiveDistanceSensor = activeDistanceSensor;
+    }
+
+    public void setConeAngle(double coneAngle) {
+        this.coneAngle = coneAngle;
     }
 
     public String getUserUUID() {

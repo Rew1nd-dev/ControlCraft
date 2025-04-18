@@ -62,8 +62,8 @@ public class SliderPeripheral extends AbstractAttachedPeripheral<DynamicSliderBl
 
     @LuaFunction
     public final Map<String, Map<String, Object>> getPhysics(){
-        Map<String, Object> own = getTarget().readSelf().getCCPhysics();
-        Map<String, Object> asm = getTarget().readComp().getCCPhysics();
+        Map<String, Object> own = getTarget().readSelf().toLua();
+        Map<String, Object> asm = getTarget().readComp().toLua();
         return Map.of(
                 "slider", own,
                 "companion", asm

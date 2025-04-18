@@ -1,10 +1,7 @@
 package com.verr1.controlcraft.content.gui.widgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.simibubi.create.foundation.gui.AllGuiTextures;
-import com.simibubi.create.foundation.gui.element.ScreenElement;
 import com.simibubi.create.foundation.gui.widget.IconButton;
-import com.verr1.controlcraft.foundation.api.SizedScreenElement;
+import com.verr1.controlcraft.content.gui.layouts.api.SizedScreenElement;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 

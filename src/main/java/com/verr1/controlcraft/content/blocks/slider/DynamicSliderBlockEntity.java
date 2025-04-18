@@ -3,7 +3,10 @@ package com.verr1.controlcraft.content.blocks.slider;
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.verr1.controlcraft.Config;
 import com.verr1.controlcraft.ControlCraftServer;
+import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.DynamicSliderForceInducer;
+import com.verr1.controlcraft.foundation.api.delegate.IControllerProvider;
+import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
@@ -171,7 +174,7 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
             }};
 
         if(level == null || level.isClientSide)return;
-        ControlCraftServer.SERVER_DEFERRAL_EXECUTOR.executeLater(task, 1);
+        ControlCraftServer.SERVER_EXECUTOR.executeLater(task, 1);
         setChanged();
     }
 
@@ -349,47 +352,9 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
                 .runtimeOnly()
                 .register();
 
-        /*
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> cheatMode.name(), n -> cheatMode = CheatMode.valueOf(n.toUpperCase()), SerializeUtils.STRING, SharedKeys.CHEAT_MODE), Side.SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> targetMode.name(), n -> targetMode = TargetMode.valueOf(n.toUpperCase()), SerializeUtils.STRING, SharedKeys.TARGET_MODE), Side.SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> lockMode.name(), n -> lockMode = LockMode.valueOf(n.toUpperCase()), SerializeUtils.STRING, SharedKeys.LOCK_MODE), Side.SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::isLocked, bl -> isLocked = bl, SerializeUtils.BOOLEAN, SharedKeys.IS_LOCKED), Side.SHARED);
-
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),
-                        tag -> tag.put("fields", ITerminalDevice.super.serialize()),
-                        FIELD),
-                Side.SHARED
-        );
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> getController().deserialize(tag.getCompound("controller")),
-                        tag -> tag.put("controller", getController().serialize()),
-                        SharedKeys.CONTROLLER),
-                Side.SHARED
-        );
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> getController().setTarget(tag.getDouble("controller_target")),
-                        tag -> tag.putDouble("controller_target", getController().getTarget()),
-                        SharedKeys.TARGET),
-                Side.SHARED
-        );
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> getController().overrideError(tag.getDouble("controller_value")),
-                        tag -> tag.putDouble("controller_value", getController().getValue()),
-                        SharedKeys.VALUE),
-                Side.SHARED
-        );
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        $ -> {if(targetMode == TargetMode.VELOCITY)getController().setTarget(0);},
-                        $ -> {},
-                        SharedKeys.TARGET),
-                Side.SERVER_ONLY
-        );
-        * */
-
-
-
-
+        panel().registerUnit(SharedKeys.LOCK, this::tryLock);
+        panel().registerUnit(SharedKeys.UNLOCK, this::tryUnlock);
+        panel().registerUnit(SharedKeys.DISASSEMBLE, this::destroyConstraints);
         registerConstraintKey("fix");
 
 

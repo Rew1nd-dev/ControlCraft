@@ -1,4 +1,4 @@
-package com.verr1.controlcraft.foundation.api;
+package com.verr1.controlcraft.foundation.api.delegate;
 
 import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Couple;

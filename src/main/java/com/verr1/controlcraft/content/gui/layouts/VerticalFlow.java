@@ -3,9 +3,8 @@ package com.verr1.controlcraft.content.gui.layouts;
 import com.verr1.controlcraft.content.blocks.NetworkBlockEntity;
 import com.verr1.controlcraft.content.gui.factory.GenericUIFactory;
 import com.verr1.controlcraft.content.gui.layouts.api.SwitchableTab;
-import com.verr1.controlcraft.content.gui.layouts.api.TabListener;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
-import com.verr1.controlcraft.foundation.data.executor.ExpirableConditionRunnable;
+import com.verr1.controlcraft.foundation.data.executor.ConditionExecutable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -24,7 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static com.verr1.controlcraft.ControlCraftClient.CLIENT_DEFERRAL_EXECUTOR;
+import static com.verr1.controlcraft.ControlCraftClient.CLIENT_EXECUTOR;
+
 
 public class VerticalFlow implements SwitchableTab {
     private final GridLayout verticalLayout = new GridLayout();
@@ -66,7 +66,7 @@ public class VerticalFlow implements SwitchableTab {
                     verticalLayout.rowSpacing(4);
                     verticalLayout.arrangeElements();
                     debug_init_id++;
-                    var task = new ExpirableConditionRunnable
+                    var task = new ConditionExecutable
                             .builder(() -> map.values().forEach(NetworkUIPort::readToLayout))
                             .withCondition(() -> !be.isAnyDirty(keys))
                             .withExpirationTicks(40)
@@ -74,7 +74,7 @@ public class VerticalFlow implements SwitchableTab {
                                     () -> p.sendSystemMessage(Component.literal("Block Entity Data Failed To Synced " + debug_init_id))
                             )
                             .build();
-                    CLIENT_DEFERRAL_EXECUTOR.executeLater(task);
+                    CLIENT_EXECUTOR.execute(task);
                 },
                 () -> p.sendSystemMessage(Component.literal("Block Entity Not Found !!!"))
         );

@@ -1,4 +1,4 @@
-package com.verr1.controlcraft.foundation.api;
+package com.verr1.controlcraft.foundation.api.operatable;
 
 import com.verr1.controlcraft.foundation.type.JointLevel;
 

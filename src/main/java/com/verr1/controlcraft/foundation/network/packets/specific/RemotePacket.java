@@ -1,0 +1,46 @@
+package com.verr1.controlcraft.foundation.network.packets.specific;
+
+import com.simibubi.create.foundation.networking.SimplePacketBase;
+import com.verr1.controlcraft.foundation.api.delegate.IRemoteDevice;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
+
+import java.util.Optional;
+
+public class RemotePacket extends SimplePacketBase {
+    private final BlockPos pos;
+    private final CompoundTag tag;
+
+    public RemotePacket(BlockPos pos, CompoundTag tag) {
+        this.tag = tag;
+        this.pos = pos;
+    }
+
+    public RemotePacket(FriendlyByteBuf buf) {
+        tag = buf.readNbt();
+        pos = buf.readBlockPos();
+    }
+
+    @Override
+    public void write(FriendlyByteBuf friendlyByteBuf) {
+        friendlyByteBuf.writeNbt(tag);
+        friendlyByteBuf.writeBlockPos(pos);
+    }
+
+    @Override
+    public boolean handle(NetworkEvent.Context context) {
+        context.enqueueWork(()->
+                Optional
+                        .ofNullable(context.getSender())
+                        .map(ServerPlayer::serverLevel)
+                        .map(level -> level.getBlockEntity(pos))
+                        .filter(IRemoteDevice.class::isInstance)
+                        .map(IRemoteDevice.class::cast)
+                        .map(IRemoteDevice::panel)
+                        .ifPresent(syncable -> syncable.receive(tag)));
+        return true;
+    }
+}

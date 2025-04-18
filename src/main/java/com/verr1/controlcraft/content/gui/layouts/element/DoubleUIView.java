@@ -34,4 +34,13 @@ public class DoubleUIView extends BasicUIView<Double>{
         this(boundPos, key, label, d -> Component.literal(String.format("%7f", d)));
     }
 
+    public static DoubleUIView of(
+            BlockPos boundPos,
+            NetworkKey key,
+            LabelProvider label,
+            Function<Double, Double> convertIn
+    ) {
+        return new DoubleUIView(boundPos, key, label, d -> Component.literal(String.format("%7f", convertIn.apply(d))));
+    }
+
 }

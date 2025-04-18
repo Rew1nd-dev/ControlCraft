@@ -143,8 +143,12 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
 
 
     public void resetNetworkRegistry(PeripheralKey newKey){
-        if(level == null)return;
+        if(level == null){
+            ControlCraft.LOGGER.error("trying to register network key when level is null !");
+            return;
+        }
         if(level.isClientSide) {
+            ControlCraft.LOGGER.error("trying to register network key in client side !");
             return;
         }
         if(Objects.equals(newKey.Name(), ""))return;
@@ -180,7 +184,7 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
 
 
         buildRegistry(PERIPHERAL).withBasic(CompoundTagPort.of(
-                () -> networkKey.serialize(),
+                () -> getNetworkKey().serialize(),
                 tag -> enqueueTask(() -> resetNetworkRegistry(PeripheralKey.deserialize(tag)))
         )).withClient(new ClientBuffer<>(SerializeUtils.of(PeripheralKey::serialize, PeripheralKey::deserialize), PeripheralKey.class)).register();
 
