@@ -1,7 +1,7 @@
 package com.verr1.controlcraft.content.gui.layouts.element;
 
 import com.simibubi.create.foundation.gui.widget.Label;
-import com.verr1.controlcraft.content.blocks.receiver.ReceiverBlockEntity;
+import com.verr1.controlcraft.content.blocks.receiver.PeripheralInterfaceBlockEntity;
 import com.verr1.controlcraft.content.gui.layouts.api.TitleLabelProvider;
 import com.verr1.controlcraft.content.gui.widgets.FormattedLabel;
 import com.verr1.controlcraft.foundation.data.PeripheralKey;
@@ -40,7 +40,7 @@ public class PeripheralKeyUIField extends TypedUIPort<PeripheralKey> implements 
     public PeripheralKeyUIField(BlockPos boundPos) {
         super(
                 boundPos,
-                ReceiverBlockEntity.PERIPHERAL,
+                PeripheralInterfaceBlockEntity.PERIPHERAL,
                 PeripheralKey.class,
                 PeripheralKey.NULL
         );

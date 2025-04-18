@@ -1,6 +1,7 @@
 package com.verr1.controlcraft.content.blocks.anchor;
 
 
+import com.verr1.controlcraft.content.valkyrienskies.attachments.AnchorForceInducer;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
@@ -130,8 +131,8 @@ public class AnchorBlockEntity extends OnShipBlockEntity
         if(level != null && level.isClientSide)return;
         Optional
             .ofNullable(getLoadedServerShip())
-            .map(AnchorForceInducer_::getOrCreate)
-            .ifPresent(inducer -> inducer.alive(WorldBlockPos.of(level, getBlockPos())));
+            .map(AnchorForceInducer::getOrCreate)
+            .ifPresent(inducer -> inducer.replace(WorldBlockPos.of(level, getBlockPos()), this::getLogicalAnchor));
     }
 
     public void displayScreen(ServerPlayer player){

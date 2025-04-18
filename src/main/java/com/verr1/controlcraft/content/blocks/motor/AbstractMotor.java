@@ -40,16 +40,15 @@ import java.lang.Math;
 import java.util.List;
 import java.util.Optional;
 
+import static com.verr1.controlcraft.content.blocks.SharedKeys.CONNECT_CONTEXT;
 import static com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies.toJOML;
 import static com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies.toMinecraft;
 
 public abstract class AbstractMotor extends ShipConnectorBlockEntity implements IBruteConnectable
 {
-    public static final NetworkKey SELF_OFFSET = NetworkKey.create("self_offset");
-    public static final NetworkKey COMP_OFFSET = NetworkKey.create("comp_offset");
     public static final NetworkKey ANIMATED_ANGLE = NetworkKey.create("animated_angle");
 
-    public static final NetworkKey CONNECT_CONTEXT = NetworkKey.create("connect_context");
+    // public static final NetworkKey CONNECT_CONTEXT = NetworkKey.create("connect_context");
 
 
     protected float clientAngle = 0;
@@ -65,8 +64,8 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
         // registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getOffset, this::setOffset, SerializeUtils.VECTOR3DC, OFFSET), Side.SHARED);
 
         buildRegistry(ANIMATED_ANGLE).withBasic(SerializePort.of(this::getServoAngle, this::setClientAngle, SerializeUtils.DOUBLE)).dispatchToSync().runtimeOnly().register();
-        buildRegistry(SELF_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getSelfOffset()), this::setSelfOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).dispatchToSync().register();
-        buildRegistry(COMP_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getCompOffset()), this::setCompOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
+        buildRegistry(SharedKeys.SELF_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getSelfOffset()), this::setSelfOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).dispatchToSync().register();
+        buildRegistry(SharedKeys.COMP_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getCompOffset()), this::setCompOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
         buildRegistry(CONNECT_CONTEXT).withBasic(SerializePort.of(() -> context, ctx -> context = ctx, SerializeUtils.CONNECT_CONTEXT)).register();
 
 
@@ -323,7 +322,7 @@ public abstract class AbstractMotor extends ShipConnectorBlockEntity implements 
     @Override
     public void tickServer() {
         super.tickServer();
-        syncForNear(true, ANIMATED_ANGLE, SELF_OFFSET);
+        syncForNear(true, ANIMATED_ANGLE, SharedKeys.SELF_OFFSET);
         // syncClientAnimation();
     }
 

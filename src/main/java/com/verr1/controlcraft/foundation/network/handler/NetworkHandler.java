@@ -105,7 +105,7 @@ public class NetworkHandler {
         );
     }
 
-    protected Registry buildRegistry(NetworkKey key){
+    public Registry buildRegistry(NetworkKey key){
         return new Registry(key);
     }
 
@@ -306,7 +306,7 @@ public class NetworkHandler {
         simplex.put(key, new SymmetricPort(server));
     }
 
-    protected class Registry {
+    public class Registry {
         Slot<CompoundTag> server = Slot.createEmpty(CompoundTag.class);
         ClientBuffer<?> client = null;
         NetworkKey key;

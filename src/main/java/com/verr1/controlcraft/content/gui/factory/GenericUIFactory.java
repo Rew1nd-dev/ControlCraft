@@ -5,10 +5,8 @@ import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.blocks.anchor.AnchorBlockEntity;
 import com.verr1.controlcraft.content.blocks.camera.CameraBlockEntity;
 import com.verr1.controlcraft.content.blocks.jet.JetBlockEntity;
-import com.verr1.controlcraft.content.blocks.motor.AbstractDynamicMotor;
-import com.verr1.controlcraft.content.blocks.motor.AbstractMotor;
 import com.verr1.controlcraft.content.blocks.propeller.PropellerBlockEntity;
-import com.verr1.controlcraft.content.blocks.receiver.ReceiverBlockEntity;
+import com.verr1.controlcraft.content.blocks.receiver.PeripheralInterfaceBlockEntity;
 import com.verr1.controlcraft.content.blocks.spatial.SpatialAnchorBlockEntity;
 import com.verr1.controlcraft.content.gui.layouts.element.*;
 import com.verr1.controlcraft.content.gui.layouts.VerticalFlow;
@@ -22,6 +20,7 @@ import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.type.descriptive.*;
 import com.verr1.controlcraft.registry.ControlCraftBlocks;
+import com.verr1.controlcraft.utils.MathUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -317,7 +316,11 @@ public class GenericUIFactory {
 
     public static GenericSettingScreen createDynamicMotorScreen(BlockPos boundPos, ItemStack stack){
 
-        var current_view = DoubleUIView.of(boundPos, SharedKeys.VALUE, Converter.convert(UIContents.CURRENT, Converter::viewStyle), Math::toDegrees);
+        var current_view = new DoubleUIView(
+                boundPos,
+                SharedKeys.VALUE,
+                Converter.convert(UIContents.CURRENT, Converter::viewStyle)
+        );  // , Math::toDegrees d -> MathUtils.clampDigit(d, 2)
 
         var lock_view = new BasicUIView<>(
                 boundPos,
@@ -329,7 +332,7 @@ public class GenericUIFactory {
                 $ -> false
         );
 
-        var target = new DoubleUIField(boundPos, SharedKeys.TARGET, Converter.convert(UIContents.TARGET, Converter::titleStyle)); //, Converter.combine(Math::toDegrees, d -> MathUtils.clampDigit(d, 2)), Math::toRadians
+        var target = new DoubleUIField(boundPos, SharedKeys.TARGET, Converter.convert(UIContents.TARGET, Converter::titleStyle), d -> MathUtils.clampDigit(d, 2), d -> d); //, Converter.combine(Math::toDegrees, d -> MathUtils.clampDigit(d, 2)), Math::toRadians
 
         var toggle_mode = new OptionUIField<>(boundPos, SharedKeys.TARGET_MODE, TargetMode.class, Converter.convert(UIContents.MODE, Converter::titleStyle));
 
@@ -337,8 +340,8 @@ public class GenericUIFactory {
 
         var toggle_lock_mode = new OptionUIField<>(boundPos, SharedKeys.LOCK_MODE, LockMode.class, Converter.convert(UIContents.AUTO_LOCK, Converter::titleStyle));
 
-        var offset_self = new Vector3dUIField(boundPos, AbstractDynamicMotor.SELF_OFFSET, Converter.convert(UIContents.SELF_OFFSET, Converter::titleStyle), 25);
-        var offset_comp = new Vector3dUIField(boundPos, AbstractDynamicMotor.COMP_OFFSET, Converter.convert(UIContents.COMP_OFFSET, Converter::titleStyle), 25);
+        var offset_self = new Vector3dUIField(boundPos, SharedKeys.SELF_OFFSET, Converter.convert(UIContents.SELF_OFFSET, Converter::titleStyle), 25);
+        var offset_comp = new Vector3dUIField(boundPos, SharedKeys.COMP_OFFSET, Converter.convert(UIContents.COMP_OFFSET, Converter::titleStyle), 25);
 
 
         var asm = new UnitUIPanel(
@@ -387,8 +390,8 @@ public class GenericUIFactory {
                                 .withPort(SharedKeys.VALUE, current_view)
                                 .withPort(SharedKeys.IS_LOCKED, lock_view)
                                 .withPort(SharedKeys.TARGET, target)
-                                .withPort(AbstractDynamicMotor.SELF_OFFSET, offset_self)
-                                .withPort(AbstractDynamicMotor.COMP_OFFSET, offset_comp)
+                                .withPort(SharedKeys.SELF_OFFSET, offset_self)
+                                .withPort(SharedKeys.COMP_OFFSET, offset_comp)
                                 .withPort(SharedKeys.TARGET_MODE, toggle_mode)
                                 .withPort(SharedKeys.CHEAT_MODE, toggle_cheat)
                                 .withPort(SharedKeys.LOCK_MODE, toggle_lock_mode)
@@ -431,11 +434,11 @@ public class GenericUIFactory {
                 $ -> false
         );
 
-        var target = new DoubleUIField(boundPos, SharedKeys.TARGET, Converter.convert(UIContents.TARGET, Converter::titleStyle));
+        var target = new DoubleUIField(boundPos, SharedKeys.TARGET, Converter.convert(UIContents.TARGET, Converter::titleStyle), d -> MathUtils.clampDigit(d, 2), d -> d);
 
         var toggle_mode = new OptionUIField<>(boundPos, SharedKeys.TARGET_MODE, TargetMode.class, Converter.convert(UIContents.MODE, Converter::titleStyle));
 
-        var toggle_cheat = new OptionUIField<>(boundPos, SharedKeys.CHEAT_MODE, CheatMode.class, Converter.convert(UIContents.CHEAT, Converter::titleStyle));
+        var toggle_cheat = new OptionUIField<>(boundPos, SharedKeys.CHEAT_MODE, CheatMode.class, new CheatMode[]{CheatMode.NONE, CheatMode.NO_REPULSE} , Converter.convert(UIContents.CHEAT, Converter::titleStyle));
 
         var toggle_lock_mode = new OptionUIField<>(boundPos, SharedKeys.LOCK_MODE, LockMode.class, Converter.convert(UIContents.AUTO_LOCK, Converter::titleStyle));
 
@@ -463,11 +466,19 @@ public class GenericUIFactory {
                 Converter.convert(UIContents.UNLOCK, Converter::titleStyle)
         );
 
+        var disasm = new UnitUIPanel(
+                boundPos,
+                SharedKeys.DISASSEMBLE,
+                Double.class,
+                0.0,
+                Converter.convert(UIContents.DISASSEMBLY, Converter::titleStyle)
+        );
+
         Runnable alignLabels = () -> {
             Converter.alignLabel(current_view, lock_view, target);
             Converter.alignLabel(toggle_mode, toggle_cheat, toggle_lock_mode);
             Converter.alignLabel(toggle_mode.valueLabel(), toggle_cheat.valueLabel(), toggle_lock_mode.valueLabel());
-            Converter.alignLabel(lock, unlock, asm);
+            Converter.alignLabel(lock, unlock, asm, disasm);
         };
         return new GenericSettingScreen.builder(boundPos)
                 .withRenderedStack(stack)
@@ -497,6 +508,7 @@ public class GenericUIFactory {
                                 .withPort(SharedKeys.ASSEMBLE, asm)
                                 .withPort(SharedKeys.LOCK, lock)
                                 .withPort(SharedKeys.UNLOCK, unlock)
+                                .withPort(SharedKeys.DISASSEMBLE, disasm)
                                 .withPreDoLayout(alignLabels)
                                 .build()
                 )
@@ -509,7 +521,7 @@ public class GenericUIFactory {
     public static GenericSettingScreen createPeripheralInterfaceScreen(BlockPos boundPos){
         var type_view = new BasicUIView<>(
                 boundPos,
-                ReceiverBlockEntity.PERIPHERAL_TYPE,
+                PeripheralInterfaceBlockEntity.PERIPHERAL_TYPE,
                 String.class,
                 "Not Attached",
                 Converter.convert(UIContents.TYPE, Converter::viewStyle),
@@ -527,8 +539,8 @@ public class GenericUIFactory {
                 .withTab(
                         GENERIC_SETTING_TAB,
                         new VerticalFlow.builder(boundPos)
-                                .withPort(ReceiverBlockEntity.PERIPHERAL_TYPE, type_view)
-                                .withPort(ReceiverBlockEntity.PERIPHERAL, key_field)
+                                .withPort(PeripheralInterfaceBlockEntity.PERIPHERAL_TYPE, type_view)
+                                .withPort(PeripheralInterfaceBlockEntity.PERIPHERAL, key_field)
                                 .build()
                 )
                 .build();
@@ -581,9 +593,9 @@ public class GenericUIFactory {
 
         var target_field = new DoubleUIField(boundPos, SharedKeys.TARGET, Converter.convert(UIContents.TARGET, Converter::titleStyle));
 
-        var self_offset = new Vector3dUIField(boundPos, AbstractMotor.SELF_OFFSET, Converter.convert(UIContents.SELF_OFFSET, Converter::titleStyle), 25);
+        var self_offset = new Vector3dUIField(boundPos, SharedKeys.SELF_OFFSET, Converter.convert(UIContents.SELF_OFFSET, Converter::titleStyle), 25);
 
-        var comp_offset = new Vector3dUIField(boundPos, AbstractMotor.COMP_OFFSET, Converter.convert(UIContents.COMP_OFFSET, Converter::titleStyle), 25);
+        var comp_offset = new Vector3dUIField(boundPos, SharedKeys.COMP_OFFSET, Converter.convert(UIContents.COMP_OFFSET, Converter::titleStyle), 25);
 
 
         var compliance_field = new DoubleUIField(
@@ -602,7 +614,18 @@ public class GenericUIFactory {
                 Converter.convert(UIContents.ASSEMBLY, Converter::titleStyle)
         );
 
-        Runnable alignLabels = () -> Converter.alignLabel(current_view, target_field, compliance_field, toggle_mode);
+        var disasm = new UnitUIPanel(
+                boundPos,
+                SharedKeys.DISASSEMBLE,
+                Double.class,
+                0.0,
+                Converter.convert(UIContents.DISASSEMBLY, Converter::titleStyle)
+        );
+
+        Runnable alignLabels = () -> {
+            Converter.alignLabel(current_view, target_field, compliance_field, toggle_mode);
+            Converter.alignLabel(asm, disasm);
+        };
 
         return new GenericSettingScreen.builder(boundPos)
                 .withTab(
@@ -611,8 +634,8 @@ public class GenericUIFactory {
                                 .withPort(SharedKeys.VALUE, current_view)
                                 .withPort(SharedKeys.TARGET, target_field)
                                 .withPort(SharedKeys.COMPLIANCE, compliance_field)
-                                .withPort(AbstractMotor.COMP_OFFSET, comp_offset)
-                                .withPort(AbstractMotor.SELF_OFFSET, self_offset)
+                                .withPort(SharedKeys.COMP_OFFSET, comp_offset)
+                                .withPort(SharedKeys.SELF_OFFSET, self_offset)
                                 .withPort(SharedKeys.TARGET_MODE, toggle_mode)
                                 .withPreDoLayout(alignLabels)
                                 .build()
@@ -625,6 +648,7 @@ public class GenericUIFactory {
                         REMOTE_TAB,
                         new VerticalFlow.builder(boundPos)
                                 .withPort(SharedKeys.ASSEMBLE, asm)
+                                .withPort(SharedKeys.DISASSEMBLE, disasm)
                                 .withPreDoLayout(alignLabels)
                                 .build()
                 )

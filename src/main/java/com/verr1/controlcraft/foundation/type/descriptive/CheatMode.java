@@ -13,14 +13,22 @@ public enum CheatMode implements Descriptive<CheatMode>
 {
     NONE(literals("No Cheats")),
     NO_REPULSE(literals("No Repulse Of Control Torque / Force")),
+    NO_GRAVITY(literals("Eliminate Loaded Ship Gravity")),
+    ALL(literals("All Cheats")),
     ;
 
-    CheatMode() {
-    }
 
     CheatMode(List<Component> description) {
         LangUtils.registerDefaultName(CheatMode.class, this, Component.literal(name()));
         LangUtils.registerDefaultDescription(CheatMode.class, this, description);
+    }
+
+    public boolean shouldEliminateGravity() {
+        return this == NO_GRAVITY || this == ALL;
+    }
+
+    public boolean shouldNoRepulse() {
+        return this == NO_REPULSE || this == ALL;
     }
 
     @Override

@@ -59,7 +59,12 @@ public class ClientCameraManager {
         if(LinkCameraPos == null)return;
         var p = new BlockBoundServerPacket.builder(LinkCameraPos, RegisteredPacketType.EXTEND_0)
                 .build();
-        ControlCraftPackets.getChannel().sendToServer(p);
+        try{
+            ControlCraftPackets.getChannel().sendToServer(p);
+        }catch (NullPointerException ignored){
+            // when players close game when they are in camera,
+            // it throws this exception because getConnection() is null
+        }
     }
 
 

@@ -21,4 +21,6 @@ public class SharedKeys {
     public static final NetworkKey DISASSEMBLE = NetworkKey.create("dis_asm");
     public static final NetworkKey LOCK = NetworkKey.create("lock");
     public static final NetworkKey UNLOCK = NetworkKey.create("unlock");
+    public static final NetworkKey SELF_OFFSET = NetworkKey.create("self_offset");
+    public static final NetworkKey COMP_OFFSET = NetworkKey.create("comp_offset");
 }

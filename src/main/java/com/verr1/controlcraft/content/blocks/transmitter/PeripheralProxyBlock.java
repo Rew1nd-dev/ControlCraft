@@ -16,10 +16,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import static com.verr1.controlcraft.registry.ControlCraftShapes.HALF_BOX_BASE;
 
-public class TransmitterBlock extends DirectionalBlock implements IBE<TransmitterBlockEntity> {
+public class PeripheralProxyBlock extends DirectionalBlock implements IBE<PeripheralProxyBlockEntity> {
     public static final String ID = "transmitter";
 
-    public TransmitterBlock(Properties p_52591_) {
+    public PeripheralProxyBlock(Properties p_52591_) {
         super(p_52591_);
     }
 
@@ -43,8 +43,8 @@ public class TransmitterBlock extends DirectionalBlock implements IBE<Transmitte
     }
 
     @Override
-    public Class<TransmitterBlockEntity> getBlockEntityClass() {
-        return TransmitterBlockEntity.class;
+    public Class<PeripheralProxyBlockEntity> getBlockEntityClass() {
+        return PeripheralProxyBlockEntity.class;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class TransmitterBlock extends DirectionalBlock implements IBE<Transmitte
     }
 
     @Override
-    public BlockEntityType<? extends TransmitterBlockEntity> getBlockEntityType() {
+    public BlockEntityType<? extends PeripheralProxyBlockEntity> getBlockEntityType() {
         return ControlCraftBlockEntities.TRANSMITTER_BLOCKENTITY.get();
     }
 }

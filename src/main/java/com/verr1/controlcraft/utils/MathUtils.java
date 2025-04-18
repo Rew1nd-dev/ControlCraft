@@ -1,5 +1,6 @@
 package com.verr1.controlcraft.utils;
 
+import net.minecraft.util.Mth;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.primitives.AABBd;
@@ -8,6 +9,9 @@ import org.joml.primitives.AABBdc;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.simibubi.create.content.kinetics.base.KineticBlockEntity.convertToAngular;
+import static com.simibubi.create.content.kinetics.base.KineticBlockEntity.convertToLinear;
+
 public class MathUtils {
 
     public static double clamp(double value, double min, double max) {
@@ -15,6 +19,7 @@ public class MathUtils {
     }
 
     public static double clamp(double value, double max) {
+        max = Math.abs(max);
         return clamp(value, -max, max);
     }
 
@@ -86,6 +91,21 @@ public class MathUtils {
         return radian;
     }
 
+    public static double toControlCraftAngular(double createSpeed){
+        return createSpeed / 60 * 2 * Math.PI;
+    }
+
+    public static double toCreateAngular(double controlcraftSpeed){
+        return controlcraftSpeed * 60 / (2 * Math.PI);
+    }
+
+    public static double toControlCraftLinear(double createSpeed){
+        return Mth.clamp(((float) createSpeed) / 512, -.49f, .49f) * 20;
+    }
+
+    public static double toCreateLinear(double controlcraftSpeed){
+        return 512 * ((float) Mth.clamp(controlcraftSpeed / 20f, -.49f, .49f));
+    }
 
     public static AABBd coverOf(List<Vector3dc> points){
         double minX = Double.POSITIVE_INFINITY;

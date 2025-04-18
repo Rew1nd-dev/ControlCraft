@@ -4,8 +4,10 @@ import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.verr1.controlcraft.Config;
 import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
+import com.verr1.controlcraft.content.create.DSliderKineticPeripheral;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.DynamicSliderForceInducer;
 import com.verr1.controlcraft.foundation.api.delegate.IControllerProvider;
+import com.verr1.controlcraft.foundation.api.delegate.IKineticDevice;
 import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
@@ -54,7 +56,7 @@ import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 // @SuppressWarnings("unused")
 public class DynamicSliderBlockEntity extends AbstractSlider implements
         IControllerProvider, IHaveGoggleInformation,
-        ITerminalDevice, IPacketHandler
+        ITerminalDevice, IPacketHandler, IKineticDevice
 {
 
 
@@ -118,6 +120,7 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
 
     private SliderPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
+    private final DSliderKineticPeripheral kineticPeripheral = new DSliderKineticPeripheral(this);
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @org.jetbrains.annotations.Nullable Direction side) {
@@ -169,9 +172,10 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
         Runnable task = () -> {if(targetMode == TargetMode.POSITION){
             controller.PID(DEFAULT_POSITION_MODE_PARAMS);
         }
-            if(targetMode == TargetMode.VELOCITY){
-                controller.PID(DEFAULT_VELOCITY_MODE_PARAMS);
-            }};
+
+        if(targetMode == TargetMode.VELOCITY){
+            controller.PID(DEFAULT_VELOCITY_MODE_PARAMS);
+        }};
 
         if(level == null || level.isClientSide)return;
         ControlCraftServer.SERVER_EXECUTOR.executeLater(task, 1);
@@ -395,6 +399,7 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
         lockCheck();
         syncAttachInducer();
         syncForNear(true, FIELD);
+        kineticPeripheral.tick();
     }
 
 
@@ -473,5 +478,10 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
     @Override
     public String name() {
         return "slider";
+    }
+
+    @Override
+    public IKineticPeripheral peripheral() {
+        return kineticPeripheral;
     }
 }

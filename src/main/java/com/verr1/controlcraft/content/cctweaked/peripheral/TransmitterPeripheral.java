@@ -1,7 +1,7 @@
 package com.verr1.controlcraft.content.cctweaked.peripheral;
 
 import com.verr1.controlcraft.ControlCraft;
-import com.verr1.controlcraft.content.blocks.transmitter.TransmitterBlockEntity;
+import com.verr1.controlcraft.content.blocks.transmitter.PeripheralProxyBlockEntity;
 import dan200.computercraft.api.lua.*;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -9,11 +9,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ExecutionException;
 
-public class TransmitterPeripheral extends AbstractAttachedPeripheral<TransmitterBlockEntity> {
+public class TransmitterPeripheral extends AbstractAttachedPeripheral<PeripheralProxyBlockEntity> {
 
 
-    public TransmitterPeripheral(TransmitterBlockEntity transmitterBlockEntity) {
-        super(transmitterBlockEntity);
+    public TransmitterPeripheral(PeripheralProxyBlockEntity peripheralProxyBlockEntity) {
+        super(peripheralProxyBlockEntity);
     }
 
 

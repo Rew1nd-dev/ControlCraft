@@ -12,6 +12,8 @@ import com.verr1.controlcraft.content.blocks.jet.JetBlockEntity;
 import com.verr1.controlcraft.content.blocks.jet.JetRudderBlock;
 import com.verr1.controlcraft.content.blocks.jet.JetRudderBlockEntity;
 import com.verr1.controlcraft.content.blocks.joints.*;
+import com.verr1.controlcraft.content.blocks.kinetic.KineticProxyBlock;
+import com.verr1.controlcraft.content.blocks.kinetic.KineticProxyBlockEntity;
 import com.verr1.controlcraft.content.blocks.loader.ChunkLoaderBlock;
 import com.verr1.controlcraft.content.blocks.loader.ChunkLoaderBlockEntity;
 import com.verr1.controlcraft.content.blocks.motor.*;
@@ -19,8 +21,8 @@ import com.verr1.controlcraft.content.blocks.propeller.PropellerBlock;
 import com.verr1.controlcraft.content.blocks.propeller.PropellerBlockEntity;
 import com.verr1.controlcraft.content.blocks.propeller.PropellerControllerBlock;
 import com.verr1.controlcraft.content.blocks.propeller.PropellerControllerBlockEntity;
-import com.verr1.controlcraft.content.blocks.receiver.ReceiverBlock;
-import com.verr1.controlcraft.content.blocks.receiver.ReceiverBlockEntity;
+import com.verr1.controlcraft.content.blocks.receiver.PeripheralInterfaceBlock;
+import com.verr1.controlcraft.content.blocks.receiver.PeripheralInterfaceBlockEntity;
 import com.verr1.controlcraft.content.blocks.slider.DynamicSliderBlock;
 import com.verr1.controlcraft.content.blocks.slider.DynamicSliderBlockEntity;
 import com.verr1.controlcraft.content.blocks.slider.KinematicSliderBlock;
@@ -31,8 +33,8 @@ import com.verr1.controlcraft.content.blocks.spinalyzer.SpinalyzerBlock;
 import com.verr1.controlcraft.content.blocks.spinalyzer.SpinalyzerBlockEntity;
 import com.verr1.controlcraft.content.blocks.terminal.TerminalBlock;
 import com.verr1.controlcraft.content.blocks.terminal.TerminalBlockEntity;
-import com.verr1.controlcraft.content.blocks.transmitter.TransmitterBlock;
-import com.verr1.controlcraft.content.blocks.transmitter.TransmitterBlockEntity;
+import com.verr1.controlcraft.content.blocks.transmitter.PeripheralProxyBlock;
+import com.verr1.controlcraft.content.blocks.transmitter.PeripheralProxyBlockEntity;
 import com.verr1.controlcraft.render.*;
 
 import static com.verr1.controlcraft.ControlCraft.REGISTRATE;
@@ -86,13 +88,13 @@ public class ControlCraftBlockEntities {
             .validBlock(ControlCraftBlocks.TERMINAL_BLOCK)
             .register();
 
-    public static final BlockEntityEntry<TransmitterBlockEntity> TRANSMITTER_BLOCKENTITY = REGISTRATE
-            .blockEntity(TransmitterBlock.ID, TransmitterBlockEntity::new)
+    public static final BlockEntityEntry<PeripheralProxyBlockEntity> TRANSMITTER_BLOCKENTITY = REGISTRATE
+            .blockEntity(PeripheralProxyBlock.ID, PeripheralProxyBlockEntity::new)
             .validBlock(ControlCraftBlocks.TRANSMITTER_BLOCK)
             .register();
 
-    public static final BlockEntityEntry<ReceiverBlockEntity> RECEIVER_BLOCKENTITY = REGISTRATE
-            .blockEntity(ReceiverBlock.ID, ReceiverBlockEntity::new)
+    public static final BlockEntityEntry<PeripheralInterfaceBlockEntity> RECEIVER_BLOCKENTITY = REGISTRATE
+            .blockEntity(PeripheralInterfaceBlock.ID, PeripheralInterfaceBlockEntity::new)
             .validBlock(ControlCraftBlocks.RECEIVER_BLOCK)
             .register();
 
@@ -159,6 +161,10 @@ public class ControlCraftBlockEntities {
             .renderer(()-> CameraRenderer::new)
             .register();
 
+    public static final BlockEntityEntry<KineticProxyBlockEntity> KINETIC_PROXY_BLOCKENTITY = REGISTRATE
+            .blockEntity(KineticProxyBlock.ID, KineticProxyBlockEntity::new)
+            .validBlock(ControlCraftBlocks.KINETIC_PROXY_BLOCK)
+            .register();
 
     public static void register(){
 

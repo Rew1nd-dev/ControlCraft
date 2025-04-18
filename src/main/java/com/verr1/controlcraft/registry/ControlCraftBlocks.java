@@ -12,6 +12,7 @@ import com.verr1.controlcraft.content.blocks.jet.JetRudderBlock;
 import com.verr1.controlcraft.content.blocks.joints.FreeJointBlock;
 import com.verr1.controlcraft.content.blocks.joints.PivotJointBlock;
 import com.verr1.controlcraft.content.blocks.joints.RevoluteJointBlock;
+import com.verr1.controlcraft.content.blocks.kinetic.KineticProxyBlock;
 import com.verr1.controlcraft.content.blocks.loader.ChunkLoaderBlock;
 import com.verr1.controlcraft.content.blocks.motor.KinematicJointMotorBlock;
 import com.verr1.controlcraft.content.blocks.motor.KinematicRevoluteMotorBlock;
@@ -19,14 +20,14 @@ import com.verr1.controlcraft.content.blocks.motor.DynamicJointMotorBlock;
 import com.verr1.controlcraft.content.blocks.motor.DynamicRevoluteMotorBlock;
 import com.verr1.controlcraft.content.blocks.propeller.PropellerBlock;
 import com.verr1.controlcraft.content.blocks.propeller.PropellerControllerBlock;
-import com.verr1.controlcraft.content.blocks.receiver.ReceiverBlock;
+import com.verr1.controlcraft.content.blocks.receiver.PeripheralInterfaceBlock;
 import com.verr1.controlcraft.content.blocks.slider.DynamicSliderBlock;
 import com.verr1.controlcraft.content.blocks.slider.KinematicSliderBlock;
 import com.verr1.controlcraft.content.blocks.spatial.SpatialAnchorBlock;
 import com.verr1.controlcraft.content.blocks.spatial.SpatialMovementBehavior;
 import com.verr1.controlcraft.content.blocks.spinalyzer.SpinalyzerBlock;
 import com.verr1.controlcraft.content.blocks.terminal.TerminalBlock;
-import com.verr1.controlcraft.content.blocks.transmitter.TransmitterBlock;
+import com.verr1.controlcraft.content.blocks.transmitter.PeripheralProxyBlock;
 import com.verr1.controlcraft.content.items.KinematicDeviceBlockItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.Rarity;
@@ -169,8 +170,8 @@ public class ControlCraftBlocks {
             .lang("Wireless Redstone Terminal")
             .register();
 
-    public static final BlockEntry<TransmitterBlock> TRANSMITTER_BLOCK = REGISTRATE
-            .block(TransmitterBlock.ID, TransmitterBlock::new)
+    public static final BlockEntry<PeripheralProxyBlock> TRANSMITTER_BLOCK = REGISTRATE
+            .block(PeripheralProxyBlock.ID, PeripheralProxyBlock::new)
             .initialProperties(SharedProperties::stone)
             .properties(p -> p.explosionResistance(32))
             .transform(TagGen.pickaxeOnly())
@@ -184,8 +185,8 @@ public class ControlCraftBlocks {
             .register();
 
 
-    public static final BlockEntry<ReceiverBlock> RECEIVER_BLOCK = REGISTRATE
-            .block(ReceiverBlock.ID, ReceiverBlock::new)
+    public static final BlockEntry<PeripheralInterfaceBlock> RECEIVER_BLOCK = REGISTRATE
+            .block(PeripheralInterfaceBlock.ID, PeripheralInterfaceBlock::new)
             .initialProperties(SharedProperties::stone)
             .properties(p -> p.explosionResistance(32))
             .transform(TagGen.pickaxeOnly())
@@ -361,6 +362,19 @@ public class ControlCraftBlocks {
             )
             .item()
             .properties(p -> p.rarity(Rarity.RARE))
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<KineticProxyBlock> KINETIC_PROXY_BLOCK = REGISTRATE
+            .block(KineticProxyBlock.ID, KineticProxyBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .item()
             .transform(customItemModel())
             .register();
 

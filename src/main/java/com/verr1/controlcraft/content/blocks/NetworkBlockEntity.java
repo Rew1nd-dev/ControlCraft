@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class NetworkBlockEntity extends SidedTickedBlockEntity implements IRemoteDevice, INetworkDelegated {
+public class NetworkBlockEntity extends SidedTickedBlockEntity implements IRemoteDevice {
 
     /*
     *  simplex channel: sync action raise from server, it's 
@@ -34,7 +34,7 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity implements IRemot
     * */
     private final RemotePanel panel = new RemotePanel();
 
-    private final NetworkHandler handler = new NetworkHandler(this);
+    private final NetworkHandler handler = null; // new NetworkHandler(this);
 
     private final HashMap<NetworkKey, AsymmetricPort> duplex = new HashMap<>();
     private final HashMap<NetworkKey, SymmetricPort> simplex = new HashMap<>();
@@ -211,9 +211,6 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity implements IRemot
     @Override
     protected void read(CompoundTag compound, boolean clientPacket) {
         super.read(compound, clientPacket);
-        /*
-        *
-        * */
         if(clientPacket)return;
         CompoundTag saveloads = compound.getCompound("saveloads");
         saveLoads.forEach((k, sidePort) -> {
@@ -257,7 +254,7 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity implements IRemot
         return panel;
     }
 
-    @Override
+    // @Override
     public NetworkHandler handler() {
         return handler;
     }

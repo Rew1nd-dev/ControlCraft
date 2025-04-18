@@ -1,10 +1,13 @@
 package com.verr1.controlcraft.content.blocks.motor;
 
+import com.verr1.controlcraft.content.create.KMotorKineticPeripheral;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.legacy.KinematicMotorForceInducer_;
 import com.verr1.controlcraft.content.valkyrienskies.controls.InducerControls;
 import com.verr1.controlcraft.content.valkyrienskies.transform.KinematicMotorTransformProvider;
 import com.verr1.controlcraft.content.valkyrienskies.transform.LerpedTransformProvider;
 import com.verr1.controlcraft.content.gui.layouts.api.IKinematicUIDevice;
+import com.verr1.controlcraft.foundation.api.IKineticPeripheral;
+import com.verr1.controlcraft.foundation.api.delegate.IKineticDevice;
 import com.verr1.controlcraft.foundation.data.GroundBodyShip;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
@@ -44,7 +47,7 @@ import java.util.Optional;
 import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 
 public abstract class AbstractKinematicMotor extends AbstractMotor implements
-        ITerminalDevice, IPacketHandler, IKinematicUIDevice
+        ITerminalDevice, IPacketHandler, IKinematicUIDevice, IKineticDevice
 {
     protected KinematicController controller = new KinematicController();
 
@@ -73,6 +76,12 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
 
     private KinematicMotorPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
+    private final KMotorKineticPeripheral kineticPeripheral = new KMotorKineticPeripheral(this);
+
+    @Override
+    public IKineticPeripheral peripheral() {
+        return kineticPeripheral;
+    }
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @org.jetbrains.annotations.Nullable Direction side) {
@@ -156,50 +165,7 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
                 )
                 .dispatchToSync()
                 .register();
-        /*
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(() -> compliance, c -> compliance = c, SerializeUtils.DOUBLE, SharedKeys.COMPLIANCE), Side.SHARED);
-        registerFieldReadWriter(
-                SerializeUtils.ReadWriter.of(
-                        () -> getTargetMode().name(),
-                        n -> setTargetMode(TargetMode.valueOf(n.toUpperCase())),
-                        SerializeUtils.STRING,
-                        SharedKeys.TARGET_MODE),
-                Side.SHARED);
-        registerFieldReadWriter(
-                SerializeUtils.ReadWriter.of(
-                        () -> context,
-                        ctx -> context = ctx,
-                        SerializeUtils.CONNECT_CONTEXT,
-                        SharedKeys.CONNECT_CONTEXT),
-                Side.SERVER_ONLY);
 
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),
-                        tag -> tag.put("fields", ITerminalDevice.super.serialize()),
-                        FIELD),
-                Side.SHARED
-        );
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> getController().deserialize(tag.getCompound("controller_target")),
-                        tag -> tag.put("controller_target", getController().serialize()),
-                        SharedKeys.TARGET),
-                Side.SHARED
-        );
-        // for kinematic device, target is actual value
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> getController().setTarget(tag.getDouble("controller")),
-                        tag -> tag.putDouble("controller", getController().getTarget()),
-                        SharedKeys.VALUE),
-                Side.SHARED
-        );
-
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        $ -> {if(getTargetMode() == TargetMode.VELOCITY)getController().setControlTarget(0);},
-                        $ -> {},
-                        SharedKeys.PLACE_HOLDER),
-                Side.SERVER_ONLY
-        );
-        * */
 
     }
 
@@ -312,14 +278,18 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
         } else{
             syncAttachTransformProviderServer();
         }
+        kineticPeripheral.tick();
     }
 
     public void syncAttachInducer(){
         if(level == null || level.isClientSide)return;
+        /*
         Optional
                 .ofNullable(getCompanionServerShip())
                 .map(KinematicMotorForceInducer_::getOrCreate)
                 .ifPresent(inducer -> inducer.alive(WorldBlockPos.of(level, getBlockPos())));
+        * */
+
     }
 
     // simply for debugging

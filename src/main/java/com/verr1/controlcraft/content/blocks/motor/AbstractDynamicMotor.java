@@ -3,7 +3,9 @@ package com.verr1.controlcraft.content.blocks.motor;
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
+import com.verr1.controlcraft.content.create.DMotorKineticPeripheral;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.DynamicMotorForceInducer;
+import com.verr1.controlcraft.foundation.api.delegate.IKineticDevice;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
@@ -47,7 +49,7 @@ import java.util.Optional;
 import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 
 public abstract class AbstractDynamicMotor extends AbstractMotor implements
-        IHaveGoggleInformation, IControllerProvider, ITerminalDevice, IPacketHandler
+        IHaveGoggleInformation, IControllerProvider, ITerminalDevice, IPacketHandler, IKineticDevice
 {
     public SynchronizedField<Double> controlTorque = new SynchronizedField<>(0.0);
 
@@ -149,8 +151,16 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
     private DynamicMotorPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
 
+
+    private final DMotorKineticPeripheral kineticPeripheral = new DMotorKineticPeripheral(this);
+
     @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @org.jetbrains.annotations.Nullable Direction side) {
+    public DMotorKineticPeripheral peripheral() {
+        return kineticPeripheral;
+    }
+
+    @Override
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
         if(cap == Capabilities.CAPABILITY_PERIPHERAL){
             if(this.peripheral == null){
                 this.peripheral = new DynamicMotorPeripheral(this);
@@ -246,7 +256,8 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
                 getServoDirection(),
                 getCompanionShipAlign(),
                 targetMode == TargetMode.POSITION,
-                cheatMode == CheatMode.NONE,
+                ! cheatMode.shouldNoRepulse(),
+                cheatMode.shouldEliminateGravity(),
                 !isLocked(),
                 controlTorque.read(),
                 getController()
@@ -270,6 +281,7 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
         syncAttachInducer();
         syncForNear(true, FIELD);
         lockCheck();
+        kineticPeripheral.tick();
         // ExposedFieldSyncClientPacket.syncClient(this, getBlockPos(), level);
     }
 

@@ -4,7 +4,6 @@ import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.blocks.ShipConnectorBlockEntity;
-import com.verr1.controlcraft.content.blocks.motor.AbstractDynamicMotor;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
@@ -39,6 +38,7 @@ import org.valkyrienskies.core.impl.game.ships.ShipTransformImpl;
 import java.util.List;
 import java.util.Optional;
 
+import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 import static com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies.toJOML;
 
 public abstract class AbstractSlider extends ShipConnectorBlockEntity implements
@@ -66,7 +66,10 @@ public abstract class AbstractSlider extends ShipConnectorBlockEntity implements
         // registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getOffset, this::setOffset, SerializeUtils.VECTOR3D, AbstractMotor.OFFSET), Side.SHARED);
 
         buildRegistry(ANIMATED_DISTANCE).withBasic(SerializePort.of(this::getSlideDistance, this::setClientDistance, SerializeUtils.DOUBLE)).dispatchToSync().runtimeOnly().register();
-        buildRegistry(AbstractDynamicMotor.SELF_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getSelfOffset()), this::setSelfOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
+        buildRegistry(SELF_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getSelfOffset()), this::setSelfOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
+        buildRegistry(COMP_OFFSET).withBasic(SerializePort.of(() -> new Vector3d(getCompOffset()), this::setCompOffset, SerializeUtils.VECTOR3D)).withClient(ClientBuffer.VECTOR3D.get()).register();
+        buildRegistry(CONNECT_CONTEXT).withBasic(SerializePort.of(() -> context, ctx -> context = ctx, SerializeUtils.CONNECT_CONTEXT)).register();
+
 
         panel().registerUnit(SharedKeys.ASSEMBLE, this::assemble);
         panel().registerUnit(SharedKeys.DISASSEMBLE, this::destroyConstraints);

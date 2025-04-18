@@ -75,17 +75,16 @@ public class InducerControls {
         double scale = scaleOf(compShip.getTransform().getShipToWorldScaling());
         double scale_5 = Math.pow(scale, 5);
         double scale_3 = Math.pow(scale, 3);
-        double internal_torque = compShip.getMomentOfInertia().m00() * accel_scale * scale_5;
+        double internal_torque = compShip.getMomentOfInertia().m00() * accel_scale; // * scale_5;
         Vector3dc direction = ValkyrienSkies.set(new Vector3d(), motor.motorDir().getNormal());
         Vector3dc controlTorque_sc = direction.mul((-control_torque + internal_torque) * -1   , new Vector3d()); //
         Vector3dc controlTorque_wc = VSMathUtils.get_sc2wc(motorShip).transform(controlTorque_sc, new Vector3d());
 
         motor.controller().overrideError(metric);
 
-        //
         compShip.applyInvariantTorque(controlTorque_wc);
-        if(!motor.shouldCounter()) return;
-        motorShip.applyInvariantTorque(controlTorque_wc.mul(-1, new Vector3d()));
+        if(motor.eliminateGravity())compShip.applyInvariantForce(new Vector3d(0, compShip.getMass() * 10, 0));
+        if(motor.shouldCounter())   motorShip.applyInvariantTorque(controlTorque_wc.mul(-1, new Vector3d()));
     }
 
 

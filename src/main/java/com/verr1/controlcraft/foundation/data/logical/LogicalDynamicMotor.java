@@ -12,6 +12,7 @@ public record LogicalDynamicMotor(
         Direction compDir,
         boolean angleOrSpeed,
         boolean shouldCounter,
+        boolean eliminateGravity,
         boolean free,
         double torque,
         DynamicController controller

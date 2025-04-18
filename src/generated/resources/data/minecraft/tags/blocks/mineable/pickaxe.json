@@ -21,6 +21,7 @@
     "vscontrolcraft:constraint_revolute",
     "vscontrolcraft:constraint_joint",
     "vscontrolcraft:constraint_slider",
-    "vscontrolcraft:camera"
+    "vscontrolcraft:camera",
+    "vscontrolcraft:kinetic_proxy"
   ]
 }

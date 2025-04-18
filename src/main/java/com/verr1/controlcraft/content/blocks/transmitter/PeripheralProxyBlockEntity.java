@@ -5,8 +5,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.verr1.controlcraft.content.blocks.receiver.PeripheralInterfaceBlockEntity;
 import com.verr1.controlcraft.foundation.data.PeripheralKey;
-import com.verr1.controlcraft.content.blocks.receiver.ReceiverBlockEntity;
 import com.verr1.controlcraft.content.cctweaked.peripheral.TransmitterPeripheral;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.ILuaContext;
@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-public class TransmitterBlockEntity extends SmartBlockEntity {
+public class PeripheralProxyBlockEntity extends SmartBlockEntity {
 
     private long currentProtocol;
 
@@ -38,17 +38,17 @@ public class TransmitterBlockEntity extends SmartBlockEntity {
     private LazyOptional<IPeripheral> peripheralCap;
 
 
-    private final LoadingCache<BlockPos, Optional<ReceiverBlockEntity>> cache = CacheBuilder.newBuilder()
+    private final LoadingCache<BlockPos, Optional<PeripheralInterfaceBlockEntity>> cache = CacheBuilder.newBuilder()
                     .maximumSize(20)
-                    .expireAfterWrite(20, TimeUnit.MILLISECONDS)
+                    .expireAfterWrite(1, TimeUnit.SECONDS)
                     .build(
                             new CacheLoader<>() {
                                 @Override
-                                public @NotNull Optional<ReceiverBlockEntity> load(@NotNull BlockPos pos) throws Exception {
+                                public @NotNull Optional<PeripheralInterfaceBlockEntity> load(@NotNull BlockPos pos) throws Exception {
                                     return Optional.ofNullable(getLevel())
                                             .map(level -> level.getExistingBlockEntity(pos))
-                                            .filter(te -> te instanceof ReceiverBlockEntity)
-                                            .map(te -> (ReceiverBlockEntity) te);
+                                            .filter(te -> te instanceof PeripheralInterfaceBlockEntity)
+                                            .map(te -> (PeripheralInterfaceBlockEntity) te);
                                 }
                             });
 
@@ -69,7 +69,7 @@ public class TransmitterBlockEntity extends SmartBlockEntity {
         currentProtocol = p;
     }
 
-    public TransmitterBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public PeripheralProxyBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
@@ -83,7 +83,7 @@ public class TransmitterBlockEntity extends SmartBlockEntity {
         BlockPos peripheralPos = NetworkManager.getRegisteredPeripheralPos(new PeripheralKey(peripheralName, currentProtocol));
         if(peripheralPos == null)return MethodResult.of(null, "Receiver Not Registered");
         if(getLevel() == null)return MethodResult.of(null, "Level Is Null");
-        ReceiverBlockEntity receiver = cache.get(peripheralPos).orElse(null);
+        PeripheralInterfaceBlockEntity receiver = cache.get(peripheralPos).orElse(null);
         if(receiver == null)return MethodResult.of(null, "Peripheral Is Not A Receiver");
         return receiver
                     .callPeripheral(
@@ -105,8 +105,8 @@ public class TransmitterBlockEntity extends SmartBlockEntity {
         if(peripheralPos == null)return MethodResult.of(null, "Receiver Not Registered");
         if(getLevel() == null)return MethodResult.of(null, "Level Is Null");
         BlockEntity receiver = getLevel().getExistingBlockEntity(peripheralPos);
-        if(!(receiver instanceof ReceiverBlockEntity))return MethodResult.of(null, "Peripheral Is Not A Receiver");
-        return ((ReceiverBlockEntity)receiver)
+        if(!(receiver instanceof PeripheralInterfaceBlockEntity))return MethodResult.of(null, "Peripheral Is Not A Receiver");
+        return ((PeripheralInterfaceBlockEntity)receiver)
                 .callPeripheralAsync(
                         access,
                         context,

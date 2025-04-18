@@ -27,11 +27,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import static com.verr1.controlcraft.registry.ControlCraftShapes.HALF_BOX_BASE;
 
 
-public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlockEntity> {
+public class PeripheralInterfaceBlock extends DirectionalBlock implements IBE<PeripheralInterfaceBlockEntity> {
 
     public static final String ID = "receiver";
 
-    public ReceiverBlock(Properties p_52591_) {
+    public PeripheralInterfaceBlock(Properties p_52591_) {
         super(p_52591_);
     }
 
@@ -67,7 +67,7 @@ public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlock
         ControlCraftServer.SERVER_EXECUTOR.executeLater(
                 () -> {
                     BlockEntity entity = world.getExistingBlockEntity(pos);
-                    if(entity instanceof ReceiverBlockEntity receiver){
+                    if(entity instanceof PeripheralInterfaceBlockEntity receiver){
                         receiver.updateAttachedPeripheral();
                     }
                 },
@@ -95,16 +95,16 @@ public class ReceiverBlock extends DirectionalBlock implements IBE<ReceiverBlock
     public void neighborChanged(BlockState state, Level world, BlockPos pos, Block otherBlock, BlockPos neighborPos,
                                 boolean isMoving) {
         if(world.isClientSide)return;
-        withBlockEntityDo(world, pos, ReceiverBlockEntity::updateAttachedPeripheral);
+        withBlockEntityDo(world, pos, PeripheralInterfaceBlockEntity::updateAttachedPeripheral);
     }
 
     @Override
-    public Class<ReceiverBlockEntity> getBlockEntityClass() {
-        return ReceiverBlockEntity.class;
+    public Class<PeripheralInterfaceBlockEntity> getBlockEntityClass() {
+        return PeripheralInterfaceBlockEntity.class;
     }
 
     @Override
-    public BlockEntityType<? extends ReceiverBlockEntity> getBlockEntityType() {
+    public BlockEntityType<? extends PeripheralInterfaceBlockEntity> getBlockEntityType() {
         return ControlCraftBlockEntities.RECEIVER_BLOCKENTITY.get();
     }
 

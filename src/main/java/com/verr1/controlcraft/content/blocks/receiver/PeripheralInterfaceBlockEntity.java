@@ -1,6 +1,5 @@
 package com.verr1.controlcraft.content.blocks.receiver;
 
-import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.NetworkBlockEntity;
 import com.verr1.controlcraft.content.blocks.transmitter.NetworkManager;
@@ -31,15 +30,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ReceiverBlockEntity extends NetworkBlockEntity implements
+public class PeripheralInterfaceBlockEntity extends NetworkBlockEntity implements
         IPacketHandler
 {
     public static final NetworkKey PERIPHERAL = NetworkKey.create("peripheral");
@@ -112,7 +108,7 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
     public void updateAttachedPeripheral(){
         if(level == null || level.isClientSide)return;
         deleteAttachedPeripheral();
-        Direction attachedDirection = getBlockState().getValue(ReceiverBlock.FACING);
+        Direction attachedDirection = getBlockState().getValue(PeripheralInterfaceBlock.FACING);
         BlockPos attachedPos = getBlockPos()
                 .offset(
                         attachedDirection
@@ -173,7 +169,7 @@ public class ReceiverBlockEntity extends NetworkBlockEntity implements
         syncForNear(true, PERIPHERAL, PERIPHERAL_TYPE);
     }
 
-    public ReceiverBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public PeripheralInterfaceBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         buildRegistry(PERIPHERAL_TYPE).withBasic(SerializePort.of(
                     () -> Optional.ofNullable(attachedPeripheral).map(IPeripheral::getType).orElse("Not Attached"),
