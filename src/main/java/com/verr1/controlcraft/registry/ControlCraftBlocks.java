@@ -250,6 +250,7 @@ public class ControlCraftBlocks {
             .properties(p -> p.explosionResistance(32))
             .transform(TagGen.pickaxeOnly())
             .transform(TagGen.axeOrPickaxe())
+            .lang("Propeller Controller")
             .blockstate(
                     BlockStateGen.directionalBlockProvider(true)
             )

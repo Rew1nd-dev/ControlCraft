@@ -1,0 +1,13 @@
+{
+  "name": "这本书的内容",
+  "icon": "vscontrolcraft:awe_in_wand",
+  "category": "patchouli:lead_in",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "第一章内容为控制学方块功能概述，本节将详细并简要介绍每一个方块的用途，其控制面板每一项的含义，作为玩家常常查阅的手册 $(br2)"
+    }
+
+
+  ]
+}

@@ -6,6 +6,7 @@ import com.simibubi.create.foundation.utility.FilesHelper;
 import com.tterrag.registrate.providers.ProviderType;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.foundation.type.descriptive.*;
+import com.verr1.controlcraft.registry.datagen.ControlCraftDataProvider;
 import net.minecraftforge.data.event.GatherDataEvent;
 
 import java.util.HashMap;
@@ -18,6 +19,8 @@ public class ControlCraftDataGen {
 
 
     public static void gatherData(GatherDataEvent event) {
+        event.getGenerator().addProvider(event.includeServer(), new ControlCraftDataProvider(event.getGenerator()));
+
 
 
         ControlCraft.REGISTRATE.addDataGenerator(ProviderType.LANG, provider -> {
@@ -25,6 +28,8 @@ public class ControlCraftDataGen {
             provideDefaultLang(langConsumer);
             provideExtra(langConsumer);
         });
+
+
 
     }
 

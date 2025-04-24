@@ -1,7 +1,10 @@
 package com.verr1.controlcraft.content.blocks.slider;
 
 import com.verr1.controlcraft.content.blocks.SharedKeys;
+import com.verr1.controlcraft.content.create.KSliderKineticPeripheral;
 import com.verr1.controlcraft.content.gui.layouts.api.IKinematicUIDevice;
+import com.verr1.controlcraft.foundation.api.IKineticPeripheral;
+import com.verr1.controlcraft.foundation.api.delegate.IKineticDevice;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
@@ -33,7 +36,7 @@ import java.util.List;
 import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 
 public class KinematicSliderBlockEntity extends AbstractSlider implements
-        ITerminalDevice, IPacketHandler, IKinematicUIDevice
+        ITerminalDevice, IPacketHandler, IKinematicUIDevice, IKineticDevice
 {
 
     protected KinematicController controller = new KinematicController();
@@ -62,6 +65,13 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
                     ExposedFieldType.FORCED_TARGET$1
             ).withSuggestedRange(0, Math.PI / 2)
     );
+
+    private final KSliderKineticPeripheral kineticPeripheral = new KSliderKineticPeripheral(this);
+
+    @Override
+    public IKineticPeripheral peripheral() {
+        return kineticPeripheral;
+    }
 
     public void setCompliance(double compliance) {
         this.compliance = compliance;
@@ -215,6 +225,7 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
         super.tickServer();
         syncForNear(true, FIELD);
         tickConstraint();
+        kineticPeripheral.tick();
         // tickPose();
         // syncAttachInducer();
     }

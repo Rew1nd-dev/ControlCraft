@@ -1,0 +1,90 @@
+[
+  {
+    "block": "vscontrolcraft:anchor",
+    "mass": 100.0
+  },
+  {
+    "block": "vscontrolcraft:camera",
+    "mass": 5.0
+  },
+  {
+    "block": "vscontrolcraft:wing_controller",
+    "mass": 100.0
+  },
+  {
+    "block": "vscontrolcraft:jet",
+    "mass": 500.0
+  },
+  {
+    "block": "vscontrolcraft:revolute_joint",
+    "mass": 5.0
+  },
+  {
+    "block": "vscontrolcraft:sphere_hinge",
+    "mass": 5.0
+  },
+  {
+    "block": "vscontrolcraft:pivot",
+    "mass": 5.0
+  },
+  {
+    "block": "vscontrolcraft:kinetic_proxy",
+    "mass": 100.0
+  },
+  {
+    "block": "vscontrolcraft:chunk_loader",
+    "mass": 100.0
+  },
+  {
+    "block": "vscontrolcraft:servo",
+    "mass": 100.0
+  },
+  {
+    "block": "vscontrolcraft:joint",
+    "mass": 100.0
+  },
+  {
+    "block": "vscontrolcraft:constraint_revolute",
+    "mass": 100.0
+  },
+  {
+    "block": "vscontrolcraft:constraint_joint",
+    "mass": 100.0
+  },
+  {
+    "block": "vscontrolcraft:slider",
+    "mass": 100.0
+  },
+  {
+    "block": "vscontrolcraft:constraint_slider",
+    "mass": 100.0
+  },
+  {
+    "block": "vscontrolcraft:propeller_controller",
+    "mass": 50.0
+  },
+  {
+    "block": "vscontrolcraft:propeller",
+    "mass": 5.0
+  },
+  {
+    "block": "vscontrolcraft:receiver",
+    "mass": 5.0
+  },
+  {
+    "block": "vscontrolcraft:transmitter",
+    "mass": 5.0
+  },
+  {
+    "block": "vscontrolcraft:spatial_anchor",
+    "mass": 500.0
+  },
+  {
+    "block": "vscontrolcraft:terminal",
+    "mass": 5.0
+  },
+  {
+    "block": "vscontrolcraft:spinalyzer",
+    "mass": 5.0
+  }
+]

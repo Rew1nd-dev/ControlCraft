@@ -8,44 +8,44 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NetworkManager {
-    static Map<PeripheralKey, BlockPos> RegisteredPos = new ConcurrentHashMap<>();
-    static private final Map<BlockPos, PeripheralKey> RegisteredKeys = new ConcurrentHashMap<>();
+    static Map<PeripheralKey, BlockPos> REGISTERED_POS = new ConcurrentHashMap<>();
+    static private final Map<BlockPos, PeripheralKey> REGISTERED_KEYS = new ConcurrentHashMap<>();
 
-    static Map<BlockPos, Integer> keyLife = new ConcurrentHashMap<>(); //dealing with unknown miss-unregister issue
+    static Map<BlockPos, Integer> KEY_LIVES = new ConcurrentHashMap<>(); //dealing with unknown miss-unregister issue
     static int TICKS_BEFORE_EXPIRED = 10;
 
     public static void UnregisterWirelessPeripheral(PeripheralKey key) {
         if(key == null)return;
         if(!isRegistered(key))return;
-        BlockPos value = RegisteredPos.get(key);
+        BlockPos value = REGISTERED_POS.get(key);
         unregister(key, value);
     }
 
     private static void unregister(PeripheralKey key, BlockPos value) {
-        RegisteredPos.remove(key);
-        RegisteredKeys.remove(value);
-        keyLife.remove(value);
+        REGISTERED_POS.remove(key);
+        REGISTERED_KEYS.remove(value);
+        KEY_LIVES.remove(value);
     }
 
     private static void register(PeripheralKey key, BlockPos pos) {
-        RegisteredPos.put(key, pos);
-        RegisteredKeys.put(pos, key);
-        keyLife.put(pos, TICKS_BEFORE_EXPIRED);
+        REGISTERED_POS.put(key, pos);
+        REGISTERED_KEYS.put(pos, key);
+        KEY_LIVES.put(pos, TICKS_BEFORE_EXPIRED);
     }
 
     public static void activate(BlockPos pos){
         if(!isRegistered(pos))return;
-        keyLife.put(pos, TICKS_BEFORE_EXPIRED);
+        KEY_LIVES.put(pos, TICKS_BEFORE_EXPIRED);
     }
 
     private static void tickActivated(){
-        keyLife.forEach((k, v) -> {
+        KEY_LIVES.forEach((k, v) -> {
             if(v < 0){
-                UnregisterWirelessPeripheral(RegisteredKeys.get(k));
+                UnregisterWirelessPeripheral(REGISTERED_KEYS.get(k));
             }
         });
-        keyLife.entrySet().removeIf(e -> e.getValue() < 0);
-        keyLife.entrySet().forEach(e-> e.setValue(e.getValue() - 1));
+        KEY_LIVES.entrySet().removeIf(e -> e.getValue() < 0);
+        KEY_LIVES.entrySet().forEach(e-> e.setValue(e.getValue() - 1));
     }
 
     public static void tick(){
@@ -59,23 +59,23 @@ public class NetworkManager {
 
     private static void move(PeripheralKey newKey, BlockPos content){
         if(!canMove(newKey, content))return;
-        PeripheralKey oldKey = RegisteredKeys.get(content);
-        RegisteredPos.remove(oldKey);
-        RegisteredKeys.remove(content);
+        PeripheralKey oldKey = REGISTERED_KEYS.get(content);
+        REGISTERED_POS.remove(oldKey);
+        REGISTERED_KEYS.remove(content);
         register(newKey, content);
     }
 
     public static boolean isRegistered(BlockPos pos){
-        return RegisteredKeys.containsKey(pos);
+        return REGISTERED_KEYS.containsKey(pos);
     }
 
     public static boolean isRegistered(PeripheralKey key){
-        return RegisteredPos.containsKey(key);
+        return REGISTERED_POS.containsKey(key);
     }
 
     public static BlockPos getRegisteredPeripheralPos(PeripheralKey key) {
         if(!isRegistered(key))return null;
-        return RegisteredPos.get(key);
+        return REGISTERED_POS.get(key);
     }
 
 
@@ -85,7 +85,7 @@ public class NetworkManager {
                 move(newKey, content);
                 return newKey;
             }
-            return RegisteredKeys.get(content);
+            return REGISTERED_KEYS.get(content);
         }
         if(isRegistered(newKey))return PeripheralKey.NULL;
         register(newKey, content);

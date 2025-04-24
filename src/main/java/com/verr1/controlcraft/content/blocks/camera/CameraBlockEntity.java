@@ -468,8 +468,8 @@ public class CameraBlockEntity extends OnShipBlockEntity
         return ClipUtils.clipEntity(
                 context.getFrom(),
                 context.getTo(),
-                clipAABB(),
-                0.5,
+                coneAABB(),
+                coneAngle,
                 level,
                 filter
         );

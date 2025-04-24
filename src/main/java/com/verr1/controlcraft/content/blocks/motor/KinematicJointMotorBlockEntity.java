@@ -39,6 +39,11 @@ public class KinematicJointMotorBlockEntity extends AbstractKinematicMotor {
 
 
     @Override
+    public Direction getAlign() {
+        return getDirection();
+    }
+
+    @Override
     public BlockPos getAssembleBlockPos() {
         return getBlockPos().relative(getDirection(), 1);
     }

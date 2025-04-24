@@ -13,10 +13,14 @@ import static com.verr1.controlcraft.utils.ComponentUtils.literals;
 public enum WandGUIModesType implements Descriptive<WandGUIModesType> {
     CONNECT(literals(
             "Connect Ships To Device",
-            "Currently Applicable:", "| Motors | Piston | Joints |")),
+            "Currently Applicable:| Motors | Piston | Joints |")),
     DISCONNECT(literals(
             "Disconnect Ships From Device",
-            "Currently Applicable:", "| Motors | Piston | Joints |")),
+            "Currently Applicable:| Motors | Piston | Joints |",
+            "Right Click Device To Start",
+            "Right Click Companion Ship Block Face(s) to Select the Face to Connect",
+            "Right Click Air to Confirm, Shift + Right Click to Restart"
+    )),
     DISCONNECT_ALL(literals(
             "Click Ship To Apply, Destroy All Constraints",
             "Won't Reset Device, Need Manually Replace",

@@ -155,8 +155,7 @@ public class TerminalScreen extends AbstractSimiContainerScreen<TerminalMenu> {
 
 
 
-        var name = new com.simibubi.create.foundation.gui.widget.Label(0, 0, row_type.asComponent()).colored(color_label);
-        name.text = row_type.asComponent();
+        var name = row_type.toDescriptiveLabel();
 
         var minTitle = UIContents.MIN.toDescriptiveLabel();
 

@@ -34,35 +34,6 @@ public class Executor {
                 it.remove();
             }
         }
-
-        /*
-        var it = common.iterator();
-        while(it.hasNext()){
-            var r = it.next();
-            r.tick();
-            if(r.shouldRun())r.run();
-            if(r.shouldRemove()){
-                r.onRemove();
-                it.remove();
-            }
-        }
-
-
-        if(named.isEmpty())return;
-
-        var it2 = named.values().iterator();
-        while(it2.hasNext()){
-            var r = it2.next();
-            r.tick();
-            if(r.shouldRun())r.run();
-            if(r.shouldRemove()){
-                r.onRemove();
-                it2.remove();
-            }
-        }
-        * */
-        // named.entrySet().removeIf(e -> e.getValue().shouldRemove());
-
     }
 
     public void execute(Executable task){

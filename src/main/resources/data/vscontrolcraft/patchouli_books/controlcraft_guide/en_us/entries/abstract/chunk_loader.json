@@ -1,0 +1,20 @@
+{
+  "name": "区块加载器",
+  "icon": "vscontrolcraft:chunk_loader",
+  "category": "patchouli:abstract",
+  "pages": [
+
+    {
+      "type": "patchouli:spotlight",
+      "item": {
+        "item": "vscontrolcraft:chunk_loader"
+      },
+      "title": "区块加载器",
+      "text": "简介 $(br2)能够强加载周围区块的方块，只在物理结构起效"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "功能 $(br2)  区块加载器被置于物理结构上时，将默认以自身为中心，强加载周围5*5区块，能够跟随物理结构移动而变化"
+    }
+  ]
+}

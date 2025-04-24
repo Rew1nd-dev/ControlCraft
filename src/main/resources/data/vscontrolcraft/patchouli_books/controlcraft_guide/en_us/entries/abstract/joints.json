@@ -1,0 +1,18 @@
+{
+  "name": "铰链",
+  "icon": "vscontrolcraft:sphere_hinge",
+  "category": "patchouli:abstract",
+  "pages": [
+
+    {
+      "type": "patchouli:spotlight",
+      "item": "vscontrolcraft:sphere_hinge,vscontrolcraft:revolute_joint,vscontrolcraft:pivot",
+      "title": "铰链",
+      "text": "简介 $(br2)通过约束连接物理结构，使用工具枪进行连接"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)Sphere Hinge $(br)使用球铰链关节约束两个物理结构，可以在任意方向上旋转 $(li)Revolute Hinge $(br)使用柱铰链关节约束两个物理结构，可以视为Joint Motor的无动力版 $(li)Pivot Hinge $(br)使用柱铰链关节约束两个物理结构，可以视为servo motor的无动力版本"
+    }
+  ]
+}
