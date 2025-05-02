@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "vscontrolcraft:block/chunk_loader/block",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "vscontrolcraft:block/chunk_loader/block"
+    },
+    "facing=south": {
+      "model": "vscontrolcraft:block/chunk_loader/block",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "vscontrolcraft:block/chunk_loader/block",
+      "y": 270
+    }
+  }
+}

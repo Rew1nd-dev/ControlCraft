@@ -1,0 +1,20 @@
+{
+  "name": "旋转分析仪",
+  "icon": "vscontrolcraft:spinalyzer",
+  "category": "vscontrolcraft:abstract",
+  "pages": [
+
+    {
+      "type": "patchouli:spotlight",
+      "item": {
+        "item": "vscontrolcraft:spinalyzer"
+      },
+      "title": "旋转分析仪",
+      "text": "简介 $(br2)能从中获取当前物理结构的物理参数，只能使用CC读取"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "功能 $(br2)  能对CC电脑发送物理帧事件，能够通过外设从中获取所在物理结构的物理信息，如果你不使用ComputerCraft，那么这个方块唯一的意义就是它的坐标系模型总是与物理结构的本地坐标系重合，而不受自身摆放朝向的影响，你可以依此作为物理结构上xyz坐标系的指示"
+    }
+  ]
+}

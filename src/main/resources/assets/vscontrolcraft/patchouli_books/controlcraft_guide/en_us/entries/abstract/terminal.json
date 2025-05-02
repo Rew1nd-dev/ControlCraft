@@ -1,0 +1,28 @@
+{
+  "name": "红石终端",
+  "icon": "vscontrolcraft:terminal",
+  "category": "vscontrolcraft:abstract",
+  "pages": [
+
+    {
+      "type": "patchouli:spotlight",
+      "item": "vscontrolcraft:terminal",
+      "title": "红石终端",
+      "text": "简介 $(br2)控制学大多数方块都有红石面板，该终端的作用就是为其每一个红石面板项目（力，目标。锁定等），设置对应的机械动力无线红石频道"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "典型面板",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/terminal/general.png"],
+      "text": "以物理活塞为例，红石终端的典型布局"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "红石终端的每一行，对应了该方块红石面板的每一项，终端中每一项基本设置与方块内红石面板设置基本相同，$(br)假如某一项是开关项，如is_locked，则一旁的红色开关表明内置非门是否开启，开启时将自动将该频道输入信号反转 $(br2)最右侧有两列开关，靠里侧的一列开关用于控制每一个频道是否对外开放，靠外侧的开关是用于选择哪一个频道可以直接接受红石终端的红石输入"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "使用扳手右键红石终端，可以改变其碰撞箱，从而使得它在一些面上接受红石信号"
+    }
+  ]
+}

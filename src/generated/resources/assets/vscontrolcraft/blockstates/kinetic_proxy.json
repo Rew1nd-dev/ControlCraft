@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "vscontrolcraft:block/kinetic_proxy/block",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "vscontrolcraft:block/kinetic_proxy/block",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "vscontrolcraft:block/kinetic_proxy/block",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "vscontrolcraft:block/kinetic_proxy/block",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "vscontrolcraft:block/kinetic_proxy/block"
+    },
+    "facing=west": {
+      "model": "vscontrolcraft:block/kinetic_proxy/block",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

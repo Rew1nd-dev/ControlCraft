@@ -1,0 +1,75 @@
+{
+  "name": "伺服电机",
+  "icon": "vscontrolcraft:servo",
+  "category": "vscontrolcraft:abstract",
+  "pages": [
+
+    {
+      "type": "patchouli:spotlight",
+      "item": "vscontrolcraft:servo,vscontrolcraft:joint",
+      "title": "伺服电机",
+      "text": "简介 $(br2)在外部条件合适的情况下，高效且准确地控制两个物理结构保持给定旋转角度/角速度 $(br)上方两种电机只有旋转方向的区别"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "交互 $(br2)$(li)当电机上方放置了方块时，潜行右键电机，将会组转上方的方块为物理结构，并进行连接，这与clockwork物理轴承相同，不支持强力胶$(li)使用扳手右键可以改变其方块朝向"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "控制面板",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/servo/panel_main.png"],
+      "text": "空手右键方块，将打开它的控制面板"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "主要面板 $(br2)这个面板展示了伺服电机的基本设置 $(br2)Current: 根据模式，实时展示当前两结构相对角度/角速度值（单位为弧度/弧度每秒） $(br2)Locked: 当前电机是否被约束锁定而无法转动 $(br2)Target: 根据模式，为给电机设定的目标相对角度/角速度（单位为弧度/弧度每秒）"
+    },
+    {
+      "type": "patchouli:image",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/servo/offset.png"],
+      "text": "电机角度均为57°，上方为调整被控结构偏置，下方为调整转轴偏置"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "主要面板 $(br2)Offset(第一行): 该偏置表示下一次组装/连接物理结构时，电机实际转轴位置相对于默认转轴的偏移 $(br2)Offset(第二行): 该偏置表示下一次组装/连接物理结构时，被控物理结构实际转轴位置相对于默认转轴的偏移"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "主要面板 $(br2)Mode: 选择电机的目标是角度还是角速度 $(br2)Cheat: 一些便携功能，NO_REPULSE取消电机控制转动时产生的反作用力，NO_GRAVITY消除被控结构的重力"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "主要面板 $(br2)AutoLock: 自动锁定模式，打开时，若电机为角速度模式，则在目标角速度为0时使用约束锁定电机，若为角度模式，则在实际角度接近目标角度，误差小于1e-3时，锁定电机"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "红石面板",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/servo/panel_redstone.png"],
+      "text": "伺服电机的红石面板"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "红石面板 $(br2)红石面板中有3项可控项: 输出力矩，目标值，是否锁定，其中目标值与锁定项可以绑定两个输入，共5项，详情见红石面板的通用介绍"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "PID控制器面板",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/servo/panel_pid.png"],
+      "text": "伺服电机的PID控制器面板"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "PID面板 $(br2)电机内置PID控制器的参数，在这些参数下其真实输出力矩为（P*误差 + D*误差变化率 + I*误差积分）* 被控件相对其质心转动惯量，注意转动惯量不会计入其它通过约束连接到被控件的物理结构$(br)如果你不会调参数，不要擅自调整这几项"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "控制器指令面板",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/servo/panel_remote.png"],
+      "text": "伺服电机的指令面板"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "指令面板 $(br2)通过该面板的按钮可以让伺服电机进行一些操作，分别是$(li)Assembly(组装其上方的方块，等价于潜行右键)$(li)Lock(手动锁定)$(li)Lock(手动解锁)$(li)Dis Assembly(断开连接)"
+    }
+  ]
+}

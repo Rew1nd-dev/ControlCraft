@@ -1,0 +1,46 @@
+{
+  "name": "喷气发动机",
+  "icon": "vscontrolcraft:jet",
+  "category": "vscontrolcraft:abstract",
+  "pages": [
+
+    {
+      "type": "patchouli:spotlight",
+      "item": "vscontrolcraft:jet,vscontrolcraft:jet_rudder",
+      "title": "矢量喷气发动机",
+      "text": "简介 $(br2)喷气方向可偏转的发动机，无需能量消耗"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "喷气发动机的正确放置",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/jet/placement.png"],
+      "text": "按照图示放置好发动机后，如果提高推力能观察到粒子尾焰效果，调节角度可以观察到方向的偏转，则放置正确"
+
+    },
+    {
+      "type": "patchouli:image",
+      "title": "喷气发动机的主要面板",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/jet/panel_main.png"]
+
+    },
+    {
+      "type": "patchouli:text",
+      "text": "主要面板 $(br2)$(li)Thrust:设置/观察发动机推力大小，$(li)Horizontal:设置/观察发动机的推力水平偏转$(li)Vertical:设置/观察发动机的推力垂直偏转$(br2)对于不同放置朝向下的发动机，这些角度正方向是如何定义的呢，具体请自己尝试，通过观察舵面的变化就知道了"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "发动机红石面板",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/jet/panel_redstone.png"]
+
+    },
+
+    {
+      "type": "patchouli:text",
+      "text": "红石面板 $(br2) 红石面板中，允许作为红石输入的有$(li)thrust $(li)Horizontal $(li)Vertical $(br2)这几项的含义与主要面板中相同，同时，角度项都有一项富余，用于允许多接受一个面的输入，可以分配不同的min,max值"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "注意 $(br2)$(li)实际产生推力的是喷气发动机而不是方向舵，但是发动机需要方向舵才可以提供可变矢量推力，方向舵的作用只是作为视觉效果提示，最终推力中心位于喷气发动机的方块中心"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "name": "工具枪",
+  "icon": "vscontrolcraft:awe_in_wand",
+  "category": "vscontrolcraft:abstract",
+  "pages": [
+
+    {
+      "type": "patchouli:spotlight",
+      "item": "vscontrolcraft:awe_in_wand",
+      "title": "控制学工具枪",
+      "text": "简介 $(br2)目前只是用来进行物理结构连接的工具$(br2)类似机械动力蓝图，按住Alt键可以使用滚轮切换模式"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "电机连接过程",
+      "images": [
+        "vscontrolcraft:patchouli/categories/abstract/awe/motor/connect_0.png",
+        "vscontrolcraft:patchouli/categories/abstract/awe/motor/connect_1.png",
+        "vscontrolcraft:patchouli/categories/abstract/awe/motor/connect_2.png"
+      ],
+      "text": ""
+    },
+
+    {
+      "type": "patchouli:text",
+      "text": "Connect模式$(br)在该模式下，需要先右键点击机器确定连接的是哪个机器$(li)电机：$(li2)如果先右键点击了电机，电机接触面出现将一个红框，表示物理结构将连接在这个面，$(li2)点击待连接方块，将出现黄框，这表示将与红框重合的面$(li2)右键空气，连接过程开始，物理结构自动飞向轴承，理想状态下10s内能对齐，并完成连接"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "关节电机连接过程",
+      "images": [
+        "vscontrolcraft:patchouli/categories/abstract/awe/jmotor/connect_0.png",
+        "vscontrolcraft:patchouli/categories/abstract/awe/jmotor/connect_1.png",
+        "vscontrolcraft:patchouli/categories/abstract/awe/jmotor/connect_2.png"
+      ],
+      "text": ""
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)关节电机：$(li2)右键关节电机，将出现两个相互垂直的红黄两框，红框表示连接的接触面，黄框表示电机的旋转轴朝向$(li2)右键待连接方块，出现红框，这是将与关节电机上的红框重合的面，$(li2)右键待连接方块另一个面（须与上一个垂直），出现黄色框，这表示连接后将与关节电机黄色框朝向平行的面$(li2)右键空气，连接开始$(li)活塞：$(li2)活塞的连接过程与关节电机相同"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "Joint连接过程",
+      "images": [
+        "vscontrolcraft:patchouli/categories/abstract/awe/rjoint/connect_0.png",
+        "vscontrolcraft:patchouli/categories/abstract/awe/rjoint/connect_1.png",
+        "vscontrolcraft:patchouli/categories/abstract/awe/rjoint/connect_2.png"
+      ],
+      "text": ""
+    },
+    {
+      "type": "patchouli:text",
+      "text": "对于所有的铰链，只需要按顺序点击两个铰链，并右键空气即可完成连接，但需要注意以下细节$(li)手持工具枪看向Revolute Joint时，铰链侧面将出现红框，这表示它的旋转轴朝向，对于两个Revolute Joint，连接上之后它们的旋转轴朝向将$(bold)相对$()，你可以使用扳手shift右键铰链改变红框的方向"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "注意$(li)使用工具枪看向电机时，会出现小红点，这表示电机实际的旋转轴位置，反映了offset的调节效果$(li)使用工具枪shift右键空气，可以随时重置选择流程"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Disconnect模式$(br)在该模式下，右键机器将使机器断开其连接，但是对于一些铰链，其虽然与其他铰链相连，但自身并不保存约束信息，这时请两个铰链都点一下$(br2)Disconnect All模式:用于删除选定物理结构的$(bold)所有$()约束，$(bold)包括其他Mod生成的$()，一定仅在万一出现无法清除的约束时使用这个功能"
+    }
+  ]
+}
+
