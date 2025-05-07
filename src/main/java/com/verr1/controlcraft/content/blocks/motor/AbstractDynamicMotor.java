@@ -89,7 +89,6 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
     public TargetMode getTargetMode() {return targetMode;}
     public LockMode getLockMode() {return lockMode;}
     public CheatMode getCheatMode() {return cheatMode;}
-    public boolean isReverseCreateInput() {return reverseCreateInput;}
     public double getTarget(){return controller.getTarget();}
     public boolean isLocked() {return isLocked;}
 

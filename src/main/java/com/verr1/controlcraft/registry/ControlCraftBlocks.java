@@ -12,7 +12,8 @@ import com.verr1.controlcraft.content.blocks.jet.JetRudderBlock;
 import com.verr1.controlcraft.content.blocks.joints.FreeJointBlock;
 import com.verr1.controlcraft.content.blocks.joints.PivotJointBlock;
 import com.verr1.controlcraft.content.blocks.joints.RevoluteJointBlock;
-import com.verr1.controlcraft.content.blocks.kinetic.KineticProxyBlock;
+import com.verr1.controlcraft.content.blocks.kinetic.proxy.KineticProxyBlock;
+import com.verr1.controlcraft.content.blocks.kinetic.resistor.KineticResistorBlock;
 import com.verr1.controlcraft.content.blocks.loader.ChunkLoaderBlock;
 import com.verr1.controlcraft.content.blocks.motor.KinematicJointMotorBlock;
 import com.verr1.controlcraft.content.blocks.motor.KinematicRevoluteMotorBlock;
@@ -368,6 +369,19 @@ public class ControlCraftBlocks {
 
     public static final BlockEntry<KineticProxyBlock> KINETIC_PROXY_BLOCK = REGISTRATE
             .block(KineticProxyBlock.ID, KineticProxyBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.explosionResistance(32))
+            .transform(TagGen.pickaxeOnly())
+            .properties(p -> p.noOcclusion().mapColor(MapColor.PODZOL))
+            .blockstate(
+                    BlockStateGen.directionalBlockProvider(true)
+            )
+            .item()
+            .transform(customItemModel())
+            .register();
+
+    public static final BlockEntry<KineticResistorBlock> KINETIC_RESISTOR_BLOCK = REGISTRATE
+            .block(KineticResistorBlock.ID, KineticResistorBlock::new)
             .initialProperties(SharedProperties::stone)
             .properties(p -> p.explosionResistance(32))
             .transform(TagGen.pickaxeOnly())

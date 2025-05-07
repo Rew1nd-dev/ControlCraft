@@ -25,10 +25,10 @@ public class NetworkHandler {
     private final HashMap<NetworkKey, SymmetricPort> saveLoads = new HashMap<>();
 
 
-    private final SmartBlockEntity owner;
+    private final SmartBlockEntity delegate;
 
-    public NetworkHandler(SmartBlockEntity owner) {
-        this.owner = owner;
+    public NetworkHandler(SmartBlockEntity delegate) {
+        this.delegate = delegate;
     }
 
     @SuppressWarnings("unchecked")
@@ -75,8 +75,8 @@ public class NetworkHandler {
     }
 
     public void request(NetworkKey... requests){
-        if(owner.getLevel() == null || !owner.getLevel().isClientSide)return;
-        var p = new LazyRequestBlockEntitySyncPacket(owner.getBlockPos(), List.of(requests));
+        if(delegate.getLevel() == null || !delegate.getLevel().isClientSide)return;
+        var p = new LazyRequestBlockEntitySyncPacket(delegate.getBlockPos(), List.of(requests));
         ControlCraftPackets.getChannel().sendToServer(p);
     }
 
@@ -86,9 +86,9 @@ public class NetworkHandler {
     }
 
     public void syncForNear(boolean simplex, NetworkKey... key){
-        BlockPos pos = owner.getBlockPos();
+        BlockPos pos = delegate.getBlockPos();
         dispatchChannel(
-                PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(pos.getX(), pos.getY(), pos.getZ(), 64, Objects.requireNonNull(owner.getLevel()).dimension())),
+                PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(pos.getX(), pos.getY(), pos.getZ(), 64, Objects.requireNonNull(delegate.getLevel()).dimension())),
                 simplex,
                 key
         );
@@ -115,13 +115,13 @@ public class NetworkHandler {
 
 
     private void dispatchPacket(PacketDistributor.PacketTarget target, CompoundTag tag){
-        if(owner.getLevel() == null)return;
-        if (!owner.getLevel().isClientSide) {
-            var p = new SyncBlockEntityClientPacket(owner.getBlockPos(), tag);
+        if(delegate.getLevel() == null)return;
+        if (!delegate.getLevel().isClientSide) {
+            var p = new SyncBlockEntityClientPacket(delegate.getBlockPos(), tag);
             ControlCraftPackets.getChannel().send(target, p);
         }
-        if (owner.getLevel().isClientSide) {
-            var p = new SyncBlockEntityServerPacket(owner.getBlockPos(), tag);
+        if (delegate.getLevel().isClientSide) {
+            var p = new SyncBlockEntityServerPacket(delegate.getBlockPos(), tag);
             ControlCraftPackets.getChannel().sendToServer(p);
         }
     }
@@ -132,12 +132,12 @@ public class NetworkHandler {
     }
 
     protected void syncSimplex(PacketDistributor.PacketTarget target, NetworkKey... key){
-        if(owner.getLevel() == null)return;
+        if(delegate.getLevel() == null)return;
         CompoundTag syncTag = new CompoundTag();
         Arrays.asList(key).forEach(
                 k -> Optional
                         .ofNullable(simplex.get(k))
-                        .map(rw -> rw.send(owner.getLevel().isClientSide))
+                        .map(rw -> rw.send(delegate.getLevel().isClientSide))
                         .ifPresent(t -> syncTag.put(k.getSerializedName(), t))
         );
         CompoundTag tag = new CompoundTag();
@@ -146,12 +146,12 @@ public class NetworkHandler {
     }
 
     protected void syncDuplex(PacketDistributor.PacketTarget target, NetworkKey... key){
-        if(owner.getLevel() == null)return;
+        if(delegate.getLevel() == null)return;
         CompoundTag portTag = new CompoundTag();
         Arrays.asList(key).forEach(
                 k -> Optional
                         .ofNullable(duplex.get(k))
-                        .map(rw -> rw.send(owner.getLevel().isClientSide))
+                        .map(rw -> rw.send(delegate.getLevel().isClientSide))
                         .ifPresent(t -> portTag.put(k.getSerializedName(), t))
         );
         CompoundTag tag = new CompoundTag();
@@ -160,30 +160,30 @@ public class NetworkHandler {
     }
 
     public void receiveSync(CompoundTag tag, Player sender){
-        if(owner.getLevel() == null)return;
+        if(delegate.getLevel() == null)return;
         CompoundTag duplexTag = tag.getCompound("duplex");
         CompoundTag simplexTag = tag.getCompound("simplex");
         if(!duplexTag.isEmpty()){
             duplex.forEach((k, sidePort) -> {
                 if(!duplexTag.contains(k.getSerializedName()))return;
                 if(!checkPermission(k, sender))return;
-                sidePort.dispatch(duplexTag.getCompound(k.getSerializedName()), owner.getLevel().isClientSide);
+                sidePort.dispatch(duplexTag.getCompound(k.getSerializedName()), delegate.getLevel().isClientSide);
             });
         }
         if(!simplexTag.isEmpty()){
             simplex.forEach((k, sidePort) -> {
                 if(!simplexTag.contains(k.getSerializedName()))return;
-                sidePort.dispatch(simplexTag.getCompound(k.getSerializedName()), owner.getLevel().isClientSide);
+                sidePort.dispatch(simplexTag.getCompound(k.getSerializedName()), delegate.getLevel().isClientSide);
             });
         }
-        if(owner.getLevel().isClientSide)return;
-        owner.setChanged();
+        if(delegate.getLevel().isClientSide)return;
+        delegate.setChanged();
     }
 
     private boolean checkPermission(NetworkKey key, Player player){
-        if(owner.getLevel() == null || owner.getLevel().isClientSide)return true;
+        if(delegate.getLevel() == null || delegate.getLevel().isClientSide)return true;
         return Optional
-                .ofNullable(owner.getLevel().getServer())
+                .ofNullable(delegate.getLevel().getServer())
                 .map(s -> s.getProfilePermissions(player.getGameProfile()))
                 .map(p -> p >= key.permissionLevel())
                 .orElseGet(() -> {

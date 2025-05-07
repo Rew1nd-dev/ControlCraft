@@ -1,6 +1,7 @@
 package com.verr1.controlcraft.content.blocks;
 
 import com.verr1.controlcraft.foundation.api.delegate.INetworkDelegated;
+import com.verr1.controlcraft.foundation.api.delegate.INetworkHandle;
 import com.verr1.controlcraft.foundation.api.delegate.IRemoteDevice;
 import com.verr1.controlcraft.foundation.api.Slot;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
@@ -26,7 +27,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class NetworkBlockEntity extends SidedTickedBlockEntity implements IRemoteDevice {
+public class NetworkBlockEntity extends SidedTickedBlockEntity implements
+        IRemoteDevice, INetworkHandle
+{
 
     /*
     *  simplex channel: sync action raise from server, it's 
@@ -34,7 +37,7 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity implements IRemot
     * */
     private final RemotePanel panel = new RemotePanel();
 
-    private final NetworkHandler handler = null; // new NetworkHandler(this);
+    private final NetworkHandler handler = new NetworkHandler(this);
 
     private final HashMap<NetworkKey, AsymmetricPort> duplex = new HashMap<>();
     private final HashMap<NetworkKey, SymmetricPort> simplex = new HashMap<>();
@@ -254,7 +257,7 @@ public class NetworkBlockEntity extends SidedTickedBlockEntity implements IRemot
         return panel;
     }
 
-    // @Override
+    @Override
     public NetworkHandler handler() {
         return handler;
     }

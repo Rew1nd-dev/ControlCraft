@@ -15,9 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class MixinEntity implements IEntityDuck {
 
 
-    @Shadow
-    public abstract int getId();
-
     @Shadow public abstract Vec3 position();
 
     @Unique

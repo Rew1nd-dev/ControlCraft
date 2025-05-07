@@ -106,6 +106,14 @@ public enum ExposedFieldType implements Descriptive<ExposedFieldType> {
     FORCE(false),
     THRUST(false),
 
+
+    RATIO(false, Component.literal("Ratio"),
+            literals(
+                    "Ratio Of Create Speed Modifier"
+            )
+    ),
+    RATIO$1(false),
+
     IS_LOCKED(true, Component.literal("Is Locked"),
             literals(
                     "If The Device Is Locked By Constraint"

@@ -14,8 +14,10 @@ import com.verr1.controlcraft.content.blocks.jet.JetBlockEntity;
 import com.verr1.controlcraft.content.blocks.jet.JetRudderBlock;
 import com.verr1.controlcraft.content.blocks.jet.JetRudderBlockEntity;
 import com.verr1.controlcraft.content.blocks.joints.*;
-import com.verr1.controlcraft.content.blocks.kinetic.KineticProxyBlock;
-import com.verr1.controlcraft.content.blocks.kinetic.KineticProxyBlockEntity;
+import com.verr1.controlcraft.content.blocks.kinetic.proxy.KineticProxyBlock;
+import com.verr1.controlcraft.content.blocks.kinetic.proxy.KineticProxyBlockEntity;
+import com.verr1.controlcraft.content.blocks.kinetic.resistor.KineticResistorBlock;
+import com.verr1.controlcraft.content.blocks.kinetic.resistor.KineticResistorBlockEntity;
 import com.verr1.controlcraft.content.blocks.loader.ChunkLoaderBlock;
 import com.verr1.controlcraft.content.blocks.loader.ChunkLoaderBlockEntity;
 import com.verr1.controlcraft.content.blocks.motor.*;
@@ -167,6 +169,13 @@ public class ControlCraftBlockEntities {
             .blockEntity(KineticProxyBlock.ID, KineticProxyBlockEntity::new)
             .instance(() -> ShaftInstance::new, false)
             .validBlock(ControlCraftBlocks.KINETIC_PROXY_BLOCK)
+            .renderer(() -> ShaftRenderer::new)
+            .register();
+
+    public static final BlockEntityEntry<KineticResistorBlockEntity> KINETIC_RESISTOR_BLOCKENTITY = REGISTRATE
+            .blockEntity(KineticResistorBlock.ID, KineticResistorBlockEntity::new)
+            .instance(() -> ShaftInstance::new, false)
+            .validBlock(ControlCraftBlocks.KINETIC_RESISTOR_BLOCK)
             .renderer(() -> ShaftRenderer::new)
             .register();
 

@@ -1,4 +1,4 @@
-package com.verr1.controlcraft.content.blocks.kinetic;
+package com.verr1.controlcraft.content.blocks.kinetic.proxy;
 
 import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;

@@ -3,6 +3,7 @@ package com.verr1.controlcraft.content.blocks.spatial;
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.verr1.controlcraft.Config;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
+import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.gui.layouts.api.IScheduleProvider;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.SpatialForceInducer;
 import com.verr1.controlcraft.foundation.api.*;
@@ -100,26 +101,6 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
             )
     );
 
-    /*
-    *             new ExposedFieldWrapper(
-                    () -> this.getSchedule().getPp(),
-                    v -> this.getSchedule().setPp(v),
-                    "P",
-                    ExposedFieldType.P
-            ).withSuggestedRange(2, 25),
-            new ExposedFieldWrapper(
-                    () -> this.getSchedule().getIp(),
-                    v -> this.getSchedule().setIp(v),
-                    "I",
-                    ExposedFieldType.I
-            ).withSuggestedRange(0, 2),
-            new ExposedFieldWrapper(
-                    () -> this.getSchedule().getDp(),
-                    v -> this.getSchedule().setDp(v),
-                    "D",
-                    ExposedFieldType.D
-            ).withSuggestedRange(1, 18)
-    * */
 
     public SpatialSchedule getSchedule() {
         return schedule;
@@ -361,10 +342,9 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
     * */
 
     @Override
-    public void lazyTick() {
-        super.lazyTick();
-        if(level.isClientSide)return;
-        ExposedFieldSyncClientPacket.syncClient(this, getBlockPos(), level);
+    public void lazyTickServer() {
+        super.lazyTickServer();
+        syncForNear(true, FIELD);
     }
 
     @Override
@@ -372,13 +352,6 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
         return "spatial anchor";
     }
 
-    public void syncClient(){
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), RegisteredPacketType.SYNC_0)
-                .withBoolean(isRunning)
-                .withBoolean(isStatic)
-                .build();
-        ControlCraftPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
-    }
 
     public void flip(){
         setFlipped(!isFlipped());
@@ -392,24 +365,6 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
     public void setFlipped(boolean flipped) {
         MinecraftUtils.updateBlockState(level, getBlockPos(), getBlockState().setValue(SpatialAnchorBlock.FLIPPED, flipped));
     }
-
-    protected void displayScreen(ServerPlayer player){
-        double offset = getAnchorOffset();
-        long protocol = getProtocol();
-        boolean isRunning = isRunning();
-        boolean isStatic = isStatic();
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), RegisteredPacketType.OPEN_SCREEN_0)
-                .withDouble(offset)
-                .withLong(protocol)
-                .withBoolean(isRunning)
-                .withBoolean(isStatic)
-                .build();
-
-        ControlCraftPackets.sendToPlayer(p, player);
-    }
-
-
-
 
 
     public SpatialAnchorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {

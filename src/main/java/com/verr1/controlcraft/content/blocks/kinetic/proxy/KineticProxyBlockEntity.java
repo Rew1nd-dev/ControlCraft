@@ -1,6 +1,5 @@
-package com.verr1.controlcraft.content.blocks.kinetic;
+package com.verr1.controlcraft.content.blocks.kinetic.proxy;
 
-import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.api.IKineticPeripheral;
