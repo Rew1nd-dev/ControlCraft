@@ -1,0 +1,19 @@
+{
+  "name": "双精度遥控器",
+  "icon": "create_tweaked_controllers:tweaked_linked_controller",
+  "category": "vscontrolcraft:features",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "tweaked controller可以获取全精度的输入，为什么不能用于红石？$(br2)确实，红石只有16个等级，无法通过红石信号来传递高精度输入"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "但是，控制学的红石终端可以，只要像往常一样设置对应频率，然后在讲台上使用tweaked controller，红石终端对应的频道就可以接受更高精度的遥控器输入，总共256个等级！"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "如果你好奇这是怎么实现的：$(br2)控制学复制了一份机械动力的无线红石代码，用于传递小数点，同时让tweak controller使用同样的频率往该无线红石网络发送小数点信号，红石终端同时接受整数信号网络（默认网络）和小数点信号网络（复制网络）的信号，并加以组合，转换到方块的控制量中"
+    }
+  ]
+}

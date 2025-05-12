@@ -1,12 +1,14 @@
 {
-  "required": true,
+  "required": false,
   "refmap": "mixins.controlcraft.refmap.json",
   "mixins": [
     "MixinAt",
     "MixinCommonHooks",
     "MixinContraption",
     "MixinEntity",
-    "accessor.ShipObjectServerWorldAccessor"
+    "accessor.ShipObjectServerWorldAccessor",
+    "tweak.MixinTweakedLecternControllerBlockEntity",
+    "tweak.MixinTweakLinkedControllerAxisPacket"
   ],
   "package": "com.verr1.controlcraft.mixin",
   "injectors": {

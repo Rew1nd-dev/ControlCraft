@@ -9,10 +9,11 @@ import org.joml.primitives.AABBdc;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.simibubi.create.content.kinetics.base.KineticBlockEntity.convertToAngular;
-import static com.simibubi.create.content.kinetics.base.KineticBlockEntity.convertToLinear;
-
 public class MathUtils {
+
+    public static final double EXP_1 = Math.exp(1);
+
+    public static final double eps = 1e-10;
 
     public static double clamp(double value, double min, double max) {
         return Math.max(min, Math.min(max, value));
@@ -146,4 +147,11 @@ public class MathUtils {
         ));
     }
 
+    public static Vector3d safeNormalize(Vector3d hvt) {
+        double length = hvt.length();
+        if (length == 0) {
+            return new Vector3d(0, 0, 0);
+        }
+        return new Vector3d(hvt.x() / length, hvt.y() / length, hvt.z() / length);
+    }
 }

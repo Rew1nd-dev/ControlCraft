@@ -1,18 +1,13 @@
 package com.verr1.controlcraft.foundation.network.packets.specific;
 
-import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldMessage;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotDirection;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.ArrayList;
@@ -35,10 +30,10 @@ public class ExposedFieldOpenScreenPacket extends SimplePacketBase {
         for (int i = 0; i < size; i++) {
             availableFields.add(
                     new ExposedFieldMessage(
-                            buffer.readEnum(ExposedFieldType.class),
+                            buffer.readEnum(SlotType.class),
                             buffer.readDouble(),
                             buffer.readDouble(),
-                            buffer.readEnum(ExposedFieldDirection.class)
+                            buffer.readEnum(SlotDirection.class)
                     )
             );
         }

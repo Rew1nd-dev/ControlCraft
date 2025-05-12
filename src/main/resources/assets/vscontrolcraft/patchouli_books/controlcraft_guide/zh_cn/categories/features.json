@@ -1,0 +1,6 @@
+{
+  "name": "特殊机制",
+  "description": "控制学对其他mod特性的兼容，修改，加强",
+  "icon": "create:experience_nugget",
+  "sortnum": 4
+}

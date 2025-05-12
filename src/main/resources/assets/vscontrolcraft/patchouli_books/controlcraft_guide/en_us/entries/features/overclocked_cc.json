@@ -1,0 +1,31 @@
+{
+  "name": "Physics-Tick CC",
+  "icon": "vscontrolcraft:awe_in_wand",
+  "category": "vscontrolcraft:features",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Standard ComputerCraft (CC) Lua scripts run at 20Hz (0.05s intervals), matching game ticks. When used for control logic, this limits performance as physics updates at 60Hz - 3x faster than CC's default frequency."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Previous CCVS-based solutions attempted to improve this by:$(li)Creating blocks that send physics-tick events to CC computers$(li)Using os.pullEvent() to process real-time physics data$(li)Directly applying forces via API calls"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "While effective for direct force application, this fails for peripheral-based control (e.g., RPM controllers) because peripherals update at game-tick speed, blocking Lua threads."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Control Craft's configuration includes a \"Physics-Frame CC\" option. When enabled:$(li)Lua scripts sync with physics ticks instead of game ticks$(li)Peripheral methods update control parameters (RPM, force) at 60Hz$(li)Specialized peripheral designs prevent thread blocking"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Warnings:$(li)Game-tick-dependent peripherals may malfunction$(li)Avoid world-access methods (e.g., camera clip) - use callRemoteAsync() for raycasting$(li)Potential stability issues not fully resolved"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "For most use cases, 20Hz control suffices. Built-in PID controllers automatically handle physics-tick adjustments. Use Kinetic Anchors with position/rotation damping for smoother operation."
+    }
+  ]
+}

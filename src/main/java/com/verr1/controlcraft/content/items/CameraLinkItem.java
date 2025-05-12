@@ -41,6 +41,8 @@ public class CameraLinkItem extends Item {
 
         if(context.getLevel().getBlockState(context.getClickedPos()).is(ControlCraftBlocks.CAMERA_BLOCK.get())){
             displayCreateLinkScreen(context.getClickedPos());
+        }else{
+            displayLinkScreen();
         }
 
         return InteractionResult.SUCCESS;

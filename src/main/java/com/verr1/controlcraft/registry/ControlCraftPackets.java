@@ -2,6 +2,7 @@ package com.verr1.controlcraft.registry;
 
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.controlcraft.ControlCraft;
+import com.verr1.controlcraft.content.legacy.TerminalSettingsPacket__;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
 import com.verr1.controlcraft.foundation.network.packets.GenericClientPacket;
@@ -32,7 +33,8 @@ public enum ControlCraftPackets {
     GENERIC_SERVER(GenericServerPacket.class, GenericServerPacket::new, NetworkDirection.PLAY_TO_SERVER),
     BLOCK_BOUND_SERVER(BlockBoundServerPacket.class, BlockBoundServerPacket::new, NetworkDirection.PLAY_TO_SERVER),
     SETTING_EXPOSED_FIELD(ExposedFieldSettingsPacket.class, ExposedFieldSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
-    TERMINAL_SETTINGS(TerminalSettingsPacket.class, TerminalSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
+    TERMINAL_SETTINGS(TerminalSettingsPacket__.class, TerminalSettingsPacket__::new, NetworkDirection.PLAY_TO_SERVER),
+    TERMINAL_SETTINGS_(TerminalSettingsPacket.class, TerminalSettingsPacket::new, NetworkDirection.PLAY_TO_SERVER),
     REQUEST_SYNC(LazyRequestBlockEntitySyncPacket.class, LazyRequestBlockEntitySyncPacket::new, NetworkDirection.PLAY_TO_SERVER),
     SYNC_BLOCKENTITY_SERVER(SyncBlockEntityServerPacket.class, SyncBlockEntityServerPacket::new, NetworkDirection.PLAY_TO_SERVER),
     REMOTE(RemotePacket.class, RemotePacket::new, NetworkDirection.PLAY_TO_SERVER),

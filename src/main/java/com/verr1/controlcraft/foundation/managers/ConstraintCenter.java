@@ -61,6 +61,7 @@ public class ConstraintCenter {
     public static void onServerStopping(MinecraftServer server){
         ConstraintSavedData storage = ConstraintSavedData.load(server);
         storage.clear();
+        ControlCraft.LOGGER.info("Saving {} constrains", cache.size());
         cache.forEach((key, data) -> {
             try{
                 storage.put(key, data.constrain());

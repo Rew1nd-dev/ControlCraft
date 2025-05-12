@@ -1,53 +1,48 @@
 {
-  "name": "摄像头",
+  "name": "Camera",
   "icon": "vscontrolcraft:camera",
   "category": "vscontrolcraft:abstract",
   "pages": [
-
     {
       "type": "patchouli:spotlight",
       "item": "vscontrolcraft:camera",
-      "title": "襟翼轴承",
-      "text": "简介 $(br2)自动标记目标的摄像头，可以远程连接，具有丰富的射线检测功能$(br2)使用shift+右键打开面板，右键则是直接使用摄像头，在摄像头视角按空格脱离$(br)使用摄像头连接器可以命名多个摄像头并远程连接"
+      "title": "Camera",
+      "text": "Overview $(br2)Automated target-marking camera with remote connectivity and advanced ray detection.$(br2)Shift + Right Click to open the panel. Right Click to activate. Press Space to exit camera view.$(br)Use a Camera Connector to name and remotely link cameras."
     },
     {
       "type": "patchouli:image",
-      "title": "摄像头的主要面板",
+      "title": "Main Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/camera/panel_main.png"],
       "text": ""
-
     },
     {
       "type": "patchouli:text",
-      "text": "主要面板 $(br2)$(li)Is_Sensor：设置是否作为距离检测器，如果打开，则会检测面前方块的距离，并输出对应红石信号$(li)Cast Ray:$(li2)Never：从不渲染射线$(li2)Always：总是渲染射线，所有人可见$(li2)On Use，只在使用时渲染，只有使用者可见"
+      "text": "Main Panel $(br2)$(li)Is_Sensor: Enables distance detection. When active, outputs redstone signals based on block distance.$(li)Cast Ray:$(li2)Never: No ray rendering.$(li2)Always: Always render rays (visible to all).$(li2)On Use: Render only during use (visible to user)."
     },
     {
       "type": "patchouli:text",
-      "text": "主要面板 $(br2)$(li)ShipOutline：$(li2)ON：当看向物理结构时，高亮物理结构$(li2)OFF：不高亮物理结构$(li)Entity Outline：$(li2)OFF：关$(li2)Target Only：只高亮视野正中的实体$(li2)IN View：高亮视野内一定范围所有实体$(li2)NEAREST：高亮视野一定范围内最近的实体"
+      "text": "Main Panel $(br2)$(li)ShipOutline:$(li2)ON: Highlights physics structures.$(li2)OFF: Disables highlighting.$(li)Entity Outline:$(li2)OFF: Disable.$(li2)Target Only: Highlight centered entities.$(li2)IN View: Highlight all entities in view.$(li2)NEAREST: Highlight nearest entity."
     },
     {
       "type": "patchouli:image",
-      "title": "摄像头的红石面板",
+      "title": "Redstone Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/camera/panel_redstone.png"]
-
     },
-
     {
       "type": "patchouli:text",
-      "text": "红石面板 $(br2) 红石面板中，允许作为红石输入的有$(li)Is_Sensor: 开关是否作为距离检测器，当打开时，$(li2)若min<max，信号随距离递增而递增：当距离小于等于min时，输出红石信号0，距离大于等于max时,输出15，在这之中时则线性插值。$(li2)如果min>max，则方向相反，信号随距离递减而递增"
+      "text": "Redstone Panel $(br2)Input options:$(li)Is_Sensor: When enabled:$(li2)If min < max, signal increases with distance (0 at min, 15 at max).$(li2)If min > max, signal decreases with distance."
     },
     {
       "type": "patchouli:image",
-      "title": "连接器的管理面板/命名面板",
+      "title": "Management/Naming",
       "images": [
         "vscontrolcraft:patchouli/categories/abstract/camera/remote_main.png",
         "vscontrolcraft:patchouli/categories/abstract/camera/remote_name.png"
       ]
-
     },
     {
       "type": "patchouli:text",
-      "text": "连接器面板 $(br2) 使用连接器右键摄像头，会打开命名面板，输入名称并关闭面板将保存，点击x按钮将取消$(br2)在管理面板中，点击方框按钮将远程连接该摄像头，注意该摄像头必须在客户端的已加载区块$(br2)面板中按下$(li)垃圾桶按钮将舍弃所有已保存摄像头$(li)刷新按钮将删除所有位于客户端未加载区块的摄像头$(li)x号按钮将删除对应摄像头"
+      "text": "Connector Panel $(br2)Right-click a camera with the connector to name it. Click X to cancel.$(br2)In the management panel:$(li)Box Button: Remotely connect (camera must be in loaded chunks).$(li)Trash Button: Delete all saved cameras.$(li)Refresh Button: Remove cameras in unloaded chunks.$(li)X Button: Delete selected camera."
     }
   ]
 }

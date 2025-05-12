@@ -5,6 +5,8 @@ import com.google.gson.JsonObject;
 import com.simibubi.create.foundation.utility.FilesHelper;
 import com.tterrag.registrate.providers.ProviderType;
 import com.verr1.controlcraft.ControlCraft;
+import com.verr1.controlcraft.foundation.type.descriptive.GroupPolicy;
+import com.verr1.controlcraft.foundation.type.descriptive.LerpType;
 import com.verr1.controlcraft.foundation.type.descriptive.*;
 import com.verr1.controlcraft.registry.datagen.ControlCraftDataProvider;
 import net.minecraftforge.data.event.GatherDataEvent;
@@ -63,13 +65,15 @@ public class ControlCraftDataGen {
         CheatMode.register();
         WandGUIModesType.register();
         LockMode.register();
-        ExposedFieldType.register();
-        ExposedFieldDirection.register();
+        SlotType.register();
+        SlotDirection.register();
         MiscDescription.register();
         UIContents.register();
         TargetMode.register();
         CameraClipType.register();
         TabType.register();
+        GroupPolicy.register();
+        LerpType.register();
     }
 
 }

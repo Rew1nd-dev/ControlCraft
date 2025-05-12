@@ -1,9 +1,11 @@
 package com.verr1.controlcraft.content.blocks.jet;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.JetForceInducer;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.data.NumericField;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
@@ -14,12 +16,11 @@ import com.verr1.controlcraft.foundation.data.SynchronizedField;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.data.logical.LogicalJet;
-import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
-import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
-import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
+import com.verr1.controlcraft.foundation.redstone.DirectReceiver;
+import com.verr1.controlcraft.foundation.redstone.IReceiver;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
-import com.verr1.controlcraft.registry.ControlCraftPackets;
+import com.verr1.controlcraft.utils.MathUtils;
 import com.verr1.controlcraft.utils.SerializeUtils;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.shared.Capabilities;
@@ -27,14 +28,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
@@ -44,7 +43,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class JetBlockEntity extends OnShipBlockEntity implements
-        ITerminalDevice, IPacketHandler, IHaveGoggleInformation
+        IReceiver, IPacketHandler, IHaveGoggleInformation
 {
 
     public SynchronizedField<Double> horizontalAngle = new SynchronizedField<>(0.0);
@@ -61,41 +60,30 @@ public class JetBlockEntity extends OnShipBlockEntity implements
     private JetPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
 
-    private final List<ExposedFieldWrapper> fields = List.of(
-            new ExposedFieldWrapper(
-                    thrust::read,
-                    thrust::write,
-                    "thrust",
-                    ExposedFieldType.THRUST
-            ).withSuggestedRange(0, 10000),
-            new ExposedFieldWrapper(
-                    horizontalAngle::read,
-                    horizontalAngle::write,
-                    "horizontal",
-                    ExposedFieldType.HORIZONTAL_TILT
-            ).withSuggestedRange(-Math.PI / 2, Math.PI / 2),
-            new ExposedFieldWrapper(
-                    verticalAngle::read,
-                    verticalAngle::write,
-                    "vertical",
-                    ExposedFieldType.VERTICAL_TILT
-            ).withSuggestedRange(-Math.PI / 2, Math.PI / 2),
-            new ExposedFieldWrapper(
-                    horizontalAngle::read,
-                    horizontalAngle::write,
-                    "horizontal",
-                    ExposedFieldType.HORIZONTAL_TILT$1
-            ).withSuggestedRange(-Math.PI / 2, Math.PI / 2),
-            new ExposedFieldWrapper(
-                    verticalAngle::read,
-                    verticalAngle::write,
-                    "vertical",
-                    ExposedFieldType.VERTICAL_TILT$1
-            ).withSuggestedRange(-Math.PI / 2, Math.PI / 2)
-    );
+    private final DirectReceiver receiver = new DirectReceiver();
 
-    private ExposedFieldWrapper exposedField = fields.get(0);
+    private static final double SQRT_2 = Math.sqrt(2);
 
+    @Override
+    public DirectReceiver receiver() {
+        return receiver;
+    }
+
+    public void setOutputThrust(Vector3d hvt){
+
+        Vector3d hvt_norm = MathUtils.safeNormalize(hvt);
+        double scale = hvt.length();
+
+        double h = Math.asin(hvt_norm.x);
+        double cosh = Math.cos(h);
+        cosh = Math.signum(cosh) * MathUtils.eps + cosh;
+        double v = Math.asin(MathUtils.clamp(hvt_norm.y / cosh, 1 - MathUtils.eps));
+
+
+        horizontalAngle.write(h);
+        verticalAngle.write(v);
+        thrust.write(scale);
+    }
 
 
     @Override
@@ -136,8 +124,8 @@ public class JetBlockEntity extends OnShipBlockEntity implements
 
     public static Vector3d getThrustDir(double h, double v, Vector3dc basis_h, Vector3dc basis_v, Vector3dc basis_t){
         double sh = Math.sin(h);
-        double sv = Math.sin(v);
-        double st = Math.sqrt(Math.abs(1 - 0.5 * (sh * sh + sv * sv))); // in case of < 0
+        double sv = Math.sin(v) * Math.cos(h);
+        double st = Math.cos(v) * Math.cos(h);// Math.sqrt(Math.abs(0.5 - 0.5 * (sh * sh + sv * sv))); // in case of < 0
 
         Vector3d dir =
                 new Vector3d(
@@ -172,7 +160,7 @@ public class JetBlockEntity extends OnShipBlockEntity implements
     }
 
     public void syncAttachedJet(){
-        if(level.isClientSide)return;
+        if(level == null || level.isClientSide)return;
         BlockPos jetPos = getBlockPos().relative(getDirection().getOpposite());
         if(!(level.getExistingBlockEntity(jetPos) instanceof JetRudderBlockEntity jet)){
             canVectorize = false;
@@ -202,54 +190,29 @@ public class JetBlockEntity extends OnShipBlockEntity implements
     public void tickServer() {
         syncAttachedJet();
         syncAttachedInducer();
-        syncForNear(true, FIELD);
+        syncForNear(true, FIELD_);
     }
 
 
-    @Override
-    public List<ExposedFieldWrapper> fields() {
-        return fields;
-    }
 
     @Override
     public String name() {
         return "Jet";
     }
 
-    public void displayScreen(ServerPlayer player){
-        double h = horizontalAngle.read();
-        double v = verticalAngle.read();
-        double t = thrust.read();
-        var p = new BlockBoundClientPacket.builder(getBlockPos(), RegisteredPacketType.OPEN_SCREEN_0)
-                .withDouble(h)
-                .withDouble(v)
-                .withDouble(t)
-                .build();
-
-        ControlCraftPackets.sendToPlayer(p, player);
-    }
 
 
 
-    @Override
-    public void handleServer(NetworkEvent.Context context, BlockBoundServerPacket packet) {
-        if(packet.getType() == RegisteredPacketType.SETTING_0){
-            double t = packet.getDoubles().get(0);
-            double h = packet.getDoubles().get(1);
-            double v = packet.getDoubles().get(2);
-            thrust.write(t);
-            horizontalAngle.write(h);
-            verticalAngle.write(v);
-        }
-    }
+
+
 
     public JetBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
 
-        buildRegistry(FIELD)
+        buildRegistry(FIELD_)
                 .withBasic(CompoundTagPort.of(
-                        ITerminalDevice.super::serialize,
-                        ITerminalDevice.super::deserializeUnchecked
+                        () -> receiver().serialize(),
+                        t -> receiver().deserialize(t)
                 ))
                 .withClient(
                         new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
@@ -287,51 +250,41 @@ public class JetBlockEntity extends OnShipBlockEntity implements
                 .dispatchToSync()
                 .register();
 
-
-        /*
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(
-                thrust::read,
-                thrust::write,
-                SerializeUtils.DOUBLE,
-                THRUST
-        ),
-                Side.SHARED
+        receiver()
+            .register(
+                new NumericField(
+                        horizontalAngle::read,
+                        horizontalAngle::write,
+                        "horizontal"
+                ),
+                new DirectReceiver.InitContext(SlotType.HORIZONTAL_TILT, Couple.create(0.0, 10000.0)),
+                6
+        )
+            .register(
+                new NumericField(
+                        verticalAngle::read,
+                        verticalAngle::write,
+                        "vertical"
+                ),
+                new DirectReceiver.InitContext(SlotType.VERTICAL_TILT, Couple.create(0.0, 10000.0)),
+                6
+        )
+            .register(
+                new NumericField(
+                        thrust::read,
+                        thrust::write,
+                        "horizontal"
+                ),
+                new DirectReceiver.InitContext(SlotType.THRUST, Couple.create(0.0, 10000.0)),
+                4
         );
-
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(
-                horizontalAngle::read,
-                horizontalAngle::write,
-                SerializeUtils.DOUBLE,
-                HORIZONTAL_ANGLE
-        ),
-                Side.SHARED
-        );
-
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(
-                verticalAngle::read,
-                verticalAngle::write,
-                SerializeUtils.DOUBLE,
-                VERTICAL_ANGLE
-        ),
-                Side.SHARED
-        );
-
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),
-                        tag -> tag.put("fields", ITerminalDevice.super.serialize()),
-                        FIELD),
-                Side.SHARED
-        );
-        * */
-
-
-
 
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        return ITerminalDevice.super.TerminalDeviceToolTip(tooltip, isPlayerSneaking);
+        return receiver().makeToolTip(tooltip, isPlayerSneaking)
+        ;
     }
 }

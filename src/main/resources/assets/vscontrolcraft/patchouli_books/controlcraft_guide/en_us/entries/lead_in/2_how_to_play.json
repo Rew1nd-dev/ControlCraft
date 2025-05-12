@@ -1,13 +1,11 @@
 {
-  "name": "怎样游玩控制学",
+  "name": "How to Play ControlCraft",
   "icon": "vscontrolcraft:awe_in_wand",
   "category": "vscontrolcraft:lead_in",
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "控制学方块功能很多，机制复杂，很多原理往往需要玩家具有较为充分的数学，物理，编程知识才能完全掌控 $(br2)但这并不意味着不擅长以上几项技能就无法游玩，在本教程的引导下，你将学习常用的知识，并且能够知晓在何时、何处、如何使用控制学机械达成你的设计意图，即使你对背后的细节并不完全理解"
+      "text": "Control Craft mechanics are complex, often requiring math, physics, or programming knowledge for full mastery.$(br2)But this guide will teach you practical workflows to achieve your designs—even without deep theoretical understanding."
     }
-
-
   ]
 }

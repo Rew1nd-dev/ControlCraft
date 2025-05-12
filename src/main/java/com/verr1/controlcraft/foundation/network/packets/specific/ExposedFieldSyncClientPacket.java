@@ -4,8 +4,8 @@ import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldMessage;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotDirection;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -56,10 +56,10 @@ public class ExposedFieldSyncClientPacket extends SimplePacketBase {
         for (int i = 0; i < size; i++) {
             messages.add(
                     new ExposedFieldMessage(
-                            buffer.readEnum(ExposedFieldType.class),
+                            buffer.readEnum(SlotType.class),
                             buffer.readDouble(),
                             buffer.readDouble(),
-                            buffer.readEnum(ExposedFieldDirection.class)
+                            buffer.readEnum(SlotDirection.class)
                     )
             );
         }

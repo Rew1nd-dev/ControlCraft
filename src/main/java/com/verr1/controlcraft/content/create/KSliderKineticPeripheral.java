@@ -3,7 +3,7 @@ package com.verr1.controlcraft.content.create;
 import com.simibubi.create.content.kinetics.transmission.sequencer.SequencerInstructions;
 import com.verr1.controlcraft.content.blocks.slider.KinematicSliderBlockEntity;
 import com.verr1.controlcraft.foundation.api.IKineticPeripheral;
-import com.verr1.controlcraft.foundation.data.executor.IntervalExecutable;
+import com.verr1.controlcraft.foundation.executor.executables.IntervalExecutable;
 import com.verr1.controlcraft.foundation.executor.Executor;
 import com.verr1.controlcraft.foundation.type.descriptive.TargetMode;
 import com.verr1.controlcraft.utils.MathUtils;

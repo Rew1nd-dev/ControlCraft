@@ -1,7 +1,7 @@
 package com.verr1.controlcraft.content.blocks.motor;
 
+import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.content.create.KMotorKineticPeripheral;
-import com.verr1.controlcraft.content.valkyrienskies.attachments.legacy.KinematicMotorForceInducer_;
 import com.verr1.controlcraft.content.valkyrienskies.controls.InducerControls;
 import com.verr1.controlcraft.content.valkyrienskies.transform.KinematicMotorTransformProvider;
 import com.verr1.controlcraft.content.valkyrienskies.transform.LerpedTransformProvider;
@@ -9,7 +9,7 @@ import com.verr1.controlcraft.content.gui.layouts.api.IKinematicUIDevice;
 import com.verr1.controlcraft.foundation.api.IKineticPeripheral;
 import com.verr1.controlcraft.foundation.api.delegate.IKineticDevice;
 import com.verr1.controlcraft.foundation.data.GroundBodyShip;
-import com.verr1.controlcraft.foundation.data.WorldBlockPos;
+import com.verr1.controlcraft.foundation.data.NumericField;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
@@ -19,7 +19,9 @@ import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.control.KinematicController;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.data.logical.LogicalKinematicMotor;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.redstone.DirectReceiver;
+import com.verr1.controlcraft.foundation.redstone.IReceiver;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.foundation.type.descriptive.TargetMode;
 import com.verr1.controlcraft.foundation.vsapi.PhysPose;
 import com.verr1.controlcraft.utils.SerializeUtils;
@@ -47,7 +49,7 @@ import java.util.Optional;
 import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 
 public abstract class AbstractKinematicMotor extends AbstractMotor implements
-        ITerminalDevice, IPacketHandler, IKinematicUIDevice, IKineticDevice
+        IReceiver, IPacketHandler, IKinematicUIDevice, IKineticDevice
 {
     protected KinematicController controller = new KinematicController();
 
@@ -59,20 +61,7 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
 
     protected double targetOfLastAppliedConstraint = 114514; // magic number : )
 
-    private final List<ExposedFieldWrapper> fields = List.of(
-            new ExposedFieldWrapper(
-                    () -> controller.getControlTarget(),
-                    t -> controller.setControlTarget(t),
-                    "target",
-                    ExposedFieldType.FORCED_TARGET
-            ).withSuggestedRange(0, Math.PI / 2),
-            new ExposedFieldWrapper(
-                    () -> controller.getControlTarget(),
-                    t -> controller.setControlTarget(t),
-                    "target",
-                    ExposedFieldType.FORCED_TARGET$1
-            ).withSuggestedRange(0, Math.PI / 2)
-    );
+    private final DirectReceiver receiver = new DirectReceiver();
 
     private KinematicMotorPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
@@ -81,6 +70,11 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
     @Override
     public IKineticPeripheral peripheral() {
         return kineticPeripheral;
+    }
+
+    @Override
+    public DirectReceiver receiver() {
+        return receiver;
     }
 
     @Override
@@ -119,10 +113,6 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
         return controller;
     }
 
-    @Override
-    public List<ExposedFieldWrapper> fields() {
-        return fields;
-    }
 
     @Override
     public String name() {
@@ -155,10 +145,10 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
                 ))
                 .register();
 
-        buildRegistry(FIELD)
+        buildRegistry(FIELD_)
                 .withBasic(CompoundTagPort.of(
-                        ITerminalDevice.super::serialize,
-                        ITerminalDevice.super::deserializeUnchecked
+                        () -> receiver().serialize(),
+                        t -> receiver().deserialize(t)
                 ))
                 .withClient(
                         new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
@@ -166,7 +156,15 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
                 .dispatchToSync()
                 .register();
 
-
+        receiver().register(
+                new NumericField(
+                        () -> getController().getTarget(),
+                        t -> getController().setControlTarget(t),
+                        "target"
+                ),
+                new DirectReceiver.InitContext(SlotType.TARGET, Couple.create(-Math.PI, Math.PI)),
+                6
+        );
     }
 
 
@@ -272,7 +270,7 @@ public abstract class AbstractKinematicMotor extends AbstractMotor implements
     @Override
     public void tickServer() {
         super.tickServer();
-        syncForNear(true, FIELD);
+        syncForNear(true, FIELD_);
         if(USE_CONSTRAINT_SPAMMING) {
             tickConstraint();
         } else{

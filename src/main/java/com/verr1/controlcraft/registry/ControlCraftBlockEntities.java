@@ -36,9 +36,9 @@ import com.verr1.controlcraft.content.blocks.spatial.SpatialAnchorBlockEntity;
 import com.verr1.controlcraft.content.blocks.spinalyzer.SpinalyzerBlock;
 import com.verr1.controlcraft.content.blocks.spinalyzer.SpinalyzerBlockEntity;
 import com.verr1.controlcraft.content.blocks.terminal.TerminalBlock;
-import com.verr1.controlcraft.content.blocks.terminal.TerminalBlockEntity;
 import com.verr1.controlcraft.content.blocks.transmitter.PeripheralProxyBlock;
 import com.verr1.controlcraft.content.blocks.transmitter.PeripheralProxyBlockEntity;
+import com.verr1.controlcraft.content.blocks.terminal.TerminalBlockEntity;
 import com.verr1.controlcraft.render.*;
 
 import static com.verr1.controlcraft.ControlCraft.REGISTRATE;

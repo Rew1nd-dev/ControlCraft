@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class NumericField implements Field<Double> {
-    public static NumericField EMPTY = new NumericField(() -> 0.0, (v) -> {}, "empty");
+    public static final NumericField EMPTY = new NumericField(() -> 0.0, (v) -> {}, "empty");
 
     private final Supplier<Double> value;
     private final Consumer<Double> callback;

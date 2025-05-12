@@ -1,6 +1,7 @@
 package com.verr1.controlcraft.content.blocks.motor;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.create.DMotorKineticPeripheral;
@@ -17,8 +18,10 @@ import com.verr1.controlcraft.foundation.data.*;
 import com.verr1.controlcraft.foundation.data.control.DynamicController;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.data.logical.LogicalDynamicMotor;
+import com.verr1.controlcraft.foundation.redstone.DirectReceiver;
+import com.verr1.controlcraft.foundation.redstone.IReceiver;
 import com.verr1.controlcraft.foundation.type.descriptive.CheatMode;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.foundation.type.descriptive.LockMode;
 import com.verr1.controlcraft.foundation.type.descriptive.TargetMode;
 import com.verr1.controlcraft.utils.MathUtils;
@@ -49,7 +52,7 @@ import java.util.Optional;
 import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 
 public abstract class AbstractDynamicMotor extends AbstractMotor implements
-        IHaveGoggleInformation, IControllerProvider, ITerminalDevice, IPacketHandler, IKineticDevice
+        IHaveGoggleInformation, IControllerProvider, IReceiver, IPacketHandler, IKineticDevice
 {
     public SynchronizedField<Double> controlTorque = new SynchronizedField<>(0.0);
 
@@ -57,10 +60,17 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
     private boolean isLocked = false;
 
 
+    private final DirectReceiver receiver = new DirectReceiver();
+
     protected TargetMode targetMode = TargetMode.VELOCITY;
     protected LockMode lockMode = LockMode.OFF;
     protected CheatMode cheatMode = CheatMode.NONE;
     protected boolean reverseCreateInput = false;
+
+    @Override
+    public DirectReceiver receiver() {
+        return receiver;
+    }
 
     public void setTargetAccordingly(double target){
         switch (targetMode){
@@ -113,19 +123,19 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
                     controlTorque::read,
                     controlTorque::write,
                     "Torque",
-                    ExposedFieldType.TORQUE
+                    SlotType.TORQUE
             ).withSuggestedRange(0, 1000),
             new ExposedFieldWrapper(
                     this::getTarget,
                     this::setTargetAccordingly,
                     "target",
-                    ExposedFieldType.TARGET
+                    SlotType.TARGET
             ).withSuggestedRange(0, Math.PI / 2),
             new ExposedFieldWrapper(
                     this::getTarget,
                     this::setTargetAccordingly,
                     "target",
-                    ExposedFieldType.TARGET$1
+                    SlotType.TARGET$1
             ).withSuggestedRange(0, Math.PI / 2),
             new ExposedFieldWrapper(
                     () -> (isLocked ? 1.0 : 0.0),
@@ -134,7 +144,7 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
                         else if(d < (double) 1 / 15)tryUnlock();
                     },
                     "Locked",
-                    ExposedFieldType.IS_LOCKED
+                    SlotType.IS_LOCKED
             ),
             new ExposedFieldWrapper(
                     () -> (isLocked ? 1.0 : 0.0),
@@ -143,7 +153,7 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
                         else if(d < (double) 1 / 15)tryUnlock();
                     },
                     "Locked",
-                    ExposedFieldType.IS_LOCKED$1
+                    SlotType.IS_LOCKED$1
             )
     );
 
@@ -169,11 +179,6 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
             return peripheralCap.cast();
         }
         return super.getCapability(cap, side);
-    }
-
-    @Override
-    public List<ExposedFieldWrapper> fields() {
-        return fields;
     }
 
     @Override
@@ -228,7 +233,7 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
                 0.0
         );
 
-        updateConstraint("fix", fixed);
+        overrideConstraint("fix", fixed);
         isLocked = true;
         setChanged();
     }
@@ -278,7 +283,6 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
     public void tickServer() {
         super.tickServer();
         syncAttachInducer();
-        syncForNear(true, FIELD);
         lockCheck();
         kineticPeripheral.tick();
         // ExposedFieldSyncClientPacket.syncClient(this, getBlockPos(), level);
@@ -288,7 +292,7 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
     @Override
     public void lazyTickServer() {
         super.lazyTickServer();
-        syncForNear(true, FIELD, CONTROLLER);
+        syncForNear(true, FIELD_, CONTROLLER);
     }
 
     public void lockCheck(){
@@ -374,10 +378,10 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
                 .withClient(ClientBuffer.BOOLEAN.get())
                 .register();
 
-        buildRegistry(FIELD)
+        buildRegistry(FIELD_)
                 .withBasic(CompoundTagPort.of(
-                        ITerminalDevice.super::serialize,
-                        ITerminalDevice.super::deserializeUnchecked
+                        () -> receiver().serialize(),
+                        t -> receiver().deserialize(t)
                 ))
                 .withClient(
                         new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
@@ -430,6 +434,38 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
         panel().registerUnit(SharedKeys.UNLOCK, this::tryUnlock);
         panel().registerUnit(SharedKeys.DISASSEMBLE, this::destroyConstraints);
 
+        receiver()
+            .register(
+                    new NumericField(
+                            this::getOutputTorque,
+                            this::setOutputTorque,
+                            "torque"
+                    ),
+                    new DirectReceiver.InitContext(SlotType.TORQUE, Couple.create(0.0, 1000.0)),
+                    2
+        )
+            .register(
+                    new NumericField(
+                            this::getTarget,
+                            this::setTargetAccordingly,
+                            "target"
+                    ),
+                    new DirectReceiver.InitContext(SlotType.TARGET, Couple.create(0.0, Math.PI / 2.0)),
+                    6
+        )
+            .register(
+                    new NumericField(
+                            () -> isLocked() ? 1.0 : 0.0,
+                            t -> {
+                                if (t > 0.001) tryLock();
+                                else tryUnlock();
+                            },
+                            "locked"
+                    ),
+                    new DirectReceiver.InitContext(SlotType.IS_LOCKED, Couple.create(0.0, 1.0)),
+                    2
+        );
+
     }
 
 
@@ -448,7 +484,7 @@ public abstract class AbstractDynamicMotor extends AbstractMotor implements
     @OnlyIn(Dist.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        return ITerminalDevice.super.TerminalDeviceToolTip(tooltip, isPlayerSneaking);
+        return receiver().makeToolTip(tooltip, isPlayerSneaking);
     }
 
 }

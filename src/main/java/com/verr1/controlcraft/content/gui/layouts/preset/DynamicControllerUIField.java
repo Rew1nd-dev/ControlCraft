@@ -8,7 +8,7 @@ import com.verr1.controlcraft.content.gui.widgets.FormattedLabel;
 import com.verr1.controlcraft.content.gui.layouts.element.TypedUIPort;
 import com.verr1.controlcraft.content.gui.layouts.api.ISerializableDynamicController;
 import com.verr1.controlcraft.foundation.data.control.PID;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.foundation.type.descriptive.UIContents;
 import com.verr1.controlcraft.utils.ParseUtils;
 import net.minecraft.client.Minecraft;
@@ -25,9 +25,9 @@ public class DynamicControllerUIField extends TypedUIPort<CompoundTag> implement
         ISerializableDynamicController, TitleLabelProvider
 {
     FormattedLabel title =  convert(UIContents.PID_CONTROLLER, Converter::viewStyle).toDescriptiveLabel();
-    FormattedLabel pLabel = convert(ExposedFieldType.P, Converter::pidStyle).toDescriptiveLabel();
-    FormattedLabel iLabel = convert(ExposedFieldType.I, Converter::pidStyle).toDescriptiveLabel();
-    FormattedLabel dLabel = convert(ExposedFieldType.D, Converter::pidStyle).toDescriptiveLabel();
+    FormattedLabel pLabel = convert(SlotType.P, Converter::pidStyle).toDescriptiveLabel();
+    FormattedLabel iLabel = convert(SlotType.I, Converter::pidStyle).toDescriptiveLabel();
+    FormattedLabel dLabel = convert(SlotType.D, Converter::pidStyle).toDescriptiveLabel();
     EditBox pField;
     EditBox iField;
     EditBox dField;

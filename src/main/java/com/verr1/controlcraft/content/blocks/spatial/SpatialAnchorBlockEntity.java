@@ -1,30 +1,27 @@
 package com.verr1.controlcraft.content.blocks.spatial;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
-import com.verr1.controlcraft.Config;
+import com.simibubi.create.foundation.utility.Couple;
+import com.verr1.controlcraft.config.BlockPropertyConfig;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
-import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.gui.layouts.api.IScheduleProvider;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.SpatialForceInducer;
 import com.verr1.controlcraft.foundation.api.*;
-import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.api.operatable.IBruteConnectable;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.data.NumericField;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
 import com.verr1.controlcraft.content.cctweaked.peripheral.SpatialAnchorPeripheral;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
 import com.verr1.controlcraft.foundation.data.control.SpatialSchedule;
-import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.data.logical.LogicalSpatial;
 import com.verr1.controlcraft.foundation.managers.SpatialLinkManager;
-import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
-import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldSyncClientPacket;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
-import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
+import com.verr1.controlcraft.foundation.redstone.DirectReceiver;
+import com.verr1.controlcraft.foundation.redstone.IReceiver;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
-import com.verr1.controlcraft.registry.ControlCraftPackets;
 import com.verr1.controlcraft.utils.MinecraftUtils;
 import com.verr1.controlcraft.utils.SerializeUtils;
 import com.verr1.controlcraft.utils.VSGetterUtils;
@@ -36,14 +33,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaterniond;
@@ -60,8 +55,12 @@ import static com.simibubi.create.content.kinetics.base.DirectionalKineticBlock.
 import static com.verr1.controlcraft.content.gui.layouts.api.ISerializableSchedule.SCHEDULE;
 
 public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
-        IBruteConnectable, ITerminalDevice, IPacketHandler, IScheduleProvider, IHaveGoggleInformation
+        IBruteConnectable, IReceiver, IPacketHandler, IScheduleProvider, IHaveGoggleInformation
 {
+
+    private final int MAX_DISTANCE_CAN_LINK = BlockPropertyConfig._MAX_DISTANCE_SPATIAL_CAN_LINK;
+    private final int MAX_DISTANCE_SQRT_CAN_LINK = MAX_DISTANCE_CAN_LINK * MAX_DISTANCE_CAN_LINK;
+
     public static NetworkKey IS_RUNNING = NetworkKey.create("is_running");
     public static NetworkKey IS_STATIC = NetworkKey.create("is_static");
     public static NetworkKey OFFSET = NetworkKey.create("offset");
@@ -71,36 +70,20 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
     private ISpatialTarget tracking = null;
     private boolean isStatic = false;
 
+    private final DirectReceiver receiver = new DirectReceiver();
 
     private double anchorOffset = 2.0;
     private long protocol = 0;
-    private final int MAX_DISTANCE_SQRT_CAN_LINK = Config.MaxDistanceSpatialCanLink * Config.MaxDistanceSpatialCanLink;
+
     private SpatialSchedule schedule = new SpatialSchedule().withPPID(18, 3, 12, 10);
 
     private SpatialAnchorPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
 
-    private final List<ExposedFieldWrapper> fields = List.of(
-            new ExposedFieldWrapper(
-                    this::getAnchorOffset,
-                    this::setAnchorOffset,
-                    "offset",
-                    ExposedFieldType.ANCHOR_OFFSET
-            ).withSuggestedRange(0, 16),
-            new ExposedFieldWrapper(
-                    () -> (double) (isRunning() ? 1 : 0),
-                    v -> setRunning(v > (double) 1 / 15) ,
-                    "running",
-                    ExposedFieldType.IS_RUNNING
-            ),
-            new ExposedFieldWrapper(
-                    () -> (double)(isStatic() ? 0 : 1),
-                    v -> setStatic(v > (double) 1 / 15),
-                    "dynamic",
-                    ExposedFieldType.IS_STATIC
-            )
-    );
-
+    @Override
+    public DirectReceiver receiver() {
+        return receiver;
+    }
 
     public SpatialSchedule getSchedule() {
         return schedule;
@@ -289,7 +272,7 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
         trackNearestWhenRunning();
         syncAttachedInducer();
         updateSchedule();
-        syncForNear(true, IS_STATIC, IS_RUNNING, FIELD);
+        syncForNear(true, IS_STATIC, IS_RUNNING, FIELD_);
         // syncClient();
     }
 
@@ -321,30 +304,11 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
     }
 
 
-    @Override
-    public List<ExposedFieldWrapper> fields() {
-        return fields;
-    }
-
-    /*
-    @Override
-    public void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
-        switch (type){
-            case OFFSET -> exposedField = fields.get(0);
-            case IS_RUNNING -> exposedField = fields.get(1);
-            case IS_STATIC -> exposedField = fields.get(2);
-            case P -> exposedField = fields.get(3);
-            case I -> exposedField = fields.get(4);
-            case D -> exposedField = fields.get(5);
-        }
-        exposedField.min_max = new Vector2d(min, max);
-    }
-    * */
 
     @Override
     public void lazyTickServer() {
         super.lazyTickServer();
-        syncForNear(true, FIELD);
+        syncForNear(true, FIELD_);
     }
 
     @Override
@@ -370,10 +334,10 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
     public SpatialAnchorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
 
-        buildRegistry(FIELD)
+        buildRegistry(FIELD_)
                 .withBasic(CompoundTagPort.of(
-                        ITerminalDevice.super::serialize,
-                        ITerminalDevice.super::deserializeUnchecked
+                        () -> receiver().serialize(),
+                        t -> receiver().deserialize(t)
                 ))
                 .withClient(
                         new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
@@ -397,36 +361,39 @@ public class SpatialAnchorBlockEntity extends OnShipBlockEntity implements
         buildRegistry(OFFSET).withBasic(SerializePort.of(this::getAnchorOffset, this::setAnchorOffset, SerializeUtils.DOUBLE)).withClient(ClientBuffer.DOUBLE.get()).register();
         buildRegistry(PROTOCOL).withBasic(SerializePort.of(this::getProtocol, this::setProtocol, SerializeUtils.LONG)).withClient(ClientBuffer.LONG.get()).register();
 
-
-        /*
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),
-                        tag -> tag.put("fields", ITerminalDevice.super.serialize()),
-                        FIELD
+        receiver()
+            .register(
+                new NumericField(
+                        this::getAnchorOffset,
+                        this::setAnchorOffset,
+                        "offset"
                 ),
-                Side.SHARED
+                new DirectReceiver.InitContext(SlotType.OFFSET, Couple.create(0.0, 10.0)),
+                new DirectReceiver.InitContext(SlotType.OFFSET, Couple.create(0.0, 10.0))
+        )
+            .register(
+                    new NumericField(
+                            () -> isRunning() ? 1.0 : 0.0,
+                            t -> setRunning(t > 0.01),
+                            "isRunning"
+                    ),
+            new DirectReceiver.InitContext(SlotType.IS_RUNNING, Couple.create(0.0, 1.0))
+        )
+            .register(
+                    new NumericField(
+                            () -> isStatic() ? 1.0 : 0.0,
+                            t -> setStatic(t > 0.01),
+                            "isStatic"
+                    ),
+                    new DirectReceiver.InitContext(SlotType.IS_STATIC, Couple.create(0.0, 1.0))
         );
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> schedule.deserialize(tag.getCompound("schedule")),
-                        tag -> tag.put("schedule", schedule.serialize()),
-                        SCHEDULE
-                ),
-                Side.SHARED
-        );
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::isRunning, this::setRunning, SerializeUtils.BOOLEAN, IS_RUNNING), Side.SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::isStatic, this::setStatic, SerializeUtils.BOOLEAN, IS_STATIC), Side.SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getAnchorOffset, this::setAnchorOffset, SerializeUtils.DOUBLE, OFFSET), Side.SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getProtocol, this::setProtocol, SerializeUtils.LONG, PROTOCOL), Side.SHARED);
-        *
-        * */
-
     }
 
 
     @Override
     @OnlyIn(Dist.CLIENT)
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        return ITerminalDevice.super.TerminalDeviceToolTip(tooltip, isPlayerSneaking);
+        return receiver().makeToolTip(tooltip, isPlayerSneaking);
     }
 
 }

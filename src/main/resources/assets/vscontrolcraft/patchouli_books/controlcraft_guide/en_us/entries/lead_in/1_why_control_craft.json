@@ -1,26 +1,23 @@
 {
-  "name": "为什么要有控制学",
+  "name": "Why ControlCraft",
   "icon": "vscontrolcraft:awe_in_wand",
   "category": "vscontrolcraft:lead_in",
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "瓦尔基里为Minecraft提供了物理引擎，从此说到Minecraft的建筑，人们想到的不再只是静态的巨构, 拥有拟真物理效果的结构开始进入大家的视野$(br2)然而，玩家一直以来缺少能够准确控制物理结构运动的手段，当玩家尝试约束两个物理结构的运动，比如尝试设计炮塔，机器关节时，传动装置往往占据大量空间，而且难以将结构精确控制在给定角度，系统的快速响应性能也不能令人满意"
-    },
-
-    {
-      "type": "patchouli:text",
-      "text": "与此同时，推进装置为了玩法设计，对玩家的限制过多，且具有力度难以精确控制，需求传动装置的缺点"
-    },
-
-    {
-      "type": "patchouli:text",
-      "text": "在这样的背景下，我设计了控制学，控制学旨在提供以下几类机械/工具：$(br2)$(li)内置控制器的约束装置（轴承，活塞）:通过手动输入、红石信号插值、脚本 直接指定约束体的目标姿态 $(br2)$(li)可精准调节的推进装置(螺旋桨，矢量喷口):通过手动设置/红石信号插值/脚本 精确控制推进力度大小 "
+      "text": "Valkyrien Skies introduced a physics engine to Minecraft, expanding the possibilities of structures from static megabuildings to dynamic machines with realistic physics.$(br2)However, players have long lacked precise control over these structures. Designing turrets, mechanical joints, or other constrained systems often requires bulky transmissions, imprecise angle control, and slow responsiveness."
     },
     {
       "type": "patchouli:text",
-      "text": "$(li)功能性方块(锚，铰链，摄像头): 提供强大而便利的功能，减轻结构设计负担 $(br2)$(li)多功能工具枪:彻底解决约束失效/轴承损坏 时结构掉落，无法维修的问题，随时随地重新连接，让模块化成为可能"
+      "text": "Meanwhile, propulsion systems impose excessive limitations and suffer from force inaccuracy or transmission dependencies."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "This inspired Control Craft, which aims to provide:$(br2)$(li)Constraint devices with built-in controllers (bearings, pistons): Directly set target angles/positions via manual input, redstone interpolation, or scripts.$(br2)$(li)Precision propulsion systems (propellers, vector jets): Adjust thrust magnitude through manual settings, redstone, or scripts."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(li)Functional blocks (anchors, hinges, cameras): Simplify structural design with versatile utilities.$(br2)$(li)Multi-tool gun: Repair disconnected constraints or bearings instantly, enabling modularity."
     }
-
   ]
 }

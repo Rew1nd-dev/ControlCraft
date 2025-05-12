@@ -1,9 +1,11 @@
 package com.verr1.controlcraft.content.blocks.propeller;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.PropellerForceInducer;
+import com.verr1.controlcraft.foundation.data.NumericField;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
@@ -17,7 +19,9 @@ import com.verr1.controlcraft.foundation.data.logical.LogicalPropeller;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
 import com.verr1.controlcraft.foundation.network.packets.specific.ExposedFieldSyncClientPacket;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.redstone.DirectReceiver;
+import com.verr1.controlcraft.foundation.redstone.IReceiver;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
 import com.verr1.controlcraft.utils.SerializeUtils;
@@ -44,7 +48,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
-        ITerminalDevice, IPacketHandler, IHaveGoggleInformation
+        IPacketHandler, IHaveGoggleInformation, IReceiver
 {
     public boolean hasAttachedPropeller = false;
 
@@ -57,20 +61,10 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
     private PropellerControllerPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
 
-    private final List<ExposedFieldWrapper> fields = List.of(
-            new ExposedFieldWrapper(
-                    rotationalSpeed::read,
-                    rotationalSpeed::write,
-                    "Speed",
-                    ExposedFieldType.SPEED
-            ).withSuggestedRange(0, 64),
-            new ExposedFieldWrapper(
-                    rotationalSpeed::read,
-                    rotationalSpeed::write,
-                    "Speed",
-                    ExposedFieldType.SPEED$1
-            ).withSuggestedRange(0, 64)
-    );
+
+
+    private final DirectReceiver receiver = new DirectReceiver();
+
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -97,7 +91,7 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
     @Override
     public void tickServer() {
         super.tickServer();
-        syncForNear(true, FIELD);
+        // syncForNear(true, FIELD);
         syncAttachedPropeller();
         syncAttachedInducer();
     }
@@ -107,44 +101,42 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
     public void lazyTick() {
         super.lazyTick();
         if(level == null || level.isClientSide)return;
-        ExposedFieldSyncClientPacket.syncClient(this, getBlockPos(), level);
+        // ExposedFieldSyncClientPacket.syncClient(this, getBlockPos(), level);
     }
 
     public PropellerControllerBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
-        /*
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(
-                        rotationalSpeed::read,
-                        rotationalSpeed::write,
-                        SerializeUtils.DOUBLE,
-                        SharedKeys.VALUE
-                ),
-                Side.SHARED
-        );
-
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),
-                        tag -> tag.put("fields", ITerminalDevice.super.serialize()),
-                        FIELD),
-                Side.SHARED
-        );
-        * */
 
         buildRegistry(SharedKeys.VALUE)
             .withBasic(SerializePort.of(rotationalSpeed::read, rotationalSpeed::write, SerializeUtils.DOUBLE))
             .withClient(ClientBuffer.DOUBLE.get())
             .register();
 
-        buildRegistry(FIELD)
+        /*
+
+        * */
+
+        buildRegistry(FIELD_)
                 .withBasic(CompoundTagPort.of(
-                        ITerminalDevice.super::serialize,
-                        ITerminalDevice.super::deserializeUnchecked
+                        () -> receiver().serialize(),
+                        t -> receiver().deserialize(t)
                 ))
                 .withClient(
                         new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
                 )
                 .dispatchToSync()
                 .register();
+
+        receiver.register(
+                new NumericField(
+                        this::getTargetSpeed,
+                        this::setTargetSpeed,
+                        "Speed"
+                ),
+                new DirectReceiver.InitContext(SlotType.SPEED  , Couple.create(0.0,  64.0)),
+                8
+        );
+
 
     }
 
@@ -181,13 +173,7 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
                 ));
     }
 
-    /*
-    @Override
-    public void onSpeedChanged(float previousSpeed) {
-        super.onSpeedChanged(previousSpeed);
-        rotationalSpeed.write((double)speed);
-    }
-    * */
+
 
 
     @Override
@@ -213,15 +199,16 @@ public class PropellerControllerBlockEntity extends OnShipBlockEntity implements
         );
     }
 
-    @Override
-    public List<ExposedFieldWrapper> fields() {
-        return fields;
-    }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        return ITerminalDevice.super.TerminalDeviceToolTip(tooltip, isPlayerSneaking);
+        return receiver().makeToolTip(tooltip, isPlayerSneaking);
+    }
+
+    @Override
+    public DirectReceiver receiver() {
+        return receiver;
     }
 
     @Override

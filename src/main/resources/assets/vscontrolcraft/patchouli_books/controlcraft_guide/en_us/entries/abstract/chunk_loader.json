@@ -1,18 +1,17 @@
 {
-  "name": "区块加载器",
+  "name": "Chunk Loader",
   "icon": "vscontrolcraft:chunk_loader",
   "category": "vscontrolcraft:abstract",
   "pages": [
-
     {
       "type": "patchouli:spotlight",
       "item": "vscontrolcraft:chunk_loader",
-      "title": "区块加载器",
-      "text": "简介 $(br2)能够强加载周围区块的方块，只在物理结构起效"
+      "title": "Chunk Loader",
+      "text": "Overview $(br2)Forces chunks around it to stay loaded. Only works on physics structures."
     },
     {
       "type": "patchouli:text",
-      "text": "功能 $(br2)  区块加载器被置于物理结构上时，将默认以自身为中心，强加载周围5*5区块，能够跟随物理结构移动而变化"
+      "text": "Function $(br2)When placed on a physics structure, it forcefully loads a 5x5 chunk area centered on itself and updates as the structure moves."
     }
   ]
 }

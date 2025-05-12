@@ -1,18 +1,15 @@
 package com.verr1.controlcraft.content.gui.layouts.preset;
 
-import com.simibubi.create.foundation.gui.AllIcons;
-import com.simibubi.create.foundation.gui.widget.IconButton;
 import com.simibubi.create.foundation.gui.widget.Label;
+import com.simibubi.create.foundation.utility.Couple;
+import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.gui.factory.Converter;
-import com.verr1.controlcraft.content.gui.widgets.DescriptiveScrollInput;
+import com.verr1.controlcraft.content.gui.layouts.api.Descriptive;
 import com.verr1.controlcraft.content.gui.layouts.element.TypedUIPort;
+import com.verr1.controlcraft.content.gui.widgets.DescriptiveScrollInput;
 import com.verr1.controlcraft.content.gui.widgets.FormattedLabel;
-import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
-import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
-import com.verr1.controlcraft.foundation.type.descriptive.MiscDescription;
-import com.verr1.controlcraft.foundation.type.descriptive.UIContents;
+import com.verr1.controlcraft.foundation.redstone.*;
+import com.verr1.controlcraft.foundation.type.descriptive.*;
 import com.verr1.controlcraft.registry.ControlCraftGuiTextures;
 import com.verr1.controlcraft.utils.ParseUtils;
 import net.minecraft.client.Minecraft;
@@ -21,185 +18,277 @@ import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.verr1.controlcraft.content.gui.factory.Converter.convert;
+import static com.verr1.controlcraft.foundation.redstone.IReceiver.FIELD_;
 
-public class TerminalDeviceUIField extends TypedUIPort<CompoundTag> implements ITerminalDevice{
+public class TerminalDeviceUIField extends TypedUIPort<CompoundTag> {
 
-    private int actualSize = 0;
-    private final ArrayList<ExposedFieldWrapper> GUIFields = new ArrayList<>(
-            List.of(
-                    new ExposedFieldWrapper(() -> 0.0, $ -> {}, "GUI_0", ExposedFieldType.NONE),
-                    new ExposedFieldWrapper(() -> 0.0, $ -> {}, "GUI_1", ExposedFieldType.NONE),
-                    new ExposedFieldWrapper(() -> 0.0, $ -> {}, "GUI_2", ExposedFieldType.NONE),
-                    new ExposedFieldWrapper(() -> 0.0, $ -> {}, "GUI_3", ExposedFieldType.NONE),
-                    new ExposedFieldWrapper(() -> 0.0, $ -> {}, "GUI_4", ExposedFieldType.NONE),
-                    new ExposedFieldWrapper(() -> 0.0, $ -> {}, "GUI_5", ExposedFieldType.NONE)
-            )
+
+    private final DirectReceiver guiView = new DirectReceiver();
+
+    private final List<SlotUI> slots = List.of(
+            new SlotUI(),
+            new SlotUI(),
+            new SlotUI(),
+            new SlotUI(),
+            new SlotUI(),
+            new SlotUI()
     );
 
-    public DescriptiveScrollInput<ExposedFieldType> fieldSelector;
-    public DescriptiveScrollInput<ExposedFieldDirection> directionSelector;
+    public DescriptiveScrollInput<SlotType> fieldSelector = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_SELECTION);
+    public FormattedLabel fieldLabel = new FormattedLabel(0,0, Component.literal("      "));
 
-    public Label minLabel = convert(UIContents.MIN, Converter::titleStyle).toDescriptiveLabel();
-    public Label maxLabel = convert(UIContents.MAX, Converter::titleStyle).toDescriptiveLabel();
-    public FormattedLabel fieldLabel;
-    public FormattedLabel directionLabel;
-    public EditBox minField;
-    public EditBox maxField;
+    public DescriptiveScrollInput<GroupPolicy> policySelector = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_SELECTION, GroupPolicy.class);
+    public FormattedLabel policyLabel = new FormattedLabel(0,0, Component.literal("      "));
 
-    public IconButton confirm;
-    public IconButton reset;
-
-    private final GridLayout buttonLayout = new GridLayout();
-    private final GridLayout fieldSelectLayout = new GridLayout();
-    private final GridLayout directionSelectLayout = new GridLayout();
+    public DescriptiveScrollInput<LerpType> lerpSelector = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_SELECTION, LerpType.class);
+    public FormattedLabel lerpLabel = new FormattedLabel(0,0, Component.literal("      "));
 
 
-    public TerminalDeviceUIField(
-            BlockPos boundPos
-    ) {
-        super(boundPos, ITerminalDevice.FIELD, CompoundTag.class, new CompoundTag());
-        earlyInit();
-    }
+    // public IconButton confirm = new IconButton(0, 0,AllIcons.I_CONFIRM).withCallback(this::confirm);
+    public int currentSize = 0;
 
-    private void earlyInit(){
-        fieldSelector = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_SELECTION); // see lateInit()
-        directionSelector = new DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_SELECTION, ExposedFieldDirection.class);
-        fieldLabel = new FormattedLabel(0,0, Component.literal("      "));
-        directionLabel = new FormattedLabel(0, 0, Component.literal("      "));
-        minField = new EditBox(Minecraft.getInstance().font, 0, 0, 60, 10, Component.empty());
-        maxField = new EditBox(Minecraft.getInstance().font, 0, 0, 60, 10, Component.empty());
-        confirm = new IconButton(0, 0, AllIcons.I_CONFIRM);
-        reset = new IconButton(0, 0, AllIcons.I_TRASH);
+    public DirectSlotGroup latestGroup = null;
 
-        maxField.setEditable(true);
-        minField.setEditable(true);
-        minField.setFilter(ParseUtils::tryParseDoubleFilter);
-        maxField.setFilter(ParseUtils::tryParseDoubleFilter);
-        confirm.withCallback(this::confirmGUI);
-        // confirm.setToolTip(Components.translatable(ControlCraft.MODID + ".tooltip.confirm_face_settings"));
-        reset.getToolTip().clear();
-        reset.getToolTip().addAll(MiscDescription.DUMP.specific());
-        reset.withCallback(this::resetGUI);
-    }
-
-    protected void lateInit(){
-        directionSelector.valueCalling(
-                it -> directionLabel.text = it.asComponent().copy().withStyle(Converter::optionStyle)
+    public void read(){
+        lerpSelector.valueCalling(
+                it -> lerpLabel.text = it.asComponent().copy().withStyle(Converter::optionStyle)
         );
-        fieldSelector.withValues(GUIFields.stream().limit(actualSize).map(w -> w.type).toArray(ExposedFieldType[]::new));
-        fieldSelector
-                .calling(i -> {
-                    var currentSelection = fields().get(fieldSelector.getState());
-                    fieldLabel.text = currentSelection.type.asComponent().copy().withStyle(Converter::optionStyle);
-                    directionSelector.setState(currentSelection.directionOptional.ordinal());
-                    directionSelector.onChanged();
-                    maxField.setValue(String.format("%.2f", currentSelection.min_max.get(false)));
-                    minField.setValue(String.format("%.2f", currentSelection.min_max.get(true)));
-                    if(isActivated)setVisibility();
-                });
+        policySelector.valueCalling(
+                it -> policyLabel.text = it.asComponent().copy().withStyle(Converter::optionStyle)
+        );
+        fieldSelector.withValues(
+                guiView.view().stream().map(DirectSlotGroup::type).toArray(SlotType[]::new)
+        );
+        fieldSelector.calling(i -> {
+            if(i >= guiView.view().size()){
+                ControlCraft.LOGGER.error("Invalid index for field selector: " + i);
+                return;
+            }
+            confirm();
+            latestGroup = guiView.view().get(i);
+            policySelector.setToValue(latestGroup.policy());
+            lerpSelector.setToValue(latestGroup.lerpType());
+            fieldLabel.setTextOnly(latestGroup.type().asComponent().copy().withStyle(Converter::optionStyle));
+            currentSize = Math.min(latestGroup.view().size(), slots.size());
+            for(int j = 0; j < currentSize; j++){
+                slots.get(j).read(latestGroup.view().get(j));
+            }
+            if(isActivated)clampVisibility();
+        });
         fieldSelector.onChanged();
-
         setMaxLength();
     }
 
-    // don set AbstractWidget::visible, because tab use it to decide which to show
-    private void setVisibility(){
-        var currentSelection = fields().get(fieldSelector.getState());
-        minField.visible = !currentSelection.type.isBoolean();
-        maxField.visible = !currentSelection.type.isBoolean();
-        minLabel.visible = !currentSelection.type.isBoolean();
-        maxLabel.visible = !currentSelection.type.isBoolean();
+    private void setMaxLength(){
+        setMaxLength(fieldSelector, fieldLabel);
+        setMaxLength(policySelector, policyLabel);
+        setMaxLength(lerpSelector, lerpLabel);
+    }
+
+    private<T extends Enum<?> & Descriptive<?>> void setMaxLength(DescriptiveScrollInput<T> selector, FormattedLabel label){
+        AtomicInteger maxLen = new AtomicInteger(0);
+        selector.values().stream().map(Descriptive::asComponent).forEach(c -> {
+            int len = Minecraft.getInstance().font.width(c.copy().withStyle(Converter::optionStyle));
+            if(len > maxLen.get()) maxLen.set(len);
+        });
+        label.setWidth(maxLen.get());
+    }
+
+    @Override
+    public void onMessage(Message msg) {
+        if(msg.equals(Message.PRE_APPLY))confirm();
+    }
+
+    private void clampVisibility(){
+        if(!isActivated)return;
+        if(slots == null)return; // maybe called before slots are initialize at inner class
+        int firstNoneDirectionIndex = slots
+                .stream()
+                .filter(s -> s.directionSelector.valueOfOption() == SlotDirection.NONE)
+                .findFirst()
+                .map(slots::indexOf)
+                .orElse(currentSize);
+
+        for (int i = 0; i < slots.size(); i++){
+            SlotUI thisSlot = slots.get(i);
+            boolean bl1 = i < currentSize;
+            boolean bl2 = i < firstNoneDirectionIndex + 1;
+            boolean bl3 = i < firstNoneDirectionIndex;
+            thisSlot.setVisibility(
+                    bl1 && bl2,
+                    Optional.ofNullable(latestGroup)
+                            .map(l -> !l.type().isBoolean() && bl1 && bl3)
+                            .orElse(false)
+            );
+        }
+        for(int i = firstNoneDirectionIndex + 1; i < slots.size(); i++){
+            slots.get(i).reset();
+            // slots.get(i).setVisibility(false, false);
+        }
+
     }
 
     @Override
     public void onActivatedTab() {
         super.onActivatedTab();
+        clampVisibility();
     }
 
-    private void setMaxLength(){
-        AtomicInteger maxLen = new AtomicInteger(0);
-        fieldSelector.values().stream().map(ExposedFieldType::asComponent).forEach(c -> {
-            int len = Minecraft.getInstance().font.width(c.copy().withStyle(Converter::optionStyle));
-            if(len > maxLen.get()) maxLen.set(len);
-        });
-        directionSelector.values().stream().map(ExposedFieldDirection::asComponent).forEach(c -> {
-            int len = Minecraft.getInstance().font.width(c.copy().withStyle(Converter::optionStyle));
-            if(len > maxLen.get()) maxLen.set(len);
-        });
-        fieldLabel.setWidth(maxLen.get());
-        directionLabel.setWidth(maxLen.get());
+    public void confirm(){
+        if(latestGroup == null)return;
+        latestGroup.setPolicy(policySelector.valueOfOption());
+        latestGroup.setLerpType(lerpSelector.valueOfOption());
+        for(int j = 0; j < Math.min(currentSize, latestGroup.view().size()); j++){
+            slots.get(j).write(latestGroup.view().get(j));
+        }
     }
 
+
+    public TerminalDeviceUIField(BlockPos boundPos) {
+        super(boundPos, FIELD_, CompoundTag.class, new CompoundTag());
+    }
 
     @Override
     protected void initLayout(GridLayout layoutToFill) {
-        fieldSelectLayout.addChild(fieldLabel, 0, 0);
+        int i = 0;
+
+        GridLayout fieldSelectLayout = new GridLayout();
+        fieldSelectLayout.addChild(fieldLabel,    0, 0);
         fieldSelectLayout.addChild(fieldSelector, 0, 1);
-        directionSelectLayout.addChild(directionSelector, 0, 1);
-        directionSelectLayout.addChild(directionLabel, 0, 0);
-        buttonLayout.addChild(reset, 0, 0);
-        // buttonLayout.addChild(confirm, 0, 0);
-        buttonLayout.columnSpacing(4);
+        fieldSelectLayout.addChild(policyLabel, 1, 0);
+        fieldSelectLayout.addChild(policySelector, 1, 1);
+        fieldSelectLayout.addChild(lerpLabel, 1, 2);
+        fieldSelectLayout.addChild(lerpSelector, 1, 3);
+        fieldSelectLayout.rowSpacing(4).columnSpacing(4);
 
-        layoutToFill.addChild(buttonLayout, 5, 0, 1, 2);
-        layoutToFill.createRowHelper(5).newCellSettings().alignVerticallyBottom();
+        layoutToFill.addChild(fieldSelectLayout, 0, 0);
+        i++;
+        for (SlotUI slot : slots) {
+            layoutToFill.addChild(slot.createLayout(), i++, 0);
+        }
 
-        layoutToFill.addChild(fieldSelectLayout, 0, 0, 1, 2);
-        layoutToFill.addChild(directionSelectLayout, 1, 0, 1, 2);
-        layoutToFill.addChild(minLabel, 2, 0);
-        layoutToFill.addChild(minField, 2, 1);
-        layoutToFill.addChild(maxLabel, 3, 0);
-        layoutToFill.addChild(maxField, 3, 1);
-        layoutToFill.rowSpacing(2);
+        // layoutToFill.addChild(confirm, i, 0);
 
-    }
-
-    private void confirmGUI(){
-        setExposedField(
-                fields().get(fieldSelector.getState()).type,
-                ParseUtils.tryParseDouble(minField.getValue()),
-                ParseUtils.tryParseDouble(maxField.getValue()),
-                directionSelector.valueOfOption()
-        );
-    }
-
-    @Override
-    public void onMessage(Message msg) {
-        if(msg.equals(Message.PRE_APPLY))confirmGUI();
-    }
-
-    private void resetGUI(){
-        ITerminalDevice.super.reset();
-        directionSelector.onChanged();
-        fieldSelector.onChanged();
+        layoutToFill.columnSpacing(2).rowSpacing(3);
     }
 
     @Override
     protected CompoundTag readGUI() {
-        return ITerminalDevice.super.serialize();
+        return guiView.serialize();
     }
 
     @Override
-    protected void writeGUI(@NotNull CompoundTag value) {
-        actualSize = value.getInt("fields");
-        ITerminalDevice.super.deserializeUnchecked(value);
-        lateInit();
+    protected void writeGUI(CompoundTag value) {
+        guiView.deserializeClientView(value);
+        read();
     }
 
-    @Override
-    public List<ExposedFieldWrapper> fields() {
-        return GUIFields;
+
+    class SlotUI{
+
+        public Label minLabel = convert(UIContents.MIN, Converter::titleStyle).toDescriptiveLabel();
+        public Label maxLabel = convert(UIContents.MAX, Converter::titleStyle).toDescriptiveLabel();
+
+        public FormattedLabel directionLabel = new FormattedLabel(0, 0, Component.literal("      "));
+        public DescriptiveScrollInput<SlotDirection> directionSelector = new
+                DescriptiveScrollInput<>(0, 0, 10, 10, ControlCraftGuiTextures.SMALL_BUTTON_SELECTION, SlotDirection.class)
+                .valueCalling(
+                        it -> {
+                            directionLabel.text = it.asComponent().copy().withStyle(Converter::optionStyle);
+                            clampVisibility();
+                });
+
+        public EditBox minField = new EditBox(Minecraft.getInstance().font, 0, 0, 30, 10, Component.empty());
+        public EditBox maxField = new EditBox(Minecraft.getInstance().font, 0, 0, 30, 10, Component.empty());
+
+        private Couple<Double> initialMinMax = Couple.create(0.0, 1.0);
+
+        public SlotUI(){
+
+            AtomicInteger maxLen = new AtomicInteger(0);
+            directionSelector.values().stream().map(SlotDirection::asComponent).forEach(c -> {
+                int len = Minecraft.getInstance().font.width(c.copy().withStyle(Converter::optionStyle));
+                if(len > maxLen.get()) maxLen.set(len);
+            });
+            directionLabel.setWidth(maxLen.get());
+            directionSelector.onChanged();
+        }
+
+
+        public void read(DirectSlotControl slot){
+            directionSelector.setToValue(slot.direction);
+            minField.setValue("%.2f".formatted(slot.min_max.getFirst()));
+            maxField.setValue("%.2f".formatted(slot.min_max.getSecond()));
+            initialMinMax = slot.min_max;
+        }
+
+        public void write(DirectSlotControl slot){
+            slot.direction = directionSelector.valueOfOption();
+            if(slot.type().isBoolean())return;
+            slot.min_max = Couple.create(
+                    ParseUtils.tryParseDouble(minField.getValue()),
+                    ParseUtils.tryParseDouble(maxField.getValue())
+            );
+        }
+
+        /*
+        * public void setVisibility(boolean visible, boolean isBooleanType){
+
+            directionLabel.visible = visible;
+            directionSelector.visible = visible;
+
+            minLabel.visible = visible && !isBooleanType;
+            maxLabel.visible = visible && !isBooleanType;
+            minField.visible = visible && !isBooleanType;
+            maxField.visible = visible && !isBooleanType;
+
+
+        }
+        * */
+
+        public void setVisibility(boolean dir, boolean field){
+
+            directionLabel.visible = dir;
+            directionSelector.visible = dir;
+
+            minLabel.visible = field;
+            maxLabel.visible = field;
+            minField.visible = field;
+            maxField.visible = field;
+
+
+        }
+
+        public GridLayout createLayout(){
+            GridLayout layout = new GridLayout();
+
+            layout.addChild(directionLabel, 0, 0);
+            layout.addChild(directionSelector, 0, 1);
+
+            layout.addChild(minLabel, 0, 2);
+            layout.addChild(minField, 0, 3);
+            layout.addChild(maxLabel, 0, 4);
+            layout.addChild(maxField, 0, 5);
+
+            layout.rowSpacing(2);
+            layout.columnSpacing(2);
+            return layout;
+        }
+
+        public void reset(){
+            directionSelector.setToValueOnly(SlotDirection.NONE); // onChange() will cause a loop
+            directionLabel.text = SlotDirection.NONE.asComponent().copy().withStyle(Converter::optionStyle);
+
+            minField.setValue(initialMinMax.get(true) + "");
+            maxField.setValue(initialMinMax.get(false) + "");
+        }
+
     }
 
-    @Override
-    public String name() {
-        return "GUIField";
-    }
 }

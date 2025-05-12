@@ -1,20 +1,15 @@
 package com.verr1.controlcraft.content.blocks.loader;
 
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import com.verr1.controlcraft.Config;
+import com.verr1.controlcraft.config.BlockPropertyConfig;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.foundation.managers.ChunkManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3dc;
-import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
-import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkLoaderBlockEntity extends OnShipBlockEntity {
@@ -22,11 +17,11 @@ public class ChunkLoaderBlockEntity extends OnShipBlockEntity {
     public  static final ConcurrentHashMap<WorldChunkPos, Integer> commonLevelChunkHolders = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Long, Integer> selfChunkDisclaimTicks = new ConcurrentHashMap<>();
 
-    private int RADIUS = 2;
+    private int radius = 2;
 
     public ChunkLoaderBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        RADIUS = Config.ChunkLoaderRadius;
+        radius = BlockPropertyConfig._CHUNK_LOADER_RADIUS;
 
     }
 
@@ -40,8 +35,8 @@ public class ChunkLoaderBlockEntity extends OnShipBlockEntity {
                 (int) shipWorldPosition.y(),
                 (int) shipWorldPosition.z());
 
-        for(int i = -RADIUS; i <= RADIUS; ++i) {
-            for(int j = -RADIUS; j <= RADIUS; ++j) {
+        for(int i = -radius; i <= radius; ++i) {
+            for(int j = -radius; j <= radius; ++j) {
                 ChunkPos resetChunkPos = new ChunkPos(chunkBlockPos.offset(
                         i * 16,
                         0,

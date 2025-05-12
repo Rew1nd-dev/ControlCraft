@@ -3,7 +3,6 @@ package com.verr1.controlcraft.content.blocks.terminal;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
-import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.registry.ControlCraftBlockEntities;
 import com.verr1.controlcraft.registry.ControlCraftShapes;
 import net.minecraft.core.BlockPos;
@@ -15,7 +14,6 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -53,7 +51,7 @@ public class TerminalBlock extends DirectionalKineticBlock implements
                                 boolean isMoving)  {
         if(worldIn.isClientSide)return;
 
-        withBlockEntityDo(worldIn, pos, be -> be.accept(worldIn.getBestNeighborSignal(pos)));
+        // withBlockEntityDo(worldIn, pos, be -> be.accept(worldIn.getBestNeighborSignal(pos)));
 
     }
 
@@ -68,9 +66,7 @@ public class TerminalBlock extends DirectionalKineticBlock implements
     public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
                                  BlockHitResult hit){
         if(worldIn.isClientSide)return InteractionResult.PASS;
-        if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()){
-            BlockEntity be = worldIn.getBlockEntity(pos);
-            if(!(be instanceof TerminalBlockEntity terminal))return InteractionResult.FAIL;
+        if(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty() && handIn.equals(InteractionHand.MAIN_HAND)){
             withBlockEntityDo(worldIn, pos, t -> t.openScreen(player));
         }
         return InteractionResult.PASS;

@@ -14,11 +14,14 @@ import org.joml.Vector3dc;
 import org.valkyrienskies.core.apigame.constraints.*;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collector;
 
 public class SerializeUtils {
     public static HashMap<Class<?>, Serializer<?>> EnumSerializerCache = new HashMap<>();
@@ -74,6 +77,32 @@ public class SerializeUtils {
             },
             tag -> new Quaterniond(tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"), tag.getDouble("w"))
     );
+
+    public static<T, A, C extends Collection<T>> Serializer<Collection<T>> ofCollection(Serializer<T> elementSerializer, Collector<T, A, C> collector){
+        return new Serializer<>() {
+            @Override
+            public CompoundTag serialize(@NotNull Collection<T> obj) {
+
+                AtomicInteger count = new AtomicInteger();
+                CompoundTagBuilder builder = new CompoundTagBuilder().withLong("count", (long) obj.size());
+                obj.forEach(d -> builder.withCompound("element_" + count.getAndIncrement(), elementSerializer.serialize(d)));
+                return builder.build();
+
+            }
+
+            @Override
+            public @NotNull Collection<T> deserialize(CompoundTag tag) {
+                A container = collector.supplier().get();
+                long count = tag.getLong("count");
+                for (long i = 0; i < count; i++) {
+                    CompoundTag elementTag = tag.getCompound("element_" + i);
+                    T element = elementSerializer.deserialize(elementTag);
+                    collector.accumulator().accept(container, element);
+                }
+                return collector.finisher().apply(container);
+            }
+        };
+    }
 
     @SuppressWarnings("unchecked") // It's checked
     public static<T extends Enum<?>> Serializer<T> ofEnum(Class<T> enumClazz){

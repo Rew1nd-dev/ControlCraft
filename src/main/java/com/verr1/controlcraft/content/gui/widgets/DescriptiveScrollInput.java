@@ -93,6 +93,15 @@ public class DescriptiveScrollInput<T extends Enum<?> & Descriptive<?>> extends 
         }
     }
 
+    public void setToValueOnly(T value){
+        try{
+            setState(values.indexOf(value));
+        }catch (IndexOutOfBoundsException e){
+            ControlCraft.LOGGER.error("enum value \"{}\" is not in the scope of options !!", value);
+            ControlCraft.LOGGER.error("available options are: {}", printValues());
+        }
+    }
+
     private String printValues(){
         AtomicReference<String> avails = new AtomicReference<>("");
         values.stream().map(v -> v.name()).forEach(s -> avails.set(avails.get() + ", " + s));

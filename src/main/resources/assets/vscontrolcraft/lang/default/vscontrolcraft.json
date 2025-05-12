@@ -1,4 +1,8 @@
 {
-  "itemGroup.vscontrolcraft.main": "Control Craft"
-
+  "itemGroup.vscontrolcraft.main": "Control Craft",
+  "vscontrolcraft.controlcraft_guide.name": "Wield the Sky",
+  "vscontrolcraft.controlcraft_guide.landing_text": "Break Newton's law -- Now your machine defines gravity!",
+  "wand.gui.cycle": "Cycle",
+  "tooltip.description": "Description",
+  "tooltip.forthisoption": "For This Option"
 }

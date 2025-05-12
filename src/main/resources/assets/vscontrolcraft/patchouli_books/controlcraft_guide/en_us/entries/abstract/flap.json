@@ -1,36 +1,32 @@
 {
-  "name": "襟翼轴承",
+  "name": "Flap Bearing",
   "icon": "vscontrolcraft:wing_controller",
   "category": "vscontrolcraft:abstract",
   "pages": [
-
     {
       "type": "patchouli:spotlight",
       "item": "vscontrolcraft:wing_controller",
-      "title": "襟翼轴承",
-      "text": "简介 $(br2)类似CW的襟翼轴承，但是没有角度限制"
+      "title": "Flap Bearing",
+      "text": "Overview $(br2)Functions like Clockwork's Flap Bearing but without angle limits."
     },
     {
       "type": "patchouli:image",
-      "title": "襟翼轴承的主要面板",
+      "title": "Main Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/flap/panel_main.png"],
-      "text": "按照图示放置好螺旋桨后，如果调节转速能观察到螺旋桨转动，则放置正确"
-
+      "text": "If adjusting speed rotates the propeller, placement is correct."
     },
     {
       "type": "patchouli:text",
-      "text": "主要面板 $(br2)$(li)角度（单位为°）：观察/设置襟翼轴承的旋转角度"
+      "text": "Main Panel $(br2)$(li)Angle (°): Observe/set the flap's rotation angle."
     },
     {
       "type": "patchouli:image",
-      "title": "襟翼轴承的红石面板",
+      "title": "Redstone Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/flap/panel_redstone.png"]
-
     },
-
     {
       "type": "patchouli:text",
-      "text": "红石面板 $(br2) 红石面板中，允许作为红石输入的有$(li)角度，角度（°）具有两个通道，用于允许接受两个面的输入，可以分配不同的min,max值$(br)注意，当你设置角度时，看起来它需要时间才能转到指定角度，但实际上它是立刻调整至目标的，这个调整过程只是动画效果"
+      "text": "Redstone Panel $(br2)Inputs:$(li)Angle.$(br)See general redstone panel documentation. $(br)Note: Angle adjustments are instant—animations are visual only."
     }
   ]
 }

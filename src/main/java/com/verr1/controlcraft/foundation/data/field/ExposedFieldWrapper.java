@@ -3,8 +3,8 @@ package com.verr1.controlcraft.foundation.data.field;
 import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.foundation.data.NumericField;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotDirection;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 
@@ -13,29 +13,29 @@ import java.util.function.Supplier;
 
 public class ExposedFieldWrapper {
 
-    public static ExposedFieldWrapper EMPTY = new ExposedFieldWrapper(NumericField.EMPTY, ExposedFieldType.NONE);
+    public static ExposedFieldWrapper EMPTY = new ExposedFieldWrapper(NumericField.EMPTY, SlotType.NONE);
 
     public NumericField field;
     public Couple<Double> min_max = Couple.create(0.0, 1.0);
     public Couple<Double> suggestedMinMax = Couple.create(0.0, 1.0);
-    public ExposedFieldType type;
-    public ExposedFieldDirection directionOptional = ExposedFieldDirection.NONE;
+    public SlotType type;
+    public SlotDirection directionOptional = SlotDirection.NONE;
 
 
-    public ExposedFieldWrapper(Supplier<Double> value, Consumer<Double> callback, String name, ExposedFieldType type){
+    public ExposedFieldWrapper(Supplier<Double> value, Consumer<Double> callback, String name, SlotType type){
         this.field = new NumericField(value, callback, name);
         this.type = type;
     }
 
     public void withMcDirection(Direction direction){
-        directionOptional = ExposedFieldDirection.convert(direction);
+        directionOptional = SlotDirection.convert(direction);
     }
 
-    public void withDirection(ExposedFieldDirection direction){
+    public void withDirection(SlotDirection direction){
         directionOptional = direction;
     }
 
-    public ExposedFieldWrapper(NumericField field, ExposedFieldType type){
+    public ExposedFieldWrapper(NumericField field, SlotType type){
         this.field = field;
         this.type = type;
     }
@@ -60,8 +60,8 @@ public class ExposedFieldWrapper {
     public void deserialize(CompoundTag tag){
         try{
             min_max = Couple.create(tag.getDouble("min"), tag.getDouble("max"));
-            type = ExposedFieldType.valueOf(tag.getString("type"));
-            directionOptional = ExposedFieldDirection.valueOf(tag.getString("direction"));
+            type = SlotType.valueOf(tag.getString("type"));
+            directionOptional = SlotDirection.valueOf(tag.getString("direction"));
         }catch (Exception e){
             ControlCraft.LOGGER.info("Some Field didn't get properly deserialized");
         }
@@ -78,7 +78,7 @@ public class ExposedFieldWrapper {
 
     public void reset(){
         min_max = Couple.create(suggestedMinMax.get(true), suggestedMinMax.get(false));
-        directionOptional = ExposedFieldDirection.NONE;
+        directionOptional = SlotDirection.NONE;
     }
 
 }

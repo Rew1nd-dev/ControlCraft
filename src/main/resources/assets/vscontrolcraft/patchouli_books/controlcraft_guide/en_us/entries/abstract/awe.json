@@ -1,18 +1,17 @@
 {
-  "name": "工具枪",
+  "name": "All In One Tool Gun",
   "icon": "vscontrolcraft:awe_in_wand",
   "category": "vscontrolcraft:abstract",
   "pages": [
-
     {
       "type": "patchouli:spotlight",
       "item": "vscontrolcraft:awe_in_wand",
-      "title": "控制学工具枪",
-      "text": "简介 $(br2)目前只是用来进行物理结构连接的工具$(br2)类似机械动力蓝图，按住Alt键可以使用滚轮切换模式"
+      "title": "Tool Gun",
+      "text": "Description $(br2)Currently can only be used for connections.$(br2)Similar to Create's schematic tool. Hold Alt before using the mouse wheel to change modes."
     },
     {
       "type": "patchouli:image",
-      "title": "电机连接过程",
+      "title": "Servo Connection",
       "images": [
         "vscontrolcraft:patchouli/categories/abstract/awe/motor/connect_0.png",
         "vscontrolcraft:patchouli/categories/abstract/awe/motor/connect_1.png",
@@ -20,14 +19,13 @@
       ],
       "text": ""
     },
-
     {
       "type": "patchouli:text",
-      "text": "Connect模式$(br)在该模式下，需要先右键点击机器确定连接的是哪个机器$(li)电机：$(li2)如果先右键点击了电机，电机接触面出现将一个红框，表示物理结构将连接在这个面，$(li2)点击待连接方块，将出现黄框，这表示将与红框重合的面$(li2)右键空气，连接过程开始，物理结构自动飞向轴承，理想状态下10s内能对齐，并完成连接"
+      "text": "Connect Mode$(br)In this mode, right-click to select a device to apply a connection.$(li)Motors:$(li2)Selecting a motor will display a red frame on its face, indicating where ships will align.$(li2)Click the target block to show a yellow frame, marking the alignment face.$(li2)Right-click air to start the connection. Ships will attempt to align within 10s before constraints activate."
     },
     {
       "type": "patchouli:image",
-      "title": "关节电机连接过程",
+      "title": "Joint Connection",
       "images": [
         "vscontrolcraft:patchouli/categories/abstract/awe/jmotor/connect_0.png",
         "vscontrolcraft:patchouli/categories/abstract/awe/jmotor/connect_1.png",
@@ -37,11 +35,11 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(li)关节电机：$(li2)右键关节电机，将出现两个相互垂直的红黄两框，红框表示连接的接触面，黄框表示电机的旋转轴朝向$(li2)右键待连接方块，出现红框，这是将与关节电机上的红框重合的面，$(li2)右键待连接方块另一个面（须与上一个垂直），出现黄色框，这表示连接后将与关节电机黄色框朝向平行的面$(li2)右键空气，连接开始$(li)活塞：$(li2)活塞的连接过程与关节电机相同"
+      "text": "$(li)Joint Motor:$(li2)Right-click the Joint Motor to display perpendicular red/yellow frames. Red indicates alignment, yellow marks the rotation axis.$(li2)Right-click a block to align its red frame with the motor's red frame.$(li2)Right-click another perpendicular face to align the yellow frame.$(li2)Right-click air to finalize.$(li)Slider:$(li2)Connects similarly to the Joint Motor."
     },
     {
       "type": "patchouli:image",
-      "title": "Joint连接过程",
+      "title": "Revolute Joint Connection Process",
       "images": [
         "vscontrolcraft:patchouli/categories/abstract/awe/rjoint/connect_0.png",
         "vscontrolcraft:patchouli/categories/abstract/awe/rjoint/connect_1.png",
@@ -51,16 +49,15 @@
     },
     {
       "type": "patchouli:text",
-      "text": "对于所有的铰链，只需要按顺序点击两个铰链，并右键空气即可完成连接，但需要注意以下细节$(li)手持工具枪看向Revolute Joint时，铰链侧面将出现红框，这表示它的旋转轴朝向，对于两个Revolute Joint，连接上之后它们的旋转轴朝向将$(bold)相对$()，你可以使用扳手shift右键铰链改变红框的方向"
+      "text": "For all hinges:$(li)Right-click two hinges in sequence and then air to connect.$(li)When targeting a Revolute Joint with the Tool Gun, a red frame appears on its side to indicate rotation axis.$(li)Connected Revolute Joints will have $(bold)relative$() rotation axes. Use a wrench (Shift + Right Click) to adjust the red frame's direction."
     },
     {
       "type": "patchouli:text",
-      "text": "注意$(li)使用工具枪看向电机时，会出现小红点，这表示电机实际的旋转轴位置，反映了offset的调节效果$(li)使用工具枪shift右键空气，可以随时重置选择流程"
+      "text": "Notes:$(li)A small red dot appears on motors when targeted, showing the actual rotation axis (including offset adjustments).$(li)Shift + Right Click air to reset the selection process."
     },
     {
       "type": "patchouli:text",
-      "text": "Disconnect模式$(br)在该模式下，右键机器将使机器断开其连接，但是对于一些铰链，其虽然与其他铰链相连，但自身并不保存约束信息，这时请两个铰链都点一下$(br2)Disconnect All模式:用于删除选定物理结构的$(bold)所有$()约束，$(bold)包括其他Mod生成的$()，一定仅在万一出现无法清除的约束时使用这个功能"
+      "text": "Disconnect Mode$(br)Right-click a machine to disconnect it. For hinges without stored constraints, click both hinges.$(br2)Disconnect All Mode: Deletes $(bold)all$() constraints in a structure, including those from other mods. Use only for irrecoverable constraint errors."
     }
   ]
 }
-

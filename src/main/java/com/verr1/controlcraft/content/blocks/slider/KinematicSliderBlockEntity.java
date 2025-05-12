@@ -1,10 +1,12 @@
 package com.verr1.controlcraft.content.blocks.slider;
 
+import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.create.KSliderKineticPeripheral;
 import com.verr1.controlcraft.content.gui.layouts.api.IKinematicUIDevice;
 import com.verr1.controlcraft.foundation.api.IKineticPeripheral;
 import com.verr1.controlcraft.foundation.api.delegate.IKineticDevice;
+import com.verr1.controlcraft.foundation.data.NumericField;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
@@ -13,8 +15,10 @@ import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.control.KinematicController;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
+import com.verr1.controlcraft.foundation.redstone.DirectReceiver;
+import com.verr1.controlcraft.foundation.redstone.IReceiver;
 import com.verr1.controlcraft.foundation.type.*;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.foundation.type.descriptive.TargetMode;
 import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
@@ -36,7 +40,7 @@ import java.util.List;
 import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 
 public class KinematicSliderBlockEntity extends AbstractSlider implements
-        ITerminalDevice, IPacketHandler, IKinematicUIDevice, IKineticDevice
+        IReceiver, IPacketHandler, IKinematicUIDevice, IKineticDevice
 {
 
     protected KinematicController controller = new KinematicController();
@@ -47,7 +51,7 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
 
     protected double targetOfLastAppliedConstraint = 114514; // magic number : )
 
-
+    private final DirectReceiver receiver = new DirectReceiver();
 
     protected double lerpSpeed = 5;
 
@@ -56,17 +60,22 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
                     () -> controller.getControlTarget(),
                     t -> controller.setControlTarget(t),
                     "target",
-                    ExposedFieldType.FORCED_TARGET
+                    SlotType.FORCED_TARGET
             ).withSuggestedRange(0, Math.PI / 2),
             new ExposedFieldWrapper(
                     () -> controller.getControlTarget(),
                     t -> controller.setControlTarget(t),
                     "target",
-                    ExposedFieldType.FORCED_TARGET$1
+                    SlotType.FORCED_TARGET$1
             ).withSuggestedRange(0, Math.PI / 2)
     );
 
     private final KSliderKineticPeripheral kineticPeripheral = new KSliderKineticPeripheral(this);
+
+    @Override
+    public DirectReceiver receiver() {
+        return receiver;
+    }
 
     @Override
     public IKineticPeripheral peripheral() {
@@ -104,10 +113,6 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
         this.lerpSpeed = lerpSpeed;
     }
 
-    @Override
-    public List<ExposedFieldWrapper> fields() {
-        return fields;
-    }
 
     @Override
     public String name() {
@@ -137,16 +142,26 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
                 ))
                 .register();
 
-        buildRegistry(FIELD)
+        buildRegistry(FIELD_)
                 .withBasic(CompoundTagPort.of(
-                        ITerminalDevice.super::serialize,
-                        ITerminalDevice.super::deserializeUnchecked
+                        () -> receiver().serialize(),
+                        t -> receiver().deserialize(t)
                 ))
                 .withClient(
                         new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
                 )
                 .dispatchToSync()
                 .register();
+
+        receiver().register(
+                new NumericField(
+                        () -> getController().getTarget(),
+                        t -> getController().setControlTarget(t),
+                        "target"
+                ),
+                new DirectReceiver.InitContext(SlotType.TARGET, Couple.create(0.0, 32.0)),
+                6
+        );
     }
 
     @Override
@@ -223,7 +238,7 @@ public class KinematicSliderBlockEntity extends AbstractSlider implements
     @Override
     public void tickServer() {
         super.tickServer();
-        syncForNear(true, FIELD);
+        syncForNear(true, FIELD_);
         tickConstraint();
         kineticPeripheral.tick();
         // tickPose();

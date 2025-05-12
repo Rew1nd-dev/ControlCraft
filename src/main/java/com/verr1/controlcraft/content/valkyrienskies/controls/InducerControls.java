@@ -1,11 +1,13 @@
 package com.verr1.controlcraft.content.valkyrienskies.controls;
 
+import com.verr1.controlcraft.config.BlockPropertyConfig;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.Observer;
 import com.verr1.controlcraft.foundation.data.ShipPhysics;
 import com.verr1.controlcraft.foundation.data.control.ImmutablePhysPose;
 import com.verr1.controlcraft.foundation.data.logical.*;
 import com.verr1.controlcraft.foundation.vsapi.PhysShipWrapper;
 import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
+import com.verr1.controlcraft.utils.MathUtils;
 import com.verr1.controlcraft.utils.VSMathUtils;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
@@ -154,13 +156,11 @@ public class InducerControls {
 
     public static void jetTickControls(LogicalJet jet, @NotNull PhysShipWrapper physShip) {
         Vector3dc dir = jet.direction();
-        double thrust = jet.thrust();
+        double thrust = MathUtils.clamp(jet.thrust(), BlockPropertyConfig._JET_MAX_THRUST);
 
-        double v_abs = physShip.getVelocity().length();
-        double mass = physShip.getMass() + 1e-20;
-        double accel = v_abs > SPEED_THRESHOLD ? 0.5 : thrust / mass;
 
-        Vector3dc force_sc = dir.mul(accel * mass, new Vector3d());
+
+        Vector3dc force_sc = dir.mul(thrust, new Vector3d());
         Vector3dc force_wc = physShip.getTransform().getShipToWorld().transformDirection(force_sc, new Vector3d());
 
         Vector3dc ship_sc = physShip.getTransform().getPositionInShip();
@@ -176,15 +176,11 @@ public class InducerControls {
         Vector3dc s_sc = physShip.getTransform().getPositionInShip();
         Vector3dc r_sc = p_sc.sub(s_sc, new Vector3d());
 
-        double thrust_abs = propeller.speed() * propeller.THRUST_RATIO();
-        double torque_abs = propeller.speed() * propeller.TORQUE_RATIO();
-
-        double v_abs = physShip.getVelocity().length();
-        double mass = physShip.getMass() + 1e-10;
-        double accel = v_abs > SPEED_THRESHOLD ? 0.5 : thrust_abs / mass;
+        double thrust_abs = MathUtils.clamp(propeller.speed() * propeller.THRUST_RATIO(), BlockPropertyConfig._PROPELLER_MAX_THRUST);
+        double torque_abs = MathUtils.clamp(propeller.speed() * propeller.TORQUE_RATIO(), BlockPropertyConfig._PROPELLER_MAX_TORQUE);
 
         Vector3dc torque = new Vector3d(propeller.direction()).mul(torque_abs);
-        Vector3dc thrust = new Vector3d(propeller.direction()).mul(mass * accel);
+        Vector3dc thrust = new Vector3d(propeller.direction()).mul(thrust_abs);
 
         Vector3dc torque_wc = physShip.getTransform().getShipToWorld().transformDirection(torque, new Vector3d());
         Vector3dc thrust_wc = physShip.getTransform().getShipToWorld().transformDirection(thrust, new Vector3d());

@@ -1,6 +1,7 @@
 package com.verr1.controlcraft.foundation.api.common;
 
 import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
+import com.verr1.controlcraft.foundation.redstone.IReceiver;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -20,7 +21,7 @@ public interface ISignalAcceptor {
 
         if(direction == null)return;
         BlockEntity blockEntity = worldIn.getBlockEntity(pos);
-        if(!(blockEntity instanceof ITerminalDevice device))return;
-        device.accept(worldIn.getSignal(pos.relative(direction), direction), direction);
+        if(!(blockEntity instanceof IReceiver device))return;
+        device.receiver().accept(worldIn.getSignal(pos.relative(direction), direction), direction);
     }
 }

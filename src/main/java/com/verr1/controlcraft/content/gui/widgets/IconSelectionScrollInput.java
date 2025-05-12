@@ -51,11 +51,11 @@ public class IconSelectionScrollInput extends SelectionScrollInput {
         List<Component> stateDescriptions = this.mutableDescriptions.apply(getState());
 
         if (!commonDescriptions.isEmpty()){
-            toolTip.add(Component.literal("Description:").withStyle(s -> s.withBold(true).withColor(ChatFormatting.GOLD).withItalic(true)));
+            toolTip.add(Component.translatable("tooltip.description").withStyle(s -> s.withBold(true).withColor(ChatFormatting.GOLD).withItalic(true)));
             toolTip.addAll(commonDescriptions);
         }
         if(!stateDescriptions.isEmpty()){
-            toolTip.add(Component.literal("For this Option:").withStyle(s -> s.withBold(true).withColor(ChatFormatting.GOLD).withItalic(true)));
+            toolTip.add(Component.translatable("tooltip.forthisoption").withStyle(s -> s.withBold(true).withColor(ChatFormatting.GOLD).withItalic(true)));
             toolTip.addAll(stateDescriptions);
         }
     }

@@ -1,23 +1,26 @@
 package com.verr1.controlcraft.content.gui.factory;
 
-import com.verr1.controlcraft.content.blocks.NetworkBlockEntity;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.blocks.anchor.AnchorBlockEntity;
 import com.verr1.controlcraft.content.blocks.camera.CameraBlockEntity;
 import com.verr1.controlcraft.content.blocks.jet.JetBlockEntity;
+import com.verr1.controlcraft.content.blocks.kinetic.resistor.KineticResistorBlockEntity;
 import com.verr1.controlcraft.content.blocks.propeller.PropellerBlockEntity;
 import com.verr1.controlcraft.content.blocks.receiver.PeripheralInterfaceBlockEntity;
 import com.verr1.controlcraft.content.blocks.spatial.SpatialAnchorBlockEntity;
 import com.verr1.controlcraft.content.gui.layouts.element.*;
 import com.verr1.controlcraft.content.gui.layouts.VerticalFlow;
 import com.verr1.controlcraft.content.gui.layouts.api.Descriptive;
+import com.verr1.controlcraft.content.gui.layouts.preset.TerminalDeviceUIField;
 import com.verr1.controlcraft.content.gui.screens.GenericSettingScreen;
 import com.verr1.controlcraft.content.gui.layouts.preset.DynamicControllerUIField;
 import com.verr1.controlcraft.content.gui.layouts.preset.SpatialScheduleUIField;
-import com.verr1.controlcraft.content.gui.layouts.preset.TerminalDeviceUIField;
+import com.verr1.controlcraft.content.legacy.TerminalDeviceUIField__;
 import com.verr1.controlcraft.foundation.BlockEntityGetter;
+import com.verr1.controlcraft.foundation.api.delegate.INetworkHandle;
 import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.redstone.IReceiver;
 import com.verr1.controlcraft.foundation.type.descriptive.*;
 import com.verr1.controlcraft.registry.ControlCraftBlocks;
 import com.verr1.controlcraft.utils.MathUtils;
@@ -50,19 +53,19 @@ public class GenericUIFactory {
         DoubleUIField air_resist = new DoubleUIField(
                 boundAnchorPos,
                 AnchorBlockEntity.AIR_RESISTANCE,
-                Converter.convert(ExposedFieldType.AIR_RESISTANCE, Converter::titleStyle)
+                Converter.convert(SlotType.AIR_RESISTANCE, Converter::titleStyle)
         );
 
         DoubleUIField extra_gravity = new DoubleUIField(
                 boundAnchorPos,
                 AnchorBlockEntity.EXTRA_GRAVITY,
-                Converter.convert(ExposedFieldType.EXTRA_GRAVITY, Converter::titleStyle)
+                Converter.convert(SlotType.EXTRA_GRAVITY, Converter::titleStyle)
         );
 
         DoubleUIField rot_damp = new DoubleUIField(
                 boundAnchorPos,
                 AnchorBlockEntity.ROTATIONAL_RESISTANCE,
-                Converter.convert(ExposedFieldType.ROTATIONAL_RESISTANCE, Converter::titleStyle)
+                Converter.convert(SlotType.ROTATIONAL_RESISTANCE, Converter::titleStyle)
         );
 
         BooleanUIField resist_at_pos = new BooleanUIField(
@@ -99,7 +102,7 @@ public class GenericUIFactory {
         BooleanUIField is_sensor = new BooleanUIField(
                 boundAnchorPos,
                 CameraBlockEntity.IS_ACTIVE_SENSOR,
-                Converter.convert(ExposedFieldType.IS_SENSOR, Converter::titleStyle)
+                Converter.convert(SlotType.IS_SENSOR, Converter::titleStyle)
         );
 
         OptionUIField<CameraClipType> cast_ray = new OptionUIField<>(
@@ -107,7 +110,7 @@ public class GenericUIFactory {
                 CameraBlockEntity.RAY_TYPE,
                 CameraClipType.class,
                 CameraClipType.RAY,
-                Converter.convert(ExposedFieldType.CAST_RAY, Converter::titleStyle)
+                Converter.convert(SlotType.CAST_RAY, Converter::titleStyle)
         );
 
         OptionUIField<CameraClipType> ship_ray = new OptionUIField<>(
@@ -115,7 +118,7 @@ public class GenericUIFactory {
                 CameraBlockEntity.SHIP_TYPE,
                 CameraClipType.class,
                 CameraClipType.SHIP,
-                Converter.convert(ExposedFieldType.CLIP_SHIP, Converter::titleStyle)
+                Converter.convert(SlotType.CLIP_SHIP, Converter::titleStyle)
         );
 
         OptionUIField<CameraClipType> entity_ray = new OptionUIField<>(
@@ -123,7 +126,7 @@ public class GenericUIFactory {
                 CameraBlockEntity.ENTITY_TYPE,
                 CameraClipType.class,
                 CameraClipType.ENTITY,
-                Converter.convert(ExposedFieldType.CLIP_ENTITY, Converter::titleStyle)
+                Converter.convert(SlotType.CLIP_ENTITY, Converter::titleStyle)
         );
 
         Runnable alignLabels = () -> {
@@ -145,7 +148,7 @@ public class GenericUIFactory {
                 )
                 .withTab(
                         REDSTONE_TAB,
-                        createTerminalDeviceTab(boundAnchorPos)
+                        createTerminalDeviceTab_(boundAnchorPos)
                 )
                 .build();
     }
@@ -154,14 +157,14 @@ public class GenericUIFactory {
         DoubleUIView angle_view = new DoubleUIView(
                 boundPos,
                 ANGLE,
-                Converter.convert(ExposedFieldType.DEGREE, Converter::viewStyle)
+                Converter.convert(SlotType.DEGREE, Converter::viewStyle)
         );
 
 
         DoubleUIField angle = new DoubleUIField(
                 boundPos,
                 ANGLE,
-                Converter.convert(ExposedFieldType.DEGREE, Converter::titleStyle)
+                Converter.convert(SlotType.DEGREE, Converter::titleStyle)
         );
 
         UnitUIPanel assemble = new UnitUIPanel(
@@ -193,7 +196,7 @@ public class GenericUIFactory {
                 )
                 .withTab(
                         REDSTONE_TAB,
-                        createTerminalDeviceTab(boundPos)
+                        createTerminalDeviceTab_(boundPos)
                 )
                 .withTab(
                         REMOTE_TAB,
@@ -211,21 +214,21 @@ public class GenericUIFactory {
         DoubleUIView speed = new DoubleUIView(
                 boundPos,
                 PropellerBlockEntity.SPEED,
-                Converter.convert(ExposedFieldType.SPEED, Converter::viewStyle)
+                Converter.convert(SlotType.SPEED, Converter::viewStyle)
         );
 
 
         DoubleUIField torque = new DoubleUIField(
                 boundPos,
                 PropellerBlockEntity.TORQUE,
-                Converter.convert(ExposedFieldType.TORQUE, Converter::titleStyle)
+                Converter.convert(SlotType.TORQUE, Converter::titleStyle)
         );
 
 
         DoubleUIField thrust = new DoubleUIField(
                 boundPos,
                 PropellerBlockEntity.THRUST,
-                Converter.convert(ExposedFieldType.THRUST, Converter::titleStyle)
+                Converter.convert(SlotType.THRUST, Converter::titleStyle)
         );
 
         return new GenericSettingScreen.builder(boundPos)
@@ -246,9 +249,9 @@ public class GenericUIFactory {
 
     public static GenericSettingScreen createPropellerControllerScreen(BlockPos boundPos){
 
-        var speed_view = new DoubleUIView(boundPos, SharedKeys.VALUE, Converter.convert(ExposedFieldType.SPEED, Converter::viewStyle));
+        var speed_view = new DoubleUIView(boundPos, SharedKeys.VALUE, Converter.convert(SlotType.SPEED, Converter::viewStyle));
 
-        var speed = new DoubleUIField(boundPos, SharedKeys.VALUE, Converter.convert(ExposedFieldType.SPEED, Converter::titleStyle));
+        var speed = new DoubleUIField(boundPos, SharedKeys.VALUE, Converter.convert(SlotType.SPEED, Converter::titleStyle));
 
 
         Runnable alignLabels = () -> Converter.alignLabel(speed, speed_view);
@@ -265,7 +268,7 @@ public class GenericUIFactory {
                 )
                 .withTab(
                         REDSTONE_TAB,
-                        createTerminalDeviceTab(boundPos)
+                        createTerminalDeviceTab_(boundPos)
                 )
                 .withTickTask(createSyncTasks(boundPos, SharedKeys.VALUE))
                 .build();
@@ -274,17 +277,17 @@ public class GenericUIFactory {
 
     public static GenericSettingScreen createJetScreen(BlockPos boundPos){
 
-        var thrust_view = new DoubleUIView(boundPos, JetBlockEntity.THRUST, Converter.convert(ExposedFieldType.THRUST, Converter::viewStyle));
+        var thrust_view = new DoubleUIView(boundPos, JetBlockEntity.THRUST, Converter.convert(SlotType.THRUST, Converter::viewStyle));
 
-        var horizontal_view = new DoubleUIView(boundPos, JetBlockEntity.HORIZONTAL_ANGLE, Converter.convert(ExposedFieldType.HORIZONTAL_TILT, Converter::viewStyle));
+        var horizontal_view = new DoubleUIView(boundPos, JetBlockEntity.HORIZONTAL_ANGLE, Converter.convert(SlotType.HORIZONTAL_TILT, Converter::viewStyle));
 
-        var vertical_view = new DoubleUIView(boundPos, JetBlockEntity.VERTICAL_ANGLE, Converter.convert(ExposedFieldType.VERTICAL_TILT, Converter::viewStyle));
+        var vertical_view = new DoubleUIView(boundPos, JetBlockEntity.VERTICAL_ANGLE, Converter.convert(SlotType.VERTICAL_TILT, Converter::viewStyle));
 
-        var thrust = new DoubleUIField(boundPos, JetBlockEntity.THRUST, Converter.convert(ExposedFieldType.THRUST, Converter::titleStyle));
+        var thrust = new DoubleUIField(boundPos, JetBlockEntity.THRUST, Converter.convert(SlotType.THRUST, Converter::titleStyle));
 
-        var horizontal = new DoubleUIField(boundPos, JetBlockEntity.HORIZONTAL_ANGLE, Converter.convert(ExposedFieldType.HORIZONTAL_TILT, Converter::titleStyle));
+        var horizontal = new DoubleUIField(boundPos, JetBlockEntity.HORIZONTAL_ANGLE, Converter.convert(SlotType.HORIZONTAL_TILT, Converter::titleStyle));
 
-        var vertical = new DoubleUIField(boundPos, JetBlockEntity.VERTICAL_ANGLE, Converter.convert(ExposedFieldType.VERTICAL_TILT, Converter::titleStyle));
+        var vertical = new DoubleUIField(boundPos, JetBlockEntity.VERTICAL_ANGLE, Converter.convert(SlotType.VERTICAL_TILT, Converter::titleStyle));
 
         Runnable alignLabels = () -> Converter.alignLabel(thrust, horizontal, vertical, thrust_view, horizontal_view, vertical_view);
 
@@ -303,7 +306,7 @@ public class GenericUIFactory {
                                 .build()
                 ).withTab(
                         REDSTONE_TAB,
-                        createTerminalDeviceTab(boundPos)
+                        createTerminalDeviceTab_(boundPos)
                 ).withTickTask(createSyncTasks(boundPos,
                         JetBlockEntity.THRUST,
                         JetBlockEntity.HORIZONTAL_ANGLE,
@@ -400,7 +403,7 @@ public class GenericUIFactory {
                 )
                 .withTab(
                         REDSTONE_TAB,
-                        createTerminalDeviceTab(boundPos)
+                        createTerminalDeviceTab_(boundPos)
                 )
                 .withTab(
                         CONTROLLER_TAB,
@@ -496,7 +499,7 @@ public class GenericUIFactory {
                 )
                 .withTab(
                         REDSTONE_TAB,
-                        createTerminalDeviceTab(boundPos)
+                        createTerminalDeviceTab_(boundPos)
                 )
                 .withTab(
                         CONTROLLER_TAB,
@@ -553,9 +556,9 @@ public class GenericUIFactory {
 
         var protocol_field = new LongUIField(pos, SpatialAnchorBlockEntity.PROTOCOL, UIContents.PROTOCOL.convertTo(Converter::titleStyle));
 
-        var is_running_field = new BooleanUIField(pos, SpatialAnchorBlockEntity.IS_RUNNING, ExposedFieldType.IS_RUNNING.convertTo(Converter::titleStyle));
+        var is_running_field = new BooleanUIField(pos, SpatialAnchorBlockEntity.IS_RUNNING, SlotType.IS_RUNNING.convertTo(Converter::titleStyle));
 
-        var is_static_field = new BooleanUIField(pos, SpatialAnchorBlockEntity.IS_STATIC, ExposedFieldType.IS_STATIC.convertTo(Converter::titleStyle));
+        var is_static_field = new BooleanUIField(pos, SpatialAnchorBlockEntity.IS_STATIC, SlotType.IS_STATIC.convertTo(Converter::titleStyle));
 
 
 
@@ -582,7 +585,7 @@ public class GenericUIFactory {
                 )
                 .withTab(
                         REDSTONE_TAB,
-                        createTerminalDeviceTab(pos)
+                        createTerminalDeviceTab_(pos)
                 )
                 .build();
     }
@@ -642,7 +645,7 @@ public class GenericUIFactory {
                 )
                 .withTab(
                         REDSTONE_TAB,
-                        createTerminalDeviceTab(boundPos)
+                        createTerminalDeviceTab_(boundPos)
                 )
                 .withTab(
                         REMOTE_TAB,
@@ -657,9 +660,30 @@ public class GenericUIFactory {
                 .build();
     }
 
+    public static GenericSettingScreen createKineticResistorScreen(BlockPos boundPos){
+        var ratio = new DoubleUIField(boundPos, KineticResistorBlockEntity.RATIO, Converter.convert(SlotType.RATIO, Converter::titleStyle));
+
+
+
+        return new GenericSettingScreen.builder(boundPos)
+                .withRenderedStack(ControlCraftBlocks.KINETIC_RESISTOR_BLOCK.asStack())
+                .withTab(
+                        GENERIC_SETTING_TAB,
+                        new VerticalFlow.builder(boundPos)
+                                .withPort(KineticResistorBlockEntity.RATIO, ratio)
+                                .build()
+                )
+                .withTab(
+                        REDSTONE_TAB,
+                        createTerminalDeviceTab_(boundPos)
+                )
+                .withTickTask(createSyncTasks(boundPos, KineticResistorBlockEntity.RATIO))
+                .build();
+    }
+
     public static Runnable createSyncTasks(BlockPos boundPos, NetworkKey... keys){
-        return () -> boundBlockEntity(boundPos, NetworkBlockEntity.class).ifPresent(
-                be -> be.request(keys)
+        return () -> boundBlockEntity(boundPos, INetworkHandle.class).ifPresent(
+                be -> be.handler().request(keys)
         );
     }
 
@@ -667,7 +691,15 @@ public class GenericUIFactory {
     public static VerticalFlow createTerminalDeviceTab(BlockPos boundPos){
         return new VerticalFlow.builder(boundPos)
                 .withPort(
-                        ITerminalDevice.FIELD,
+                        ITerminalDevice.FIELD__,
+                        new TerminalDeviceUIField__(boundPos)
+                ).build();
+    }
+
+    public static VerticalFlow createTerminalDeviceTab_(BlockPos boundPos){
+        return new VerticalFlow.builder(boundPos)
+                .withPort(
+                        IReceiver.FIELD_,
                         new TerminalDeviceUIField(boundPos)
                 ).build();
     }

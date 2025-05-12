@@ -1,15 +1,15 @@
 {
-  "name": "这本书的内容",
+  "name": "What's Included",
   "icon": "vscontrolcraft:awe_in_wand",
   "category": "vscontrolcraft:lead_in",
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "$(li)第一章内容为控制学方块功能概述，本节将详细并简要介绍每一个方块的用途，其控制面板每一项的含义，作为玩家常常查阅的手册 $(br2)$(li)第二章为进阶教程，将介绍一些提升机器性能的方法和知识"
+      "text": "$(li)Chapter 1: Overview of Control Craft blocks. A concise manual for daily reference.$(br2)$(li)Chapter 2: Advanced techniques to optimize machine performance."
     },
     {
       "type": "patchouli:text",
-      "text": "$(li)第三章将介绍一些常用的组合结构，展示控制学方块如何相互合作"
+      "text": "$(li)Chapter 3: Common composite structures and collaborative block interactions."
     }
   ]
 }

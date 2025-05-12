@@ -2,6 +2,7 @@ package com.verr1.controlcraft.foundation.network.packets.specific;
 
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.controlcraft.content.blocks.NetworkBlockEntity;
+import com.verr1.controlcraft.foundation.api.delegate.INetworkHandle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -41,9 +42,9 @@ public class SyncBlockEntityClientPacket extends SimplePacketBase {
                 Optional
                         .ofNullable(Minecraft.getInstance().level)
                         .map(level -> level.getBlockEntity(pos))
-                        .filter(NetworkBlockEntity.class::isInstance)
-                        .map(NetworkBlockEntity.class::cast)
-                        .ifPresent(syncable -> syncable.receiveSync(tag, context.getSender())));
+                        .filter(INetworkHandle.class::isInstance)
+                        .map(INetworkHandle.class::cast)
+                        .ifPresent(syncable -> syncable.handler().receiveSync(tag, context.getSender())));
         return true;
     }
 }

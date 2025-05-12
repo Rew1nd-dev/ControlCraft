@@ -3,8 +3,8 @@ package com.verr1.controlcraft.foundation.network.packets.specific;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotDirection;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -13,12 +13,12 @@ import net.minecraftforge.network.NetworkEvent;
 public class ExposedFieldSettingsPacket extends SimplePacketBase {
 
     private final BlockPos pos;
-    private final ExposedFieldType type;
-    private final ExposedFieldDirection openTo;
+    private final SlotType type;
+    private final SlotDirection openTo;
     private final double min;
     private final double max;
 
-    public ExposedFieldSettingsPacket(BlockPos pos, ExposedFieldType type, double min, double max, ExposedFieldDirection openTo) {
+    public ExposedFieldSettingsPacket(BlockPos pos, SlotType type, double min, double max, SlotDirection openTo) {
         this.pos = pos;
         this.type = type;
         this.min = min;
@@ -28,10 +28,10 @@ public class ExposedFieldSettingsPacket extends SimplePacketBase {
 
     public ExposedFieldSettingsPacket(FriendlyByteBuf buffer) {
         pos = buffer.readBlockPos();
-        type = buffer.readEnum(ExposedFieldType.class);
+        type = buffer.readEnum(SlotType.class);
         min = buffer.readDouble();
         max = buffer.readDouble();
-        openTo = buffer.readEnum(ExposedFieldDirection.class);
+        openTo = buffer.readEnum(SlotDirection.class);
     }
 
     @Override

@@ -1,11 +1,11 @@
 package com.verr1.controlcraft.foundation.data.field;
 
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotDirection;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 
 public record ExposedFieldMessage(
-        ExposedFieldType type,
+        SlotType type,
         double min,
         double max,
-        ExposedFieldDirection openTo) {
+        SlotDirection openTo) {
 }

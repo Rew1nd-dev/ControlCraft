@@ -2,6 +2,8 @@ package com.verr1.controlcraft;
 
 import com.mojang.logging.LogUtils;
 import com.simibubi.create.foundation.data.CreateRegistrate;
+import com.verr1.controlcraft.config.BlockPropertyConfig;
+import com.verr1.controlcraft.config.PermissionConfig;
 import com.verr1.controlcraft.registry.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -19,6 +21,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.loading.FileUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.joml.Random;
@@ -97,7 +100,7 @@ public class ControlCraft
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ControlCraftServer::ServerInit);
 
         MinecraftForge.EVENT_BUS.register(this);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);// Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
+        config(ModLoadingContext.get());// Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
     }
 
 
@@ -141,16 +144,26 @@ public class ControlCraft
         Configurator.setLevel("org.valkryienskies.physics.networking", Level.ERROR);
 
         MinecraftForge.EVENT_BUS.register(this);
-        context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+
+        config(context);
+
 
     }
+
+    private void config(ModLoadingContext context){
+
+
+        context.registerConfig(ModConfig.Type.COMMON, BlockPropertyConfig.SPEC);
+        context.registerConfig(ModConfig.Type.COMMON, PermissionConfig.SPEC);
+    }
+
 
     private void commonSetup(final FMLCommonSetupEvent event)
     {
         // Some common setup code
         LOGGER.info("HELLO FROM COMMON SETUP");
 
-        if (Config.OVERCLOCK_COMPUTERCRAFT) LOGGER.info("CC OverClocked");
+        if (BlockPropertyConfig._CC_OVERCLOCKING) LOGGER.info("CC OverClocked");
 
 
     }

@@ -1,0 +1,38 @@
+{
+  "name": "阻尼器",
+  "icon": "vscontrolcraft:kinetic_resistor",
+  "category": "vscontrolcraft:abstract",
+  "pages": [
+
+    {
+      "type": "patchouli:spotlight",
+      "item": "vscontrolcraft:kinetic_resistor",
+      "title": "阻尼器",
+      "text": "简介 $(br2)能够对输入转速施加阻尼，以一定比例传递到输出端"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "控制面板",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/k_resistor/panel_main.png"],
+      "text": "空手右键方块，将打开它的控制面板"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "控制面板 $(br2)控制面板的可调项目:$(li)Ratio: 阻尼系数，表示从输出端转速与输入端之比，注意阻尼器总会让输出转速为整数，因此有一些偏差"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "红石面板",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/slider/panel_redstone.png"],
+      "text": "阻尼器的红石面板"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "红石面板 $(br2)红石面板中可以控制阻尼系数，可绑定多个频道，详情见红石面板的通用介绍"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "注意事项 $(li)注意阻尼器的放置朝向，其转速传递是单向的，反向接入动力将破坏阻尼器，可以通过观察方块侧面边缘的红色小三角提示"
+    }
+  ]
+}

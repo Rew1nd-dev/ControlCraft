@@ -1,22 +1,21 @@
 {
-  "name": "动力代理",
+  "name": "Kinetic Proxy",
   "icon": "vscontrolcraft:kinetic_proxy",
   "category": "vscontrolcraft:abstract",
   "pages": [
-
     {
       "type": "patchouli:spotlight",
       "item": "vscontrolcraft:kinetic_proxy",
-      "title": "动力代理",
-      "text": "简介 $(br2)能够将机械动力转速输入输入到机器中，或是接受可编程齿轮箱的指令来控制机器"
+      "title": "Kinetic Proxy",
+      "text": "Overview $(br2)Converts mechanical power RPM into machine input or accepts commands from programmable gearboxes."
     },
     {
       "type": "patchouli:text",
-      "text": "功能 $(br2)目前，暂时只有轴承活塞可以接受机械动力转速$(li)对于轴承，把模式调至速度模式，并将方块放置在带有接口的一面，对动力代理接入转速，即可让轴承按转速旋转，使用可编程齿轮箱时，可以是角度模式或速度模式，只能接受旋转角度的命令$(li)对于活塞，须调至速度模式，这一点与轴承相同，其速度将是换算后的速度，使用可编程齿轮箱时，可以是位置模式或速度模式，只能接受推动距离的命令"
+      "text": "Function $(br2)Currently supports bearings and pistons:$(li)Bearings (Velocity Mode): Place on the proxy's interface side.$(li)Pistons (Velocity Mode): Speed is scaled. Programmable gearboxes can send position/velocity commands."
     },
     {
       "type": "patchouli:text",
-      "text": "注意事项 $(li)当机器处于速度模式时，使用可编程齿轮箱的指令让机器尝试旋转到目标角度/位置，实际上内部是依靠调整速度Target值实现的，由于动力学的活塞、轴承响应速度有限，不能很好地反映转速大小，调整转速的效果不明显，转速过低时不能保证转动到目标$(li)运动学活塞、轴承则没有这些问题，但是速度过低时也不能保证转到目标"
+      "text": "Notes $(li)In Velocity Mode, programmable gearbox commands adjust Target speed internally. Low speeds may fail to reach targets.$(li)Kinematic machines avoid these issues but still struggle at very low speeds."
     }
   ]
 }

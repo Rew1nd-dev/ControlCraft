@@ -51,18 +51,6 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
                 l -> setBlockConnectContext(BlockPos.of(l)),
                 SerializeUtils.LONG)
         ).register();
-
-        /*
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getCompanionShipID, this::setCompanionShipID, SerializeUtils.LONG, COMPANION), Side.SHARED);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(
-                () -> companionShipDirection.getSerializedName(),
-                name -> companionShipDirection = Direction.valueOf(name.toUpperCase()),
-                SerializeUtils.STRING,
-                COMPANION_DIRECTION
-        ), Side.SHARED);
-        * */
-
-
     }
 
     public BlockPos blockConnectContext() {
@@ -107,7 +95,7 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
     public void setCompanionShipID(long companionShipID) {
         this.companionShipID = companionShipID;
         if(level != null && level.isClientSide)return;
-        syncForAllPlayers(true, COMPANION);
+        handler().syncForAllPlayers(true, COMPANION);
     }
 
     protected long getCompanionShipID() {
@@ -135,7 +123,7 @@ public abstract class ShipConnectorBlockEntity extends OnShipBlockEntity
     public void setCompanionShipDirection(@NotNull Direction direction){
         this.companionShipDirection = direction;
         if(level != null && level.isClientSide)return;
-        syncForAllPlayers(true, COMPANION_DIRECTION);
+        handler().syncForAllPlayers(true, COMPANION_DIRECTION);
     }
 
     public Vector3d getCompanionShipAlignJOML(){

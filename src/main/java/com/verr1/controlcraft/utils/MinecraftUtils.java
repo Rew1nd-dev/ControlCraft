@@ -1,6 +1,8 @@
 package com.verr1.controlcraft.utils;
 
 import com.simibubi.create.content.kinetics.base.DirectionalAxisKineticBlock;
+import com.verr1.controlcraft.content.gui.factory.Converter;
+import com.verr1.controlcraft.content.gui.layouts.api.Descriptive;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MinecraftUtils {
     public static void updateBlockState(@Nullable Level world, BlockPos pos, BlockState newState){
@@ -61,6 +64,16 @@ public class MinecraftUtils {
                 .orElse(null);
     }
 
+
+    @OnlyIn(Dist.CLIENT)
+    public static<T extends Descriptive<?>> int maxLength(List<T> descriptive){
+        AtomicInteger maxLen = new AtomicInteger(0);
+        descriptive.forEach(c -> {
+            int len = Minecraft.getInstance().font.width(c.asComponent().copy().withStyle(Converter::optionStyle));
+            if(len > maxLen.get()) maxLen.set(len);
+        });
+        return maxLen.get();
+    }
 
     @OnlyIn(Dist.CLIENT)
     public static  <T> Optional<T> getBlockEntityAt(@NotNull BlockPos pos, Class<T> clazz){

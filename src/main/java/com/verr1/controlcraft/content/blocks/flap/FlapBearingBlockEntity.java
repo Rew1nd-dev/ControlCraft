@@ -8,11 +8,13 @@ import com.simibubi.create.content.contraptions.bearing.BearingBlock;
 import com.simibubi.create.content.contraptions.bearing.BearingContraption;
 import com.simibubi.create.content.contraptions.bearing.IBearingBlockEntity;
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.foundation.utility.Couple;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
+import com.verr1.controlcraft.foundation.data.NumericField;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
@@ -23,7 +25,9 @@ import com.verr1.controlcraft.foundation.data.WingContraption;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.redstone.DirectReceiver;
+import com.verr1.controlcraft.foundation.redstone.IReceiver;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
 import com.verr1.controlcraft.registry.ControlCraftPackets;
 import com.verr1.controlcraft.utils.MathUtils;
@@ -49,7 +53,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class FlapBearingBlockEntity extends OnShipBlockEntity implements
-        IBearingBlockEntity, ITerminalDevice, IPacketHandler, IHaveGoggleInformation
+        IBearingBlockEntity, IReceiver, IPacketHandler, IHaveGoggleInformation
 {
     public static NetworkKey ANGLE = NetworkKey.create("angle");
 
@@ -63,21 +67,12 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
     private FlapBearingPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
 
-    private final List<ExposedFieldWrapper> fields = List.of(
-            new ExposedFieldWrapper(
-                    () -> (double)angle,
-                    v -> setAngle(v.floatValue()),
-                    "Angle °",
-                    ExposedFieldType.DEGREE$1
-            ),
-            new ExposedFieldWrapper(
-                    () -> (double)angle,
-                    v -> setAngle(v.floatValue()),
-                    "Angle °",
-                    ExposedFieldType.DEGREE$2
-            )
+    private final DirectReceiver receiver = new DirectReceiver();
 
-    );
+    @Override
+    public DirectReceiver receiver() {
+        return receiver;
+    }
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -144,7 +139,7 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
     @Override
     public void lazyTickServer() {
         super.lazyTickServer();
-        syncForNear(true, ANGLE, FIELD);
+        syncForNear(true, ANGLE, FIELD_);
         if (physicalWing != null){
             sendData();
         }
@@ -272,20 +267,6 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
 
 
 
-    public void syncClient(){
-        if(!level.isClientSide){
-            var p = new BlockBoundClientPacket.builder(getBlockPos(), RegisteredPacketType.SYNC_0)
-                    .withDouble(angle)
-                    .build();
-            ControlCraftPackets.getChannel().send(PacketDistributor.ALL.noArg(), p);
-        }
-    }
-
-    @Override
-    public List<ExposedFieldWrapper> fields() {
-        return fields;
-    }
-
 
     protected void displayScreen(ServerPlayer player){
         double angle = getAngle();
@@ -299,7 +280,7 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        return ITerminalDevice.super.TerminalDeviceToolTip(tooltip, isPlayerSneaking);
+        return receiver().makeToolTip(tooltip, isPlayerSneaking);
     }
 
 
@@ -321,16 +302,16 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
     public FlapBearingBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
 
-        buildRegistry(FIELD)
-            .withBasic(CompoundTagPort.of(
-                    ITerminalDevice.super::serialize,
-                    ITerminalDevice.super::deserializeUnchecked
-            ))
-            .withClient(
-                    new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
-            )
-            .dispatchToSync()
-            .register();
+        buildRegistry(FIELD_)
+                .withBasic(CompoundTagPort.of(
+                        () -> receiver().serialize(),
+                        t -> receiver().deserialize(t)
+                ))
+                .withClient(
+                        new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
+                )
+                .dispatchToSync()
+                .register();
 
         buildRegistry(ANGLE)
                 .withBasic(SerializePort.of(
@@ -347,16 +328,15 @@ public class FlapBearingBlockEntity extends OnShipBlockEntity implements
 
         panel().registerUnit(SharedKeys.DISASSEMBLE, this::disassemble);
 
-        /*
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> ITerminalDevice.super.deserialize(tag.getCompound("fields")),
-                        tag -> tag.put("fields", ITerminalDevice.super.serialize()),
-                        FIELD),
-                Side.SHARED
+        receiver().register(
+                new NumericField(
+                        this::getAngle,
+                        this::setAngle,
+                        "angle"
+                ),
+                new DirectReceiver.InitContext(SlotType.DEGREE, Couple.create(0.0, 1.0)),
+                8
         );
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getAngle, this::setAngle, SerializeUtils.FLOAT, ANGLE), Side.RUNTIME_SHARED);
-
-        * */
 
 
         lazyTickRate = 3;

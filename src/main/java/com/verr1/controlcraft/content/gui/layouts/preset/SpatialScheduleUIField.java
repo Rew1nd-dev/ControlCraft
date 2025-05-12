@@ -7,7 +7,7 @@ import com.verr1.controlcraft.content.gui.widgets.FormattedLabel;
 import com.verr1.controlcraft.content.gui.layouts.element.TypedUIPort;
 import com.verr1.controlcraft.content.gui.layouts.api.ISerializableSchedule;
 import com.verr1.controlcraft.foundation.data.control.PID;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.foundation.type.descriptive.UIContents;
 import com.verr1.controlcraft.utils.ParseUtils;
 import net.minecraft.client.Minecraft;
@@ -27,17 +27,17 @@ public class SpatialScheduleUIField extends TypedUIPort<CompoundTag> implements
     FormattedLabel title = UIContents.PID_CONTROLLER.convertTo(Converter::viewStyle).toDescriptiveLabel();
 
     FormattedLabel qTitle = UIContents.QPID_CONTROLLER.convertTo(Converter::viewStyle).toDescriptiveLabel();
-    FormattedLabel qpLabel = ExposedFieldType.P.convertTo(Converter::pidStyle).toDescriptiveLabel();
-    FormattedLabel qiLabel = ExposedFieldType.I.convertTo(Converter::pidStyle).toDescriptiveLabel();
-    FormattedLabel qdLabel = ExposedFieldType.D.convertTo(Converter::pidStyle).toDescriptiveLabel();
+    FormattedLabel qpLabel = SlotType.P.convertTo(Converter::pidStyle).toDescriptiveLabel();
+    FormattedLabel qiLabel = SlotType.I.convertTo(Converter::pidStyle).toDescriptiveLabel();
+    FormattedLabel qdLabel = SlotType.D.convertTo(Converter::pidStyle).toDescriptiveLabel();
     EditBox qpField;
     EditBox qiField;
     EditBox qdField;
 
     FormattedLabel pTitle = UIContents.PPID_CONTROLLER.convertTo(Converter::viewStyle).toDescriptiveLabel();
-    FormattedLabel ppLabel = ExposedFieldType.P.convertTo(Converter::pidStyle).toDescriptiveLabel();
-    FormattedLabel piLabel = ExposedFieldType.I.convertTo(Converter::pidStyle).toDescriptiveLabel();
-    FormattedLabel pdLabel = ExposedFieldType.D.convertTo(Converter::pidStyle).toDescriptiveLabel();
+    FormattedLabel ppLabel = SlotType.P.convertTo(Converter::pidStyle).toDescriptiveLabel();
+    FormattedLabel piLabel = SlotType.I.convertTo(Converter::pidStyle).toDescriptiveLabel();
+    FormattedLabel pdLabel = SlotType.D.convertTo(Converter::pidStyle).toDescriptiveLabel();
     EditBox ppField;
     EditBox piField;
     EditBox pdField;

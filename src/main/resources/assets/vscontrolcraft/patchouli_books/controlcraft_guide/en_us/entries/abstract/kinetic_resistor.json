@@ -1,0 +1,33 @@
+{
+  "name": "Kinetic Resistor",
+  "icon": "vscontrolcraft:kinetic_resistor",
+  "category": "vscontrolcraft:abstract",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "vscontrolcraft:kinetic_resistor",
+      "title": "Kinetic Damper",
+      "text": "Overview $(br2)Applies configurable damping to input RPM before transmitting it to the output."
+    },
+    {
+      "type": "patchouli:image",
+      "title": "Control Panel",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/k_resistor/panel_main.png"],
+      "text": "Right-click with empty hand to open control panel"
+    },
+    {
+      "type": "patchouli:image",
+      "title": "Redstone Panel",
+      "images": ["vscontrolcraft:patchouli/categories/abstract/slider/panel_redstone.png"],
+      "text": "Kinetic Damper Redstone Panel"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Redstone Panel $(br2)Configure damping coefficient through multiple channels. See general redstone panel documentation for details."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Important Notes $(li)Orientation matters! RPM transfer is unidirectional - check red triangles on block edges for flow direction."
+    }
+  ]
+}

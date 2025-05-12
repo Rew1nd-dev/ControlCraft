@@ -1,0 +1,19 @@
+{
+  "name": "Dual-Precision Remote Controller",
+  "icon": "create_tweaked_controllers:tweaked_linked_controller",
+  "category": "vscontrolcraft:features",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Why can't tweaked controllers with full precision input be used for redstone?$(br2)Redstone only has 16 signal levels, making it unsuitable for high-precision input transmission."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "However, Control Craft's Redstone Terminal can achieve this. Set the corresponding frequency as usual, then use the tweaked controller on a lectern. The terminal channel will accept remote inputs with 256 precision levels!"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Technical implementation details:$(br2)Control Craft duplicates Create's wireless redstone code to transmit decimal values. The tweaked controller sends decimal signals through this duplicated network. The terminal combines signals from both integer (default) and decimal networks to generate precise control values."
+    }
+  ]
+}

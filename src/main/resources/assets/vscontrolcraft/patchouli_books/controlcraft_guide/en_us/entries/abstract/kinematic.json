@@ -1,60 +1,59 @@
 {
-  "name": "运动学机器",
+  "name": "Kinematic Devices",
   "icon": "vscontrolcraft:constraint_revolute",
   "category": "vscontrolcraft:abstract",
   "pages": [
-
     {
       "type": "patchouli:spotlight",
       "item": "vscontrolcraft:constraint_revolute,vscontrolcraft:constraint_joint,vscontrolcraft:constraint_slider",
-      "title": "运动学零件",
-      "text": "简介 $(br2)伺服电机/物理活塞的运动学变种 $(br)功能强大但不安全"
+      "title": "Kinematic Components",
+      "text": "Overview $(br2)Kinematic variants of Servo Motors/Physical Pistons.$(br)Powerful but unsafe."
     },
     {
       "type": "patchouli:text",
-      "text": "交互 $(br2)$(li)当机器上方放置了方块时，潜行右键机器，将会组转上方的方块为物理结构，并进行连接，这与clockwork物理轴承相同，不支持强力胶$(li)使用扳手右键可以改变其方块朝向"
+      "text": "Interaction $(br2)$(li)Sneak + Right Click to assemble blocks above (glue not supported).$(li)Use a wrench to adjust orientation."
     },
     {
       "type": "patchouli:image",
-      "title": "控制面板",
+      "title": "Control Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/kinematic/panel_main.png"],
-      "text": "空手右键方块，将打开它的控制面板"
+      "text": "Right Click with an empty hand to open the control panel."
     },
     {
       "type": "patchouli:text",
-      "text": "主要面板 $(br2)这个面板展示了运动学机器的基本设置 $(br2)Current: 根据模式，实时展示当前两结构相对角度（位置）/角速度（速度）值（单位为弧度/弧度每秒或格/格每秒）$(br2)Target: 根据模式，为给电机设定的目标相对角度/角速度（单位为弧度/弧度每秒）"
+      "text": "Main Panel $(br2)Displays:$(br2)Current: Relative angle/angular velocity or position/velocity (radians/radians per second or blocks/blocks per second).$(br2)Target: Desired angle/angular velocity."
     },
     {
       "type": "patchouli:text",
-      "text": "主要面板 $(br2)Compliance: 运动学机器通过更新约束来强迫物理结构保持指定角度/位置，这一项表示当目标位置/角度值与当前位置/角度值误差小于多少时，机器不再更新约束，注意这一项展示的是误差的对数，默认为-5，即意味着实际误差小于1e-5时机器不再更新约束"
+      "text": "Main Panel $(br2)Compliance: Stops updating constraints when error falls below 1e-5 (default log value: -5)."
     },
     {
       "type": "patchouli:text",
-      "text": "主要面板 $(br2)Mode: 选择电机的目标是角度还是角速度"
+      "text": "Main Panel $(br2)Mode: Angle or Angular Velocity."
     },
     {
       "type": "patchouli:image",
-      "title": "红石面板",
+      "title": "Redstone Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/kinematic/panel_redstone.png"],
-      "text": "运动学机器的红石面板"
+      "text": "Kinematic Machine Redstone Panel"
     },
     {
       "type": "patchouli:text",
-      "text": "红石面板 $(br2)红石面板中有1项可控项: 目标值，目标值可以绑定两个输入，为了允许使用不同的min，max设置"
+      "text": "Redstone Panel $(br2)Configurable parameter: Target value (supports multiple inputs with min/max settings).$(br) See general redstone panel documentation."
     },
     {
       "type": "patchouli:image",
-      "title": "指令面板",
+      "title": "Remote Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/kinematic/panel_remote.png"],
-      "text": "伺服电机的指令面板"
+      "text": "Kinematic Machine Remote Panel"
     },
     {
       "type": "patchouli:text",
-      "text": "指令面板 $(br2)通过该面板的按钮可以让运动学机器进行一些操作，分别是$(li)Assembly(组装其上方的方块，等价于潜行右键)$(li)Dis Assembly(断开连接)"
+      "text": "Remote Panel $(br2)Buttons:$(li)Assembly (Sneak + Right Click equivalent).$(li)Disconnect."
     },
     {
       "type": "patchouli:text",
-      "text": "注意事项 $(br2)运动学机械无视物理，因此带来了一些代价$(li)不要摧毁控制学机器连接或控制的物理结构，不要使用delete指令删除，而要先断开连接，或者先打碎机器，否则物理线程将崩溃，这是VS自身的bug$(li)使用约束进行控制，会导致很强的反冲，这使得底座质量必须远大于被控制的物理结构质量，或者处于static状态，否则很容易出现震荡并失控"
+      "text": "Warnings $(br2)Kinematic machines ignore physics, which has consequences:$(li)Avoid destroying connected structures without disassembly—this may crash the physics thread.$(li)Strong recoil requires the base to be static or massive to prevent oscillations."
     }
   ]
 }

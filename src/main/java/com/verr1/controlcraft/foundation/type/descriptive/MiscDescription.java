@@ -52,6 +52,11 @@ public enum MiscDescription implements Descriptive<MiscDescription> {
             "Install Patchouli Books to see the ControlCraft Guide"
     )),
 
+    FACE_BOUND(literals(
+            "Face Bound Input"
+    )),
+
+
     ;
 
 

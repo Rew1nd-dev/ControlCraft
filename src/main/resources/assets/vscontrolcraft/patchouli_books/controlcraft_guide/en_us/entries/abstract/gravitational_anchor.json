@@ -1,29 +1,27 @@
 {
-  "name": "重力锚",
+  "name": "Gravitational Anchor",
   "icon": "vscontrolcraft:anchor",
   "category": "vscontrolcraft:abstract",
   "pages": [
-
     {
       "type": "patchouli:spotlight",
       "item": "vscontrolcraft:anchor",
-      "title": "重力锚",
-      "text": "简介 $(br2)对物理结构施加额外重力，额外平动，转动阻力"
+      "title": "Gravitational Anchor",
+      "text": "Overview $(br2)Applies extra gravity, linear/rotational damping to physics structures."
     },
     {
       "type": "patchouli:image",
-      "title": "重力锚面板",
+      "title": "Main Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/anchor/panel_main.png"],
       "text": ""
-
     },
     {
       "type": "patchouli:text",
-      "text": "主要面板 $(br)$(li)Air Resist:设置空气阻力系数，正值为阻力，建议数值不要超过1$(li)Extra G:额外重力系数，设置为-10时消除物理结构重力$(li)Rot Damp:施加额外旋转阻尼，建议数值不要超过0.1$(li)Resist At Pos：默认情况下，阻力施加在物理结构质心，此项打开时，改为施加在重力锚方块中心$(li)同上，此项打开时，附加重力施加在重力锚中心"
+      "text": "Main Panel $(br)$(li)Air Resist: Air resistance coefficient (positive values).$(li)Extra G: Additional gravity (set to -10 to cancel gravity).$(li)Rot Damp: Rotational damping (keep ≤0.1).$(li)Resist At Pos: Apply forces at anchor's center instead of structure's COM."
     },
     {
       "type": "patchouli:text",
-      "text": "注意事项 $(br)$(li)不要把阻力项设置为负值，除非你知道这意味着什么，后果通常是物理结构不受限制地加速并脱离控制$(li)为什么旋转项没有设置在方块中心的选项？因为对于力矩来说，不同作用点之间是等效的，在哪都一样"
+      "text": "Warnings $(br)$(li)Avoid negative resistance (causes runaway acceleration).$(li)Rotational damping's effect point is irrelevant for torque."
     }
   ]
 }

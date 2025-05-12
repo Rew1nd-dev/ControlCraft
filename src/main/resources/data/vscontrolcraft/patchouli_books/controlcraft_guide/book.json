@@ -1,6 +1,6 @@
 {
-  "name": "VS Unleashed",
-  "landing_text": "$(l)$(o)Break Newton's rules — Now your machines define gravity",
+  "name": "vscontrolcraft.controlcraft_guide.name",
+  "landing_text": "vscontrolcraft.controlcraft_guide.landing_text",
   "version": 1,
   "creative_tab": "vscontrolcraft:tab",
   "model": "vscontrolcraft:guide",

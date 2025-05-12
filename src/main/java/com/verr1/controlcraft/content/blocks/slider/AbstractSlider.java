@@ -1,6 +1,7 @@
 package com.verr1.controlcraft.content.blocks.slider;
 
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
+import com.verr1.controlcraft.config.BlockPropertyConfig;
 import com.verr1.controlcraft.ControlCraft;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.blocks.ShipConnectorBlockEntity;
@@ -46,7 +47,7 @@ public abstract class AbstractSlider extends ShipConnectorBlockEntity implements
 {
     public static NetworkKey ANIMATED_DISTANCE = NetworkKey.create("animated_distance");
 
-    protected double MAX_SLIDE_DISTANCE = 32;
+    protected double MAX_SLIDE_DISTANCE = BlockPropertyConfig._PHYSICS_MAX_SLIDE_DISTANCE;
 
     protected ConnectContext context = ConnectContext.EMPTY;
 

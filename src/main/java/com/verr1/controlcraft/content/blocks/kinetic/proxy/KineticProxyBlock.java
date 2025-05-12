@@ -19,7 +19,7 @@ public class KineticProxyBlock extends DirectionalKineticBlock implements IBE<Ki
 
     @Override
     public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
-        return true;
+        return face == state.getValue(FACING).getOpposite();
     }
 
     @Override

@@ -4,8 +4,8 @@ import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldDirection;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotDirection;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.utils.MinecraftUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
@@ -19,14 +19,14 @@ import java.util.List;
 import static java.lang.Math.min;
 
 public interface ITerminalDevice{
-    public static NetworkKey FIELD = NetworkKey.create("field");
+    public static NetworkKey FIELD__ = NetworkKey.create("field");
 
     List<ExposedFieldWrapper> fields();
 
     String name();
 
 
-    default void setExposedField(ExposedFieldType type, double min, double max, ExposedFieldDirection openTo){
+    default void setExposedField(SlotType type, double min, double max, SlotDirection openTo){
         fields().stream()
                 .filter(f -> f.type == type)
                 .findFirst()

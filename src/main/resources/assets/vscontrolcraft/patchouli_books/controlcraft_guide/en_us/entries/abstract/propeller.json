@@ -1,56 +1,50 @@
 {
-  "name": "螺旋桨",
+  "name": "Propeller",
   "icon": "vscontrolcraft:propeller",
   "category": "vscontrolcraft:abstract",
   "pages": [
-
     {
       "type": "patchouli:spotlight",
       "item": "vscontrolcraft:propeller,vscontrolcraft:propeller_controller",
-      "title": "螺旋桨系统",
-      "text": "简介 $(br2)扭矩，推理系数可调的螺旋桨及其控制器"
+      "title": "Propeller System",
+      "text": "Overview $(br2)Adjustable thrust/torque propeller and controller."
     },
     {
       "type": "patchouli:image",
-      "title": "螺旋桨的正确放置",
+      "title": "Propeller Placement",
       "images": ["vscontrolcraft:patchouli/categories/abstract/propeller/placement.png"],
-      "text": "按照图示放置好螺旋桨后，如果调节转速能观察到螺旋桨转动，则放置正确"
-
+      "text": "Correct placement is confirmed by visible propeller rotation."
     },
     {
       "type": "patchouli:image",
-      "title": "控制器（底座）的主要面板",
+      "title": "Controller Main Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/propeller/panel_main.png"]
-
     },
     {
       "type": "patchouli:text",
-      "text": "主要面板 $(br2)$(li)转速：观察/设置螺旋桨的转速"
+      "text": "Main Panel $(br2)$(li)RPM: Set/observe propeller speed."
     },
     {
       "type": "patchouli:image",
-      "title": "控制器的红石面板",
+      "title": "Redstone Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/propeller/panel_redstone.png"]
-
     },
-
     {
       "type": "patchouli:text",
-      "text": "红石面板 $(br2) 红石面板中，允许作为红石输入的有$(li)转速，转速具有两个通道，用于允许接受两个面的输入，可以分配不同的min,max值"
+      "text": "Redstone Panel $(br2)Inputs: RPM (multiple channels for min/max).$(br)See general redstone panel documentation."
     },
     {
       "type": "patchouli:image",
-      "title": "螺旋桨（转动）的主要面板",
+      "title": "Propeller Main Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/propeller/panel_sub_main.png"]
-
     },
     {
       "type": "patchouli:text",
-      "text": "主要面板 $(br2)$(li)转速：观察当前螺旋桨转速$(li)扭矩系数：实际扭矩与转速之比，可以为负数$(li)推力系数：实际推力与转速之比，可以为负数"
+      "text": "Main Panel $(br2)$(li)Omega: Current speed.$(li)Torque Coefficient: Torque-to-Omega ratio (can be negative).$(li)Thrust Coefficient: Thrust-to-Omega ratio (can be negative)."
     },
     {
       "type": "patchouli:text",
-      "text": "注意 $(br2)$(li)实际产生推力的是控制器，但是控制器需要顶部有螺旋桨才能工作，螺旋桨的作用是提供视觉效果，以及告诉控制器该以什么推力/扭矩系数提供动力，其推力作用点位于控制器方块中心$(li)使用扳手右键螺旋桨，可以改变它的模型，如果你不想看见叶片的话，不影响功能"
+      "text": "Notes $(br2)$(li)Thrust originates from the controller block. Propellers are visual aids.$(li)Use a wrench to hide propeller blades (cosmetic only)."
     }
   ]
 }

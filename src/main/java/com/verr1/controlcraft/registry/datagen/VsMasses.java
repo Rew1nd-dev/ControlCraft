@@ -4,6 +4,7 @@ import com.verr1.controlcraft.content.blocks.anchor.AnchorBlock;
 import com.verr1.controlcraft.content.blocks.camera.CameraBlock;
 import com.verr1.controlcraft.content.blocks.flap.FlapBearingBlock;
 import com.verr1.controlcraft.content.blocks.jet.JetBlock;
+import com.verr1.controlcraft.content.blocks.jet.JetRudderBlock;
 import com.verr1.controlcraft.content.blocks.joints.FreeJointBlock;
 import com.verr1.controlcraft.content.blocks.joints.PivotJointBlock;
 import com.verr1.controlcraft.content.blocks.joints.RevoluteJointBlock;
@@ -26,6 +27,7 @@ public enum VsMasses {
     CAMERA(CameraBlock.ID, 5),
     FLAP_BEARING(FlapBearingBlock.ID),
     JET_ENGINE(JetBlock.ID, 500),
+    JET_RUDDER(JetRudderBlock.ID, 5),
     REVOLUTE_JOINT(RevoluteJointBlock.ID, 5),
     FREE_JOINT(FreeJointBlock.ID, 5),
     PIVOT_JOINT(PivotJointBlock.ID, 5),

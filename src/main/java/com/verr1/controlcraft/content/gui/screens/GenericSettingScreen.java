@@ -55,10 +55,7 @@ public class GenericSettingScreen extends AbstractSimiScreen {
                     s -> s
             );
 
-            List<Component> tooltips = new ArrayList<>(List.of(converted.asComponent(),
-                    Component
-                        .literal("Descriptions:")
-                        .withStyle(s -> s.withColor(ChatFormatting.GRAY).withItalic(true))));
+            List<Component> tooltips = new ArrayList<>(List.of(converted.asComponent()));
 
             tooltips.addAll(converted.specific().stream().map(
                     s -> s.copy().withStyle(s1 -> s1.withColor(ChatFormatting.AQUA).withItalic(true))

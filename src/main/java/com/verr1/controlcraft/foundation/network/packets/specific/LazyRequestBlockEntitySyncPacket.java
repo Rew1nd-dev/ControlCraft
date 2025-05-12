@@ -3,6 +3,7 @@ package com.verr1.controlcraft.foundation.network.packets.specific;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
 import com.verr1.controlcraft.content.blocks.NetworkBlockEntity;
+import com.verr1.controlcraft.foundation.api.delegate.INetworkHandle;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -42,8 +43,8 @@ public class LazyRequestBlockEntitySyncPacket extends SimplePacketBase {
     public boolean handle(NetworkEvent.Context context) {
         context.enqueueWork(()->{
             BlockEntity be = context.getSender().level().getExistingBlockEntity(pos);
-            if(be instanceof NetworkBlockEntity obe){
-                obe.receiveRequest(requests, context.getSender());
+            if(be instanceof INetworkHandle obe){
+                obe.handler().receiveRequest(requests, context.getSender());
             }
 
         });

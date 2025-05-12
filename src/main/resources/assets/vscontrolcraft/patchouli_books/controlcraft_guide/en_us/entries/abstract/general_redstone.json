@@ -1,23 +1,25 @@
 {
-  "name": "通用-红石面板",
+  "name": "General - Redstone Panel",
   "icon": "minecraft:redstone",
   "category": "vscontrolcraft:abstract",
   "pages": [
     {
       "type": "patchouli:image",
-      "title": "典型红石面板",
+      "title": "Typical Redstone Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/redstone/panel.png"],
       "text": ""
-
     },
     {
       "type": "patchouli:text",
-      "text": "一个典型的红石面板，由以下几个部分组成$(li)域选择器，选择当前设置的是方块的哪一个属性，这总是与该方块的主要面板上的可控制项相对应$(li)方向选择器：选择该域能够接受方块哪个面传来的红石信号$(li)min/max：设置红石信号与该作用域数值的对应关系，min值对应红石信号输入为0时，目标域将被设置为何值，max值对应红石信号输入为15时，将会被设置的值，min值不一定要小于max，当信号在0-15之间时，设置值随信号强度线性变化"
+      "text": "A typical redstone panel includes:$(li)Domain Selector: Chooses which property to control, matching the main panel's options.$(li)Aggregation Strategy:$(li2)Summation: Adds control values from multiple channels.$(li2)Exclusive: Only the latest active channel affects the value.$(li)Interpolation: Linear or nonlinear (finer control for weak signals)."
     },
     {
       "type": "patchouli:text",
-      "text": "假如域选择器选到了开关项，比如电机的切换锁定，空间锚的切换运行，则不显示min和max，默认情况下，输入信号为0时该项为关，不为0时为开"
+      "text": "$(li)Channels below the selector:$(li2)Direction Selector: Specifies input face for redstone signals.$(li2)Min/Max: Maps redstone strength (0-15) to target values. Values interpolate between min (0) and max (15)."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "For toggle domains (e.g., motor lock), min/max are hidden. Default behavior: 0 = off, non-zero = on."
     }
-
   ]
 }

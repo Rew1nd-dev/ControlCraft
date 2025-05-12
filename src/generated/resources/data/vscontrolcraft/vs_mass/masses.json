@@ -16,6 +16,10 @@
     "mass": 500.0
   },
   {
+    "block": "vscontrolcraft:jet_rudder",
+    "mass": 5.0
+  },
+  {
     "block": "vscontrolcraft:revolute_joint",
     "mass": 5.0
   },

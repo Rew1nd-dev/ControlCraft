@@ -1,14 +1,14 @@
 package com.verr1.controlcraft.content.blocks.slider;
 
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
-import com.verr1.controlcraft.Config;
+import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.blocks.SharedKeys;
 import com.verr1.controlcraft.content.create.DSliderKineticPeripheral;
 import com.verr1.controlcraft.content.valkyrienskies.attachments.DynamicSliderForceInducer;
 import com.verr1.controlcraft.foundation.api.delegate.IControllerProvider;
 import com.verr1.controlcraft.foundation.api.delegate.IKineticDevice;
-import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
+import com.verr1.controlcraft.foundation.data.NumericField;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
 import com.verr1.controlcraft.foundation.network.executors.CompoundTagPort;
 import com.verr1.controlcraft.foundation.network.executors.SerializePort;
@@ -18,13 +18,14 @@ import com.verr1.controlcraft.foundation.data.SynchronizedField;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
 import com.verr1.controlcraft.foundation.data.control.DynamicController;
 import com.verr1.controlcraft.foundation.data.control.PID;
-import com.verr1.controlcraft.foundation.data.field.ExposedFieldWrapper;
 import com.verr1.controlcraft.foundation.data.logical.LogicalSlider;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
+import com.verr1.controlcraft.foundation.redstone.DirectReceiver;
+import com.verr1.controlcraft.foundation.redstone.IReceiver;
 import com.verr1.controlcraft.foundation.type.*;
 import com.verr1.controlcraft.foundation.type.descriptive.CheatMode;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.foundation.type.descriptive.LockMode;
 import com.verr1.controlcraft.foundation.type.descriptive.TargetMode;
 import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
@@ -56,7 +57,7 @@ import static com.verr1.controlcraft.content.blocks.SharedKeys.*;
 // @SuppressWarnings("unused")
 public class DynamicSliderBlockEntity extends AbstractSlider implements
         IControllerProvider, IHaveGoggleInformation,
-        ITerminalDevice, IPacketHandler, IKineticDevice
+        IReceiver, IPacketHandler, IKineticDevice
 {
 
 
@@ -67,7 +68,7 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
 
     private final DynamicController controller = new DynamicController().withPID(DEFAULT_POSITION_MODE_PARAMS);
 
-
+    private final DirectReceiver receiver = new DirectReceiver();
 
 
     private TargetMode targetMode = TargetMode.POSITION;
@@ -79,48 +80,16 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
 
 
 
-    private final List<ExposedFieldWrapper> fields = List.of(
-            new ExposedFieldWrapper(
-                    controlForce::read,
-                    controlForce::write,
-                    "Force",
-                    ExposedFieldType.FORCE
-            ).withSuggestedRange(0, 1000),
-            new ExposedFieldWrapper(
-                    () -> this.getController().getTarget(),
-                    t -> this.getController().setTarget(t),
-                    "target",
-                    ExposedFieldType.TARGET
-            ).withSuggestedRange(0, 15),
-            new ExposedFieldWrapper(
-                    () -> this.getController().getTarget(),
-                    t -> this.getController().setTarget(t),
-                    "target",
-                    ExposedFieldType.TARGET$1
-            ).withSuggestedRange(0, 15),
-            new ExposedFieldWrapper(
-                    () -> (isLocked ? 1.0 : 0.0),
-                    (d) -> {
-                        if(d > (double) 1 / 15)tryLock();
-                        else if(d < (double) 1 / 15)tryUnlock();
-                    },
-                    "Locked",
-                    ExposedFieldType.IS_LOCKED
-            ),
-            new ExposedFieldWrapper(
-                    () -> (isLocked ? 1.0 : 0.0),
-                    (d) -> {
-                        if(d > (double) 1 / 15)tryLock();
-                        else if(d < (double) 1 / 15)tryUnlock();
-                    },
-                    "Locked",
-                    ExposedFieldType.IS_LOCKED$1
-            )
-    );
+
 
     private SliderPeripheral peripheral;
     private LazyOptional<IPeripheral> peripheralCap;
     private final DSliderKineticPeripheral kineticPeripheral = new DSliderKineticPeripheral(this);
+
+    @Override
+    public DirectReceiver receiver() {
+        return receiver;
+    }
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @org.jetbrains.annotations.Nullable Direction side) {
@@ -312,10 +281,10 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
                 .withClient(ClientBuffer.BOOLEAN.get())
                 .register();
 
-        buildRegistry(FIELD)
+        buildRegistry(FIELD_)
                 .withBasic(CompoundTagPort.of(
-                        ITerminalDevice.super::serialize,
-                        ITerminalDevice.super::deserializeUnchecked
+                        () -> receiver().serialize(),
+                        t -> receiver().deserialize(t)
                 ))
                 .withClient(
                         new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
@@ -361,10 +330,40 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
         panel().registerUnit(SharedKeys.DISASSEMBLE, this::destroyConstraints);
         registerConstraintKey("fix");
 
-
+        receiver()
+            .register(
+                new NumericField(
+                        this::getOutputForce,
+                        this::setOutputForce,
+                        "force"
+                ),
+                new DirectReceiver.InitContext(SlotType.FORCE, Couple.create(0.0, 1000.0)),
+                2
+        )
+            .register(
+                new NumericField(
+                        this::getTarget,
+                        this::setTarget,
+                        "target"
+                ),
+                new DirectReceiver.InitContext(SlotType.TARGET, Couple.create(0.0, 32.0)),
+                6
+        )
+            .register(
+                new NumericField(
+                        () -> isLocked() ? 1.0 : 0.0,
+                        t -> {
+                            if (t > 0.001) tryLock();
+                            else tryUnlock();
+                        },
+                        "locked"
+                ),
+                new DirectReceiver.InitContext(SlotType.IS_LOCKED, Couple.create(0.0, 1.0)),
+                new DirectReceiver.InitContext(SlotType.IS_LOCKED$1, Couple.create(0.0, 1.0))
+        );
 
         lazyTickRate = 20;
-        MAX_SLIDE_DISTANCE = Config.PhysicsMaxSlideDistance;
+
     }
 
     @Override
@@ -398,7 +397,7 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
         super.tickServer();
         lockCheck();
         syncAttachInducer();
-        syncForNear(true, FIELD);
+        syncForNear(true, FIELD_);
         kineticPeripheral.tick();
     }
 
@@ -406,7 +405,7 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        return ITerminalDevice.super.TerminalDeviceToolTip(tooltip, isPlayerSneaking);
+        return receiver().makeToolTip(tooltip, isPlayerSneaking);
     }
 
     public LogicalSlider getLogicalSlider() {
@@ -470,10 +469,6 @@ public class DynamicSliderBlockEntity extends AbstractSlider implements
     }
 
 
-    @Override
-    public List<ExposedFieldWrapper> fields() {
-        return fields;
-    }
 
     @Override
     public String name() {

@@ -1,8 +1,8 @@
 package com.verr1.controlcraft.foundation.executor;
 
 import com.verr1.controlcraft.foundation.api.operatable.Executable;
-import com.verr1.controlcraft.foundation.data.executor.DeferralExecutable;
-import com.verr1.controlcraft.foundation.data.executor.IntervalExecutable;
+import com.verr1.controlcraft.foundation.executor.executables.DeferralExecutable;
+import com.verr1.controlcraft.foundation.executor.executables.IntervalExecutable;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;

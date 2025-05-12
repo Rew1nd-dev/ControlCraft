@@ -114,7 +114,7 @@ public class NetworkHandler {
     }
 
 
-    private void dispatchPacket(PacketDistributor.PacketTarget target, CompoundTag tag){
+    public void dispatchPacket(PacketDistributor.PacketTarget target, CompoundTag tag){
         if(delegate.getLevel() == null)return;
         if (!delegate.getLevel().isClientSide) {
             var p = new SyncBlockEntityClientPacket(delegate.getBlockPos(), tag);
@@ -131,7 +131,7 @@ public class NetworkHandler {
         else syncDuplex(target, key);
     }
 
-    protected void syncSimplex(PacketDistributor.PacketTarget target, NetworkKey... key){
+    public void syncSimplex(PacketDistributor.PacketTarget target, NetworkKey... key){
         if(delegate.getLevel() == null)return;
         CompoundTag syncTag = new CompoundTag();
         Arrays.asList(key).forEach(
@@ -145,7 +145,7 @@ public class NetworkHandler {
         dispatchPacket(target, tag);
     }
 
-    protected void syncDuplex(PacketDistributor.PacketTarget target, NetworkKey... key){
+    public void syncDuplex(PacketDistributor.PacketTarget target, NetworkKey... key){
         if(delegate.getLevel() == null)return;
         CompoundTag portTag = new CompoundTag();
         Arrays.asList(key).forEach(
@@ -180,7 +180,7 @@ public class NetworkHandler {
         delegate.setChanged();
     }
 
-    private boolean checkPermission(NetworkKey key, Player player){
+    public boolean checkPermission(NetworkKey key, Player player){
         if(delegate.getLevel() == null || delegate.getLevel().isClientSide)return true;
         return Optional
                 .ofNullable(delegate.getLevel().getServer())
@@ -194,7 +194,7 @@ public class NetworkHandler {
     }
 
 
-    protected void onRead(CompoundTag compound, boolean clientPacket) {
+    public void onRead(CompoundTag compound, boolean clientPacket) {
         // super.read(compound, clientPacket);
 
         if(clientPacket)return;
@@ -208,7 +208,7 @@ public class NetworkHandler {
     }
 
 
-    protected void onWrite(CompoundTag compound, boolean clientPacket) {
+    public void onWrite(CompoundTag compound, boolean clientPacket) {
         // super.write(compound, clientPacket);
 
         if(clientPacket)return;
@@ -339,7 +339,7 @@ public class NetworkHandler {
             return this;
         }
 
-        // For save load: Unnamed<CompoundTag> only calls when read write()
+        // For save load: Slot<CompoundTag> only calls when read write()
         // For sync: Just like what I did before, server write and client read, they use the same serializer
         // For buffer: server write and client buffer read the tag
 

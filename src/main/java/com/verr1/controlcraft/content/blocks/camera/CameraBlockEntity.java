@@ -4,10 +4,11 @@ import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.utility.Color;
 import com.simibubi.create.foundation.utility.Components;
+import com.simibubi.create.foundation.utility.Couple;
 import com.verr1.controlcraft.ControlCraftClient;
 import com.verr1.controlcraft.content.blocks.OnShipBlockEntity;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
-import com.verr1.controlcraft.foundation.data.render.Line;
+import com.verr1.controlcraft.foundation.data.NumericField;
 import com.verr1.controlcraft.foundation.data.render.RayLerpHelper;
 import com.verr1.controlcraft.foundation.managers.ClientCameraManager;
 import com.verr1.controlcraft.foundation.network.executors.ClientBuffer;
@@ -23,8 +24,10 @@ import com.verr1.controlcraft.foundation.managers.ClientOutliner;
 import com.verr1.controlcraft.foundation.managers.ServerCameraManager;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundClientPacket;
 import com.verr1.controlcraft.foundation.network.packets.BlockBoundServerPacket;
+import com.verr1.controlcraft.foundation.redstone.DirectReceiver;
+import com.verr1.controlcraft.foundation.redstone.IReceiver;
 import com.verr1.controlcraft.foundation.type.descriptive.CameraClipType;
-import com.verr1.controlcraft.foundation.type.descriptive.ExposedFieldType;
+import com.verr1.controlcraft.foundation.type.descriptive.SlotType;
 import com.verr1.controlcraft.foundation.type.RegisteredPacketType;
 import com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies;
 import com.verr1.controlcraft.mixinducks.IEntityDuck;
@@ -82,7 +85,7 @@ import static com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies.toJOML;
 import static com.verr1.controlcraft.foundation.vsapi.ValkyrienSkies.toMinecraft;
 
 public class CameraBlockEntity extends OnShipBlockEntity
-        implements IPacketHandler, ITerminalDevice, IHaveGoggleInformation
+        implements IPacketHandler, IReceiver, IHaveGoggleInformation
 {
     public static NetworkKey PITCH = NetworkKey.create("pitch");
     public static NetworkKey YAW = NetworkKey.create("yaw");
@@ -136,14 +139,7 @@ public class CameraBlockEntity extends OnShipBlockEntity
 
     private boolean isActiveDistanceSensor = false;
 
-    List<ExposedFieldWrapper> fields = List.of(
-            new ExposedFieldWrapper(
-                    () -> (isActiveDistanceSensor() ? 1.0 : 0.0),
-                    v -> {}, // This field is used to output redstone, so no input here
-                    "Sensor",
-                    ExposedFieldType.IS_SENSOR
-            )
-    );
+    private final DirectReceiver receiver = new DirectReceiver();
 
     public void clipNewShip(){
         latestShipHitResult = clipShip();
@@ -215,6 +211,11 @@ public class CameraBlockEntity extends OnShipBlockEntity
         this.coneAngle = coneAngle;
     }
 
+    @Override
+    public DirectReceiver receiver() {
+        return receiver;
+    }
+
     public String getUserUUID() {
         if(level == null || level.isClientSide)return "";
         return ServerCameraManager.getUserUUID(WorldBlockPos.of(level, worldPosition)).toString();
@@ -227,7 +228,7 @@ public class CameraBlockEntity extends OnShipBlockEntity
         receivedSignalChanged = false;
         Arrays
             .stream(Direction.values())
-            .filter(fields.get(0).directionOptional::test)
+            .filter(receiver().view().get(0).view().get(0).direction::test)
             .forEach(
                     face -> {
                         BlockPos attachedPos = worldPosition.relative(face);
@@ -258,8 +259,8 @@ public class CameraBlockEntity extends OnShipBlockEntity
 
         double d = getClipDistance();
 
-        double a = fields.get(0).min_max.get(true);
-        double b = fields.get(0).min_max.get(false);
+        double a = receiver().view().get(0).view().get(0).min_max.get(true);
+        double b = receiver().view().get(0).view().get(0).min_max.get(false);
         double ratio = MathUtils.clampHalf(
                 Math.abs(d - a) / (Math.abs(a - b) + 1e-8), 1
         );
@@ -707,7 +708,7 @@ public class CameraBlockEntity extends OnShipBlockEntity
     @Override
     public void lazyTickServer() {
         super.lazyTickServer();
-        syncForNear(true, RAY_TYPE, SHIP_TYPE, ENTITY_TYPE , IS_ACTIVE_SENSOR, FIELD);
+        syncForNear(true, RAY_TYPE, SHIP_TYPE, ENTITY_TYPE , IS_ACTIVE_SENSOR, FIELD_);
     }
 
 
@@ -881,35 +882,28 @@ public class CameraBlockEntity extends OnShipBlockEntity
                 .dispatchToSync()
                 .register();
 
-        buildRegistry(FIELD)
+        buildRegistry(FIELD_)
                 .withBasic(CompoundTagPort.of(
-                        ITerminalDevice.super::serialize,
-                        ITerminalDevice.super::deserializeUnchecked
+                        () -> receiver().serialize(),
+                        t -> receiver().deserialize(t)
                 ))
                 .withClient(
                         new ClientBuffer<>(SerializeUtils.UNIT, CompoundTag.class)
                 )
                 .dispatchToSync()
                 .register();
-        /*
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getPitch, this::setPitch, SerializeUtils.DOUBLE, PITCH), Side.SERVER_ONLY);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::getYaw, this::setYaw, SerializeUtils.DOUBLE, YAW), Side.SERVER_ONLY);
-        registerFieldReadWriter(SerializeUtils.ReadWriter.of(this::isActiveDistanceSensor, this::setActiveDistanceSensor, SerializeUtils.BOOLEAN, IS_ACTIVE_SENSOR), Side.SHARED);
-        registerReadWriteExecutor(SerializeUtils.ReadWriteExecutor.of(
-                        tag -> fields.forEach(f -> f.deserialize(tag.getCompound("field_" + f.type.name()))),
-                        tag -> fields.forEach(e -> tag.put("field_" + e.type.name(), e.serialize())),
-                        FIELD),
-                Side.SERVER_ONLY
+
+        receiver().register(
+                new NumericField(
+                        () -> isActiveDistanceSensor() ? 1.0 : 0.0,
+                        t -> setActiveDistanceSensor(t > 0.01),
+                        "sensor"
+                ),
+                new DirectReceiver.InitContext(SlotType.IS_SENSOR, Couple.create(0.0, 1.0))
         );
-        * */
-
     }
 
 
-    @Override
-    public List<ExposedFieldWrapper> fields() {
-        return fields;
-    }
 
     @Override
     public String name() {
@@ -921,13 +915,6 @@ public class CameraBlockEntity extends OnShipBlockEntity
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
 
         Direction dir = MinecraftUtils.lookingAtFaceDirection();
-        if(dir == null)return true;
-        tooltip.add(Components.literal("    Face " + dir + " Bounded:"));
-        fields().forEach(f -> {
-            if(!f.directionOptional.test(dir))return;
-            String info = f.type.asComponent().getString();
-            tooltip.add(Component.literal(info).withStyle(ChatFormatting.AQUA));
-        });
 
         return true;
     }

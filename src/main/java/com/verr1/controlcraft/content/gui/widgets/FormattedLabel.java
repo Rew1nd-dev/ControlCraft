@@ -40,6 +40,11 @@ public class FormattedLabel extends Label {
         return this;
     }
 
+    public FormattedLabel withWidth(int width){
+        setWidth(width);
+        return this;
+    }
+
     public void setTextOnly(Component text){
         this.text = text;
     }

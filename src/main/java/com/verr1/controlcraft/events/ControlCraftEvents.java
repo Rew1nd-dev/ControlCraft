@@ -3,7 +3,7 @@ package com.verr1.controlcraft.events;
 import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.blocks.transmitter.NetworkManager;
 import com.verr1.controlcraft.content.cctweaked.delegation.ComputerCraftDelegation;
-import com.verr1.controlcraft.content.commands.ControlCraftCommands;
+import com.verr1.controlcraft.content.compact.tweak.TweakedLinkedControllerServerHandlerExtension;
 import com.verr1.controlcraft.foundation.BlockEntityGetter;
 import com.verr1.controlcraft.foundation.managers.ChunkManager;
 import com.verr1.controlcraft.foundation.managers.ConstraintCenter;
@@ -12,18 +12,17 @@ import com.verr1.controlcraft.foundation.type.descriptive.MiscDescription;
 import com.verr1.controlcraft.registry.ControlCraftAttachments;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import org.valkyrienskies.core.api.ships.LoadedServerShip;
 
 @Mod.EventBusSubscriber
 public class ControlCraftEvents {
@@ -48,16 +47,38 @@ public class ControlCraftEvents {
         NetworkManager.tick();
     }
 
+    @SubscribeEvent
+    public static void onServerWorldTick(TickEvent.LevelTickEvent event) {
+        if (event.phase != TickEvent.Phase.START && event.side != LogicalSide.CLIENT) {
+            Level world = event.level;
+            TweakedLinkedControllerServerHandlerExtension.tick(world);
+        }
+    }
+
+
+    @SubscribeEvent
+    public static void onLoadWorld(LevelEvent.Load event) {
+        LevelAccessor world = event.getLevel();
+        ControlCraftServer.DECIMAL_LINK_NETWORK_HANDLER.onLoadWorld(world);
+    }
+
+    @SubscribeEvent
+    public static void onUnloadWorld(LevelEvent.Unload event) {
+        LevelAccessor world = event.getLevel();
+        ControlCraftServer.DECIMAL_LINK_NETWORK_HANDLER.onUnloadWorld(world);
+    }
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event){
         if(!ModList.get().isLoaded("patchouli")){
             event.getEntity().sendSystemMessage(
-                    Component.literal("[Control Craft]").withStyle(s -> s.withColor(ChatFormatting.GOLD).withBold(true))
+                    Component.literal("[Control Craft]")
+                            .withStyle(s -> s.withColor(ChatFormatting.GOLD).withBold(true).withUnderlined(true))
                             .append(
                                     MiscDescription.SUGGEST_PATCHOULI.specific().stream().reduce(
                                             Component.empty(),
                                             (a, b) -> a.copy().append(Component.literal(" ")).append(b)
+                                                    .withStyle(s -> s.withBold(false).withColor(ChatFormatting.AQUA))
                                     )
             ));
         }
@@ -69,11 +90,11 @@ public class ControlCraftEvents {
     }
 
     public static void onPhysicsTickStart(){
-        ComputerCraftDelegation.LockDelegateThread();
+        ComputerCraftDelegation.lockDelegateThread();
     }
 
     public static void onPhysicsTickEnd(){
-        ComputerCraftDelegation.FreeDelegateThread();
+        ComputerCraftDelegation.freeDelegateThread();
     }
 
 }

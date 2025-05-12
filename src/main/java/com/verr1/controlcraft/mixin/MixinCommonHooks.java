@@ -1,6 +1,6 @@
 package com.verr1.controlcraft.mixin;
 
-import com.verr1.controlcraft.Config;
+import com.verr1.controlcraft.config.BlockPropertyConfig;
 import com.verr1.controlcraft.ControlCraftServer;
 import com.verr1.controlcraft.content.cctweaked.delegation.ComputerCraftDelegation;
 import dan200.computercraft.shared.CommonHooks;
@@ -15,7 +15,7 @@ abstract class MixinCommonHooks {
 
     @Inject(method = "onServerTickStart", at = @At("HEAD"), remap = false, cancellable = true)
     private static void ControlCraft$delegateToPhysicsTick(CallbackInfo ci) {
-        if(!Config.OVERCLOCK_COMPUTERCRAFT){
+        if(!BlockPropertyConfig._CC_OVERCLOCKING){
             return;
         }
         ci.cancel();
@@ -23,7 +23,7 @@ abstract class MixinCommonHooks {
 
     @Inject(method = "onServerTickEnd", at = @At("HEAD"), remap = false, cancellable = true)
     private static void ControlCraft$delegateToPhysicsTickEnd(CallbackInfo ci) {
-        if(!Config.OVERCLOCK_COMPUTERCRAFT){
+        if(!BlockPropertyConfig._CC_OVERCLOCKING){
             return;
         }
         ci.cancel();
@@ -31,19 +31,19 @@ abstract class MixinCommonHooks {
 
     @Inject(method = "onServerStarting", at = @At("TAIL"), remap = false)
     private static void ControlCraft$onServerStarting(MinecraftServer server, CallbackInfo ci) {
-        if(!Config.OVERCLOCK_COMPUTERCRAFT){
+        if(!BlockPropertyConfig._CC_OVERCLOCKING){
             return;
         }
         ComputerCraftDelegation.setServer(server);
-        ControlCraftServer.SERVER_EXECUTOR.executeLater(ComputerCraftDelegation::DelegateThreadStart, 10);
+        ControlCraftServer.SERVER_EXECUTOR.executeLater(ComputerCraftDelegation::delegateThreadStart, 10);
     }
 
     @Inject(method = "onServerStopped", at = @At("HEAD"), remap = false)
     private static void ControlCraft$onServerStopped(CallbackInfo ci) {
-        if(!Config.OVERCLOCK_COMPUTERCRAFT){
+        if(!BlockPropertyConfig._CC_OVERCLOCKING){
             return;
         }
-        ComputerCraftDelegation.DelegateThreadKill();
+        ComputerCraftDelegation.delegateThreadKill();
     }
 
 }

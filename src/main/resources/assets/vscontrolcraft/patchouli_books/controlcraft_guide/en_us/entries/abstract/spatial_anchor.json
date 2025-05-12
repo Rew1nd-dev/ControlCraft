@@ -1,65 +1,53 @@
 {
-  "name": "空间锚",
+  "name": "Spatial Anchor",
   "icon": "vscontrolcraft:spatial_anchor",
   "category": "vscontrolcraft:abstract",
   "pages": [
-
     {
       "type": "patchouli:spotlight",
       "item": "vscontrolcraft:spatial_anchor",
-      "title": "空间锚",
-      "text": "简介 $(br2)一种自动对齐装置，常用于自动停靠"
+      "title": "Spatial Anchor",
+      "text": "Overview $(br2)Automatic alignment device for docking."
     },
     {
       "type": "patchouli:image",
-      "title": "空间锚基本面板",
+      "title": "Spatial Anchor Main Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/spatial/panel_main.png"]
-
     },
-
     {
       "type": "patchouli:text",
-      "text": "首先，空间锚具有三种工作状态：关闭/作为目标（静止）/寻找目标（动态）。$(br2)作为目标（静止）的空间锚不会对所在物理结构施加任何控制，而是将允许其他空间锚选择自己为对齐目标$(br2)寻找目标（动态）的空间锚会选择同频道（Protocol）内距离最近（默认限制32格）的空间锚作为目标，并对自身所在船施加控制，尝试使得两个空间锚的正面对齐，底座朝向相反"
+      "text": "Modes: Off / Target (Static) / Seeking Target (Dynamic).$(br2)Static anchors allow others to align. Dynamic anchors search for the nearest static anchor (same Protocol, ≤32 blocks)."
     },
-
     {
       "type": "patchouli:text",
-      "text": "主要面板$(li)Offset: 该数值用于调整对齐时两个空间锚面相对距离，单位为格，注意，实际停靠距离取决与动态的空间锚的此项数值 $(li)Protocol: 空间锚的频道，只有相同频道的动态锚能找到静态锚作为目标 $(li)is_running: 用于设置空间锚是否为关闭状态，关闭时，空间锚停用，打开时，根据下一项开关决定自己是静态还是动态 $(li)is_static: 切换空间锚的动态/静止状态，如果上一项为关，则这一项无效"
+      "text": "Main Panel$(li)Offset: Adjust docking distance (dynamic anchor's value is used).$(li)Protocol: Channel filter.$(li)is_running: Enable/disable.$(li)is_static: Static/dynamic mode (requires is_running)."
     },
     {
       "type": "patchouli:image",
-      "title": "空间锚红石面板",
+      "title": "Redstone Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/spatial/panel_redstone.png"]
-
     },
-
     {
       "type": "patchouli:text",
-      "text": "红石面板 $(br2) 红石面板中，允许作为红石输入的有$(li)is_running $(li)protocol $(li)offset $(br2)这几项的含义与主要面板中相同"
+      "text": "Redstone Panel $(br2)Inputs: is_running, Protocol, Offset.$(br)See general redstone panel documentation."
     },
     {
       "type": "patchouli:image",
-      "title": "空间锚控制器",
+      "title": "Controller Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/spatial/panel_pid.png"]
-
     },
-
     {
       "type": "patchouli:text",
-      "text": "控制器面板 $(br2) 控制器面板中，包含了控制旋转与控制位置的PID控制参数，由于空间锚姿态调整涉及到三维旋转，因此难以在此处描述其具体原理，因此建议在默认参数范围附近测试其他参数"
+      "text": "Controller Panel $(br2)Adjust PID parameters for 3D rotation/position control. Test within default ranges."
     },
-
     {
       "type": "patchouli:image",
-      "title": "空间锚对齐动态结构",
+      "title": "Alignment with Dynamic Structures",
       "images": ["vscontrolcraft:patchouli/categories/abstract/spatial/contraption.png"]
-
     },
-
     {
       "type": "patchouli:text",
-      "text": "其他 $(br2) 空间锚处于动态结构上时，默认处于开启的静止状态，即is_running，is_static为开，这使得物理结构可以对齐动态结构，可以通过动态结构控制器关闭"
+      "text": "Notes $(br2)Spatial anchors on dynamic structures default to Static mode. Use controllers to override."
     }
-
   ]
 }

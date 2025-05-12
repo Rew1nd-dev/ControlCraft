@@ -1,24 +1,23 @@
 {
-  "name": "远程CC外设连接",
+  "name": "Remote Peripheral Connection",
   "icon": "vscontrolcraft:transmitter",
   "category": "vscontrolcraft:abstract",
   "pages": [
-
     {
       "type": "patchouli:spotlight",
       "item": "vscontrolcraft:transmitter,vscontrolcraft:receiver",
-      "title": "远程外设",
-      "text": "简介 $(br2)通过收发器，设置名称，可以让CC电脑远程连接控制学方块的CC外设"
+      "title": "Remote CC Peripheral",
+      "text": "Overview $(br2)Links CC peripherals to control machines wirelessly via named channels."
     },
     {
       "type": "patchouli:image",
-      "title": "接收器面板",
+      "title": "Receiver Panel",
       "images": ["vscontrolcraft:patchouli/categories/abstract/trx/receiver.png"],
-      "text": "以贴在伺服电机上为例"
+      "text": "Example: Attached to a Servo Motor."
     },
     {
       "type": "patchouli:text",
-      "text": "$(li)发信器:放置在CC电脑上 $(li)接收器:放置在控制学方块上，接收器面板中$(li2)Type表明当前外设类型$(li2)Protocol表示当前频道$(li2)Name表示该频道下该外设的命名 $(br2)注意，外设接收器在同一频道下名称必须是唯一的，且不能为\"null\", 通常如果名称为\"null\"表示未注册或注册失败（频道下名称已占用） "
+      "text": "$(li)Transmitter: Attach to CC computer.$(li)Receiver: Attach to machine.$(br2)Panel:$(li2)Type: Peripheral type.$(li2)Protocol: Channel.$(li2)Name: Unique identifier (≠ \"null\")."
     }
   ]
 }

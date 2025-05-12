@@ -1,6 +1,6 @@
 package com.verr1.controlcraft.content.cctweaked.delegation;
 
-import com.verr1.controlcraft.Config;
+import com.verr1.controlcraft.config.BlockPropertyConfig;
 import com.verr1.controlcraft.ControlCraft;
 import dan200.computercraft.shared.computer.core.ServerContext;
 import dan200.computercraft.shared.peripheral.monitor.MonitorWatcher;
@@ -32,8 +32,8 @@ public class ComputerCraftDelegation {
     }
 
 
-    private static void DelegateRun() {
-        if(!Config.OVERCLOCK_COMPUTERCRAFT)return;
+    private static void delegateRun() {
+        if(!BlockPropertyConfig._CC_OVERCLOCKING)return;
         while (true) {
             synchronized (lock) {
                 while (isLocked) {
@@ -60,14 +60,14 @@ public class ComputerCraftDelegation {
         }
     }
 
-    public static synchronized void DelegateThreadStart() {
+    public static synchronized void delegateThreadStart() {
         if (ComputerCraftDelegateThread == null || !ComputerCraftDelegateThread.isAlive()) {
-            ComputerCraftDelegateThread = new Thread(ComputerCraftDelegation::DelegateRun);
+            ComputerCraftDelegateThread = new Thread(ComputerCraftDelegation::delegateRun);
             ComputerCraftDelegateThread.start();
         }
     }
 
-    public static synchronized void DelegateThreadKill() {
+    public static synchronized void delegateThreadKill() {
         if (ComputerCraftDelegateThread != null && ComputerCraftDelegateThread.isAlive()) {
             ComputerCraftDelegateThread.interrupt();
             try {
@@ -79,14 +79,14 @@ public class ComputerCraftDelegation {
         }
     }
 
-    public static void FreeDelegateThread() {
+    public static void freeDelegateThread() {
         synchronized (lock) {
             isLocked = false;
             lock.notify();
         }
     }
 
-    public static void LockDelegateThread() {
+    public static void lockDelegateThread() {
         synchronized (lock) {
             isLocked = true;
         }

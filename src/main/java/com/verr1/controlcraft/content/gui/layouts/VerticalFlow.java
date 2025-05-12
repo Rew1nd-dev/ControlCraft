@@ -1,10 +1,10 @@
 package com.verr1.controlcraft.content.gui.layouts;
 
-import com.verr1.controlcraft.content.blocks.NetworkBlockEntity;
 import com.verr1.controlcraft.content.gui.factory.GenericUIFactory;
 import com.verr1.controlcraft.content.gui.layouts.api.SwitchableTab;
+import com.verr1.controlcraft.foundation.api.delegate.INetworkHandle;
 import com.verr1.controlcraft.foundation.data.NetworkKey;
-import com.verr1.controlcraft.foundation.data.executor.ConditionExecutable;
+import com.verr1.controlcraft.foundation.executor.executables.ConditionExecutable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -59,8 +59,8 @@ public class VerticalFlow implements SwitchableTab {
         boundBlockEntity().ifPresentOrElse(
                 be -> {
                     NetworkKey[] keys = map.keySet().toArray(NetworkKey[]::new);
-                    be.request(keys);
-                    be.setDirty(keys);
+                    be.handler().request(keys);
+                    be.handler().setDirty(keys);
                     AtomicInteger row = new AtomicInteger();
                     entries.forEach(port -> verticalLayout.addChild(map.get(port).layout(), row.getAndIncrement(), 0, 1, 2));
                     verticalLayout.rowSpacing(4);
@@ -68,7 +68,7 @@ public class VerticalFlow implements SwitchableTab {
                     debug_init_id++;
                     var task = new ConditionExecutable
                             .builder(() -> map.values().forEach(NetworkUIPort::readToLayout))
-                            .withCondition(() -> !be.isAnyDirty(keys))
+                            .withCondition(() -> !be.handler().isAnyDirty(keys))
                             .withExpirationTicks(40)
                             .withOrElse(
                                     () -> p.sendSystemMessage(Component.literal("Block Entity Data Failed To Synced " + debug_init_id))
@@ -121,15 +121,15 @@ public class VerticalFlow implements SwitchableTab {
                 NetworkKey[] keys = map.keySet().toArray(NetworkKey[]::new);
                 // be.activateLock(keys); // maybe not needed
                 map.values().forEach(NetworkUIPort::writeFromLayout);
-                be.syncToServer(keys);
+                be.handler().syncToServer(keys);
                 map.values().forEach(p -> p.onMessage(Message.POST_APPLY));
             }
         );
     }
 
 
-    private Optional<NetworkBlockEntity> boundBlockEntity(){
-        return GenericUIFactory.boundBlockEntity(boundBlockEntityPos, NetworkBlockEntity.class);
+    private Optional<INetworkHandle> boundBlockEntity(){
+        return GenericUIFactory.boundBlockEntity(boundBlockEntityPos, INetworkHandle.class);
     }
 
     @Override

@@ -34,4 +34,12 @@ public interface Descriptive<T extends Enum<?>> extends ComponentLike {
     default List<Component> specific() {
         return LangUtils.descriptionsOf(clazz(), self());
     }
+
+    default Component specificFlat(){
+        return specific().stream().reduce(
+                Component.empty(),
+                (a, b) -> a.copy().append(b)
+        );
+    }
+
 }

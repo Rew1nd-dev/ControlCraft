@@ -10,7 +10,7 @@ import com.verr1.controlcraft.foundation.api.operatable.IBruteConnectable;
 import com.verr1.controlcraft.foundation.api.operatable.IConstraintHolder;
 import com.verr1.controlcraft.foundation.api.delegate.IControllerProvider;
 import com.verr1.controlcraft.foundation.api.delegate.ITerminalDevice;
-import com.verr1.controlcraft.foundation.data.executor.FaceAlignmentSchedule;
+import com.verr1.controlcraft.foundation.executor.executables.FaceAlignmentSchedule;
 import com.verr1.controlcraft.foundation.data.field.ExposedFieldMessage;
 import com.verr1.controlcraft.foundation.managers.ConstraintCenter;
 import com.verr1.controlcraft.foundation.network.packets.GenericServerPacket;

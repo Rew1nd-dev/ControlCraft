@@ -6,7 +6,7 @@ import com.verr1.controlcraft.content.valkyrienskies.attachments.Observer;
 import com.verr1.controlcraft.foundation.api.IKineticPeripheral;
 import com.verr1.controlcraft.foundation.data.ExpirableListener;
 import com.verr1.controlcraft.foundation.data.WorldBlockPos;
-import com.verr1.controlcraft.foundation.data.executor.IntervalExecutable;
+import com.verr1.controlcraft.foundation.executor.executables.IntervalExecutable;
 import com.verr1.controlcraft.foundation.executor.Executor;
 import com.verr1.controlcraft.foundation.type.descriptive.TargetMode;
 import com.verr1.controlcraft.utils.MathUtils;
